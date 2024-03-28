@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { UserRepository } from './user.repository';
+import { LocalStrategy } from '../../strategys/local.strategy';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { UserRepository } from './user.repository';
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [UserController],
-  providers: [UserService, { provide: 'IUserRepository', useClass: UserRepository }],
+  providers: [UserService, LocalStrategy, UserRepository],
 })
 export class UserModule {}

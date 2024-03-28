@@ -1,10 +1,14 @@
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
-import { IUserRepository } from './user.repository.interface';
+import { InjectRepository } from '@nestjs/typeorm';
 
-export class UserRepository extends Repository<User> implements IUserRepository {
+export class UserRepository {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.findOne({ where: { email } });
+    return this.userRepository.findOne({ where: { email } });
   }
 
   async createUser(
@@ -13,8 +17,8 @@ export class UserRepository extends Repository<User> implements IUserRepository 
     birthDate: string,
     gender: string,
   ): Promise<User> {
-    const user = this.create({ email, password, birthDate, gender });
-    await this.save(user);
+    const user = this.userRepository.create({ email, password, birthDate, gender });
+    await this.userRepository.save(user);
     return user;
   }
 }

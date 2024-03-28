@@ -4,7 +4,9 @@ import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filters/httpExceiption.filter';
 import * as helmet from 'helmet';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 declare const module: any;
 async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule, {
