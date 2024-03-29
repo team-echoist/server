@@ -6,7 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { UserRepository } from './user.repository';
 import { LocalStrategy } from '../../common/guards/local.strategy';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @Module({
   imports: [
     JwtModule.register({

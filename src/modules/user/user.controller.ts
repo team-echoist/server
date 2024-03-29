@@ -43,9 +43,13 @@ export class UserController {
     return;
   }
 
-  @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Request() req: RequestWithUser) {
-    return this.userService.login(req.user);
+  @UseGuards(AuthGuard('local'))
+  async login(@Request() req: RequestWithUser, @Res() res: Response) {
+    const jwt = generateJWT(req.user);
+
+    res.setHeader('Authorization', `Bearer ${jwt}`);
+    res.status(HttpStatus.OK).json({ message: 'Login successful' });
+    return;
   }
 }
