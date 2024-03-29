@@ -12,7 +12,7 @@ export class User {
   password: string;
 
   @Column()
-  birthDate: string;
+  birth_date: string;
 
   @Column()
   gender: string;

@@ -5,6 +5,6 @@ import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [UserModule, TypeOrmModule.forRoot(typeOrmConfig)],
-  providers: [Logger],
+  providers: [],
 })
 export class AppModule {}

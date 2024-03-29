@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { User } from '../../entities/user.entity';
 import { UserRepository } from './user.repository';
+import * as bcrypt from 'bcrypt';
+import { UserResDto } from './dto/userRes.dto';
 
 @Injectable()
 export class UserService {
@@ -11,15 +13,15 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, birthDate, gender } = createUserDto;
-    const existingUser = await this.userRepository.findByEmail(email);
+  async register(createUserDto: CreateUserReqDto): Promise<UserResDto> {
+    const existingUser = await this.userRepository.findByEmail(createUserDto.email);
 
     if (existingUser) {
-      throw new Error('Email already exists');
+      throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
     }
+    createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
-    return this.userRepository.createUser(email, password, birthDate, gender);
+    return await this.userRepository.createUser(createUserDto);
   }
 
   async validateUser(email: string, password: string): Promise<any> {
