@@ -7,6 +7,7 @@ import { User } from '../../entities/user.entity';
 import { UserRepository } from './user.repository';
 import { LocalStrategy } from '../../common/guards/local.strategy';
 import * as dotenv from 'dotenv';
+import { AuthService } from '../auth/auth.service';
 
 dotenv.config();
 @Module({
@@ -18,6 +19,6 @@ dotenv.config();
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [UserController],
-  providers: [UserService, LocalStrategy, UserRepository],
+  providers: [UserService, LocalStrategy, UserRepository, AuthService],
 })
 export class UserModule {}

@@ -17,7 +17,7 @@ export class UserResDto {
   password: string;
 
   @Exclude()
-  birth_date: string;
+  birthDate: Date;
 
   @Exclude()
   gender: string;

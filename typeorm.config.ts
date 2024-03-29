@@ -1,6 +1,8 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 import { User } from './src/entities/user.entity';
+import { Subscription } from 'src/entities/subscription.entity';
+import { Essay } from './src/entities/essay.entity';
 
 dotenv.config();
 export const typeOrmConfig: TypeOrmModuleOptions = {
@@ -10,7 +12,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USER,
   password: String(process.env.DB_PASSWORD),
   database: process.env.DB_NAME,
-  entities: [User],
+  entities: [User, Essay, Subscription],
   synchronize: true,
   migrations: ['dist/migration/*.js'],
   migrationsTableName: 'migrations',

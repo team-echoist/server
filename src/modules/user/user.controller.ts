@@ -14,7 +14,7 @@ import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../../entities/user.entity';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { generateJWT } from '../../common/guards/jwt.service';
+import { AuthService } from '../auth/auth.service';
 import { Response } from 'express';
 import { UserResDto } from './dto/userRes.dto';
 import { LoginReqDto } from './dto/loginReq.dto';
@@ -26,7 +26,10 @@ interface RequestWithUser extends Request {
 @ApiTags('Post')
 @Controller('api/user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private authService: AuthService,
+  ) {}
 
   @ApiOperation({
     summary: '회원가입',
@@ -38,7 +41,7 @@ export class UserController {
   @UsePipes(new ValidationPipe())
   async register(@Body() createUserDto: CreateUserReqDto, @Res() res: Response): Promise<void> {
     const user = await this.userService.register(createUserDto);
-    const jwt = generateJWT(user);
+    const jwt = this.authService.generateJWT(user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
     res.status(HttpStatus.CREATED).json(user);
@@ -55,7 +58,7 @@ export class UserController {
   @UsePipes(new ValidationPipe())
   @UseGuards(AuthGuard('local'))
   async login(@Request() req: RequestWithUser, @Res() res: Response): Promise<void> {
-    const jwt = generateJWT(req.user);
+    const jwt = this.authService.generateJWT(req.user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
     res.status(HttpStatus.OK).json({ message: 'Login successful' });

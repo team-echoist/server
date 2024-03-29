@@ -1,4 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  OneToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
+import { Essay } from './essay.entity';
+import { Subscription } from './subscription.entity';
 
 @Entity()
 export class User {
@@ -12,8 +23,29 @@ export class User {
   password: string;
 
   @Column()
-  birth_date: string;
-
-  @Column()
   gender: string;
+
+  @Column({ name: 'birth_date' })
+  birthDate: Date;
+
+  @Column({ type: 'jsonb', nullable: true, name: 'oauth_info' })
+  oauthInfo: any;
+
+  @Column({ default: false })
+  admin: boolean;
+
+  @CreateDateColumn({ name: 'create_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'update_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'delete_at' })
+  deletedAt?: Date;
+
+  @OneToMany(() => Essay, (essay) => essay.user)
+  essays: Essay[];
+
+  @OneToOne(() => Subscription, (subscription) => subscription.user)
+  subscription: Subscription;
 }

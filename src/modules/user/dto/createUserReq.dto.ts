@@ -15,7 +15,7 @@ export class CreateUserReqDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  birth_date: string;
+  birthDate: Date;
 
   @ApiProperty()
   @IsNotEmpty()
