@@ -17,6 +17,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { generateJWT } from '../../common/guards/jwt.service';
 import { Response } from 'express';
 import { UserResDto } from './dto/userRes.dto';
+import { LoginReqDto } from './dto/loginReq.dto';
 
 interface RequestWithUser extends Request {
   user: User;
@@ -29,6 +30,7 @@ export class UserController {
 
   @ApiOperation({
     summary: '회원가입',
+    description: '회원 가입 후 응답 헤더에 JWT 추가',
   })
   @Post('register')
   @ApiBody({ type: CreateUserReqDto })
@@ -44,8 +46,15 @@ export class UserController {
   }
 
   @Post('login')
+  @ApiOperation({
+    summary: '로그인',
+    description: '로그인 후 응답 헤더에 JWT 추가',
+  })
+  @ApiBody({ type: LoginReqDto })
+  @ApiResponse({ status: 200 })
+  @UsePipes(new ValidationPipe())
   @UseGuards(AuthGuard('local'))
-  async login(@Request() req: RequestWithUser, @Res() res: Response) {
+  async login(@Request() req: RequestWithUser, @Res() res: Response): Promise<void> {
     const jwt = generateJWT(req.user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
