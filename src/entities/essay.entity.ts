@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -13,9 +14,6 @@ import { User } from './user.entity';
 export class Essay {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  author: number;
 
   @Column({ nullable: true, name: 'original_author' })
   originalAuthor: number | null; // 원작자 ID, 자기 글일 경우 null
@@ -57,12 +55,18 @@ export class Essay {
   @Column({ default: false, name: 'is_favorite' })
   isFavorite: boolean;
 
+  @Index()
   @Column({ default: false, name: 'is_published' })
   isPublished: boolean;
 
   @Column({ nullable: true, name: 'capsule_open_date', type: 'timestamp' })
   capsuleOpenDate: Date;
 
+  @Index()
+  @Column({ nullable: true, name: 'device_info' })
+  deviceInfo: string;
+
   @ManyToOne(() => User, (user) => user.essays)
-  user: User;
+  @JoinColumn({ name: 'author' })
+  author: User;
 }

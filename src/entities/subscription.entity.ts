@@ -16,6 +16,6 @@ export class Subscription {
   expiration_date: Date;
 
   @OneToOne(() => User, (user) => user.subscription)
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

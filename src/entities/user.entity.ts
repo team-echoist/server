@@ -43,9 +43,9 @@ export class User {
   @DeleteDateColumn({ name: 'delete_at' })
   deletedAt?: Date;
 
-  @OneToMany(() => Essay, (essay) => essay.user)
+  @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
 
-  @OneToOne(() => Subscription, (subscription) => subscription.user)
+  @OneToOne(() => Subscription, (subscription) => subscription.user_id)
   subscription: Subscription;
 }

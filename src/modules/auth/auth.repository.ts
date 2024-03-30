@@ -5,7 +5,7 @@ import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserResDto } from './dto/userRes.dto';
 
-export class UserRepository {
+export class AuthRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
