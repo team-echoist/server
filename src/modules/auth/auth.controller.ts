@@ -8,6 +8,7 @@ import {
   ValidationPipe,
   HttpStatus,
   Res,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
@@ -44,7 +45,7 @@ export class AuthController {
     return;
   }
 
-  @Post('login')
+  @Get('login')
   @ApiOperation({
     summary: '로그인',
     description: '로그인 후 응답 헤더에 JWT 추가',
@@ -59,5 +60,47 @@ export class AuthController {
     res.setHeader('Authorization', `Bearer ${jwt}`);
     res.status(HttpStatus.OK).send();
     return;
+  }
+
+  @Get('google')
+  @ApiOperation({
+    summary: 'OAuth-구글 로그인',
+    description: '로그인 후 응답 헤더에 JWT 추가',
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Request() req: RequestWithUser, @Res() res: Response) {
+    const jwt = await this.authService.oauthLogin(req.user);
+
+    res.setHeader('Authorization', `Bearer ${jwt}`);
+    res.status(HttpStatus.OK).send();
+  }
+
+  @Get('kakao')
+  @ApiOperation({
+    summary: 'OAuth-카카오 로그인',
+    description: '로그인 후 응답 헤더에 JWT 추가',
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('google'))
+  async kakaoAuthRedirect(@Request() req: RequestWithUser, @Res() res: Response) {
+    const jwt = await this.authService.oauthLogin(req.user);
+
+    res.setHeader('Authorization', `Bearer ${jwt}`);
+    res.status(HttpStatus.OK).send();
+  }
+
+  @Get('naver')
+  @ApiOperation({
+    summary: 'OAuth-네이버 로그인',
+    description: '로그인 후 응답 헤더에 JWT 추가',
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('google'))
+  async naverAuthRedirect(@Request() req: RequestWithUser, @Res() res: Response) {
+    const jwt = await this.authService.oauthLogin(req.user);
+
+    res.setHeader('Authorization', `Bearer ${jwt}`);
+    res.status(HttpStatus.OK).send();
   }
 }

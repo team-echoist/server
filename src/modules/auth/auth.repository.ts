@@ -19,4 +19,12 @@ export class AuthRepository {
     const user = await this.userRepository.save(createUserDto);
     return plainToInstance(UserResDto, user);
   }
+
+  async updateUserOauthInfo(userId: number, oauthInfo: any): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) return;
+
+    user.oauthInfo = { ...user.oauthInfo, ...oauthInfo };
+    await this.userRepository.save(user);
+  }
 }

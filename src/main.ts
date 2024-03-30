@@ -22,13 +22,15 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
-    .setTitle('NestJS API')
-    .setDescription('')
-    .setVersion('1.0')
-    .build();
-  const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  if (process.env.NODE_ENV === 'DEV') {
+    const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
+      .setTitle('NestJS API')
+      .setDescription('')
+      .setVersion('1.0')
+      .build();
+    const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api-doc', app, document);
+  }
 
   await app.listen(process.env.SERVER_PORT);
   if (module.hot) {

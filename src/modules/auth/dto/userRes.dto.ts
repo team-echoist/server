@@ -21,4 +21,7 @@ export class UserResDto {
 
   @Exclude()
   gender: string;
+
+  @Exclude()
+  oauthInfo: object;
 }

@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { AuthRepository } from './auth.repository';
-import { LocalStrategy } from '../../common/guards/local.strategy';
+import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,6 +18,13 @@ dotenv.config();
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, AuthRepository],
+  providers: [
+    AuthService,
+    AuthRepository,
+    strategies.LocalStrategy,
+    strategies.GoogleStrategy,
+    strategies.KakaoStrategy,
+    strategies.NaverStrategy,
+  ],
 })
 export class AuthModule {}

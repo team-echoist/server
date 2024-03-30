@@ -19,17 +19,22 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   gender: string;
 
-  @Column({ name: 'birth_date' })
+  @Column({ name: 'birth_date', nullable: true })
   birthDate: Date;
 
-  @Column({ type: 'jsonb', nullable: true, name: 'oauth_info' })
-  oauthInfo: any;
+  @Column({ name: 'oauth_info', type: 'jsonb', nullable: true })
+  oauthInfo: {
+    google: string;
+    kakao: string;
+    naver: string;
+    apple: string;
+  };
 
   @Column({ default: false })
   admin: boolean;
@@ -46,6 +51,6 @@ export class User {
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
 
-  @OneToOne(() => Subscription, (subscription) => subscription.user_id)
+  @OneToOne(() => Subscription, (subscription) => subscription.user)
   subscription: Subscription;
 }
