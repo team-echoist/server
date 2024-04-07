@@ -16,8 +16,8 @@ async function bootstrap() {
       exposedHeaders: 'Authorization',
     },
   });
-  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.use(helmet.default());
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

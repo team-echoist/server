@@ -3,14 +3,13 @@ import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { AuthRepository } from './auth.repository';
 import * as bcrypt from 'bcrypt';
 import { UserResDto } from './dto/userRes.dto';
-import { User } from '../../entities/user.entity';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
-  constructor(private authRepository: AuthRepository) {}
+  constructor(private readonly authRepository: AuthRepository) {}
 
-  generateJWT(user: UserResDto | User): string {
+  generateJWT(user: Express.User | UserResDto): string {
     const secretKey = process.env.JWT_SECRET;
     const options = { expiresIn: '30m' };
 

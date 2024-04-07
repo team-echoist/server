@@ -13,15 +13,10 @@ import {
 import { AuthService } from './auth.service';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../../entities/user.entity';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request as ExpressRequest, Response } from 'express';
 import { UserResDto } from './dto/userRes.dto';
 import { LoginReqDto } from './dto/loginReq.dto';
-
-interface RequestWithUser extends Request {
-  user: User;
-}
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -54,7 +49,8 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @UsePipes(new ValidationPipe())
   @UseGuards(AuthGuard('local'))
-  async login(@Request() req: RequestWithUser, @Res() res: Response): Promise<void> {
+  async login(@Request() req: ExpressRequest, @Res() res: Response): Promise<void> {
+    console.log(req.user);
     const jwt = this.authService.generateJWT(req.user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
@@ -69,7 +65,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Request() req: RequestWithUser, @Res() res: Response) {
+  async googleAuthRedirect(@Request() req: ExpressRequest, @Res() res: Response) {
     const jwt = await this.authService.oauthLogin(req.user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
@@ -83,7 +79,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async kakaoAuthRedirect(@Request() req: RequestWithUser, @Res() res: Response) {
+  async kakaoAuthRedirect(@Request() req: ExpressRequest, @Res() res: Response) {
     const jwt = await this.authService.oauthLogin(req.user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
@@ -97,7 +93,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async naverAuthRedirect(@Request() req: RequestWithUser, @Res() res: Response) {
+  async naverAuthRedirect(@Request() req: ExpressRequest, @Res() res: Response) {
     const jwt = await this.authService.oauthLogin(req.user);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);

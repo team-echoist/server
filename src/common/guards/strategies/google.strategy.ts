@@ -8,7 +8,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'redirect 주소로 변경',
+      callbackURL: 'https://....com/api/auth/google',
       scope: ['email', 'profile'],
     });
   }

@@ -11,7 +11,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     super({
       clientID: process.env.NAVER_CLIENT_ID,
       clientSecret: process.env.NAVER_CLIENT_SECRET,
-      callbackURL: '/auth/naver/callback',
+      callbackURL: 'https://....com/api/auth/naver',
     });
   }
 
