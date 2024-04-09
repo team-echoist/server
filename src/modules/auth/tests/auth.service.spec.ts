@@ -68,7 +68,7 @@ describe('AuthService', () => {
         email: 'user@example.com',
         password: 'hashed',
       };
-      const secretKey = process.env.JWT_SECRET || 'SecretKey';
+      const secretKey = process.env.JWT_SECRET;
       const options = { expiresIn: '30m' };
       const expectedToken = jwt.sign({ email: user.email, id: user.id }, secretKey, options);
 
