@@ -1,4 +1,4 @@
-name: PR_Test
+name: PR_test
 
 on:
   push:
