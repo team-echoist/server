@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { AuthRepository } from './auth.repository';
-import * as bcrypt from 'bcrypt';
 import { UserResDto } from './dto/userRes.dto';
+import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
@@ -25,6 +25,7 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserReqDto): Promise<UserResDto> {
+    console.log('여기야 여기');
     const existingUser = await this.authRepository.findByEmail(createUserDto.email);
 
     if (existingUser) {

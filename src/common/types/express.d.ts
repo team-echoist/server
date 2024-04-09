@@ -4,14 +4,14 @@ import { Request as ExpressRequest } from 'express';
 declare global {
   namespace Express {
     export interface User {
-      id: number;
+      id?: number;
       email: string;
       password?: string;
       gender?: string;
       birthDate?: Date;
       oauthInfo?: object;
-      admin: boolean;
-      createdAt: Date;
+      admin?: boolean;
+      createdAt?: Date;
       updatedAt?: Date;
       deletedAt?: null;
     }
