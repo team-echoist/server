@@ -15,7 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
@@ -26,6 +25,8 @@ jobs:
 
       - name: run_test_code
         run: npm test
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name : if_fail
         uses: actions/github-script@v4
