@@ -1,0 +1,49 @@
+name: PR_Test
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "20.9.0"
+
+      - name: npm_install
+        run: npm install
+
+      - name: run_test_code
+        run: npm test
+
+      - name : if_fail
+        uses: actions/github-script@v4
+        with:
+            github-token: ${{ secrets.TOKEN }}
+            script : |
+              const ref = "${{github.ref}}"
+              const pull_number = Number(ref.split("/")[2])
+              console.log(pull_number, ref.split("/"), github.ref)
+              await github.pulls.createReview({
+                ...context.repo,
+                pull_number,
+                body : "테스트코드를 다시 확인해주세요.",
+                event : "REQUEST_CHANGES"
+              })
+              await github.pulls.update({
+                ...context.repo,
+                pull_number,
+                state: "closed"
+              })
+        if: failure()

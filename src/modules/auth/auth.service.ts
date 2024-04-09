@@ -13,7 +13,7 @@ export class AuthService {
     const secretKey = process.env.JWT_SECRET;
     const options = { expiresIn: '30m' };
 
-    return jwt.sign({ username: user.email, id: user.id }, secretKey, options);
+    return jwt.sign({ email: user.email, id: user.id }, secretKey, options);
   }
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -25,7 +25,6 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserReqDto): Promise<UserResDto> {
-    console.log('여기야 여기');
     const existingUser = await this.authRepository.findByEmail(createUserDto.email);
 
     if (existingUser) {
