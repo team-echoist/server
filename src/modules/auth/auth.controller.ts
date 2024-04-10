@@ -10,13 +10,14 @@ import {
   Res,
   Get,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
+import { AuthService } from './auth.service';
+import { generateJWT } from '../../common/utils/jwt.utils';
 import { UserResDto } from './dto/userRes.dto';
 import { LoginReqDto } from './dto/loginReq.dto';
+import { CreateUserReqDto } from './dto/createUserReq.dto';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -33,7 +34,7 @@ export class AuthController {
   @UsePipes(new ValidationPipe())
   async register(@Body() createUserDto: CreateUserReqDto, @Res() res: Response): Promise<void> {
     const user = await this.authService.register(createUserDto);
-    const jwt = this.authService.generateJWT(user);
+    const jwt = generateJWT(user.id, user.email);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
     res.status(HttpStatus.CREATED).send();
@@ -50,8 +51,7 @@ export class AuthController {
   @UsePipes(new ValidationPipe())
   @UseGuards(AuthGuard('local'))
   async login(@Request() req: ExpressRequest, @Res() res: Response): Promise<void> {
-    console.log(req.user);
-    const jwt = this.authService.generateJWT(req.user);
+    const jwt = generateJWT(req.user.id, req.user.email);
 
     res.setHeader('Authorization', `Bearer ${jwt}`);
     res.status(HttpStatus.OK).send();

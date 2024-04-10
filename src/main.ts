@@ -1,8 +1,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
+import { AppModule } from './app.module';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 

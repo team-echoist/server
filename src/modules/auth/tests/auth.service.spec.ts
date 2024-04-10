@@ -1,16 +1,18 @@
 import { AuthService } from '../auth.service';
 import { AuthRepository } from '../auth.repository';
 import { CreateUserReqDto } from '../dto/createUserReq.dto';
-import { UserResDto } from '../dto/userRes.dto';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
 import { HttpException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn().mockResolvedValue('fake_hashed_password'),
   compare: jest.fn(),
+}));
+
+jest.mock('../../../common/utils/jwt.utils', () => ({
+  generateJWT: jest.fn().mockReturnValue('mockToken'),
 }));
 
 describe('AuthService', () => {
@@ -24,6 +26,10 @@ describe('AuthService', () => {
     };
 
     authService = new AuthService(mockAuthRepository as AuthRepository);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('register', () => {
@@ -58,23 +64,6 @@ describe('AuthService', () => {
       expect(mockAuthRepository.findByEmail).toHaveBeenCalledWith('newuser@example.com');
       expect(mockAuthRepository.createUser).toHaveBeenCalledWith(createUserDto);
       expect(result).toEqual(savedUser);
-    });
-  });
-
-  describe('generateJWT', () => {
-    it('should generate a valid JWT', () => {
-      const user: UserResDto | Express.User = {
-        id: 1,
-        email: 'user@example.com',
-        password: 'hashed',
-      };
-      const secretKey = process.env.JWT_SECRET;
-      const options = { expiresIn: '30m' };
-      const expectedToken = jwt.sign({ email: user.email, id: user.id }, secretKey, options);
-
-      const token = authService.generateJWT(user);
-
-      expect(token).toBe(expectedToken);
     });
   });
 

@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm';
-import { User } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { plainToInstance } from 'class-transformer';
+import { User } from '../../entities/user.entity';
+import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { UserResDto } from './dto/userRes.dto';
 
 export class AuthRepository {

@@ -4,8 +4,13 @@ import { AuthService } from '../auth.service';
 import { CreateUserReqDto } from '../dto/createUserReq.dto';
 import { Response } from 'express';
 import { HttpStatus } from '@nestjs/common';
+import * as jwtUtils from '../../../common/utils/jwt.utils';
 import * as dotenv from 'dotenv';
 dotenv.config();
+
+jest.mock('../../../common/utils/jwt.utils', () => ({
+  generateJWT: jest.fn().mockReturnValue('mockedJWTToken'),
+}));
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -13,10 +18,8 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     mockAuthService = {
-      // 비동기 함수는 항상 promise를 반환해야합니다.
       register: jest.fn(),
-      generateJWT: jest.fn((user) => `token-${user.id}`),
-      oauthLogin: jest.fn((user) => Promise.resolve(`token-${user.id}`)),
+      oauthLogin: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -61,7 +64,7 @@ describe('AuthController', () => {
 
     // mockAuthService 의 register 함수가 createUserDto를 인수로 호출되었는지 확인. 이하 비슷비슷
     expect(mockAuthService.register).toHaveBeenCalledWith(createUserDto);
-    expect(mockAuthService.generateJWT).toHaveBeenCalled();
+    expect(jwtUtils.generateJWT).toHaveBeenCalledWith(1, 'test@example.com');
     expect(mockResponse.setHeader).toHaveBeenCalledWith('Authorization', expect.any(String)); // 임의의 문자열
     expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CREATED);
     expect(mockResponse.send).toHaveBeenCalled();

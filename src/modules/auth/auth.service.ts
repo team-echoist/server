@@ -2,19 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { AuthRepository } from './auth.repository';
 import { UserResDto } from './dto/userRes.dto';
+import { generateJWT } from '../../common/utils/jwt.utils';
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
-
-  generateJWT(user: Express.User | UserResDto): string {
-    const secretKey = process.env.JWT_SECRET;
-    const options = { expiresIn: '30m' };
-
-    return jwt.sign({ email: user.email, id: user.id }, secretKey, options);
-  }
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.authRepository.findByEmail(email);
@@ -50,6 +43,6 @@ export class AuthService {
         });
       }
     }
-    return this.generateJWT(existingUser);
+    return generateJWT(existingUser.id, existingUser.email);
   }
 }
