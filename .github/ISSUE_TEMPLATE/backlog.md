@@ -2,7 +2,7 @@
 name: BACKLOG
 about: backlog default template
 title: "[Backlog]"
-labels: 'Priority: Medium, Status: Available, Type: Enhancement'
+labels: 'Priority: Medium, Type: Enhancement'
 assignees: ''
 
 ---
