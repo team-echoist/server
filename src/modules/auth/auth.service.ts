@@ -4,6 +4,7 @@ import { AuthRepository } from './auth.repository';
 import { UserResDto } from './dto/userRes.dto';
 import { generateJWT } from '../../common/utils/jwt.utils';
 import * as bcrypt from 'bcrypt';
+import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,14 @@ export class AuthService {
       return user;
     }
     return null;
+  }
+
+  async checkEmail(data: CheckEmailReqDto): Promise<boolean> {
+    const existingUser = await this.authRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+    }
+    return true;
   }
 
   async register(createUserDto: CreateUserReqDto): Promise<UserResDto> {
