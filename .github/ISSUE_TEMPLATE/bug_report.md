@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG-back]"
-labels: 'Domain: Back, Priority: Medium, Status: Available, Type: Bug, Type: Enhancement'
+title: "[BUG]"
+labels: 'Priority: Medium, Status: Available, Type: Bug, Type: Enhancement'
 assignees: ''
 
 ---
