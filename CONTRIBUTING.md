@@ -22,16 +22,16 @@ footer
 ```
 
 ### type
-- Feat : 새로운 기능
-- Fix : 버그 수정
-- Docs : 문서 관련
-- Style : 코드 포맷팅 등 코드변경이 없는 경우
-- Refactor : 리팩토링
-- Test : 테스트 코드, 리팩토링 테스트 코드 추가
-- Chore : 빌드 업무, 패키지 매니저 수정, 프로덕션과 무관한 부분
-- Comment : 주석
-- Remove : 파일 삭제
-- Rename : 파일 수정
+- feat : 새로운 기능
+- fix : 버그 수정
+- docs : 문서 관련
+- style : 코드 포맷팅 등 코드변경이 없는 경우
+- refactor : 리팩토링
+- test : 테스트 코드, 리팩토링 테스트 코드 추가
+- chore : 빌드 업무, 패키지 매니저 수정, 프로덕션과 무관한 부분
+- comment : 주석
+- remove : 파일 삭제
+- rename : 파일 수정
 
 ### subject
 - Add : 추가
