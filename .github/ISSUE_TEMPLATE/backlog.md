@@ -1,8 +1,8 @@
 ---
 name: BACKLOG
 about: backlog default template
-title: "[BACK]"
-labels: 'Domain: Back, Priority: Medium, Status: Available, Type: Enhancement'
+title: "[Backlog]"
+labels: 'Priority: Medium, Status: Available, Type: Enhancement'
 assignees: ''
 
 ---
