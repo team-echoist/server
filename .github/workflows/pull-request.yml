@@ -1,4 +1,4 @@
-name: PR_test
+name: CI/CD_test
 
 on:
   push:
