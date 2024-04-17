@@ -23,6 +23,13 @@ import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({ summary: 'health check' })
+  @Get('health-check')
+  @ApiResponse({ status: 200 })
+  async healthCheck() {
+    return 'UP';
+  }
+
   @ApiOperation({
     summary: '이메일중복검사',
   })
