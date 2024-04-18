@@ -42,17 +42,6 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: '이메일중복검사',
-  })
-  @Get('check-email')
-  @ApiBody({ type: CheckEmailReqDto })
-  @ApiResponse({ status: 200, type: isBoolean })
-  @UsePipes(new ValidationPipe())
-  async checkEmail(@Body() data: CheckEmailReqDto) {
-    return await this.authService.checkEmail(data);
-  }
-
-  @ApiOperation({
     summary: '회원가입',
     description: '회원 가입 후 응답 헤더에 JWT 추가',
   })
