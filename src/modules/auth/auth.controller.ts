@@ -23,6 +23,24 @@ import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({ summary: 'health check' })
+  @Get('health-check')
+  @ApiResponse({ status: 200 })
+  async healthCheck() {
+    return 'UP';
+  }
+
+  @ApiOperation({
+    summary: '이메일중복검사',
+  })
+  @Get('check-email')
+  @ApiBody({ type: CheckEmailReqDto })
+  @ApiResponse({ status: 200, type: isBoolean })
+  @UsePipes(new ValidationPipe())
+  async checkEmail(@Body() data: CheckEmailReqDto) {
+    return await this.authService.checkEmail(data);
+  }
+
   @ApiOperation({
     summary: '이메일중복검사',
   })

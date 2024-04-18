@@ -2,7 +2,7 @@
 name: BACKLOG
 about: backlog default template
 title: "[Backlog]"
-labels: 'Priority: Medium, Status: Available, Type: Enhancement'
+labels: 'Priority: Medium, Type: Enhancement'
 assignees: ''
 
 ---
@@ -12,9 +12,9 @@ assignees: ''
 <br />
 
 ## To Do
-[ ] 웅
-[ ] 엥
-[ ] 웅
+- [ ] 대괄호 내부에
+- [ ] x를 넣으면
+- [ ] 체크가 되어요
 
 <br />
 

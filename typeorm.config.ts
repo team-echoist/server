@@ -1,8 +1,8 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import * as dotenv from 'dotenv';
 import { User } from './src/entities/user.entity';
 import { Subscription } from 'src/entities/subscription.entity';
 import { Essay } from './src/entities/essay.entity';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 export const typeOrmConfig: TypeOrmModuleOptions = {
@@ -21,4 +21,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     max: 9,
     connectionTimeoutMillis: 5000,
   },
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
 };
