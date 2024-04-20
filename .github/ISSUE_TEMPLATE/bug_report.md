@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: "[BUG]"
-labels: 'Priority: Medium, Type: Bug, Type: Enhancement'
+labels: 'Priority: Medium, Type: Bug'
 assignees: ''
 
 ---
