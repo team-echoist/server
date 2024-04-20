@@ -8,3 +8,4 @@
 ㅁㄴㄹ뭐ㅑㅈ도램피ㅏㄹasdfkldasnfofwflna
 ㄹㅇ 찐막인듯
 아니네 ㅎㅎ;
+ㅈ뱡닐므
