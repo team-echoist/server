@@ -1,18 +1,15 @@
 on:
-  push:
-    branches:
-      - main
-      - develop
   pull_request:
+    types: [submitted]
     branches:
       - main
-      - develop
 
-name: Demo CI on ECR
+name: CI on ECR
 
 jobs:
   deploy:
     name: Deploy
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
 
     steps:
@@ -37,8 +34,17 @@ jobs:
           ECR_REPOSITORY: echoist
           IMAGE_TAG: ${{ github. sha }}
         run: |
-          # Build a docker container and push it to ECR
+          # Build a docker container
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          echo "Pushing image to ECR..."
+
+          # Tagging the image as 'latest'
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          echo "Pushing images to ECR..."
+          # Push the specific SHA tag
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # Push the 'latest' tag
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "latest image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
