@@ -43,6 +43,9 @@ jobs:
           echo "Pushing image with commit SHA to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           
+          echo "Waiting for ECR index to refresh..."
+          sleep 10 
+          
           echo "Pushing latest image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           
