@@ -1,18 +1,15 @@
 on:
-  push:
-    branches:
-      - main
-      - develop
   pull_request:
+    types: [submitted]
     branches:
       - main
-      - develop
 
-name: Demo CI on ECR
+name: CI on ECR
 
 jobs:
   deploy:
     name: Deploy
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
 
     steps:
