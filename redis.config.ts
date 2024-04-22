@@ -5,7 +5,8 @@ dotenv.config();
 
 export const redisConfig = {
   store: redisStore,
-  url: process.env.REDIS_URL,
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
   ttl: 300,
   max: 1000,
 };
