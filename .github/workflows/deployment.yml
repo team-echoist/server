@@ -1,6 +1,5 @@
 on:
-  pull_request:
-    types: [submitted]
+  push:
     branches:
       - main
 
