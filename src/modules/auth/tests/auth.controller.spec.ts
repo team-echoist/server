@@ -15,10 +15,7 @@ describe('AuthController', () => {
         Promise.resolve({
           id: 1,
           email: dto.email,
-          password: dto.password,
-          birthDate: null,
-          gender: null,
-          oauthInfo: {},
+          password: 'encryptedPassword',
         }),
       ),
       oauthLogin: jest.fn(),
@@ -38,19 +35,25 @@ describe('AuthController', () => {
     jest.clearAllMocks();
   });
 
-  it('/register should create a new user and return a JWT', async () => {
-    const createUserDto = new CreateUserReqDto();
-    createUserDto.email = 'test@example.com';
-    createUserDto.password = 'password';
+  describe('register', () => {
+    it('새 사용자를 생성하고 토큰을 반환', async () => {
+      const createUserDto = new CreateUserReqDto();
+      createUserDto.email = 'test@example.com';
+      const mockRequest = {
+        user: null,
+      };
 
-    const mockRequest = {
-      user: null,
-    };
+      const result = await controller.register(createUserDto, mockRequest as any);
 
-    await controller.register(createUserDto, mockRequest as any);
-
-    expect(mockAuthService.register).toHaveBeenCalledWith(createUserDto);
-    expect(mockRequest.user).toBeTruthy();
-    expect(mockRequest.user.email).toEqual('test@example.com');
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 1,
+          email: 'test@example.com',
+        }),
+      );
+      expect(mockRequest.user).toBeDefined();
+      expect(mockRequest.user).toEqual(expect.objectContaining({ email: 'test@example.com' }));
+      expect(mockAuthService.register).toHaveBeenCalledWith(createUserDto);
+    });
   });
 });
