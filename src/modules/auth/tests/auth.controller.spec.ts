@@ -35,23 +35,25 @@ describe('AuthController', () => {
     jest.clearAllMocks();
   });
 
-  it('/register should create a new user and return a JWT', async () => {
-    const createUserDto = new CreateUserReqDto();
-    createUserDto.email = 'test@example.com';
-    const mockRequest = {
-      user: null,
-    };
+  describe('register', () => {
+    it('새 사용자를 생성하고 토큰을 반환', async () => {
+      const createUserDto = new CreateUserReqDto();
+      createUserDto.email = 'test@example.com';
+      const mockRequest = {
+        user: null,
+      };
 
-    const result = await controller.register(createUserDto, mockRequest as any);
+      const result = await controller.register(createUserDto, mockRequest as any);
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        id: 1,
-        email: 'test@example.com',
-      }),
-    );
-    expect(mockRequest.user).toBeDefined();
-    expect(mockRequest.user).toEqual(expect.objectContaining({ email: 'test@example.com' }));
-    expect(mockAuthService.register).toHaveBeenCalledWith(createUserDto);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 1,
+          email: 'test@example.com',
+        }),
+      );
+      expect(mockRequest.user).toBeDefined();
+      expect(mockRequest.user).toEqual(expect.objectContaining({ email: 'test@example.com' }));
+      expect(mockAuthService.register).toHaveBeenCalledWith(createUserDto);
+    });
   });
 });

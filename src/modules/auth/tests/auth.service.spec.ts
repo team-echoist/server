@@ -1,100 +1,88 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { AuthRepository } from '../auth.repository';
-import { CreateUserReqDto } from '../dto/createUserReq.dto';
 import { HttpException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as dotenv from 'dotenv';
-dotenv.config();
-
-jest.mock('bcrypt', () => ({
-  hash: jest.fn().mockResolvedValue('fake_hashed_password'),
-  compare: jest.fn(),
-}));
-
-jest.mock('../../../common/utils/jwt.utils', () => ({
-  generateJWT: jest.fn().mockReturnValue('mockToken'),
-}));
 
 describe('AuthService', () => {
-  let authService: AuthService;
-  let mockAuthRepository: Partial<AuthRepository>;
+  let service: AuthService;
+  let mockCacheManager: any;
+  let mockAuthRepository: any;
 
   beforeEach(async () => {
+    mockCacheManager = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
     mockAuthRepository = {
       findByEmail: jest.fn(),
       createUser: jest.fn(),
     };
 
-    authService = new AuthService(mockAuthRepository as AuthRepository);
-  });
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: AuthRepository, useValue: mockAuthRepository },
+      ],
+    }).compile();
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('register', () => {
-    it('should throw HttpException if email already exists', async () => {
-      const createUserDto: CreateUserReqDto = {
-        email: 'test@example.com',
-        password: 'password123',
-      };
-
-      mockAuthRepository.findByEmail = jest.fn().mockResolvedValue(createUserDto);
-
-      await expect(authService.register(createUserDto)).rejects.toThrow(HttpException);
-    });
-
-    it('should successfully register a new user', async () => {
-      const createUserDto: CreateUserReqDto = {
-        email: 'newuser@example.com',
-        password: 'newpassword',
-      };
-      createUserDto.password = await bcrypt.hash('newpassword', 10);
-
-      const savedUser = {
-        id: 1,
-        email: 'newuser@example.com',
-      };
-
-      mockAuthRepository.findByEmail = jest.fn().mockResolvedValue(null);
-      mockAuthRepository.createUser = jest.fn().mockResolvedValue(savedUser);
-
-      const result = await authService.register(createUserDto);
-
-      expect(mockAuthRepository.findByEmail).toHaveBeenCalledWith('newuser@example.com');
-      expect(mockAuthRepository.createUser).toHaveBeenCalledWith(createUserDto);
-      expect(result).toEqual(savedUser);
-    });
+    service = module.get<AuthService>(AuthService);
   });
 
   describe('validateUser', () => {
-    it('should validate and return the user if password matches', async () => {
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      const email = 'valid@example.com';
-      const password = 'password';
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = { email, password: hashedPassword };
+    it('사용자를 찾을 수 없으면 null을 반환', async () => {
+      mockCacheManager.get.mockResolvedValue(null);
+      mockAuthRepository.findByEmail.mockResolvedValue(null);
 
-      mockAuthRepository.findByEmail = jest.fn().mockResolvedValue(user);
-
-      const result = await authService.validateUser(email, password);
-
-      expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
-      expect(result).toEqual(user);
+      expect(await service.validateUser('user@example.com', 'password123')).toBeNull();
     });
 
-    it('should return null if password does not match', async () => {
-      (bcrypt.compare as jest.Mock).mockResolvedValue(null);
-      const email = 'invalid@example.com';
-      const password = 'wrongpassword';
-      const user = { email, password: 'correcthashedpassword' };
+    it('이메일과 비밀번호가 일치하면 사용자를 반환', async () => {
+      const user = { email: 'user@example.com', password: await bcrypt.hash('password123', 10) };
+      mockCacheManager.get.mockResolvedValue(null);
+      mockAuthRepository.findByEmail.mockResolvedValue(user);
 
-      mockAuthRepository.findByEmail = jest.fn().mockResolvedValue(user);
+      expect(await service.validateUser('user@example.com', 'password123')).toEqual(user);
+    });
+  });
 
-      const result = await authService.validateUser(email, password);
+  describe('checkEmail', () => {
+    it('이미 사용중인 이메일이라면 예외처리.', async () => {
+      mockAuthRepository.findByEmail.mockResolvedValue({ id: 1, email: 'user@example.com' });
 
-      expect(bcrypt.compare).toHaveBeenCalledWith(password, user.password);
-      expect(result).toBeNull();
+      await expect(service.checkEmail({ email: 'user@example.com' })).rejects.toThrow(
+        HttpException,
+      );
+    });
+
+    it('중복되지 않아서 사용할 수 있는 이메일이라면 true를 반환', async () => {
+      mockAuthRepository.findByEmail.mockResolvedValue(null);
+
+      expect(await service.checkEmail({ email: 'new@example.com' })).toBe(true);
+    });
+  });
+
+  describe('register', () => {
+    it('이미 사용중인 이메일이라면 예외처리', async () => {
+      mockAuthRepository.findByEmail.mockResolvedValue({ email: 'user@example.com' });
+
+      await expect(
+        service.register({ email: 'user@example.com', password: 'password123' }),
+      ).rejects.toThrow(HttpException);
+    });
+
+    it('회원등록 성공시 응답 DTO 반환', async () => {
+      mockAuthRepository.findByEmail.mockResolvedValue(null);
+      mockAuthRepository.createUser.mockResolvedValue({
+        id: 1,
+        email: 'new@example.com',
+        password: 'hashed',
+      });
+
+      const result = await service.register({ email: 'new@example.com', password: 'password123' });
+      expect(result).toEqual({ id: 1, email: 'new@example.com', password: 'hashed' });
     });
   });
 });
