@@ -15,10 +15,7 @@ describe('AuthController', () => {
         Promise.resolve({
           id: 1,
           email: dto.email,
-          password: dto.password,
-          birthDate: null,
-          gender: null,
-          oauthInfo: {},
+          password: 'encryptedPassword',
         }),
       ),
       oauthLogin: jest.fn(),
@@ -41,16 +38,20 @@ describe('AuthController', () => {
   it('/register should create a new user and return a JWT', async () => {
     const createUserDto = new CreateUserReqDto();
     createUserDto.email = 'test@example.com';
-    createUserDto.password = 'password';
-
     const mockRequest = {
       user: null,
     };
 
-    await controller.register(createUserDto, mockRequest as any);
+    const result = await controller.register(createUserDto, mockRequest as any);
 
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 1,
+        email: 'test@example.com',
+      }),
+    );
+    expect(mockRequest.user).toBeDefined();
+    expect(mockRequest.user).toEqual(expect.objectContaining({ email: 'test@example.com' }));
     expect(mockAuthService.register).toHaveBeenCalledWith(createUserDto);
-    expect(mockRequest.user).toBeTruthy();
-    expect(mockRequest.user.email).toEqual('test@example.com');
   });
 });

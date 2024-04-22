@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisConfig } from '../../../redis.config';
 
 dotenv.config();
 @Module({
@@ -16,6 +18,7 @@ dotenv.config();
       signOptions: { expiresIn: '30m' },
     }),
     TypeOrmModule.forFeature([User]),
+    CacheModule.register(redisConfig),
   ],
   controllers: [AuthController],
   providers: [
