@@ -1,5 +1,4 @@
 ## PR Type
-<!— Please check the one that applies to this PR using "x". —>
 
 - [ ] 버그수정(Bugfix)
 - [ ] 기능개발(Feature)
@@ -12,14 +11,11 @@
 <br />
 
 ## Summary
-~~요약~~
 
 <br />
 
 ## Describe your changes
-~~상세 내용~~
 
 <br />
 
 ## Issue Number or Link
-~~IsOptional~~
