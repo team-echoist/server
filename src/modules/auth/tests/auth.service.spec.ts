@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { AuthRepository } from '../auth.repository';
 import { HttpException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { RedisCacheService } from '../../redis/redis.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -23,7 +23,7 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: RedisCacheService, useValue: mockCacheManager },
         { provide: AuthRepository, useValue: mockAuthRepository },
       ],
     }).compile();

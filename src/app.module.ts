@@ -3,18 +3,23 @@ import { typeOrmConfig } from '../typeorm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtInterceptor } from './common/interceptros/Jwt.interceptor';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { AuthModule } from './modules/auth/auth.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-store';
 
 @Module({
   imports: [
     AuthModule,
     TypeOrmModule.forRoot(typeOrmConfig),
-    CacheModule.register({
-      global: true,
-      store: redisStore,
-      url: process.env.REDIS_URL,
+    RedisModule.forRootAsync({
+      useFactory: () => ({
+        type: process.env.ENV === 'prod' ? 'cluster' : 'single',
+        nodes: [
+          {
+            host: process.env.REDIS_HOST,
+            port: parseInt(process.env.REDIS_PORT, 10),
+          },
+        ],
+      }),
     }),
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: JwtInterceptor }],
