@@ -1,19 +1,17 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
-import { User } from '../../entities/user.entity';
 import { UserResDto } from './dto/userRes.dto';
 import { generateJWT } from '../../common/utils/jwt.utils';
 import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
+import { RedisCacheService } from '../redis/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private cacheManager: RedisCacheService,
   ) {}
 
   /**
@@ -22,7 +20,7 @@ export class AuthService {
    * */
   async validateUser(email: string, password: string): Promise<any> {
     const cacheKey = `auth_${email}`;
-    let user = await this.cacheManager.get<User>(cacheKey);
+    let user = await this.cacheManager.get(cacheKey);
 
     if (!user) {
       user = await this.authRepository.findByEmail(email);
