@@ -21,5 +21,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     max: 9,
     connectionTimeoutMillis: 5000,
   },
-  ssl: process.env.DB_SSL === 'TRUE' ? { rejectUnauthorized: false } : undefined,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 };

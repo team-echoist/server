@@ -23,7 +23,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  if (process.env.ENV === 'dev') {
+  if (process.env.SWAGGER === 'true') {
     const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
       .setTitle('NestJS API')
       .setDescription('')

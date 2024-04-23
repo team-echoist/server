@@ -42,11 +42,31 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * @description
+   * 캐싱 테스트를 위해 임시로 코드 추가
+   * */
   async checkEmail(data: CheckEmailReqDto): Promise<boolean> {
-    const existingUser = await this.authRepository.findByEmail(data.email);
-    if (existingUser) {
+    const cacheKey = `emailCheck_${data.email}`;
+    const cachedUser = await this.redis.get(cacheKey);
+
+    // 이메일 확인 결과가 캐시되어 있는 경우 즉시 결과를 파싱하여 응답
+    if (cachedUser !== null) {
+      const isEmailAvailable = JSON.parse(cachedUser);
+      if (!isEmailAvailable) {
+        throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+      }
+      return true;
+    }
+
+    // 캐시에 없으면 데이터베이스를 확인
+    const exUser = await this.authRepository.findByEmail(data.email);
+    if (exUser) {
+      // exUser 캐싱
+      await this.redis.set(cacheKey, JSON.stringify(exUser), 'EX', 600);
       throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
     }
+
     return true;
   }
 
