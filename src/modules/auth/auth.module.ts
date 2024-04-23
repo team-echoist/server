@@ -21,8 +21,7 @@ dotenv.config();
     TypeOrmModule.forFeature([User]),
     CacheModule.register({
       store: redisStore,
-      host: 'server-cache-7y2mqq.serverless.apn2.cache.amazonaws.com',
-      port: 6379,
+      url: process.env.REDIS_URL,
     }),
   ],
   controllers: [AuthController],
