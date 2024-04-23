@@ -12,7 +12,12 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js', 'ormconfig.js'],
+  ignorePatterns: [
+    '.eslintrc.js',
+    'ormconfig.js',
+    'redis.config.ts',
+    'redisSingle.config.ts',
+  ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

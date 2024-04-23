@@ -4,14 +4,15 @@ import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { UserResDto } from './dto/userRes.dto';
 import { generateJWT } from '../../common/utils/jwt.utils';
 import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
+import Redis from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import * as bcrypt from 'bcrypt';
-import { RedisCacheService } from '../redis/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRedis() private readonly redis: Redis,
     private readonly authRepository: AuthRepository,
-    private cacheManager: RedisCacheService,
   ) {}
 
   /**
@@ -20,15 +21,21 @@ export class AuthService {
    * */
   async validateUser(email: string, password: string): Promise<any> {
     const cacheKey = `auth_${email}`;
-    let user = await this.cacheManager.get(cacheKey);
 
+    // Redis에서 캐시된 사용자 데이터를 조회
+    const cachedUser = await this.redis.get(cacheKey);
+    let user = cachedUser ? JSON.parse(cachedUser) : null;
+
+    // 캐시에 없는 경우 데이터베이스 조회
     if (!user) {
       user = await this.authRepository.findByEmail(email);
       if (user) {
-        await this.cacheManager.set(cacheKey, user, 600);
+        // 만약 데이터베이스에 있다면 레디스에 사용자 데이터를 문자열로 캐시
+        await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
       }
     }
 
+    // 비밀번호를 검증하고 유효한 사용자라면 유저데이터를 반환
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
     }
