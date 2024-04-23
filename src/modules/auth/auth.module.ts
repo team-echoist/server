@@ -11,8 +11,6 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 
 dotenv.config();
-console.log('테스트: ', process.env.JWT_SECRET);
-console.log('테스트: ', process.env.REDIS_HOST, process.env.REDIS_PORT);
 
 @Module({
   imports: [
@@ -23,8 +21,8 @@ console.log('테스트: ', process.env.REDIS_HOST, process.env.REDIS_PORT);
     TypeOrmModule.forFeature([User]),
     CacheModule.register({
       store: redisStore,
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
+      host: 'server-cache-7y2mqq.serverless.apn2.cache.amazonaws.com',
+      port: 6379,
     }),
   ],
   controllers: [AuthController],
