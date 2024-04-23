@@ -22,7 +22,7 @@ assignees: ''
 <br />
 
 ## **Screenshots**
-~~옵션~~
+
 
 <br />
 
