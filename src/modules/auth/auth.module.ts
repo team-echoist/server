@@ -11,6 +11,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 
 dotenv.config();
+console.log('테스트: ', process.env.JWT_SECRET);
+console.log('테스트: ', process.env.REDIS_HOST, process.env.REDIS_PORT);
+
 @Module({
   imports: [
     JwtModule.register({
