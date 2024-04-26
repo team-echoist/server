@@ -4,8 +4,8 @@ import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { UserResDto } from './dto/userRes.dto';
 import { generateJWT } from '../../common/utils/jwt.utils';
 import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
-import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class AuthService {
    * 캐싱 테스트를 위해 임시로 코드 추가
    * */
   async validateUser(email: string, password: string): Promise<any> {
-    const cacheKey = `auth_${email}`;
+    const cacheKey = `user_${email}`;
 
     // Redis에서 캐시된 사용자 데이터를 조회
     const cachedUser = await this.redis.get(cacheKey);
@@ -47,17 +47,12 @@ export class AuthService {
    * 캐싱 테스트를 위해 임시로 코드 추가
    * */
   async checkEmail(data: CheckEmailReqDto): Promise<boolean> {
-    const cacheKey = `emailCheck_${data.email}`;
+    const cacheKey = `user_${data.email}`;
     const cachedUser = await this.redis.get(cacheKey);
 
-    // 이메일 확인 결과가 캐시되어 있는 경우 즉시 결과를 파싱하여 응답
-    if (cachedUser !== null) {
-      const isEmailAvailable = JSON.parse(cachedUser);
-      if (!isEmailAvailable) {
-        throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
-      }
-      return true;
-    }
+    // 캐시에 이메일이 있다면 예외처리
+    if (cachedUser !== null)
+      throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
 
     // 캐시에 없으면 데이터베이스를 확인
     const exUser = await this.authRepository.findByEmail(data.email);
