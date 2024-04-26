@@ -55,20 +55,21 @@ export class AuthService {
       throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
 
     // 캐시에 없으면 데이터베이스를 확인
-    const exUser = await this.authRepository.findByEmail(data.email);
-    if (exUser) {
-      // exUser 캐싱
-      await this.redis.set(cacheKey, JSON.stringify(exUser), 'EX', 600);
+    const user = await this.authRepository.findByEmail(data.email);
+    if (user) {
+      // user 가 있다면 캐싱 후 예외처리
+      await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
       throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
     }
 
+    await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
     return true;
   }
 
   async register(createUserDto: CreateUserReqDto): Promise<UserResDto> {
-    const existingUser = await this.authRepository.findByEmail(createUserDto.email);
+    const user = await this.authRepository.findByEmail(createUserDto.email);
 
-    if (existingUser) {
+    if (user) {
       throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
     }
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
