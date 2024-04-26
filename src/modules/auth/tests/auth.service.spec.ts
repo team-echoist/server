@@ -1,14 +1,7 @@
 import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import * as bcrypt from 'bcrypt';
-
-// const mockRedis = {
-//   get: jest.fn(),
-//   set: jest.fn(),
-//   del: jest.fn(),
-// };
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -16,40 +9,24 @@ describe('AuthService', () => {
   let mockRedis: any;
 
   beforeEach(async () => {
+    mockAuthRepository = {
+      findByEmail: jest.fn(),
+      createUser: jest.fn(),
+    };
     mockRedis = {
       get: jest.fn(),
       set: jest.fn(),
       del: jest.fn(),
     };
-
-    mockAuthRepository = {
-      findByEmail: jest.fn(),
-      createUser: jest.fn(),
-    };
-
-    mockRedis.get.mockClear();
-    mockRedis.set.mockClear();
-    mockRedis.del.mockClear();
+    const RedisInstance = jest.fn(() => mockRedis);
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        RedisModule.forRootAsync({
-          useFactory: () => ({
-            type: 'single',
-            nodes: [
-              {
-                host: 'mock',
-                port: 0,
-              },
-            ],
-          }),
-        }),
+      providers: [
+        AuthService,
+        { provide: AuthRepository, useValue: mockAuthRepository },
+        { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
-      providers: [AuthService, { provide: AuthRepository, useValue: mockAuthRepository }],
-    })
-      .overrideProvider(RedisModule)
-      .useValue(mockRedis)
-      .compile();
+    }).compile();
 
     authService = module.get<AuthService>(AuthService);
     jest.clearAllMocks();

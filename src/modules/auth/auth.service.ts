@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { generateJWT } from '../../common/utils/jwt.utils';
 import { AuthRepository } from './auth.repository';
+import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
 import { UserResDto } from './dto/userRes.dto';
-import { generateJWT } from '../../common/utils/jwt.utils';
-import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
 
