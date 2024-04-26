@@ -5,10 +5,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtInterceptor } from './common/interceptros/Jwt.interceptor';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { AuthModule } from './modules/auth/auth.module';
+import { EssayModule } from './modules/essay/essay.module';
 
 @Module({
   imports: [
     AuthModule,
+    EssayModule,
     TypeOrmModule.forRoot(typeOrmConfig),
     RedisModule.forRootAsync({
       useFactory: () => ({

@@ -17,6 +17,7 @@ export class AuthService {
 
   /**
    * @description
+   * 인증용
    * 캐싱 테스트를 위해 임시로 코드 추가
    * */
   async validateUser(email: string, password: string): Promise<any> {
@@ -38,6 +39,24 @@ export class AuthService {
     // 비밀번호를 검증하고 유효한 사용자라면 유저데이터를 반환
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
+    }
+    return null;
+  }
+
+  /**
+   * @description
+   * 인가용
+   * */
+  async validatePayload(email: string) {
+    const cacheKey = `validate_${email}`;
+    const cachedUser = await this.redis.get(cacheKey);
+    let user = cachedUser ? JSON.parse(cachedUser) : null;
+    if (!user) {
+      user = await this.authRepository.findByEmail(email);
+      if (user) {
+        await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
+        return user;
+      }
     }
     return null;
   }
