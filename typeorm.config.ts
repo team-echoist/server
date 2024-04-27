@@ -16,7 +16,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   synchronize: true,
   migrations: ['dist/migration/*.js'],
   migrationsTableName: 'migrations',
-  logging: true,
+  logging: false,
   extra: {
     max: 9,
     connectionTimeoutMillis: 5000,

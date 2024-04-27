@@ -11,6 +11,7 @@ import { AuthRepository } from '../auth/auth.repository';
 import { JwtModule } from '@nestjs/jwt';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { MailService } from '../mail/mail.service';
 
 dotenv.config();
 
@@ -24,6 +25,13 @@ dotenv.config();
     TypeOrmModule.forFeature([User, Essay]),
   ],
   controllers: [EssayController],
-  providers: [AuthService, AuthRepository, EssayService, EssayRepository, strategies.JwtStrategy],
+  providers: [
+    AuthService,
+    AuthRepository,
+    MailService,
+    EssayService,
+    EssayRepository,
+    strategies.JwtStrategy,
+  ],
 })
 export class EssayModule {}

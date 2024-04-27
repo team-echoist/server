@@ -12,9 +12,9 @@ declare const module: any;
 async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule, {
     cors: {
-      origin: '*', // TODO 도메인 발급시 변경, 앱의 경우 cors 정책이 적용되지 않는다곤 하는데 확인 필요
-      allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-      exposedHeaders: 'Authorization',
+      origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
+      allowedHeaders: 'Content-Type, Authorization',
+      exposedHeaders: [],
     },
   });
   app.enableCors();

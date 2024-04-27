@@ -3,37 +3,40 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
+  Res,
   UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { isBoolean } from 'class-validator';
 import { Request as ExpressRequest } from 'express';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { UserResDto } from './dto/userRes.dto';
 import { LoginReqDto } from './dto/loginReq.dto';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
-import { isBoolean } from 'class-validator';
 import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
+import { UserResDto } from './dto/userRes.dto';
 
 @ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiOperation({ summary: 'health check' })
   @Get('health-check')
+  @ApiOperation({ summary: 'health check' })
   @ApiResponse({ status: 200 })
   async healthCheck() {
     return 'UP';
   }
 
+  @Get('check-email')
   @ApiOperation({
     summary: '이메일중복검사',
   })
-  @Get('check-email')
   @ApiBody({ type: CheckEmailReqDto })
   @ApiResponse({ status: 200, type: isBoolean })
   @UsePipes(new ValidationPipe())
@@ -41,20 +44,33 @@ export class AuthController {
     return await this.authService.checkEmail(data);
   }
 
+  @Post('verify')
   @ApiOperation({
-    summary: '회원가입',
-    description: '회원 가입 후 응답 헤더에 JWT 추가',
+    summary: '회원가입을 위한 이메일 인증 요청',
+    description: '다시 한번 이메일 중복 체크 후 인증 링크 발송',
   })
-  @Post('register')
   @ApiBody({ type: CreateUserReqDto })
-  @ApiResponse({ status: 201, type: UserResDto })
+  @ApiResponse({ status: 201 })
   @UsePipes(new ValidationPipe())
+  async verify(@Body() createUserDto: CreateUserReqDto) {
+    await this.authService.isEmailOwned(createUserDto);
+
+    return;
+  }
+
+  @Get('register')
+  @ApiOperation({
+    summary: '인증 링크 확인 후 회원 등록 및 리다이렉트',
+  })
+  @ApiResponse({ status: 201, type: UserResDto })
   async register(
-    @Body() createUserDto: CreateUserReqDto,
+    @Query('token') token: string,
     @Req() req: ExpressRequest,
+    @Res() res: Response,
   ): Promise<UserResDto> {
-    const user = await this.authService.register(createUserDto);
+    const user = await this.authService.register(token);
     req.user = user;
+    res.redirect(''); // todo 리다이렉트 주소 추가
 
     return user;
   }
