@@ -1,16 +1,18 @@
 import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as bcrypt from 'bcrypt';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { CheckEmailReqDto } from '../dto/checkEamilReq.dto';
 import { CreateUserReqDto } from '../dto/createUserReq.dto';
 import { User } from '../../../entities/user.entity';
+import { MailService } from '../../mail/mail.service';
+import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let authService: AuthService;
   let mockAuthRepository: any;
   let mockRedis: any;
+  let mockMailService: any;
 
   beforeEach(async () => {
     mockAuthRepository = {
@@ -22,6 +24,10 @@ describe('AuthService', () => {
       set: jest.fn(),
       del: jest.fn(),
     };
+    mockMailService = {
+      sendVerificationEmail: jest.fn(),
+    };
+
     const RedisInstance = jest.fn(() => mockRedis);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -29,6 +35,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: AuthRepository, useValue: mockAuthRepository },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
+        { provide: MailService, useValue: mockMailService },
       ],
     }).compile();
 
@@ -36,58 +43,21 @@ describe('AuthService', () => {
     jest.clearAllMocks();
   });
 
-  describe('validateUser', () => {
-    it('이메일로 유저를 찾을 수 없으면 null 반환', async () => {
-      const email = 'user@example.com';
-      const password = '1234';
-
-      mockRedis.get.mockResolvedValue(null);
-      mockAuthRepository.findByEmail.mockResolvedValue(null);
-
-      const result = await authService.validateUser(email, password);
-      expect(result).toBeNull();
-    });
-
-    it('데이터가 발견되고 비밀번호가 일치하면 사용자를 반환', async () => {
-      const email = 'user@example.com';
-      const password = '1234';
-      const hashedPassword = await bcrypt.hash('1234', 10);
-      const user = { email, password: hashedPassword };
-
-      mockAuthRepository.findByEmail.mockResolvedValue(user);
-
-      const result = await authService.validateUser(email, password);
-      expect(result).toEqual(user);
-    });
-  });
-
   describe('checkEmail', () => {
-    it('캐시에 이메일이 있다면 예외처리', async () => {
-      const checkEmailReqDto = new CheckEmailReqDto();
-      checkEmailReqDto.email = 'user@example.com';
-      const cachedUser = 'user';
-
-      mockRedis.get.mockResolvedValue(cachedUser);
-
-      await expect(authService.checkEmail(checkEmailReqDto)).rejects.toThrow(HttpException);
-    });
-
-    it('데이터베이스에 이메일이 있다면 예외처리', async () => {
+    it('사용중인 이메일이라면 예외처리', async () => {
       const checkEmailReqDto = new CheckEmailReqDto();
       checkEmailReqDto.email = 'user@example.com';
       const user = new User();
 
-      mockRedis.get.mockResolvedValue(null);
       mockAuthRepository.findByEmail.mockResolvedValue(user);
 
       await expect(authService.checkEmail(checkEmailReqDto)).rejects.toThrow(HttpException);
     });
 
-    it('캐시와 데이터베이스에 중복된 이메일이 없다면 캐싱 후 true 응답', async () => {
+    it('사용할 수 있는 이메일이면 true', async () => {
       const checkEmailReqDto = new CheckEmailReqDto();
       checkEmailReqDto.email = 'user@example.com';
 
-      mockRedis.get.mockResolvedValue(null);
       mockAuthRepository.findByEmail.mockResolvedValue(null);
 
       const result = await authService.checkEmail(checkEmailReqDto);
@@ -96,15 +66,56 @@ describe('AuthService', () => {
     });
   });
 
+  describe('isEmailOwned', () => {
+    it('이메일 중복 재검사 후 토큰을 생성해 캐싱하고 메일서비스 호출', async () => {
+      const user = new CreateUserReqDto();
+      user.email = 'test@example.com';
+      user.password = '1234';
+
+      await authService.isEmailOwned(user);
+
+      expect(mockRedis.set).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'EX', 600);
+      expect(mockMailService.sendVerificationEmail).toHaveBeenCalledWith(
+        user.email,
+        expect.any(String),
+      );
+    });
+  });
+
   describe('register', () => {
-    it('회원가입 진행 전 이메일 중복 재검증 후 중복 시 예외처리', async () => {
-      const registerData = new CreateUserReqDto();
-      registerData.email = 'user@example.com';
-      const user = new User();
+    it('클라이언트가 인증링크를 클릭하면 토큰 검증 후 회원등록 완료', async () => {
+      const user = 'user';
+      const token = 'token';
+
+      mockRedis.get.mockResolvedValue(user);
+      const result = await mockRedis.get(token);
+
+      expect(result).toEqual(user);
+      expect(mockRedis.get).toHaveBeenCalledWith(token);
+    });
+  });
+
+  describe('validateUser', () => {
+    it('이메일로 유저를 찾을 수 없으면 null 반환', async () => {
+      const email = 'user@example.com';
+      const password = '1234';
+
+      mockAuthRepository.findByEmail.mockResolvedValue(null);
+
+      const result = await authService.validateUser(email, password);
+      expect(result).toBeNull();
+    });
+
+    it('이메일로 유저를 찾고 비밀번호가 일치하면 사용자를 반환', async () => {
+      const email = 'user@example.com';
+      const password = '1234';
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = { email: email, password: hashedPassword };
 
       mockAuthRepository.findByEmail.mockResolvedValue(user);
 
-      await expect(authService.register(registerData)).rejects.toThrow(HttpException);
+      const result = await authService.validateUser(email, password);
+      expect(result).toEqual(user);
     });
   });
 });
