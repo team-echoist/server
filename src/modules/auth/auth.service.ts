@@ -37,7 +37,9 @@ export class AuthService {
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
     await this.redis.set(token, JSON.stringify(createUserDto), 'EX', 600);
+
     await this.mailService.sendVerificationEmail(email, token);
+
     return;
   }
 

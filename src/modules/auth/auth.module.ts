@@ -6,9 +6,6 @@ import { AuthRepository } from './auth.repository';
 import { MailService } from '../mail/mail.service';
 import { User } from '../../entities/user.entity';
 import * as strategies from '../../common/guards/strategies';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],

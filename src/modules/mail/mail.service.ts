@@ -1,38 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
 
-  // constructor(private configService: ConfigService) {
-  //   this.transporter = nodemailer.createTransport({
-  //     service: this.configService.get<string>('EMAIL_SERVICE'),
-  //     host: this.configService.get<string>('EMAIL_HOST'),
-  //     port: this.configService.get<number>('EMAIL_PORT'),
-  //     secure: this.configService.get<boolean>('EMAIL_SECURE'),
-  //     auth: {
-  //       user: this.configService.get<string>('EMAIL_USER'),
-  //       pass: this.configService.get<string>('EMAIL_PASSWORD'),
-  //     },
-  //   });
-  constructor() {
+  constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT, 10),
-      secure: process.env.EMAIL_SECURE === 'true', // Assuming EMAIL_SECURE is a boolean-like string ('true'/'false')
+      service: this.configService.get<string>('EMAIL_SERVICE'),
+      host: this.configService.get<string>('EMAIL_HOST'),
+      port: this.configService.get<number>('EMAIL_PORT'),
+      secure: this.configService.get<boolean>('EMAIL_SECURE'),
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: this.configService.get<string>('EMAIL_USER'),
+        pass: this.configService.get<string>('EMAIL_PASSWORD'),
       },
     });
   }
 
   async sendVerificationEmail(to: string, token: string): Promise<void> {
-    // const env = this.configService.get<string>('ENV');
-    const env = process.env.ENV;
+    const env = this.configService.get<string>('ENV');
     const baseVerificationUrl =
       env === 'dev'
         ? 'http://localhost:3000/api/auth/register'

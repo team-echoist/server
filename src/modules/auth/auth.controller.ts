@@ -13,8 +13,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { isBoolean } from 'class-validator';
-import { Request as ExpressRequest } from 'express';
-import { Response } from 'express';
+import { Request as ExpressRequest, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginReqDto } from './dto/loginReq.dto';
 import { CreateUserReqDto } from './dto/createUserReq.dto';
@@ -68,11 +67,12 @@ export class AuthController {
     @Req() req: ExpressRequest,
     @Res() res: Response,
   ): Promise<UserResDto> {
-    const user = await this.authService.register(token);
-    req.user = user;
-    res.redirect(''); // todo 리다이렉트 주소 추가
+    req.user = await this.authService.register(token);
+    req.device === 'iPhone' || 'iPad' || 'Android'
+      ? res.redirect('todo 딥링크')
+      : res.redirect('todo 웹 링크');
 
-    return user;
+    return;
   }
 
   @Post('login')
