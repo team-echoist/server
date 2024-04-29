@@ -21,4 +21,8 @@ export class CreateUserReqDto {
   @IsOptional()
   @IsString()
   gender?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  oauthInfo?: object;
 }
