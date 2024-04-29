@@ -1,6 +1,6 @@
 ## 개발환경으로 서버 실행하기
 
-`yarn start:dev` hot reload 적용해놓음
+`npm run start:dev` hot reload 적용해놓음
 
 <br />
 
@@ -68,8 +68,8 @@ ex`CreateUserReq.dto`
 
 e2e는 나중에 어느정도 완성되면 시나리오 만들어보는걸로
 
-+ `yarn test` : 자동으로 .spec 을 찾아 테스트코드를 실행해줍니다.
-+ `yarn test:cov:` : 테스트 커버리지 레포트를 생성하고(html) 터미널에도 출력해줌 \
++ `npm run test` : 자동으로 .spec 을 찾아 테스트코드를 실행해줍니다.
++ `npm run test:cov:` : 테스트 커버리지 레포트를 생성하고(html) 터미널에도 출력해줌 \
 	*커버리지의 지표가 높다고 무조건 좋은건 아님 (테스트의 질이 좋아야지..)*
 
 아래는 테스트 커버리지 속성

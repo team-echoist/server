@@ -7,16 +7,19 @@ import {
   UpdateDateColumn,
   Index,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Report } from './report.entity';
+import { Infraction } from './infraction.entity';
 
 @Entity()
 export class Essay {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true, name: 'original_author' })
-  originalAuthor: number | null; // 원작자 ID, 자기 글일 경우 null
+  @Column('text')
+  title: string;
 
   @Column('text')
   content: string;
@@ -28,17 +31,8 @@ export class Essay {
   @UpdateDateColumn({ name: 'update_at' })
   updatedAt: Date;
 
-  @Column({ type: 'jsonb', nullable: true })
-  image: any;
-
-  @Column({ type: 'jsonb', nullable: true })
-  video: any;
-
-  @Column('decimal', { precision: 9, scale: 6, nullable: true })
-  latitude: number;
-
-  @Column('decimal', { precision: 9, scale: 6, nullable: true })
-  longitude: number;
+  @Column({ name: 'thumbnail', nullable: true })
+  thumbnail: string;
 
   @Column({ nullable: true })
   weather: string;
@@ -47,26 +41,26 @@ export class Essay {
   bookmarks: boolean;
 
   @Column({ default: 0 })
-  reports: number;
-
-  @Column({ default: 0 })
   views: number;
-
-  @Column({ default: false, name: 'is_favorite' })
-  isFavorite: boolean;
 
   @Index()
   @Column({ default: false, name: 'is_published' })
   isPublished: boolean;
 
-  @Column({ nullable: true, name: 'capsule_open_date', type: 'timestamp' })
-  capsuleOpenDate: Date;
+  @Column({ default: false, name: 'is_linked_out' })
+  isLinkedOut: boolean;
 
   @Index()
   @Column({ nullable: true, name: 'device_info' })
-  deviceInfo: string;
+  device: string;
 
-  @ManyToOne(() => User, (user) => user.essays)
   @JoinColumn({ name: 'author' })
+  @ManyToOne(() => User, (user) => user.essays)
   author: User;
+
+  @OneToMany(() => Report, (report) => report.reportedEssay)
+  reports: Report[];
+
+  @OneToMany(() => Infraction, (infraction) => infraction.essay)
+  infractions: Infraction[];
 }
