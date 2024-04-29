@@ -1,8 +1,9 @@
 import { NestFactory, Reflector } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
+import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
 import { AppModule } from './app.module';
+import { swaggerConfig } from '../swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
@@ -24,12 +25,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   if (process.env.SWAGGER === 'true') {
-    const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
-      .setTitle('NestJS API')
-      .setDescription('')
-      .setVersion('1.0')
-      .build();
-    const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
+    const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api-doc', app, document);
   }
 
