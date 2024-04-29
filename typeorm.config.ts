@@ -1,10 +1,13 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from './src/entities/user.entity';
-import { Subscription } from 'src/entities/subscription.entity';
+import { Receipt } from 'src/entities/receipt.entity';
 import { Essay } from './src/entities/essay.entity';
+import { Report } from './src/entities/report.entity';
+import { Infraction } from './src/entities/infraction.entity';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.DB_HOST,
@@ -12,11 +15,11 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USER,
   password: String(process.env.DB_PASSWORD),
   database: process.env.DB_NAME,
-  entities: [User, Essay, Subscription],
+  entities: [User, Essay, Receipt, Report, Infraction],
   synchronize: true,
   migrations: ['dist/migration/*.js'],
   migrationsTableName: 'migrations',
-  logging: true,
+  logging: false,
   extra: {
     max: 9,
     connectionTimeoutMillis: 5000,

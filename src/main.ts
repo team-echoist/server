@@ -1,8 +1,9 @@
 import { NestFactory, Reflector } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
+import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
 import { AppModule } from './app.module';
+import { swaggerConfig } from '../swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
@@ -12,9 +13,9 @@ declare const module: any;
 async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule, {
     cors: {
-      origin: '*', // TODO 도메인 발급시 변경, 앱의 경우 cors 정책이 적용되지 않는다곤 하는데 확인 필요
-      allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-      exposedHeaders: 'Authorization',
+      origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
+      allowedHeaders: 'Content-Type, Authorization',
+      exposedHeaders: [],
     },
   });
   app.enableCors();
@@ -24,12 +25,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   if (process.env.SWAGGER === 'true') {
-    const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
-      .setTitle('NestJS API')
-      .setDescription('')
-      .setVersion('1.0')
-      .build();
-    const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
+    const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api-doc', app, document);
   }
 

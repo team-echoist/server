@@ -19,6 +19,7 @@ declare global {
     export interface Request {
       user?: User;
       token?: string;
+      device?: string;
     }
   }
 }

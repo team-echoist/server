@@ -1,27 +1,33 @@
-import { Module } from '@nestjs/common';
+import { redisConfig } from '../redis.config';
 import { typeOrmConfig } from '../typeorm.config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtInterceptor } from './common/interceptros/Jwt.interceptor';
+import { Module } from '@nestjs/common';
+import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { AuthModule } from './modules/auth/auth.module';
+import { EssayModule } from './modules/essay/essay.module';
+import { MailModule } from './modules/mail/mail.module';
+import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 
 @Module({
   imports: [
-    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '../.env',
+    }),
     TypeOrmModule.forRoot(typeOrmConfig),
     RedisModule.forRootAsync({
-      useFactory: () => ({
-        type: process.env.ENV === 'prod' ? 'cluster' : 'single',
-        nodes: [
-          {
-            host: process.env.REDIS_HOST,
-            port: parseInt(process.env.REDIS_PORT, 10),
-          },
-        ],
-      }),
+      useFactory: () => redisConfig,
     }),
+    AuthModule,
+    EssayModule,
+    MailModule,
   ],
-  providers: [{ provide: APP_INTERCEPTOR, useClass: JwtInterceptor }],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
+  ],
 })
 export class AppModule {}

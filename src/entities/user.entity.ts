@@ -3,13 +3,14 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
-  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
 import { Essay } from './essay.entity';
-import { Subscription } from './subscription.entity';
+import { Receipt } from './receipt.entity';
+import { Report } from './report.entity';
+import { Infraction } from './infraction.entity';
 
 @Entity()
 export class User {
@@ -36,21 +37,30 @@ export class User {
     apple: string;
   };
 
-  @Column({ default: false })
-  admin: boolean;
+  @Column({ default: 'client' })
+  role: string;
 
-  @CreateDateColumn({ name: 'create_at' })
+  @Column({ name: 'subscription_end', type: 'timestamp', nullable: true })
+  subscriptionEnd: Date;
+
+  @CreateDateColumn({ name: 'create_at', type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_at' })
+  @UpdateDateColumn({ name: 'update_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'delete_at' })
+  @DeleteDateColumn({ name: 'delete_at', type: 'timestamp' })
   deletedAt?: Date;
 
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
 
-  @OneToOne(() => Subscription, (subscription) => subscription.user)
-  subscription: Subscription;
+  @OneToMany(() => Receipt, (receipt) => receipt.user)
+  receipts: Receipt[];
+
+  @OneToMany(() => Infraction, (infraction) => infraction.user)
+  infractions: Infraction[];
+
+  @OneToMany(() => Report, (report) => report.reporter)
+  reportsMade: Report[];
 }
