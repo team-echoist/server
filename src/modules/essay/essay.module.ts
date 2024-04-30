@@ -1,17 +1,20 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { EssayController } from './essay.controller';
 import { EssayService } from './essay.service';
+import { AuthService } from '../auth/auth.service';
+import { MailService } from '../mail/mail.service';
+import { UserService } from '../user/user.service';
 import { EssayRepository } from './essay.repository';
+import { AuthRepository } from '../auth/auth.repository';
+import { UserRepository } from '../user/user.repository';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
-import { AuthService } from '../auth/auth.service';
-import { AuthRepository } from '../auth/auth.repository';
-import { JwtModule } from '@nestjs/jwt';
+import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
-import { MailService } from '../mail/mail.service';
 
 dotenv.config();
 
@@ -22,7 +25,7 @@ dotenv.config();
       signOptions: { expiresIn: '30h' },
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    TypeOrmModule.forFeature([User, Essay]),
+    TypeOrmModule.forFeature([User, Essay, ReviewQueue]),
   ],
   controllers: [EssayController],
   providers: [
@@ -31,6 +34,8 @@ dotenv.config();
     MailService,
     EssayService,
     EssayRepository,
+    UserService,
+    UserRepository,
     strategies.JwtStrategy,
   ],
 })

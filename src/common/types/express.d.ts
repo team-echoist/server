@@ -8,12 +8,13 @@ declare global {
       email: string;
       password?: string;
       gender?: string;
-      birthDate?: Date;
+      black?: boolean;
+      role?: string;
       oauthInfo?: object;
-      admin?: boolean;
+      birthDate?: Date;
       createdAt?: Date;
       updatedAt?: Date;
-      deletedAt?: null;
+      deletedAt?: Date;
     }
 
     export interface Request {

@@ -62,7 +62,7 @@ export class AuthController {
     summary: '인증 링크 확인 후 회원 등록, jwt 발급 및 리다이렉트',
     description: '응답 헤더에 토큰을 사용하면 바로 로그인 가능',
   })
-  @ApiResponse({ status: 201, type: UserResDto })
+  @ApiResponse({ status: 201 })
   async register(
     @Query('token') token: string,
     @Req() req: ExpressRequest,

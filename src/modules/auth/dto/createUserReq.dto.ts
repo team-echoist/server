@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserReqDto {
   @ApiProperty()
@@ -14,7 +14,7 @@ export class CreateUserReqDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
+  @IsDate()
   birthDate?: Date;
 
   @ApiProperty()

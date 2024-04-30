@@ -9,8 +9,9 @@ import {
 } from 'typeorm';
 import { Essay } from './essay.entity';
 import { Receipt } from './receipt.entity';
-import { Report } from './report.entity';
-import { Infraction } from './infraction.entity';
+import { ReportQueue } from './reportQueue.entity';
+import { Category } from './category.entity';
+import { ReviewQueue } from './reviewQueue.entity';
 
 @Entity()
 export class User {
@@ -40,17 +41,23 @@ export class User {
   @Column({ default: 'client' })
   role: string;
 
+  @Column({ default: false })
+  black: boolean;
+
   @Column({ name: 'subscription_end', type: 'timestamp', nullable: true })
   subscriptionEnd: Date;
 
-  @CreateDateColumn({ name: 'create_at', type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_at', type: 'timestamp' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'delete_at', type: 'timestamp' })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp' })
   deletedAt?: Date;
+
+  @OneToMany(() => Category, (category) => category.user)
+  category: Category[];
 
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
@@ -58,9 +65,9 @@ export class User {
   @OneToMany(() => Receipt, (receipt) => receipt.user)
   receipts: Receipt[];
 
-  @OneToMany(() => Infraction, (infraction) => infraction.user)
-  infractions: Infraction[];
+  @OneToMany(() => ReportQueue, (report) => report.reporter)
+  reports: ReportQueue[];
 
-  @OneToMany(() => Report, (report) => report.reporter)
-  reportsMade: Report[];
+  @OneToMany(() => ReviewQueue, (review) => review.user)
+  review: ReviewQueue[];
 }
