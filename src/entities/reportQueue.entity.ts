@@ -10,7 +10,7 @@ import { User } from './user.entity';
 import { Essay } from './essay.entity';
 
 @Entity()
-export class Report {
+export class ReportQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,13 +18,13 @@ export class Report {
   reason: string;
 
   @Column({ default: false })
-  confirm: boolean;
+  approved: boolean;
 
   @CreateDateColumn({ name: 'reported_at' })
   reportedAt: Date;
 
   @JoinColumn({ name: 'reporter_id' })
-  @ManyToOne(() => User, (user) => user.reportsMade)
+  @ManyToOne(() => User, (user) => user.reports)
   reporter: User;
 
   @JoinColumn({ name: 'reported_essay_id' })

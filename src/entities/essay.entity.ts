@@ -10,8 +10,9 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Report } from './report.entity';
-import { Infraction } from './infraction.entity';
+import { ReportQueue } from './reportQueue.entity';
+import { Category } from './category.entity';
+import { ReviewQueue } from './reviewQueue.entity';
 
 @Entity()
 export class Essay {
@@ -24,6 +25,9 @@ export class Essay {
   @Column('text')
   content: string;
 
+  @Column({ name: 'linked_out_gauge' })
+  linkedOutGauge: number;
+
   @Index()
   @CreateDateColumn({ name: 'create_at' })
   createdAt: Date;
@@ -33,9 +37,6 @@ export class Essay {
 
   @Column({ name: 'thumbnail', nullable: true })
   thumbnail: string;
-
-  @Column({ nullable: true })
-  weather: string;
 
   @Column({ default: false })
   bookmarks: boolean;
@@ -54,13 +55,18 @@ export class Essay {
   @Column({ nullable: true, name: 'device_info' })
   device: string;
 
-  @JoinColumn({ name: 'author' })
+  @ManyToOne(() => Category, (category) => category.essays)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
+
+  @Index()
+  @JoinColumn({ name: 'author_id' })
   @ManyToOne(() => User, (user) => user.essays)
   author: User;
 
-  @OneToMany(() => Report, (report) => report.reportedEssay)
-  reports: Report[];
+  @OneToMany(() => ReportQueue, (report) => report.reportedEssay)
+  reports: ReportQueue[];
 
-  @OneToMany(() => Infraction, (infraction) => infraction.essay)
-  infractions: Infraction[];
+  @OneToMany(() => ReviewQueue, (review) => review.essay)
+  review: ReviewQueue[];
 }

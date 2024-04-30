@@ -9,8 +9,9 @@ import {
 } from 'typeorm';
 import { Essay } from './essay.entity';
 import { Receipt } from './receipt.entity';
-import { Report } from './report.entity';
-import { Infraction } from './infraction.entity';
+import { ReportQueue } from './reportQueue.entity';
+import { Category } from './category.entity';
+import { ReviewQueue } from './reviewQueue.entity';
 
 @Entity()
 export class User {
@@ -52,15 +53,18 @@ export class User {
   @DeleteDateColumn({ name: 'delete_at', type: 'timestamp' })
   deletedAt?: Date;
 
+  @OneToMany(() => Category, (category) => category.user)
+  category: Category[];
+
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
 
   @OneToMany(() => Receipt, (receipt) => receipt.user)
   receipts: Receipt[];
 
-  @OneToMany(() => Infraction, (infraction) => infraction.user)
-  infractions: Infraction[];
+  @OneToMany(() => ReportQueue, (report) => report.reporter)
+  reports: ReportQueue[];
 
-  @OneToMany(() => Report, (report) => report.reporter)
-  reportsMade: Report[];
+  @OneToMany(() => ReviewQueue, (review) => review.user)
+  review: ReviewQueue[];
 }
