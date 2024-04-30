@@ -14,11 +14,11 @@ export class ProcessingHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @JoinColumn({ name: 'review_queue' })
+  @JoinColumn({ name: 'review_queue_id' })
   @ManyToOne(() => ReviewQueue, { nullable: true })
   reviewQueue: ReviewQueue;
 
-  @JoinColumn({ name: 'report_queue' })
+  @JoinColumn({ name: 'report_queue_id' })
   @ManyToOne(() => ReportQueue, { nullable: true })
   reportQueue: ReportQueue;
 
@@ -31,6 +31,6 @@ export class ProcessingHistory {
   @CreateDateColumn({ name: 'action_data' })
   actionDate: Date;
 
-  @Column('text', { nullable: true })
+  @Column({ nullable: true })
   comments: string;
 }

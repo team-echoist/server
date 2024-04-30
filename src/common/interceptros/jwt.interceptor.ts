@@ -16,7 +16,7 @@ export class JwtInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         if (!response.headersSent && request.user) {
-          const newJwt = generateJWT(request.user.id, request.user.email);
+          const newJwt = generateJWT(request.user.id, request.user.email, request.user.black);
           response.setHeader('Authorization', `Bearer ${newJwt}`);
         }
       }),

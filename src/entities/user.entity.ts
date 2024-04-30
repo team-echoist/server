@@ -41,16 +41,19 @@ export class User {
   @Column({ default: 'client' })
   role: string;
 
+  @Column({ default: false })
+  black: boolean;
+
   @Column({ name: 'subscription_end', type: 'timestamp', nullable: true })
   subscriptionEnd: Date;
 
-  @CreateDateColumn({ name: 'create_at', type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_at', type: 'timestamp' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'delete_at', type: 'timestamp' })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp' })
   deletedAt?: Date;
 
   @OneToMany(() => Category, (category) => category.user)

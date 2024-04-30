@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
+import { IsDate, IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class UserResDto {
   @ApiProperty()
@@ -13,8 +13,18 @@ export class UserResDto {
   @IsEmail()
   email: string;
 
+  @ApiProperty()
+  @IsDate()
+  createdAt: Date;
+
   @Exclude()
   password: string;
+
+  @Exclude()
+  black: boolean;
+
+  @Exclude()
+  role: string;
 
   @Exclude()
   birthDate: Date;

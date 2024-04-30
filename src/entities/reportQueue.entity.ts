@@ -14,7 +14,7 @@ export class ReportQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('text')
+  @Column()
   reason: string;
 
   @Column({ default: false })
@@ -27,7 +27,7 @@ export class ReportQueue {
   @ManyToOne(() => User, (user) => user.reports)
   reporter: User;
 
-  @JoinColumn({ name: 'reported_essay_id' })
+  @JoinColumn({ name: 'essay_id' })
   @ManyToOne(() => Essay, (essay) => essay.reports)
-  reportedEssay: Essay;
+  essay: Essay;
 }

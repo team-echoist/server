@@ -1,17 +1,23 @@
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { EssayService } from './essay.service';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import { EssayService } from './essay.service';
+import { CreateEssayReqDto } from './dto/createEssayReq.dto';
+import { EssayResDto } from './dto/essayRes.dto';
 
 @ApiTags('Essay')
 @Controller('api/essay')
 export class EssayController {
   constructor(private readonly essayService: EssayService) {}
 
-  @ApiOperation({ summary: 'test' })
-  @Get('test')
+  @Post()
+  @ApiOperation({ summary: '에세이 작성', description: '블랙 유저의 경우 리뷰 대기' })
+  @ApiBody({ type: CreateEssayReqDto })
+  @ApiResponse({ status: 201, type: EssayResDto })
   @UseGuards(AuthGuard('jwt'))
-  async test() {
-    return true;
+  @UsePipes(new ValidationPipe())
+  async createEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
+    return await this.essayService.createEssay(req.user, req.device, createEssayDto);
   }
 }

@@ -14,23 +14,26 @@ export class ReviewQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Essay, (essay) => essay.review)
+  @Column()
+  type: 'publish' | 'linked_out';
+
   @JoinColumn({ name: 'essay_id' })
+  @ManyToOne(() => Essay, (essay) => essay.review)
   essay: Essay;
 
-  @ManyToOne(() => User, (user) => user.review)
   @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, (user) => user.review)
   user: User;
 
   @Column({ default: false })
   approved: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ name: 'reviewed_at', nullable: true })
   reviewedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ name: 'reviewer_comment', nullable: true })
   reviewerComment: string;
 }

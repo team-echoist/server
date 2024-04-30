@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { generateJWT } from '../../common/utils/jwt.utils';
 import { generateToken } from '../../common/utils/verify.utils';
 import { AuthRepository } from './auth.repository';
 import { MailService } from '../mail/mail.service';
@@ -69,26 +68,26 @@ export class AuthService {
         return user;
       }
     }
-    return null;
+    return !user ? null : user;
   }
 
   // ----------------- OAuth ---------------------
 
-  async oauthLogin(user: any) {
-    let existingUser: UserResDto = await this.authRepository.findByEmail(user.email);
-
-    if (!existingUser) {
-      existingUser = await this.authRepository.createUser({
-        email: user.email,
-        oauthInfo: { [`${user.platform}Id`]: user.platformId },
-      });
-    } else {
-      if (!existingUser.oauthInfo || !existingUser.oauthInfo[`${user.platform}Id`]) {
-        await this.authRepository.updateUserOauthInfo(existingUser.id, {
-          [`${user.platform}Id`]: user.platformId,
-        });
-      }
-    }
-    return generateJWT(existingUser.id, existingUser.email);
-  }
+  // async oauthLogin(user: any) {
+  //   let existingUser: UserResDto = await this.authRepository.findByEmail(user.email);
+  //
+  //   if (!existingUser) {
+  //     existingUser = await this.authRepository.createUser({
+  //       email: user.email,
+  //       oauthInfo: { [`${user.platform}Id`]: user.platformId },
+  //     });
+  //   } else {
+  //     if (!existingUser.oauthInfo || !existingUser.oauthInfo[`${user.platform}Id`]) {
+  //       await this.authRepository.updateUserOauthInfo(existingUser.id, {
+  //         [`${user.platform}Id`]: user.platformId,
+  //       });
+  //     }
+  //   }
+  //   return generateJWT(existingUser.id, existingUser.email, existingUser.black);
+  // }
 }

@@ -16,7 +16,7 @@ export class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('text')
+  @Column()
   name: string;
 
   @CreateDateColumn({ name: 'create_at' })
