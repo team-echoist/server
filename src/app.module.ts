@@ -1,7 +1,7 @@
 import { redisConfig } from '../redis.config';
 import { typeOrmConfig } from '../typeorm.config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -10,6 +10,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EssayModule } from './modules/essay/essay.module';
 import { MailModule } from './modules/mail/mail.module';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
+import { SeederService } from './modules/seeder/seeder.service';
+import { SeederModule } from './modules/seeder/seeder.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { DeviceInterceptor } from './common/interceptros/device.interceptor';
     RedisModule.forRootAsync({
       useFactory: () => redisConfig,
     }),
+    SeederModule,
     AuthModule,
     EssayModule,
     MailModule,
@@ -30,4 +33,12 @@ import { DeviceInterceptor } from './common/interceptros/device.interceptor';
     { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly seederService: SeederService) {}
+
+  async onModuleInit() {
+    if (process.env.SEED_DB === 'true') {
+      await this.seederService.seed();
+    }
+  }
+}

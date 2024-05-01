@@ -18,7 +18,8 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: String(process.env.DB_PASSWORD),
   database: process.env.DB_NAME,
   entities: [User, Essay, Receipt, Category, ReportQueue, ReviewQueue, ProcessingHistory],
-  synchronize: true,
+  dropSchema: true, // todo 프로덕션에선 삭제
+  synchronize: true, // todo ㅍ로덕션에선 삭제
   migrations: ['dist/migration/*.js'],
   migrationsTableName: 'migrations',
   logging: false,

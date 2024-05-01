@@ -21,6 +21,7 @@ export class EssayService {
       author: user,
     };
 
+    // todo 하나의 트랜잭션으로 묶기
     if (requester.black) {
       const adjustedData = {
         ...essayData,
