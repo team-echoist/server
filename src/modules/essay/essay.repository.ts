@@ -6,6 +6,7 @@ import { CreateEssayDto } from './dto/createEssay.dto';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
 
 export class EssayRepository {
   constructor(
@@ -16,7 +17,7 @@ export class EssayRepository {
   ) {}
 
   async findEssayById(essayId: number) {
-    return await this.essayRepository.findOne({ where: { id: essayId } });
+    return await this.essayRepository.findOne({ where: { id: essayId }, relations: ['author'] });
   }
 
   async createEssay(data: CreateEssayDto) {
@@ -36,5 +37,23 @@ export class EssayRepository {
       type: type,
     });
     return;
+  }
+
+  async findReviewByEssayId(essayId: number) {
+    return this.reviewRepository.findOne({ where: { essay: { id: essayId }, completed: false } });
+  }
+
+  async updateEssay(essay: Essay, data: UpdateEssayReqDto) {
+    const essayData = this.essayRepository.create({ ...essay, ...data });
+    const updatedEssay = await this.essayRepository.save(essayData);
+
+    return plainToInstance(
+      EssayResDto,
+      { ...updatedEssay, authorId: updatedEssay.author.id },
+      {
+        strategy: 'exposeAll',
+        excludeExtraneousValues: true,
+      },
+    );
   }
 }

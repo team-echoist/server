@@ -17,6 +17,7 @@ module.exports = {
     'ormconfig.js',
     'redis.config.ts',
     'redisSingle.config.ts',
+    'typeorm.options.ts',
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',

@@ -4,6 +4,7 @@ import { CreateEssayReqDto } from './dto/createEssayReq.dto';
 import { EssayRepository } from './essay.repository';
 import { UserRepository } from '../user/user.repository';
 import Redis from 'ioredis';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class EssayService {
@@ -13,6 +14,7 @@ export class EssayService {
     private readonly userRepository: UserRepository,
   ) {}
 
+  @Transactional()
   async createEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userRepository.findById(requester.id);
     const essayData = {
@@ -20,8 +22,6 @@ export class EssayService {
       device: device,
       author: user,
     };
-
-    // todo 하나의 트랜잭션으로 묶기
     if (requester.black) {
       const adjustedData = {
         ...essayData,
@@ -29,9 +29,9 @@ export class EssayService {
         linkedOut: false,
       };
       const createdEssay = await this.essayRepository.createEssay(adjustedData);
+
       const essay = await this.essayRepository.findEssayById(createdEssay.id);
       const reviewType = data.publish ? 'publish' : data.linkedOut ? 'linked_out' : null;
-      console.log(data.publish);
 
       if (reviewType) {
         await this.essayRepository.createReviewRequest(user, essay, reviewType);
@@ -41,5 +41,27 @@ export class EssayService {
     }
 
     return this.essayRepository.createEssay(essayData);
+  }
+
+  @Transactional()
+  async updateEssay(requester: Express.User, essayId: string, data: CreateEssayReqDto) {
+    const user = await this.userRepository.findById(requester.id);
+    const essay = await this.essayRepository.findEssayById(parseInt(essayId, 10));
+    if (!essay) throw new Error('Essay not found');
+
+    const isUnderReview = await this.essayRepository.findReviewByEssayId(parseInt(essayId, 10));
+    if (isUnderReview) throw new Error('Update rejected: Essay is currently under review');
+
+    if (requester.black) {
+      if (data.publish || data.linkedOut) {
+        const reviewType = data.publish ? 'publish' : data.linkedOut ? 'linked_out' : null;
+        await this.essayRepository.createReviewRequest(user, essay, reviewType);
+        return { essay, message: 'Review request created due to policy violations.' };
+      }
+      data.publish = false;
+      data.linkedOut = false;
+    }
+
+    return await this.essayRepository.updateEssay(essay, data);
   }
 }
