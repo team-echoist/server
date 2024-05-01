@@ -28,6 +28,9 @@ export class ReviewQueue {
   @Column({ default: false })
   approved: boolean;
 
+  @Column({ default: false })
+  completed: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

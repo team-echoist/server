@@ -21,7 +21,7 @@ import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
 import { UserResDto } from './dto/userRes.dto';
 
 @ApiTags('Auth')
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

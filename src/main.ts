@@ -1,4 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import { initializeTransactionalContext } from 'typeorm-transactional';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
@@ -11,6 +12,7 @@ dotenv.config();
 
 declare const module: any;
 async function bootstrap() {
+  initializeTransactionalContext();
   const app: INestApplication = await NestFactory.create(AppModule, {
     cors: {
       origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
@@ -18,6 +20,7 @@ async function bootstrap() {
       exposedHeaders: [],
     },
   });
+  app.setGlobalPrefix('/api');
   app.enableCors();
   app.useGlobalFilters(new HttpExceptionFilter());
   app.use(helmet.default());
