@@ -21,7 +21,7 @@ export class UserResDto {
   password: string;
 
   @Exclude()
-  black: boolean;
+  banned: boolean;
 
   @Exclude()
   role: string;

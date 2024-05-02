@@ -1,23 +1,29 @@
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
+  Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
+import { EssayService } from './essay.service';
 import { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { EssayService } from './essay.service';
+import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
+import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
+import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { CreateEssayReqDto } from './dto/createEssayReq.dto';
 import { EssayResDto } from './dto/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
+import { EssayListResDto } from './dto/essayListRes.dto';
 
 @ApiTags('Essay')
+@UseGuards(AuthGuard('jwt'))
 @Controller('essay')
 export class EssayController {
   constructor(private readonly essayService: EssayService) {}
@@ -26,8 +32,6 @@ export class EssayController {
   @ApiOperation({ summary: '에세이 작성', description: '블랙 유저의 경우 리뷰 대기' })
   @ApiBody({ type: CreateEssayReqDto })
   @ApiResponse({ status: 201, type: EssayResDto })
-  @UseGuards(AuthGuard('jwt'))
-  @UsePipes(new ValidationPipe())
   async createEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
     return await this.essayService.createEssay(req.user, req.device, createEssayDto);
   }
@@ -36,13 +40,28 @@ export class EssayController {
   @ApiOperation({ summary: '에세이 업데이트' })
   @ApiBody({ type: UpdateEssayReqDto })
   @ApiResponse({ status: 200, type: EssayResDto })
-  @UseGuards(AuthGuard('jwt'))
-  @UsePipes(new ValidationPipe())
   async updateEssay(
     @Req() req: ExpressRequest,
-    @Param('essayId') essayId: string,
+    @Param('essayId', ParseIntPipe) essayId: number,
     @Body() updateEssayDto: UpdateEssayReqDto,
   ) {
     return await this.essayService.updateEssay(req.user, essayId, updateEssayDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: '본인 에세이 조회' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'published', required: false })
+  @ApiQuery({ name: 'categoryId', required: false })
+  @ApiResponse({ type: EssayListResDto })
+  async getMyEssay(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('published', OptionalBoolPipe) published: boolean,
+    @Query('categoryId', OptionalParseIntPipe) categoryId: number,
+  ) {
+    return await this.essayService.getMyEssay(req.user.id, published, categoryId, page, limit);
   }
 }

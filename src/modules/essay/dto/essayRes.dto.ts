@@ -1,17 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 
 export class EssayResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()
   id: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Expose()
-  authorId: number;
 
   @ApiProperty()
   @IsDate()
@@ -25,23 +20,18 @@ export class EssayResDto {
 
   @ApiProperty()
   @IsNumber()
-  @Expose()
+  @Exclude()
   views: number;
 
   @ApiProperty()
   @IsBoolean()
   @Expose()
-  publish: boolean;
+  published: boolean;
 
   @ApiProperty()
   @IsBoolean()
   @Expose()
   linkedOut: boolean;
-
-  @ApiProperty()
-  @IsNumber()
-  @Expose()
-  categoryId: number;
 
   @ApiProperty()
   @IsNumber()

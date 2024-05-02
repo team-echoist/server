@@ -42,7 +42,7 @@ export class User {
   role: string;
 
   @Column({ default: false })
-  black: boolean;
+  banned: boolean;
 
   @Column({ name: 'subscription_end', type: 'timestamp', nullable: true })
   subscriptionEnd: Date;

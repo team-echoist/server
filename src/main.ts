@@ -27,8 +27,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
+      transform: false,
+      transformOptions: { enableImplicitConversion: false },
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

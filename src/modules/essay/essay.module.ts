@@ -7,6 +7,7 @@ import { EssayService } from './essay.service';
 import { AuthService } from '../auth/auth.service';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
+import { RedisService } from '../redis/redis.service';
 import { EssayRepository } from './essay.repository';
 import { AuthRepository } from '../auth/auth.repository';
 import { UserRepository } from '../user/user.repository';
@@ -36,6 +37,7 @@ dotenv.config();
     EssayRepository,
     UserService,
     UserRepository,
+    RedisService,
     strategies.JwtStrategy,
   ],
 })

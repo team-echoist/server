@@ -7,22 +7,22 @@ export class CreateUserReqDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  password?: string;
+  password: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsDate()
   birthDate?: Date;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   gender?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   oauthInfo?: object;
 }

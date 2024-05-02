@@ -15,7 +15,7 @@ export class ReviewQueue {
   id: number;
 
   @Column()
-  type: 'publish' | 'linked_out';
+  type: 'published' | 'linked_out';
 
   @JoinColumn({ name: 'essay_id' })
   @ManyToOne(() => Essay, (essay) => essay.review)

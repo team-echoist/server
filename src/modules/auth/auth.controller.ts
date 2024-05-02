@@ -38,7 +38,6 @@ export class AuthController {
   })
   @ApiBody({ type: CheckEmailReqDto })
   @ApiResponse({ status: 200, type: isBoolean })
-  @UsePipes(new ValidationPipe())
   async checkEmail(@Body() data: CheckEmailReqDto) {
     return await this.authService.checkEmail(data);
   }
@@ -50,7 +49,6 @@ export class AuthController {
   })
   @ApiBody({ type: CreateUserReqDto })
   @ApiResponse({ status: 201 })
-  @UsePipes(new ValidationPipe())
   async verify(@Body() createUserDto: CreateUserReqDto) {
     await this.authService.isEmailOwned(createUserDto);
 
@@ -83,7 +81,6 @@ export class AuthController {
   })
   @ApiBody({ type: LoginReqDto })
   @ApiResponse({ status: 200 })
-  @UsePipes(new ValidationPipe())
   @UseGuards(AuthGuard('local'))
   async login() {
     return;
