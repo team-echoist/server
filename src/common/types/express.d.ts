@@ -8,7 +8,7 @@ declare global {
       email: string;
       password?: string;
       gender?: string;
-      black?: boolean;
+      banned?: boolean;
       role?: string;
       oauthInfo?: object;
       birthDate?: Date;

@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRedis() private readonly redis: Redis,
+    @InjectRedis() private readonly redis: Redis, // todo redisService 주입
     private readonly authRepository: AuthRepository,
     private readonly mailService: MailService,
   ) {}
@@ -88,6 +88,6 @@ export class AuthService {
   //       });
   //     }
   //   }
-  //   return generateJWT(existingUser.id, existingUser.email, existingUser.black);
+  //   return generateJWT(existingUser.id, existingUser.email, existingUser.banned);
   // }
 }

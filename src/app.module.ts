@@ -27,6 +27,7 @@ import { TypeOrmOptions } from '../typeorm.options';
     AuthModule,
     EssayModule,
     MailModule,
+    RedisModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },

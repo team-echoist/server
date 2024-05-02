@@ -46,7 +46,7 @@ export class Essay {
 
   @Index()
   @Column({ default: false })
-  publish: boolean;
+  published: boolean;
 
   @Column({ default: false, name: 'linked_out' })
   linkedOut: boolean;

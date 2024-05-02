@@ -24,7 +24,7 @@ export class CreateEssayDto {
 
   @IsNotEmpty()
   @IsBoolean()
-  publish: boolean;
+  published: boolean;
 
   @IsNotEmpty()
   @IsBoolean()

@@ -1,12 +1,11 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
-import { EssayResDto } from './dto/essayRes.dto';
 import { CreateEssayDto } from './dto/createEssay.dto';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
+import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 
 export class EssayRepository {
   constructor(
@@ -21,16 +20,10 @@ export class EssayRepository {
   }
 
   async createEssay(data: CreateEssayDto) {
-    const essay = await this.essayRepository.save(data);
-
-    return plainToInstance(
-      EssayResDto,
-      { ...essay, authorId: essay.author.id },
-      { strategy: 'exposeAll', excludeExtraneousValues: true },
-    );
+    return await this.essayRepository.save(data);
   }
 
-  async createReviewRequest(user: User, essay: Essay, type: 'publish' | 'linked_out') {
+  async createReviewRequest(user: User, essay: Essay, type: 'published' | 'linked_out') {
     await this.reviewRepository.save({
       user: user,
       essay: essay,
@@ -45,15 +38,16 @@ export class EssayRepository {
 
   async updateEssay(essay: Essay, data: UpdateEssayReqDto) {
     const essayData = this.essayRepository.create({ ...essay, ...data });
-    const updatedEssay = await this.essayRepository.save(essayData);
+    return await this.essayRepository.save(essayData);
+  }
 
-    return plainToInstance(
-      EssayResDto,
-      { ...updatedEssay, authorId: updatedEssay.author.id },
-      {
-        strategy: 'exposeAll',
-        excludeExtraneousValues: true,
-      },
-    );
+  async findMyEssay(query: FindMyEssayQueryInterface, page: number, limit: number) {
+    const [essays, total] = await this.essayRepository.findAndCount({
+      where: query,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { essays, total };
   }
 }
