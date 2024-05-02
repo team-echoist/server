@@ -46,8 +46,16 @@ export class EssayRepository {
       where: query,
       skip: (page - 1) * limit,
       take: limit,
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return { essays, total };
+  }
+
+  async deleteEssay(essay: Essay) {
+    await this.essayRepository.delete(essay);
+    return;
   }
 }

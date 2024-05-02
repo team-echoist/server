@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import { plainToInstance } from 'class-transformer';
 import { EssayRepository } from './essay.repository';
@@ -59,7 +59,11 @@ export class EssayService {
     if (!essay) throw new Error('Essay not found');
 
     const isUnderReview = await this.essayRepository.findReviewByEssayId(essayId);
-    if (isUnderReview) throw new Error('Update rejected: Essay is currently under review');
+    if (isUnderReview)
+      throw new HttpException(
+        'Update rejected: Essay is currently under review',
+        HttpStatus.BAD_REQUEST,
+      );
 
     if (requester.banned) {
       if (data.published || data.linkedOut) {
@@ -111,5 +115,17 @@ export class EssayService {
     const result = { essays: essayDtos, total, totalPage, page };
     await this.redisService.setCached(cacheKey, result, 900);
     return result;
+  }
+
+  async deleteEssay(userId: number, essayId: number) {
+    const essay = await this.essayRepository.findEssayById(essayId);
+    if (essay.author.id !== userId)
+      throw new HttpException(
+        'Essay not found or you do not have permission to delete this essay.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    await this.essayRepository.deleteEssay(essay);
+    return;
   }
 }

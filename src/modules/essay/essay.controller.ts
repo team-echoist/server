@@ -1,7 +1,8 @@
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -54,7 +55,7 @@ export class EssayController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
-  @ApiResponse({ type: EssayListResDto })
+  @ApiResponse({ status: 200, type: EssayListResDto })
   async getMyEssay(
     @Req() req: ExpressRequest,
     @Query('page', new PagingParseIntPipe(1)) page: number,
@@ -63,5 +64,13 @@ export class EssayController {
     @Query('categoryId', OptionalParseIntPipe) categoryId: number,
   ) {
     return await this.essayService.getMyEssay(req.user.id, published, categoryId, page, limit);
+  }
+
+  @Delete(':essayId')
+  @ApiOperation({ summary: '에세이 삭제' })
+  @ApiResponse({ status: 204 })
+  async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
+    await this.essayService.deleteEssay(req.user.id, essayId);
+    return { message: 'Essay deleted successfully.' };
   }
 }
