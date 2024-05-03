@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { CreateEssayDto } from './dto/createEssay.dto';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
@@ -57,5 +57,24 @@ export class EssayRepository {
   async deleteEssay(essay: Essay) {
     await this.essayRepository.delete(essay);
     return;
+  }
+
+  // ------------------------------------------------------admin api
+  async totalEssayCount() {
+    return await this.essayRepository.count();
+  }
+
+  async todayEssays(todayStart: Date, todayEnd: Date) {
+    return await this.essayRepository.count({
+      where: { createdDate: Between(todayStart, todayEnd) },
+    });
+  }
+
+  async totalPublishedEssays() {
+    return await this.essayRepository.count({ where: { published: true } });
+  }
+
+  async totalLinkedOutEssays() {
+    return await this.essayRepository.count({ where: { linkedOut: true } });
   }
 }

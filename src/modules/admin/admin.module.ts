@@ -12,13 +12,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { DayUtils } from '../../common/utils/day.utils';
+import { Essay } from '../../entities/essay.entity';
+import { EssayRepository } from '../essay/essay.repository';
+import { Subscription } from '../../entities/subscription.entity';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, ReviewQueue, ReportQueue]),
+    TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue, Subscription]),
   ],
   controllers: [AdminController],
   providers: [
@@ -27,7 +31,9 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
     AuthService,
     AuthRepository,
     UserRepository,
+    EssayRepository,
     MailService,
+    DayUtils,
     strategies.AdminStrategy,
   ],
   exports: [],
