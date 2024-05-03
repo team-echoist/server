@@ -17,7 +17,7 @@ async function bootstrap() {
     cors: {
       origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
       allowedHeaders: 'Content-Type, Authorization',
-      exposedHeaders: [],
+      exposedHeaders: ['Authorization'],
     },
   });
   app.setGlobalPrefix('/api');
