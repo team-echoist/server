@@ -33,7 +33,7 @@ export class EssayRepository {
   }
 
   async findReviewByEssayId(essayId: number) {
-    return this.reviewRepository.findOne({ where: { essay: { id: essayId }, completed: false } });
+    return this.reviewRepository.findOne({ where: { essay: { id: essayId }, processed: false } });
   }
 
   async updateEssay(essay: Essay, data: UpdateEssayReqDto) {
@@ -47,7 +47,7 @@ export class EssayRepository {
       skip: (page - 1) * limit,
       take: limit,
       order: {
-        createdAt: 'DESC',
+        createdDate: 'DESC',
       },
     });
 

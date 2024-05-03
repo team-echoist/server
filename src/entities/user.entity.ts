@@ -8,7 +8,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { Essay } from './essay.entity';
-import { Receipt } from './receipt.entity';
+import { Subscription } from './subscription.entity';
 import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
@@ -47,14 +47,14 @@ export class User {
   @Column({ name: 'subscription_end', type: 'timestamp', nullable: true })
   subscriptionEnd: Date;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-  createdAt: Date;
+  @CreateDateColumn({ name: 'created_date', type: 'timestamp' })
+  createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
-  updatedAt: Date;
+  @UpdateDateColumn({ name: 'updated_date', type: 'timestamp' })
+  updatedDate: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp' })
-  deletedAt?: Date;
+  @DeleteDateColumn({ name: 'deleted_date', type: 'timestamp' })
+  deletedDate?: Date;
 
   @OneToMany(() => Category, (category) => category.user)
   category: Category[];
@@ -62,8 +62,8 @@ export class User {
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
 
-  @OneToMany(() => Receipt, (receipt) => receipt.user)
-  receipts: Receipt[];
+  @OneToMany(() => Subscription, (subscription) => subscription.user)
+  subscriptions: Subscription[];
 
   @OneToMany(() => ReportQueue, (report) => report.reporter)
   reports: ReportQueue[];

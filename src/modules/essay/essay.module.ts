@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PassportModule } from '@nestjs/passport';
 import { EssayController } from './essay.controller';
 import { EssayService } from './essay.service';
 import { AuthService } from '../auth/auth.service';
@@ -23,9 +22,7 @@ dotenv.config();
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '30h' },
     }),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forFeature([User, Essay, ReviewQueue]),
   ],
   controllers: [EssayController],
