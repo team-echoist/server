@@ -6,6 +6,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { EssayModule } from './modules/essay/essay.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { MailModule } from './modules/mail/mail.module';
 import { SeederModule } from './modules/seeder/seeder.module';
 import { SeederService } from './modules/seeder/seeder.service';
@@ -23,6 +24,7 @@ import { TypeOrmOptions } from '../typeorm.options';
     RedisModule.forRootAsync({
       useFactory: () => redisConfig,
     }),
+    AdminModule,
     SeederModule,
     AuthModule,
     EssayModule,

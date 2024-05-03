@@ -34,7 +34,7 @@ import { Subscription } from '../../entities/subscription.entity';
     EssayRepository,
     MailService,
     DayUtils,
-    strategies.AdminStrategy,
+    strategies.JwtStrategy,
   ],
   exports: [],
 })
