@@ -7,18 +7,28 @@ import { AppModule } from './app.module';
 import { swaggerConfig } from '../swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
+import { Request, Response, NextFunction } from 'express';
 
 dotenv.config();
 
 declare const module: any;
 async function bootstrap() {
   initializeTransactionalContext();
-  const app: INestApplication = await NestFactory.create(AppModule, {
-    cors: {
-      origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
-      allowedHeaders: 'Content-Type, Authorization',
-      exposedHeaders: ['Authorization'],
-    },
+  const app: INestApplication = await NestFactory.create(AppModule);
+  // {
+  //   cors: {
+  //     origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
+  //     allowedHeaders: 'Content-Type, Authorization',
+  //     exposedHeaders: ['Authorization'],
+  //   },
+  // }
+  app.enableCors({
+    origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
+    allowedHeaders: 'Content-Type, Authorization',
+  });
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+    next();
   });
   app.setGlobalPrefix('/api');
   app.enableCors();
