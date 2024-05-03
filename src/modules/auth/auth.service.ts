@@ -35,9 +35,7 @@ export class AuthService {
     const token = await generateToken();
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
-    console.log('레디스에 저장할 유저: ', createUserDto);
-    const user = await this.redis.set(token, JSON.stringify(createUserDto), 'EX', 600);
-    console.log('레디스 저장 완료: ', user);
+    await this.redis.set(token, JSON.stringify(createUserDto), 'EX', 600);
 
     await this.mailService.sendVerificationEmail(email, token);
 
@@ -46,7 +44,6 @@ export class AuthService {
 
   async register(token: string): Promise<UserResDto> {
     const user = await this.redis.get(token);
-    console.log('register 컨트롤러의 캐싱된 유저: ', user);
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
     return await this.authRepository.createUser(JSON.parse(user));

@@ -24,7 +24,7 @@ export class MailService {
     const baseVerificationUrl =
       env === 'dev'
         ? 'http://localhost:3000/api/auth/register'
-        : 'https://linkedoutapp.com/api/auth/register';
+        : 'https://www.linkedoutapp.com/api/auth/register';
     const verificationUrl = `${baseVerificationUrl}?token=${token}`;
 
     await this.transporter.sendMail({

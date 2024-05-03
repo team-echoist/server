@@ -17,7 +17,6 @@ export class AuthRepository {
 
   async createUser(createUserDto: CreateUserReqDto): Promise<UserResDto> {
     const user = await this.userRepository.save(createUserDto);
-    console.log('유저 등록 완료: ', user);
     return plainToInstance(UserResDto, user);
   }
 

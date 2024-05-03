@@ -1,5 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { initializeTransactionalContext } from 'typeorm-transactional';
+import { Request, Response, NextFunction } from 'express';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
@@ -7,7 +8,6 @@ import { AppModule } from './app.module';
 import { swaggerConfig } from '../swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
-import { Request, Response, NextFunction } from 'express';
 
 dotenv.config();
 
@@ -15,13 +15,7 @@ declare const module: any;
 async function bootstrap() {
   initializeTransactionalContext();
   const app: INestApplication = await NestFactory.create(AppModule);
-  // {
-  //   cors: {
-  //     origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
-  //     allowedHeaders: 'Content-Type, Authorization',
-  //     exposedHeaders: ['Authorization'],
-  //   },
-  // }
+
   app.enableCors({
     origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
     allowedHeaders: 'Content-Type, Authorization',
