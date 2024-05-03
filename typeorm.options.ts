@@ -4,11 +4,10 @@ import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { User } from './src/entities/user.entity';
 import { Essay } from './src/entities/essay.entity';
-import { Receipt } from './src/entities/receipt.entity';
+import { Subscription } from './src/entities/subscription.entity';
 import { Category } from './src/entities/category.entity';
 import { ReportQueue } from './src/entities/reportQueue.entity';
 import { ReviewQueue } from './src/entities/reviewQueue.entity';
-import { ProcessingHistory } from './src/entities/processingHistory.entity';
 
 dotenv.config();
 
@@ -20,7 +19,7 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
     username: process.env.DB_USER,
     password: String(process.env.DB_PASSWORD),
     database: process.env.DB_NAME,
-    entities: [User, Essay, Receipt, Category, ReportQueue, ReviewQueue, ProcessingHistory],
+    entities: [User, Essay, Subscription, Category, ReportQueue, ReviewQueue],
     dropSchema: process.env.ENV === 'prod',
     synchronize: true,
     autoLoadEntities: true,

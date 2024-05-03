@@ -1,16 +1,17 @@
 import { redisConfig } from '../redis.config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { Module, OnModuleInit } from '@nestjs/common';
-import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { EssayModule } from './modules/essay/essay.module';
 import { MailModule } from './modules/mail/mail.module';
-import { DeviceInterceptor } from './common/interceptros/device.interceptor';
-import { SeederService } from './modules/seeder/seeder.service';
+import { AdminModule } from './modules/admin/admin.module';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { SeederService } from './modules/seeder/seeder.service';
+import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
+import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TypeOrmOptions } from '../typeorm.options';
 
 @Module({
@@ -28,6 +29,7 @@ import { TypeOrmOptions } from '../typeorm.options';
     EssayModule,
     MailModule,
     RedisModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },

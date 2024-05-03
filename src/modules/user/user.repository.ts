@@ -11,4 +11,9 @@ export class UserRepository {
   async findById(userId: number) {
     return await this.userRepository.findOne({ where: { id: userId } });
   }
+
+  // ------------------------------------------------------admin api
+  async usersCount() {
+    return await this.userRepository.count();
+  }
 }

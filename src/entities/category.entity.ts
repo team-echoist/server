@@ -19,11 +19,11 @@ export class Category {
   @Column()
   name: string;
 
-  @CreateDateColumn({ name: 'create_at' })
-  createAt: Date;
+  @CreateDateColumn({ name: 'create_date' })
+  createDate: Date;
 
-  @UpdateDateColumn({ name: 'update_at' })
-  updateAt: Date;
+  @UpdateDateColumn({ name: 'update_date' })
+  updateDate: Date;
 
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.category)

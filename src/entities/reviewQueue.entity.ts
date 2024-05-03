@@ -24,13 +24,13 @@ export class ReviewQueue {
   approved: boolean;
 
   @Column({ default: false })
-  completed: boolean;
+  processed: boolean;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn({ name: 'created_date' })
+  createdDate: Date;
 
-  @Column({ name: 'reviewed_at', nullable: true })
-  reviewedAt: Date;
+  @Column({ name: 'processed_date', nullable: true })
+  processedDate: Date;
 
   @JoinColumn({ name: 'essay_id' })
   @ManyToOne(() => Essay, (essay) => essay.review)

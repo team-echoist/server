@@ -20,8 +20,14 @@ export class ReportQueue {
   @Column({ default: false })
   approved: boolean;
 
-  @CreateDateColumn({ name: 'reported_at' })
-  reportedAt: Date;
+  @Column({ default: false })
+  processed: boolean;
+
+  @Column({ name: 'processed_date', nullable: true })
+  processedDate: Date;
+
+  @CreateDateColumn({ name: 'created_date' })
+  createdDate: Date;
 
   @JoinColumn({ name: 'reporter_id' })
   @ManyToOne(() => User, (user) => user.reports)

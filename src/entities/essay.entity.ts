@@ -29,11 +29,11 @@ export class Essay {
   linkedOutGauge: number;
 
   @Index()
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn({ name: 'created_date' })
+  createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn({ name: 'updated_date' })
+  updatedDate: Date;
 
   @Column({ name: 'thumbnail', nullable: true })
   thumbnail: string;
