@@ -14,7 +14,6 @@ export class AdminGuard extends AuthGuard('jwt') {
   }
 
   validate(request: any) {
-    console.log(request.user);
     return request.user && request.user.role === 'admin';
   }
 }
