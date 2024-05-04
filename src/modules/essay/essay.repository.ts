@@ -77,4 +77,39 @@ export class EssayRepository {
   async totalLinkedOutEssays() {
     return await this.essayRepository.count({ where: { linkedOut: true } });
   }
+
+  async getEssayReports(essayId: number) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.reports', 'report', 'report.processed = :processed', {
+        processed: false,
+      })
+      .leftJoin('report.reporter', 'reporter') // Join without selecting all fields
+      .leftJoin('essay.author', 'author') // Assuming 'author' is a relation on the Essay entity
+      .select([
+        'essay.id',
+        'essay.title',
+        'essay.content',
+        'essay.linkedOutGauge',
+        'essay.createdDate',
+        'essay.updatedDate',
+        'essay.thumbnail',
+        'essay.bookmarks',
+        'essay.views',
+        'essay.published',
+        'essay.linkedOut',
+        'essay.device',
+        'author.id',
+      ])
+      .addSelect([
+        'report.id',
+        'report.reason',
+        'report.processed',
+        'report.processedDate',
+        'report.createdDate',
+        'reporter.id',
+      ])
+      .where('essay.id = :id', { id: essayId })
+      .getOne();
+  }
 }
