@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
@@ -26,7 +26,7 @@ export class AdminController {
 
   @Get('report')
   @ApiOperation({
-    summary: '신고리스트',
+    summary: '리포트 리스트',
     description: '확인되지 않은 신고 중 신고 수가 많은 순으로 정렬',
   })
   @ApiQuery({ name: 'sort', required: true })
@@ -39,5 +39,12 @@ export class AdminController {
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     return await this.adminService.getReports(sort, page, limit);
+  }
+
+  @Get('report/:essayId')
+  @ApiOperation({ summary: '리포트 상세 조회', description: 'EssayWithReportsDto' })
+  @ApiResponse({ status: 200 })
+  async getEssayReports(@Param('essayId', ParseIntPipe) essayId: number) {
+    return await this.adminService.getEssayReports(essayId);
   }
 }

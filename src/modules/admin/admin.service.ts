@@ -7,6 +7,7 @@ import { DayUtils } from '../../common/utils/day.utils';
 import { DashboardResDto } from './dto/dashboardRes.dto';
 import { plainToInstance } from 'class-transformer';
 import { ReportListDto } from './dto/reportList.dto';
+import { EssayWithReportsDto } from './dto/essayWithReports.dto';
 
 @Injectable()
 export class AdminService {
@@ -62,5 +63,28 @@ export class AdminService {
     });
 
     return { reports: reportDtos, total, totalPage, page };
+  }
+
+  async getEssayReports(essayId: number) {
+    const essayWithReports = await this.essayRepository.getEssayReports(essayId);
+    return plainToInstance(
+      EssayWithReportsDto,
+      {
+        ...essayWithReports,
+        authorId: essayWithReports.author ? essayWithReports.author.id : null,
+        reports: essayWithReports.reports.map((report) => ({
+          id: report.id,
+          reason: report.reason,
+          processed: report.processed,
+          processedDate: report.processedDate,
+          createdDate: report.createdDate,
+          reporterId: report.reporter ? report.reporter.id : null,
+        })),
+      },
+      {
+        strategy: 'exposeAll',
+        excludeExtraneousValues: true,
+      },
+    );
   }
 }
