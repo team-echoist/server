@@ -19,15 +19,17 @@ async function bootstrap() {
   app.enableCors({
     origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
     allowedHeaders: 'Content-Type, Authorization',
+    exposedHeaders: 'Authorization',
   });
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     next();
   });
-  app.setGlobalPrefix('/api');
-  app.enableCors();
-  app.useGlobalFilters(new HttpExceptionFilter());
   app.use(helmet.default());
+
+  app.setGlobalPrefix('/api');
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -35,7 +37,6 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: false },
     }),
   );
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);

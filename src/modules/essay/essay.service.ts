@@ -44,7 +44,7 @@ export class EssayService {
 
     const createdEssay = await this.essayRepository.createEssay(essayData);
 
-    await this.redisService.deleteCachePattern('essays-*');
+    // await this.redisService.deleteCachePattern('essays-*');
 
     return plainToInstance(EssayResDto, createdEssay, {
       strategy: 'exposeAll',
@@ -77,7 +77,7 @@ export class EssayService {
 
     const updatedEssay = await this.essayRepository.updateEssay(essay, data);
 
-    await this.redisService.deleteCachePattern('essays-*');
+    // await this.redisService.deleteCachePattern('essays-*');
 
     return plainToInstance(EssayResDto, updatedEssay, {
       strategy: 'exposeAll',
@@ -92,11 +92,11 @@ export class EssayService {
     page: number,
     limit: number,
   ) {
-    const cacheKey = `essays-${userId}-${published}-${categoryId}-${page}-${limit}`;
-    const cachedData = await this.redisService.getCached(cacheKey);
-    if (cachedData) {
-      return JSON.parse(cachedData);
-    }
+    // const cacheKey = `essays-${userId}-${published}-${categoryId}-${page}-${limit}`;
+    // const cachedData = await this.redisService.getCached(cacheKey);
+    // if (cachedData) {
+    //   return JSON.parse(cachedData);
+    // }
 
     const query: FindMyEssayQueryInterface = {
       author: { id: userId },
@@ -113,7 +113,7 @@ export class EssayService {
     });
 
     const result = { essays: essayDtos, total, totalPage, page };
-    await this.redisService.setCached(cacheKey, result, 900);
+    // await this.redisService.setCached(cacheKey, result, 900);
     return result;
   }
 
