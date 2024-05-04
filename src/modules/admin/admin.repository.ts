@@ -36,4 +36,33 @@ export class AdminRepository {
       where: { processed: false },
     });
   }
+
+  async getReports(sort: string, page: number, limit: number) {
+    const total = await this.reportRepository
+      .createQueryBuilder('report')
+      .leftJoin('report.essay', 'essay')
+      .where('report.processed = :processed', { processed: false })
+      .getCount();
+
+    const queryBuilder = this.reportRepository
+      .createQueryBuilder('report')
+      .select('essay.id', 'essayId')
+      .addSelect('essay.title', 'essayTitle')
+      .addSelect('COUNT(report.id)', 'reportCount')
+      .addSelect('MIN(report.createdDate)', 'oldestReportDate')
+      .leftJoin('report.essay', 'essay')
+      .where('report.processed = :processed', { processed: false })
+      .groupBy('essay.id');
+
+    if (sort === 'oldest') {
+      queryBuilder.addOrderBy('MIN(report.createdDate)', 'ASC');
+    } else if (sort === 'most') {
+      queryBuilder.addOrderBy('COUNT(report.id)', 'DESC');
+    }
+
+    queryBuilder.offset((page - 1) * limit).limit(limit);
+    const reports = await queryBuilder.getRawMany();
+
+    return { reports, total };
+  }
 }

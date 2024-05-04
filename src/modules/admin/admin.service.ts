@@ -6,6 +6,7 @@ import { EssayRepository } from '../essay/essay.repository';
 import { DayUtils } from '../../common/utils/day.utils';
 import { DashboardResDto } from './dto/dashboardRes.dto';
 import { plainToInstance } from 'class-transformer';
+import { ReportListDto } from './dto/reportList.dto';
 
 @Injectable()
 export class AdminService {
@@ -50,5 +51,16 @@ export class AdminService {
         excludeExtraneousValues: true,
       },
     );
+  }
+
+  async getReports(sort: string, page: number, limit: number) {
+    const { reports, total } = await this.adminRepository.getReports(sort, page, limit);
+    const totalPage: number = Math.ceil(total / limit);
+    const reportDtos = plainToInstance(ReportListDto, reports, {
+      strategy: 'exposeAll',
+      excludeExtraneousValues: true,
+    });
+
+    return { reports: reportDtos, total, totalPage, page };
   }
 }

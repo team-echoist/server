@@ -18,9 +18,6 @@ export class ReportQueue {
   reason: string;
 
   @Column({ default: false })
-  approved: boolean;
-
-  @Column({ default: false })
   processed: boolean;
 
   @Column({ name: 'processed_date', nullable: true })
