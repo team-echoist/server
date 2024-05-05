@@ -6,11 +6,13 @@ import { EssayRepository } from '../essay/essay.repository';
 import { DayUtils } from '../../common/utils/day.utils';
 import { DashboardResDto } from './dto/dashboardRes.dto';
 import { plainToInstance } from 'class-transformer';
-import { ReportListDto } from './dto/reportList.dto';
-import { EssayWithReportsDto } from './dto/essayWithReports.dto';
+import { ReportsDto } from './dto/reports.dto';
+import { ReportDetailResDto } from './dto/reportDetailRes.dto';
 import { Transactional } from 'typeorm-transactional';
 import { ProcessReqDto } from './dto/processReq.dto';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
+import { ReviewsDto } from './dto/reviews.dto';
+import { ReportsResDto } from './dto/reportsRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -52,32 +54,30 @@ export class AdminService {
         unprocessedReviews,
       },
       {
-        strategy: 'exposeAll',
         excludeExtraneousValues: true,
       },
     );
   }
 
   @Transactional()
-  async getReports(sort: string, page: number, limit: number) {
+  async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {
     const { reports, totalReports, totalEssay } = await this.adminRepository.getReports(
       sort,
       page,
       limit,
     );
     const totalPage: number = Math.ceil(totalEssay / limit);
-    const reportDtos = plainToInstance(ReportListDto, reports, {
-      strategy: 'exposeAll',
+    const reportDtos = plainToInstance(ReportsDto, reports, {
       excludeExtraneousValues: true,
     });
 
     return { reports: reportDtos, totalReports, totalEssay, totalPage, page };
   }
 
-  async getEssayReports(essayId: number) {
-    const essayWithReports = await this.essayRepository.getEssayReports(essayId);
+  async getReportDetails(essayId: number) {
+    const essayWithReports = await this.essayRepository.getReportDetails(essayId);
     return plainToInstance(
-      EssayWithReportsDto,
+      ReportDetailResDto,
       {
         ...essayWithReports,
         authorId: essayWithReports.author ? essayWithReports.author.id : null,
@@ -91,23 +91,23 @@ export class AdminService {
         })),
       },
       {
-        strategy: 'exposeAll',
         excludeExtraneousValues: true,
       },
     );
   }
 
   @Transactional()
-  async processReports(userId: number, essayId: number, resultReqDto: ProcessReqDto) {
+  async processReports(userId: number, essayId: number, processReqDto: ProcessReqDto) {
     const essay = await this.essayRepository.findEssayById(essayId);
     if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
 
-    if (resultReqDto.result === 'Approved') {
+    if (processReqDto.result === 'Approved') {
       essay.published = false;
       essay.linkedOut = false;
       await this.essayRepository.saveEssay(essay);
+      // todo 여기에 앱 푸쉬알림이랑 메일링 추가해야할듯
     }
-    await this.syncProcessed(essayId, userId, resultReqDto.result, resultReqDto.comment);
+    await this.syncProcessed(essayId, userId, processReqDto.result, processReqDto.comment);
     return;
   }
 
@@ -131,5 +131,28 @@ export class AdminService {
       await this.adminRepository.saveHistory(newHistory);
     }
     return;
+  }
+
+  async getReviews(page: number, limit: number) {
+    const { reviews, total } = await this.adminRepository.getReviews(page, limit);
+    const totalPage: number = Math.ceil(total / limit);
+
+    const reviewsDto = plainToInstance(
+      ReviewsDto,
+      reviews.map((review) => ({
+        id: review.id,
+        type: review.type,
+        processed: review.processed,
+        createDate: review.createdDate,
+        processedDate: review.processedDate,
+        userId: review.user.id,
+        essayId: review.essay.id,
+        essayTitle: review.essay.title,
+      })),
+      {
+        excludeExtraneousValues: true,
+      },
+    );
+    return { reviews: reviewsDto, totalPage, page, total };
   }
 }

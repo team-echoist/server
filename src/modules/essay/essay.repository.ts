@@ -89,7 +89,7 @@ export class EssayRepository {
     return await this.essayRepository.count({ where: { linkedOut: true } });
   }
 
-  async getEssayReports(essayId: number) {
+  async getReportDetails(essayId: number) {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.reports', 'report', 'report.processed = :processed', {
