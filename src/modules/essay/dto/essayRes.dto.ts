@@ -11,12 +11,12 @@ export class EssayResDto {
   @ApiProperty()
   @IsDate()
   @Expose()
-  createdAt: Date;
+  createdDate: Date;
 
   @ApiProperty()
   @IsDate()
   @Expose()
-  updatedAt: Date;
+  updatedDate: Date;
 
   @ApiProperty()
   @IsNumber()
