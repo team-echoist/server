@@ -9,7 +9,7 @@ import { swaggerConfig } from '../swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
-import { join } from 'path';
+import * as path from 'node:path';
 
 dotenv.config();
 
@@ -30,7 +30,8 @@ async function bootstrap() {
 
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../../src/common/images', 'seedimage.jpeg'));
+    const imagePath = path.resolve(__dirname, './src/common/images/seedimage.jpeg');
+    res.sendFile(imagePath);
   });
 
   app.setGlobalPrefix('/api');
