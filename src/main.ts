@@ -30,7 +30,7 @@ async function bootstrap() {
 
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req: Request, res: Response) => {
-    const imagePath = path.resolve(__dirname, './src/common/images/seedimage.jpeg');
+    const imagePath = path.resolve(__dirname, './common/images/seedimage.jpeg');
     res.sendFile(imagePath);
   });
 
