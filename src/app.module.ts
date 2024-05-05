@@ -41,7 +41,8 @@ export class AppModule implements OnModuleInit {
 
   async onModuleInit() {
     if (process.env.SEED_DB === 'true' && process.env.ENV === 'prod') {
-      await this.seederService.seed();
+      await this.seederService.seedAdmin();
+      await this.seederService.seedAll();
     }
   }
 }

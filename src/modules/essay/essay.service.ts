@@ -43,24 +43,26 @@ export class EssayService {
       const savedBannedEssay = await this.essayRepository.saveEssay(adjustedData);
 
       const essay = await this.essayRepository.findEssayById(savedBannedEssay.id);
+
+      const bannedEssay = plainToInstance(EssayResDto, essay, {
+        strategy: 'exposeAll',
+        excludeExtraneousValues: true,
+      });
+
       const reviewType = data.published ? 'published' : data.linkedOut ? 'linked_out' : null;
 
       if (reviewType) {
         await this.essayRepository.saveReviewRequest(user, essay, reviewType);
         return {
-          ...savedBannedEssay,
+          ...bannedEssay,
           message: 'Your essay is under review due to policy violations.',
         };
       }
-      return savedBannedEssay;
+      return bannedEssay;
     }
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
-
-    // await this.redisService.deleteCachePattern('essays-*');
-
     return plainToInstance(EssayResDto, savedEssay, {
-      strategy: 'exposeAll',
       excludeExtraneousValues: true,
     });
   }
@@ -99,12 +101,10 @@ export class EssayService {
       essayData.linkedOut = false;
     }
 
-    const updatedEssay = await this.essayRepository.updateEssay(essay, essayData);
+    await this.essayRepository.updateEssay(essay, essayData);
 
-    // await this.redisService.deleteCachePattern('essays-*');
-
+    const updatedEssay = await this.essayRepository.findEssayById(essay.id);
     return plainToInstance(EssayResDto, updatedEssay, {
-      strategy: 'exposeAll',
       excludeExtraneousValues: true,
     });
   }
@@ -116,12 +116,6 @@ export class EssayService {
     page: number,
     limit: number,
   ) {
-    // const cacheKey = `essays-${userId}-${published}-${categoryId}-${page}-${limit}`;
-    // const cachedData = await this.redisService.getCached(cacheKey);
-    // if (cachedData) {
-    //   return JSON.parse(cachedData);
-    // }
-
     const query: FindMyEssayQueryInterface = {
       author: { id: userId },
       category: { id: categoryId },
@@ -136,9 +130,7 @@ export class EssayService {
       excludeExtraneousValues: true,
     });
 
-    const result = { essays: essayDtos, total, totalPage, page };
-    // await this.redisService.setCached(cacheKey, result, 900);
-    return result;
+    return { essays: essayDtos, total, totalPage, page };
   }
 
   async deleteEssay(userId: number, essayId: number) {

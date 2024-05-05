@@ -16,14 +16,8 @@ export class ReviewQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'reviewer_comment', nullable: true })
-  reviewerComment: string;
-
   @Column()
   type: 'published' | 'linked_out';
-
-  @Column({ default: false })
-  approved: boolean;
 
   @Column({ default: false })
   processed: boolean;

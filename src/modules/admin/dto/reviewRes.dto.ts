@@ -1,20 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { ReviewsDto } from './reviews.dto';
 
-export class ReportListDto {
-  @ApiProperty()
+export class ReviewResDto {
+  @ApiProperty({ type: [ReviewsDto] })
   @Expose()
-  essayId: number;
-
-  @ApiProperty()
-  @Expose()
-  essayTitle: string;
+  reviews: ReviewsDto[];
 
   @ApiProperty()
   @Expose()
-  reportCount: number;
+  totalPage: number;
 
   @ApiProperty()
   @Expose()
-  oldestReportDate: Date;
+  page: number;
+
+  @ApiProperty()
+  @Expose()
+  total: number;
 }

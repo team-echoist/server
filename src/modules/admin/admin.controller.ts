@@ -5,7 +5,6 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put,
   Query,
   Req,
   UseGuards,
@@ -16,9 +15,11 @@ import { AdminGuard } from '../../common/guards/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { DashboardResDto } from './dto/dashboardRes.dto';
-import { ReportListResDto } from './dto/reportListRes.dto';
+import { ReportsResDto } from './dto/reportsRes.dto';
 import { ProcessReqDto } from './dto/processReq.dto';
 import { Request as ExpressRequest } from 'express';
+import { ReviewResDto } from './dto/reviewRes.dto';
+import { ReportDetailResDto } from './dto/reportDetailRes.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -42,7 +43,7 @@ export class AdminController {
     summary: '리포트 리스트',
     description: '확인되지 않은 신고 중 신고 수가 많은 순으로 정렬',
   })
-  @ApiResponse({ status: 200, type: ReportListResDto })
+  @ApiResponse({ status: 200, type: ReportsResDto })
   @ApiQuery({ name: 'sort', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -55,14 +56,14 @@ export class AdminController {
   }
 
   @Get('report/:essayId')
-  @ApiOperation({ summary: '리포트 상세 조회', description: 'EssayWithReportsDto' })
-  @ApiResponse({ status: 200, type: '' })
+  @ApiOperation({ summary: '리포트 상세 조회' })
+  @ApiResponse({ status: 200, type: ReportDetailResDto })
   async getEssayReports(@Param('essayId', ParseIntPipe) essayId: number) {
-    return await this.adminService.getEssayReports(essayId);
+    return await this.adminService.getReportDetails(essayId);
   }
 
   @Post('report/:essayId')
-  @ApiOperation({ summary: '리포트 처리?' })
+  @ApiOperation({ summary: '리포트 처리' })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: ProcessReqDto })
   async processEssayReports(
@@ -71,5 +72,17 @@ export class AdminController {
     @Body() processReqDto: ProcessReqDto,
   ) {
     return await this.adminService.processReports(req.user.id, essayId, processReqDto);
+  }
+
+  @Get('review')
+  @ApiOperation({ summary: '리뷰 리스트' })
+  @ApiResponse({ status: 200, type: ReviewResDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getReviews(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return await this.adminService.getReviews(page, limit);
   }
 }

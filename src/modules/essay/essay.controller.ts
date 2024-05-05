@@ -21,7 +21,7 @@ import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { CreateEssayReqDto } from './dto/createEssayReq.dto';
 import { EssayResDto } from './dto/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
-import { EssayListResDto } from './dto/essayListRes.dto';
+import { EssaysResDto } from './dto/essaysRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -51,7 +51,7 @@ export class EssayController {
 
   @Get()
   @ApiOperation({ summary: '본인 에세이 조회' })
-  @ApiResponse({ status: 200, type: EssayListResDto })
+  @ApiResponse({ status: 200, type: EssaysResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
@@ -68,7 +68,7 @@ export class EssayController {
 
   @Delete(':essayId')
   @ApiOperation({ summary: '에세이 삭제' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     await this.essayService.deleteEssay(req.user.id, essayId);
     return { message: 'Essay deleted successfully.' };
