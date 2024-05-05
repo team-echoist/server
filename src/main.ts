@@ -9,6 +9,8 @@ import { swaggerConfig } from '../swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
+import { join } from 'path';
+
 dotenv.config();
 
 declare const module: any;
@@ -25,9 +27,14 @@ async function bootstrap() {
     res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     next();
   });
-  app.use(helmet.default());
+
+  const server = app.getHttpAdapter().getInstance();
+  server.get('/', (req: Request, res: Response) => {
+    res.sendFile(join(__dirname, '../src/common/images', 'seedimage.jpeg'));
+  });
 
   app.setGlobalPrefix('/api');
+  app.use(helmet.default());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
