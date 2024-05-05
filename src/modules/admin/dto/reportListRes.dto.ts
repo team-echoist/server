@@ -6,7 +6,10 @@ export class ReportListResDto {
   reports: ReportListDto[];
 
   @ApiProperty()
-  total: number;
+  totalReports: number;
+
+  @ApiProperty()
+  totalEssay: number;
 
   @ApiProperty()
   totalPage: number;

@@ -25,8 +25,8 @@ export class AuthController {
   @ApiOperation({
     summary: '이메일중복검사',
   })
-  @ApiBody({ type: CheckEmailReqDto })
   @ApiResponse({ status: 200, type: isBoolean })
+  @ApiBody({ type: CheckEmailReqDto })
   async checkEmail(@Body() data: CheckEmailReqDto) {
     return await this.authService.checkEmail(data);
   }
@@ -36,8 +36,8 @@ export class AuthController {
     summary: '회원가입을 위한 이메일 인증 요청',
     description: '다시 한번 이메일 중복 체크 후 인증 링크 발송',
   })
-  @ApiBody({ type: CreateUserReqDto })
   @ApiResponse({ status: 201 })
+  @ApiBody({ type: CreateUserReqDto })
   async verify(@Body() createUserDto: CreateUserReqDto) {
     await this.authService.isEmailOwned(createUserDto);
 
@@ -68,8 +68,8 @@ export class AuthController {
     summary: '로그인',
     description: '로그인 후 응답 헤더에 JWT 추가',
   })
-  @ApiBody({ type: LoginReqDto })
   @ApiResponse({ status: 200 })
+  @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
   async login() {
     return;

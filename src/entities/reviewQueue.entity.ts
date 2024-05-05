@@ -5,9 +5,11 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
+import { ProcessedHistory } from './processedHistory.entity';
 
 @Entity()
 export class ReviewQueue {
@@ -39,4 +41,8 @@ export class ReviewQueue {
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.review)
   user: User;
+
+  @JoinColumn({ name: 'processed_histories' })
+  @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.report)
+  processedHistories: ProcessedHistory[];
 }

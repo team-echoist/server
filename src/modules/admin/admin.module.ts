@@ -16,13 +16,23 @@ import { DayUtils } from '../../common/utils/day.utils';
 import { Essay } from '../../entities/essay.entity';
 import { EssayRepository } from '../essay/essay.repository';
 import { Subscription } from '../../entities/subscription.entity';
+import { Category } from '../../entities/category.entity';
+import { ProcessedHistory } from '../../entities/processedHistory.entity';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue, Subscription]),
+    TypeOrmModule.forFeature([
+      User,
+      Essay,
+      Category,
+      ReviewQueue,
+      ReportQueue,
+      Subscription,
+      ProcessedHistory,
+    ]),
   ],
   controllers: [AdminController],
   providers: [
