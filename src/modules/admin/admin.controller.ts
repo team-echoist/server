@@ -64,7 +64,7 @@ export class AdminController {
   @Post('report/:essayId')
   @ApiOperation({ summary: '리포트 처리?' })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: '' })
+  @ApiBody({ type: ProcessReqDto })
   async processEssayReports(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
