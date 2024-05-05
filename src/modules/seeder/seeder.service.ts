@@ -83,13 +83,12 @@ export class SeederService {
         });
 
         const essayPromise = this.essayRepository.save(essay).then((savedEssay) => {
-          // Check if the user is banned and thus needs a review queue
           if (user.banned) {
             const reviewQueue = this.reviewQueueRepository.create({
-              essay: savedEssay, // Use the savedEssay to ensure it's properly linked
+              essay: savedEssay,
               user: user,
               type: 'linked_out',
-              createdDate: new Date(), // Assuming you want to set the created date at creation
+              createdDate: new Date(),
             });
             reviewQueuePromises.push(this.reviewQueueRepository.save(reviewQueue));
           }
