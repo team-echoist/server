@@ -1,11 +1,24 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { DashboardResDto } from './dto/dashboardRes.dto';
 import { ReportListResDto } from './dto/reportListRes.dto';
+import { ProcessReqDto } from './dto/processReq.dto';
+import { Request as ExpressRequest } from 'express';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -29,10 +42,10 @@ export class AdminController {
     summary: '리포트 리스트',
     description: '확인되지 않은 신고 중 신고 수가 많은 순으로 정렬',
   })
+  @ApiResponse({ status: 200, type: ReportListResDto })
   @ApiQuery({ name: 'sort', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @ApiResponse({ status: 200, type: ReportListResDto })
   async getReports(
     @Query('sort') sort: string,
     @Query('page', new PagingParseIntPipe(1)) page: number,
@@ -43,8 +56,20 @@ export class AdminController {
 
   @Get('report/:essayId')
   @ApiOperation({ summary: '리포트 상세 조회', description: 'EssayWithReportsDto' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: '' })
   async getEssayReports(@Param('essayId', ParseIntPipe) essayId: number) {
     return await this.adminService.getEssayReports(essayId);
+  }
+
+  @Post('report/:essayId')
+  @ApiOperation({ summary: '리포트 처리?' })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: ProcessReqDto })
+  async processEssayReports(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+    @Body() processReqDto: ProcessReqDto,
+  ) {
+    return await this.adminService.processReports(req.user.id, essayId, processReqDto);
   }
 }

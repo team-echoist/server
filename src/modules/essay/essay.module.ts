@@ -15,6 +15,7 @@ import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { Category } from '../../entities/category.entity';
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ dotenv.config();
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Essay, ReviewQueue]),
+    TypeOrmModule.forFeature([User, Essay, Category, ReviewQueue]),
   ],
   controllers: [EssayController],
   providers: [

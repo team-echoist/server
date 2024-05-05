@@ -7,6 +7,7 @@ import { CreateEssayReqDto } from './dto/createEssayReq.dto';
 import { EssayResDto } from './dto/essayRes.dto';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { RedisService } from '../redis/redis.service';
+import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
 
 @Injectable()
 export class EssayService {
@@ -17,49 +18,72 @@ export class EssayService {
   ) {}
 
   @Transactional()
-  async createEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
+  async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userRepository.findById(requester.id);
+    let category = null;
+
+    if (data.categoryId) {
+      category = await this.essayRepository.findCategoryById(user, data.categoryId);
+    }
+
     const essayData = {
       ...data,
       device: device,
       author: user,
+      category: category,
     };
+
     if (requester.banned) {
       const adjustedData = {
         ...essayData,
         published: false,
         linkedOut: false,
       };
-      const createdEssay = await this.essayRepository.createEssay(adjustedData);
 
-      const essay = await this.essayRepository.findEssayById(createdEssay.id);
+      const savedBannedEssay = await this.essayRepository.saveEssay(adjustedData);
+
+      const essay = await this.essayRepository.findEssayById(savedBannedEssay.id);
       const reviewType = data.published ? 'published' : data.linkedOut ? 'linked_out' : null;
 
       if (reviewType) {
-        await this.essayRepository.createReviewRequest(user, essay, reviewType);
-        return { ...createdEssay, message: 'Your essay is under review due to policy violations.' };
+        await this.essayRepository.saveReviewRequest(user, essay, reviewType);
+        return {
+          ...savedBannedEssay,
+          message: 'Your essay is under review due to policy violations.',
+        };
       }
-      return createdEssay;
+      return savedBannedEssay;
     }
 
-    const createdEssay = await this.essayRepository.createEssay(essayData);
+    const savedEssay = await this.essayRepository.saveEssay(essayData);
 
     // await this.redisService.deleteCachePattern('essays-*');
 
-    return plainToInstance(EssayResDto, createdEssay, {
+    return plainToInstance(EssayResDto, savedEssay, {
       strategy: 'exposeAll',
       excludeExtraneousValues: true,
     });
   }
 
   @Transactional()
-  async updateEssay(requester: Express.User, essayId: number, data: CreateEssayReqDto) {
+  async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
     const user = await this.userRepository.findById(requester.id);
+    let category = null;
+
     const essay = await this.essayRepository.findEssayById(essayId);
     if (!essay) throw new Error('Essay not found');
 
+    if (data.categoryId) {
+      category = await this.essayRepository.findCategoryById(user, data.categoryId);
+    }
+
+    const essayData = {
+      ...data,
+      category: category,
+    };
+
     const isUnderReview = await this.essayRepository.findReviewByEssayId(essayId);
-    if (isUnderReview)
+    if ((isUnderReview && data.linkedOut) || (isUnderReview && data.published))
       throw new HttpException(
         'Update rejected: Essay is currently under review',
         HttpStatus.BAD_REQUEST,
@@ -68,14 +92,14 @@ export class EssayService {
     if (requester.banned) {
       if (data.published || data.linkedOut) {
         const reviewType = data.published ? 'published' : data.linkedOut ? 'linked_out' : null;
-        await this.essayRepository.createReviewRequest(user, essay, reviewType);
+        await this.essayRepository.saveReviewRequest(user, essay, reviewType);
         return { essay, message: 'Review request created due to policy violations.' };
       }
-      data.published = false;
-      data.linkedOut = false;
+      essayData.published = false;
+      essayData.linkedOut = false;
     }
 
-    const updatedEssay = await this.essayRepository.updateEssay(essay, data);
+    const updatedEssay = await this.essayRepository.updateEssay(essay, essayData);
 
     // await this.redisService.deleteCachePattern('essays-*');
 

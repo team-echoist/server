@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Category } from '../../../entities/category.entity';
 
-export class UpdateEssayReqDto {
+export class UpdateEssayDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
@@ -18,9 +19,8 @@ export class UpdateEssayReqDto {
   linkedOutGauge: number;
 
   @ApiProperty({ required: false })
-  @IsNumber()
   @IsOptional()
-  categoryId: number;
+  category: Category;
 
   @ApiProperty({ required: false })
   @IsString()

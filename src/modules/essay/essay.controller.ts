@@ -31,16 +31,16 @@ export class EssayController {
 
   @Post()
   @ApiOperation({ summary: '에세이 작성', description: '블랙 유저의 경우 리뷰 대기' })
-  @ApiBody({ type: CreateEssayReqDto })
   @ApiResponse({ status: 201, type: EssayResDto })
-  async createEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
-    return await this.essayService.createEssay(req.user, req.device, createEssayDto);
+  @ApiBody({ type: CreateEssayReqDto })
+  async saveEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
+    return await this.essayService.saveEssay(req.user, req.device, createEssayDto);
   }
 
   @Put(':essayId')
   @ApiOperation({ summary: '에세이 업데이트' })
-  @ApiBody({ type: UpdateEssayReqDto })
   @ApiResponse({ status: 200, type: EssayResDto })
+  @ApiBody({ type: UpdateEssayReqDto })
   async updateEssay(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
@@ -51,11 +51,11 @@ export class EssayController {
 
   @Get()
   @ApiOperation({ summary: '본인 에세이 조회' })
+  @ApiResponse({ status: 200, type: EssayListResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
-  @ApiResponse({ status: 200, type: EssayListResDto })
   async getMyEssay(
     @Req() req: ExpressRequest,
     @Query('page', new PagingParseIntPipe(1)) page: number,
