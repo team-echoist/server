@@ -3,11 +3,14 @@ import { Between, Repository } from 'typeorm';
 import { Subscription } from '../../entities/subscription.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { ProcessedHistory } from '../../entities/processedHistory.entity';
 
 export class AdminRepository {
   @InjectRepository(Subscription) private readonly subscriptionRepository: Repository<Subscription>;
   @InjectRepository(ReportQueue) private readonly reportRepository: Repository<ReportQueue>;
   @InjectRepository(ReviewQueue) private readonly reviewRepository: Repository<ReviewQueue>;
+  @InjectRepository(ProcessedHistory)
+  private readonly processedRepository: Repository<ProcessedHistory>;
 
   async totalSubscriberCount(today: Date) {
     return await this.subscriptionRepository.count({
@@ -38,11 +41,21 @@ export class AdminRepository {
   }
 
   async getReports(sort: string, page: number, limit: number) {
-    const total = await this.reportRepository
+    const totalReports = await this.reportRepository
       .createQueryBuilder('report')
       .leftJoin('report.essay', 'essay')
       .where('report.processed = :processed', { processed: false })
       .getCount();
+
+    const totalEssaysWithReports = await this.reportRepository
+      .createQueryBuilder('report')
+      .leftJoin('report.essay', 'essay')
+      .where('report.processed = :processed', { processed: false })
+      .select('essay.id')
+      .distinct(true)
+      .getRawMany();
+
+    const totalEssay = totalEssaysWithReports.length;
 
     const queryBuilder = this.reportRepository
       .createQueryBuilder('report')
@@ -63,6 +76,18 @@ export class AdminRepository {
     queryBuilder.offset((page - 1) * limit).limit(limit);
     const reports = await queryBuilder.getRawMany();
 
-    return { reports, total };
+    return { reports, totalReports, totalEssay };
+  }
+
+  async findReportByEssayId(essayId: number) {
+    return this.reportRepository.find({ where: { essay: { id: essayId } } });
+  }
+
+  async saveReport(report: ReportQueue) {
+    await this.reportRepository.save(report);
+  }
+
+  async saveHistory(history: ProcessedHistory) {
+    await this.processedRepository.save(history);
   }
 }

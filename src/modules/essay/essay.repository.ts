@@ -1,11 +1,13 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { CreateEssayDto } from './dto/createEssay.dto';
+import { SaveEssayDto } from './dto/saveEssay.dto';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
+import { Category } from '../../entities/category.entity';
+import { UpdateEssayDto } from './dto/updateEssay.dto';
 
 export class EssayRepository {
   constructor(
@@ -13,17 +15,26 @@ export class EssayRepository {
     private readonly essayRepository: Repository<Essay>,
     @InjectRepository(ReviewQueue)
     private readonly reviewRepository: Repository<ReviewQueue>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async findEssayById(essayId: number) {
-    return await this.essayRepository.findOne({ where: { id: essayId }, relations: ['author'] });
+    return await this.essayRepository.findOne({
+      where: { id: essayId },
+      relations: ['author', 'category'],
+    });
   }
 
-  async createEssay(data: CreateEssayDto) {
+  async findCategoryById(user: User, categoryId: number) {
+    return await this.categoryRepository.findOne({ where: { id: categoryId, user: user } });
+  }
+
+  async saveEssay(data: SaveEssayDto) {
     return await this.essayRepository.save(data);
   }
 
-  async createReviewRequest(user: User, essay: Essay, type: 'published' | 'linked_out') {
+  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linked_out') {
     await this.reviewRepository.save({
       user: user,
       essay: essay,
@@ -36,7 +47,7 @@ export class EssayRepository {
     return this.reviewRepository.findOne({ where: { essay: { id: essayId }, processed: false } });
   }
 
-  async updateEssay(essay: Essay, data: UpdateEssayReqDto) {
+  async updateEssay(essay: Essay, data: UpdateEssayDto) {
     const essayData = this.essayRepository.create({ ...essay, ...data });
     return await this.essayRepository.save(essayData);
   }

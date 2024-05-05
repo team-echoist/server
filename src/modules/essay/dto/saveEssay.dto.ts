@@ -1,7 +1,8 @@
 import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { User } from '../../../entities/user.entity';
+import { Category } from '../../../entities/category.entity';
 
-export class CreateEssayDto {
+export class SaveEssayDto {
   @IsNotEmpty()
   @IsString()
   title: string;
@@ -15,8 +16,7 @@ export class CreateEssayDto {
   linkedOutGauge: number;
 
   @IsOptional()
-  @IsNumber()
-  categoryId: number;
+  category: Category;
 
   @IsOptional()
   @IsString()
