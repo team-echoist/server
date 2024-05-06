@@ -4,15 +4,15 @@ import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
 import { DayUtils } from '../../common/utils/day.utils';
-import { DashboardResDto } from './dto/dashboardRes.dto';
+import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { plainToInstance } from 'class-transformer';
 import { ReportsDto } from './dto/reports.dto';
-import { ReportDetailResDto } from './dto/reportDetailRes.dto';
+import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { Transactional } from 'typeorm-transactional';
-import { ProcessReqDto } from './dto/processReq.dto';
+import { ProcessReqDto } from './dto/request/processReq.dto';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { ReviewsDto } from './dto/reviews.dto';
-import { ReportsResDto } from './dto/reportsRes.dto';
+import { ReportsResDto } from './dto/response/reportsRes.dto';
 
 @Injectable()
 export class AdminService {

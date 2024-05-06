@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportsDto } from './reports.dto';
+import { ReportsDto } from '../reports.dto';
 import { Expose } from 'class-transformer';
 
 export class ReportsResDto {

@@ -3,16 +3,17 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { generateToken } from '../../common/utils/verify.utils';
 import { AuthRepository } from './auth.repository';
 import { MailService } from '../mail/mail.service';
-import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
-import { CreateUserReqDto } from './dto/createUserReq.dto';
-import { UserResDto } from './dto/userRes.dto';
+import { CheckEmailReqDto } from './dto/request/checkEamilReq.dto';
+import { CreateUserReqDto } from './dto/request/createUserReq.dto';
+import { UserResDto } from './dto/response/userRes.dto';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
+import { OauthDto } from './dto/oauth.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRedis() private readonly redis: Redis, // todo redisService 주입
+    @InjectRedis() private readonly redis: Redis,
     private readonly authRepository: AuthRepository,
     private readonly mailService: MailService,
   ) {}
@@ -42,7 +43,7 @@ export class AuthService {
     return;
   }
 
-  async register(token: string): Promise<UserResDto> {
+  async register(token: string) {
     const user = await this.redis.get(token);
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
@@ -73,21 +74,20 @@ export class AuthService {
 
   // ----------------- OAuth ---------------------
 
-  // async oauthLogin(user: any) {
-  //   let existingUser: UserResDto = await this.authRepository.findByEmail(user.email);
-  //
-  //   if (!existingUser) {
-  //     existingUser = await this.authRepository.createUser({
-  //       email: user.email,
-  //       oauthInfo: { [`${user.platform}Id`]: user.platformId },
-  //     });
-  //   } else {
-  //     if (!existingUser.oauthInfo || !existingUser.oauthInfo[`${user.platform}Id`]) {
-  //       await this.authRepository.updateUserOauthInfo(existingUser.id, {
-  //         [`${user.platform}Id`]: user.platformId,
-  //       });
-  //     }
-  //   }
-  //   return generateJWT(existingUser.id, existingUser.email, existingUser.banned);
-  // }
+  async oauthLogin(oauthUser: OauthDto) {
+    let user = await this.authRepository.findByEmail(oauthUser.email);
+    if (!user) {
+      user = await this.authRepository.createUser({
+        email: oauthUser.email,
+        oauthInfo: { [`${oauthUser.platform}Id`]: oauthUser.platformId },
+      });
+    } else {
+      if (!user.oauthInfo || !user.oauthInfo[`${oauthUser.platform}Id`]) {
+        await this.authRepository.updateUserOauthInfo(user.id, {
+          [`${oauthUser.platform}Id`]: oauthUser.platformId,
+        });
+      }
+    }
+    return user;
+  }
 }

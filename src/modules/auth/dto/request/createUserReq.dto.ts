@@ -10,7 +10,7 @@ export class CreateUserReqDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  password: string;
+  password?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

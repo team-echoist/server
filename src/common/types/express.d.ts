@@ -21,6 +21,9 @@ declare global {
       user?: User;
       token?: string;
       device?: string;
+      platform?: string;
+      platformId?: string;
+      accessToken?: string;
     }
   }
 }

@@ -3,11 +3,11 @@ import { Transactional } from 'typeorm-transactional';
 import { plainToInstance } from 'class-transformer';
 import { EssayRepository } from './essay.repository';
 import { UserRepository } from '../user/user.repository';
-import { CreateEssayReqDto } from './dto/createEssayReq.dto';
-import { EssayResDto } from './dto/essayRes.dto';
+import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
+import { EssayResDto } from './dto/response/essayRes.dto';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { RedisService } from '../redis/redis.service';
-import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
+import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 
 @Injectable()
 export class EssayService {

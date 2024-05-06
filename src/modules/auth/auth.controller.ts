@@ -4,10 +4,9 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { isBoolean } from 'class-validator';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginReqDto } from './dto/loginReq.dto';
-import { CreateUserReqDto } from './dto/createUserReq.dto';
-import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
-import { UserResDto } from './dto/userRes.dto';
+import { LoginReqDto } from './dto/request/loginReq.dto';
+import { CreateUserReqDto } from './dto/request/createUserReq.dto';
+import { CheckEmailReqDto } from './dto/request/checkEamilReq.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -18,7 +17,7 @@ export class AuthController {
   @ApiOperation({ summary: 'health check' })
   @ApiResponse({ status: 200 })
   async healthCheck() {
-    return 'UP';
+    return 'up';
   }
 
   @Get('check-email')
@@ -50,11 +49,7 @@ export class AuthController {
     description: '응답 헤더에 토큰을 사용하면 바로 로그인 가능',
   })
   @ApiResponse({ status: 201 })
-  async register(
-    @Query('token') token: string,
-    @Req() req: ExpressRequest,
-    @Res() res: Response,
-  ): Promise<UserResDto> {
+  async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
     req.user = await this.authService.register(token);
     req.device === 'iPhone' || 'iPad' || 'Android'
       ? res.redirect('todo 딥링크')
@@ -76,14 +71,22 @@ export class AuthController {
   }
 
   //-----------------------------------OAuth
-  @Post('google')
+  @Get('google')
   @ApiOperation({
     summary: 'OAuth-구글 로그인',
     description: '로그인 후 응답 헤더에 JWT 추가',
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect() {
+  async google() {
+    return;
+  }
+
+  @Get('google/callback')
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(@Req() req: ExpressRequest) {
+    req.user = await this.authService.oauthLogin(req.user);
     return;
   }
 

@@ -1,9 +1,7 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
 import { User } from '../../entities/user.entity';
-import { CreateUserReqDto } from './dto/createUserReq.dto';
-import { UserResDto } from './dto/userRes.dto';
+import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 
 export class AuthRepository {
   constructor(
@@ -15,9 +13,8 @@ export class AuthRepository {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async createUser(createUserDto: CreateUserReqDto): Promise<UserResDto> {
-    const user = await this.userRepository.save(createUserDto);
-    return plainToInstance(UserResDto, user);
+  async createUser(createUserDto: CreateUserReqDto) {
+    return await this.userRepository.save(createUserDto);
   }
 
   async updateUserOauthInfo(userId: number, oauthInfo: any): Promise<void> {

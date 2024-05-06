@@ -14,12 +14,12 @@ import { AdminService } from './admin.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
-import { DashboardResDto } from './dto/dashboardRes.dto';
-import { ReportsResDto } from './dto/reportsRes.dto';
-import { ProcessReqDto } from './dto/processReq.dto';
+import { DashboardResDto } from './dto/response/dashboardRes.dto';
+import { ReportsResDto } from './dto/response/reportsRes.dto';
+import { ProcessReqDto } from './dto/request/processReq.dto';
 import { Request as ExpressRequest } from 'express';
-import { ReviewResDto } from './dto/reviewRes.dto';
-import { ReportDetailResDto } from './dto/reportDetailRes.dto';
+import { ReviewResDto } from './dto/response/reviewRes.dto';
+import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
