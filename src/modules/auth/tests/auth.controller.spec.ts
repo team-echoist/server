@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
-import { CreateUserReqDto } from '../dto/createUserReq.dto';
+import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import * as dotenv from 'dotenv';
-import { CheckEmailReqDto } from '../dto/checkEamilReq.dto';
+import { CheckEmailReqDto } from '../dto/request/checkEamilReq.dto';
 dotenv.config();
 
 describe('AuthController', () => {

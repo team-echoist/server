@@ -40,7 +40,6 @@ export class RedisService {
       await pipeline.exec(); // 나머지 명령 실행
     }
 
-    // todo 나중에 지우기
     console.log(`Deleted ${keysDeleted} keys matching pattern ${pattern}`);
   }
 }

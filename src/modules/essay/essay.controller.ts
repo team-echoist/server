@@ -18,10 +18,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
-import { CreateEssayReqDto } from './dto/createEssayReq.dto';
-import { EssayResDto } from './dto/essayRes.dto';
-import { UpdateEssayReqDto } from './dto/updateEssayReq.dto';
-import { EssaysResDto } from './dto/essaysRes.dto';
+import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
+import { EssayResDto } from './dto/response/essayRes.dto';
+import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
+import { EssaysResDto } from './dto/response/essaysRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))

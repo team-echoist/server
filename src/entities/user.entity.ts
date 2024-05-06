@@ -18,6 +18,9 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true, unique: true, default: null })
+  nickname: string;
+
   @Column({ unique: true })
   email: string;
 

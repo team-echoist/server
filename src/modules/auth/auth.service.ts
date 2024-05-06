@@ -3,16 +3,16 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { generateToken } from '../../common/utils/verify.utils';
 import { AuthRepository } from './auth.repository';
 import { MailService } from '../mail/mail.service';
-import { CheckEmailReqDto } from './dto/checkEamilReq.dto';
-import { CreateUserReqDto } from './dto/createUserReq.dto';
-import { UserResDto } from './dto/userRes.dto';
+import { CheckEmailReqDto } from './dto/request/checkEamilReq.dto';
+import { CreateUserReqDto } from './dto/request/createUserReq.dto';
+import { UserResDto } from './dto/response/userRes.dto';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRedis() private readonly redis: Redis, // todo redisService 주입
+    @InjectRedis() private readonly redis: Redis,
     private readonly authRepository: AuthRepository,
     private readonly mailService: MailService,
   ) {}
@@ -42,7 +42,7 @@ export class AuthService {
     return;
   }
 
-  async register(token: string): Promise<UserResDto> {
+  async register(token: string) {
     const user = await this.redis.get(token);
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
