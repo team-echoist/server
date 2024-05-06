@@ -71,14 +71,22 @@ export class AuthController {
   }
 
   //-----------------------------------OAuth
-  @Post('google')
+  @Get('google')
   @ApiOperation({
     summary: 'OAuth-구글 로그인',
     description: '로그인 후 응답 헤더에 JWT 추가',
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect() {
+  async google() {
+    return;
+  }
+
+  @Get('google/callback')
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(@Req() req: ExpressRequest) {
+    req.user = await this.authService.oauthLogin(req.user);
     return;
   }
 

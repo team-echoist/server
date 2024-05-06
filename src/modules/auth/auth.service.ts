@@ -8,6 +8,7 @@ import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
+import { OauthDto } from './dto/oauth.dto';
 
 @Injectable()
 export class AuthService {
@@ -73,21 +74,20 @@ export class AuthService {
 
   // ----------------- OAuth ---------------------
 
-  // async oauthLogin(user: any) {
-  //   let existingUser: UserResDto = await this.authRepository.findByEmail(user.email);
-  //
-  //   if (!existingUser) {
-  //     existingUser = await this.authRepository.createUser({
-  //       email: user.email,
-  //       oauthInfo: { [`${user.platform}Id`]: user.platformId },
-  //     });
-  //   } else {
-  //     if (!existingUser.oauthInfo || !existingUser.oauthInfo[`${user.platform}Id`]) {
-  //       await this.authRepository.updateUserOauthInfo(existingUser.id, {
-  //         [`${user.platform}Id`]: user.platformId,
-  //       });
-  //     }
-  //   }
-  //   return generateJWT(existingUser.id, existingUser.email, existingUser.banned);
-  // }
+  async oauthLogin(oauthUser: OauthDto) {
+    let user = await this.authRepository.findByEmail(oauthUser.email);
+    if (!user) {
+      user = await this.authRepository.createUser({
+        email: oauthUser.email,
+        oauthInfo: { [`${oauthUser.platform}Id`]: oauthUser.platformId },
+      });
+    } else {
+      if (!user.oauthInfo || !user.oauthInfo[`${oauthUser.platform}Id`]) {
+        await this.authRepository.updateUserOauthInfo(user.id, {
+          [`${oauthUser.platform}Id`]: oauthUser.platformId,
+        });
+      }
+    }
+    return user;
+  }
 }
