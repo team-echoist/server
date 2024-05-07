@@ -2,7 +2,6 @@ import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
-import { CheckEmailReqDto } from '../dto/request/checkEamilReq.dto';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { User } from '../../../entities/user.entity';
 import { MailService } from '../../mail/mail.service';
@@ -45,24 +44,22 @@ describe('AuthService', () => {
 
   describe('checkEmail', () => {
     it('사용중인 이메일이라면 예외처리', async () => {
-      const checkEmailReqDto = new CheckEmailReqDto();
-      checkEmailReqDto.email = 'user@example.com';
+      const email = 'user@example.com';
       const user = new User();
 
       mockAuthRepository.findByEmail.mockResolvedValue(user);
 
-      await expect(authService.checkEmail(checkEmailReqDto)).rejects.toThrow(HttpException);
+      await expect(authService.checkEmail(email)).rejects.toThrow(HttpException);
     });
 
-    it('사용할 수 있는 이메일이면 true', async () => {
-      const checkEmailReqDto = new CheckEmailReqDto();
-      checkEmailReqDto.email = 'user@example.com';
+    it('사용할 수 있는 이메일이면', async () => {
+      const email = 'user@example.com';
 
       mockAuthRepository.findByEmail.mockResolvedValue(null);
 
-      const result = await authService.checkEmail(checkEmailReqDto);
+      const result = await authService.checkEmail(email);
 
-      expect(result).toEqual(true);
+      expect(result).toEqual(undefined);
     });
   });
 

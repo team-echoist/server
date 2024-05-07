@@ -1,12 +1,21 @@
-import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { isBoolean } from 'class-validator';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginReqDto } from './dto/request/loginReq.dto';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import { CheckEmailReqDto } from './dto/request/checkEamilReq.dto';
+import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -23,9 +32,10 @@ export class AuthController {
   @Get('check')
   @ApiOperation({
     summary: '이메일중복검사',
+    description: '회원가입 페이지에서 이메일 입력칸에 이메일형식의 문자열이 완성되었을 때 사용',
   })
   @ApiQuery({ name: 'email', required: true })
-  @ApiResponse({ status: 200, type: isBoolean })
+  @ApiResponse({ status: 200, type: 'success: boolean' })
   async checkEmail(@Query('email') email: string) {
     return await this.authService.checkEmail(email);
   }
@@ -45,7 +55,7 @@ export class AuthController {
 
   @Get('register')
   @ApiOperation({
-    summary: '인증 링크 확인 후 회원 등록, jwt 발급 및 리다이렉트',
+    summary: 'verify 요청에서 보낸 인증 링크 확인 후 회원 등록, jwt 발급 및 리다이렉트',
     description: '응답 헤더에 토큰을 사용하면 바로 로그인 가능',
   })
   @ApiResponse({ status: 201 })
@@ -53,7 +63,7 @@ export class AuthController {
     req.user = await this.authService.register(token);
     req.device === 'iPhone' || 'iPad' || 'Android'
       ? res.redirect('todo 딥링크')
-      : res.redirect('todo 웹 링크');
+      : res.redirect('https://www.linkedoutapp.com');
 
     return;
   }
@@ -87,6 +97,20 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: ExpressRequest) {
     req.user = await this.authService.oauthLogin(req.user);
+    return;
+  }
+
+  @Post('google/android')
+  @ApiOperation({ summary: 'OAuth-구글 안드로이드 로그인' })
+  @ApiBody({ type: GoogleUserReqDto })
+  @ApiResponse({ status: 200 })
+  async androidGoogleLogin(
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+    @Body() googleUserData: GoogleUserReqDto,
+  ) {
+    req.user = await this.authService.validateGoogleUser(googleUserData);
+    res.status(HttpStatus.OK);
     return;
   }
 
