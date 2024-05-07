@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { isBoolean } from 'class-validator';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -17,17 +17,17 @@ export class AuthController {
   @ApiOperation({ summary: 'health check' })
   @ApiResponse({ status: 200 })
   async healthCheck() {
-    return 'up';
+    return '살아있느니라';
   }
 
-  @Get('check-email')
+  @Get('check')
   @ApiOperation({
     summary: '이메일중복검사',
   })
+  @ApiQuery({ name: 'email', required: true })
   @ApiResponse({ status: 200, type: isBoolean })
-  @ApiBody({ type: CheckEmailReqDto })
-  async checkEmail(@Body() data: CheckEmailReqDto) {
-    return await this.authService.checkEmail(data);
+  async checkEmail(@Query('email') email: string) {
+    return await this.authService.checkEmail(email);
   }
 
   @Post('verify')

@@ -18,8 +18,8 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  async checkEmail(data: CheckEmailReqDto): Promise<boolean> {
-    const user = await this.authRepository.findByEmail(data.email);
+  async checkEmail(email: string): Promise<boolean> {
+    const user = await this.authRepository.findByEmail(email);
     if (user) throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
 
     return true;
