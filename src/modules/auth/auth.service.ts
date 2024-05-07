@@ -3,12 +3,12 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { generateToken } from '../../common/utils/verify.utils';
 import { AuthRepository } from './auth.repository';
 import { MailService } from '../mail/mail.service';
-import { CheckEmailReqDto } from './dto/request/checkEamilReq.dto';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import { UserResDto } from './dto/response/userRes.dto';
+import axios from 'axios';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
 import { OauthDto } from './dto/oauth.dto';
+import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 
 @Injectable()
 export class AuthService {
@@ -86,6 +86,28 @@ export class AuthService {
         await this.authRepository.updateUserOauthInfo(user.id, {
           [`${oauthUser.platform}Id`]: oauthUser.platformId,
         });
+      }
+    }
+    return user;
+  }
+
+  async validateGoogleUser(data: GoogleUserReqDto) {
+    const response = await axios.get(
+      `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${data.token}`,
+    );
+    const googleUser = response.data;
+    if (!googleUser)
+      throw new HttpException('Error validating Google token', HttpStatus.BAD_REQUEST);
+
+    let user = await this.authRepository.findByEmail(googleUser);
+    if (!user) {
+      user = await this.authRepository.createUser({
+        email: googleUser.email,
+        oauthInfo: { ['googleId']: data.id },
+      });
+    } else {
+      if (!user.oauthInfo || !user.oauthInfo['googleId']) {
+        await this.authRepository.updateUserOauthInfo(user.id, { ['googleId']: data.id });
       }
     }
     return user;
