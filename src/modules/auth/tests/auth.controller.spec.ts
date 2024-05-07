@@ -3,7 +3,6 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import * as dotenv from 'dotenv';
-import { CheckEmailReqDto } from '../dto/request/checkEamilReq.dto';
 dotenv.config();
 
 describe('AuthController', () => {
@@ -42,7 +41,7 @@ describe('AuthController', () => {
 
   describe('check-email', () => {
     it('이메일 중복 검사 후 불린값 반환', async () => {
-      const email = new CheckEmailReqDto();
+      const email = 'test@email.com';
       mockAuthService.checkEmail.mockResolvedValue(true);
 
       const result = await controller.checkEmail(email);

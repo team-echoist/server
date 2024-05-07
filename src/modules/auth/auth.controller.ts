@@ -35,7 +35,7 @@ export class AuthController {
     description: '회원가입 페이지에서 이메일 입력칸에 이메일형식의 문자열이 완성되었을 때 사용',
   })
   @ApiQuery({ name: 'email', required: true })
-  @ApiResponse({ status: 200, type: 'string(true) or error' })
+  @ApiResponse({ status: 200, type: 'success: boolean' })
   async checkEmail(@Query('email') email: string) {
     return await this.authService.checkEmail(email);
   }
@@ -76,8 +76,8 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
-  async login(@Res() res: Response) {
-    return res.status(HttpStatus.OK);
+  async login() {
+    return;
   }
 
   //-----------------------------------OAuth

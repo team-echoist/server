@@ -18,11 +18,11 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  async checkEmail(email: string): Promise<boolean> {
+  async checkEmail(email: string) {
     const user = await this.authRepository.findByEmail(email);
     if (user) throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
 
-    return true;
+    return;
   }
 
   async isEmailOwned(createUserDto: CreateUserReqDto) {

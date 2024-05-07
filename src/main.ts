@@ -10,6 +10,7 @@ import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
 import { join } from 'path';
+import { ResponseTransformInterceptor } from './common/interceptros/responseTransform.interceptor';
 
 dotenv.config();
 
@@ -36,7 +37,10 @@ async function bootstrap() {
   app.setGlobalPrefix('/api');
   app.use(helmet.default());
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+    new ResponseTransformInterceptor(),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
