@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Post,
-  Query,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
@@ -104,14 +94,9 @@ export class AuthController {
   @ApiOperation({ summary: 'OAuth-구글 안드로이드 로그인' })
   @ApiBody({ type: GoogleUserReqDto })
   @ApiResponse({ status: 200 })
-  async androidGoogleLogin(
-    @Req() req: ExpressRequest,
-    @Res() res: Response,
-    @Body() googleUserData: GoogleUserReqDto,
-  ) {
+  async androidGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: GoogleUserReqDto) {
     req.user = await this.authService.validateGoogleUser(googleUserData);
-    res.status(HttpStatus.OK);
-    return;
+    return req.user;
   }
 
   @Post('kakao')
