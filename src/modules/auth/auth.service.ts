@@ -4,11 +4,11 @@ import { generateToken } from '../../common/utils/verify.utils';
 import { AuthRepository } from './auth.repository';
 import { MailService } from '../mail/mail.service';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import axios from 'axios';
+import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
+import { OauthDto } from './dto/oauth.dto';
+import { OAuth2Client } from 'google-auth-library';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
-import { OauthDto } from './dto/oauth.dto';
-import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +17,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly mailService: MailService,
   ) {}
+  private readonly oauthClient = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
 
   async checkEmail(email: string) {
     const user = await this.authRepository.findByEmail(email);
@@ -92,24 +93,20 @@ export class AuthService {
   }
 
   async validateGoogleUser(data: GoogleUserReqDto) {
-    const response = await axios.get(
-      `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${data.token}`,
-    );
-    const googleUser = response.data;
-    if (!googleUser)
-      throw new HttpException('Error validating Google token', HttpStatus.BAD_REQUEST);
-
-    let user = await this.authRepository.findByEmail(googleUser);
-    if (!user) {
-      user = await this.authRepository.createUser({
-        email: googleUser.email,
-        oauthInfo: { ['googleId']: data.id },
-      });
-    } else {
-      if (!user.oauthInfo || !user.oauthInfo['googleId']) {
-        await this.authRepository.updateUserOauthInfo(user.id, { ['googleId']: data.id });
-      }
+    const ticket = await this.oauthClient.verifyIdToken({
+      idToken: data.token,
+      audience: process.env.GOOGLE_ANDROID_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (!payload) {
+      throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
     }
-    return user;
+
+    const oauthDto = new OauthDto();
+    oauthDto.platform = 'google';
+    oauthDto.email = payload.email;
+    oauthDto.platformId = data.id;
+
+    return await this.oauthLogin(oauthDto);
   }
 }

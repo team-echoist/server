@@ -11,9 +11,4 @@ export class GoogleUserReqDto {
   @IsString()
   @IsNotEmpty()
   id: string;
-
-  @ApiProperty({ nullable: false })
-  @IsString()
-  @IsNotEmpty()
-  email: string;
 }
