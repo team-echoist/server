@@ -1,14 +1,30 @@
 import { EssayController } from '../essay.controller';
 import { EssayService } from '../essay.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
+import { INestApplication } from '@nestjs/common';
+import { setTestUserMiddleware } from '../../../common/utils/test.utils';
+import * as request from 'supertest';
+
+jest.mock('@nestjs/passport', () => ({
+  AuthGuard: () => {
+    return jest.fn().mockImplementation(() => {
+      return { canActivate: () => true };
+    });
+  },
+}));
 
 describe('EssayController', () => {
+  let app: INestApplication;
   let controller: EssayController;
-  let mockEssayService: any;
+  const mockEssayService = {
+    saveEssay: jest.fn(),
+    updateEssay: jest.fn(),
+    getMyEssay: jest.fn(),
+    deleteEssay: jest.fn(),
+  };
 
   beforeEach(async () => {
-    mockEssayService = {};
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EssayController],
       providers: [
@@ -19,11 +35,61 @@ describe('EssayController', () => {
       ],
     }).compile();
 
+    app = module.createNestApplication();
+    app.use(setTestUserMiddleware({ id: 1 }));
+    await app.init();
     controller = module.get<EssayController>(EssayController);
-    jest.clearAllMocks();
   });
 
-  describe('essay', () => {
-    it('에세이 작성', async () => {});
+  it('에세이 작성', async () => {
+    const createEssayDto = new CreateEssayReqDto();
+    createEssayDto.title = 'title';
+    createEssayDto.content = 'content';
+    const expectedResponse = { id: 1, ...createEssayDto };
+
+    mockEssayService.saveEssay.mockResolvedValue(expectedResponse);
+
+    await request(app.getHttpServer())
+      .post('/essay')
+      .send(createEssayDto)
+      .expect(201)
+      .expect(expectedResponse);
+  });
+
+  it('에세이 업데이트', async () => {
+    const updateEssayDto = { title: 'Updated Essay', content: 'Updated content here' };
+    const essayId = 1;
+    const expectedResponse = { id: essayId, ...updateEssayDto };
+
+    mockEssayService.updateEssay.mockResolvedValue(expectedResponse);
+
+    await request(app.getHttpServer())
+      .put(`/essay/${essayId}`)
+      .send(updateEssayDto)
+      .expect(200)
+      .expect(expectedResponse);
+  });
+
+  it('쿼리 매개변수로 에세이 조회', async () => {
+    const mockResponse = [{ id: 1, title: 'Sample Essay' }];
+    mockEssayService.getMyEssay.mockResolvedValue(mockResponse);
+
+    await request(app.getHttpServer())
+      .get('/essay')
+      .query({ page: 1, limit: 10, published: true, categoryId: 5 })
+      .expect(200)
+      .expect(mockResponse);
+  });
+
+  it('에세이 삭제', async () => {
+    const essayId = 1;
+
+    mockEssayService.deleteEssay.mockResolvedValue(true);
+
+    await request(app.getHttpServer()).delete(`/essay/${essayId}`).expect(200);
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });

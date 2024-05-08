@@ -17,16 +17,16 @@ export class SaveEssayDto {
   @IsOptional()
   @IsNumber()
   @Expose()
-  linkedOutGauge: number;
+  linkedOutGauge?: number;
 
   @IsOptional()
   @Expose()
-  category: Category;
+  category?: Category;
 
   @IsOptional()
   @IsString()
   @Expose()
-  thumbnail: string;
+  thumbnail?: string;
 
   @IsNotEmpty()
   @IsBoolean()

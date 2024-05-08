@@ -66,7 +66,7 @@ export class EssayRepository {
   }
 
   async deleteEssay(essay: Essay) {
-    await this.essayRepository.delete(essay);
+    await this.essayRepository.delete(essay.id);
     return;
   }
 

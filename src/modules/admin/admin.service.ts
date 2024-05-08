@@ -11,7 +11,7 @@ import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { Transactional } from 'typeorm-transactional';
 import { ProcessReqDto } from './dto/request/processReq.dto';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
-import { ReviewsDto } from './dto/reviews.dto';
+import { ReviewDto } from './dto/review.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 
 @Injectable()
@@ -138,7 +138,7 @@ export class AdminService {
     const totalPage: number = Math.ceil(total / limit);
 
     const reviewsDto = plainToInstance(
-      ReviewsDto,
+      ReviewDto,
       reviews.map((review) => ({
         id: review.id,
         type: review.type,
