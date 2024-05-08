@@ -65,14 +65,15 @@ export class EssayController {
     @Query('published', OptionalBoolPipe) published: boolean,
     @Query('categoryId', OptionalParseIntPipe) categoryId: number,
   ) {
+    // todo 일반, 프리미엄 구독자 구별 기능
     return await this.essayService.getMyEssay(req.user.id, published, categoryId, page, limit);
   }
 
   @Delete(':essayId')
   @ApiOperation({ summary: '에세이 삭제' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 204 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     await this.essayService.deleteEssay(req.user.id, essayId);
-    return { message: 'Essay deleted successfully.' };
+    return;
   }
 }

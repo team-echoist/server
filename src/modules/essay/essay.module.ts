@@ -13,9 +13,9 @@ import { UserRepository } from '../user/user.repository';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { Category } from '../../entities/category.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
-import { Category } from '../../entities/category.entity';
 
 dotenv.config();
 

@@ -18,7 +18,7 @@ import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
 import { Request as ExpressRequest } from 'express';
-import { ReviewResDto } from './dto/response/reviewRes.dto';
+import { ReviewsResDto } from './dto/response/reviewsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 
 @ApiTags('Admin')
@@ -76,7 +76,7 @@ export class AdminController {
 
   @Get('review')
   @ApiOperation({ summary: '리뷰 리스트' })
-  @ApiResponse({ status: 200, type: ReviewResDto })
+  @ApiResponse({ status: 200, type: ReviewsResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getReviews(

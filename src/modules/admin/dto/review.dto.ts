@@ -1,8 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
-export class ReviewsDto {
+export class ReviewDto {
   @Expose()
   @IsNumber()
   id: number;
