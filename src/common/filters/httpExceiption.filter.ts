@@ -19,19 +19,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(
-        `${message}\nRequest: \n${JSON.stringify(
-          request.body,
-          null,
-          2,
-        )} \nResponse: \n${JSON.stringify(error, null, 2)}\nStack Trace: ${errorStack}`,
+        `${message}\nRequest: ${JSON.stringify(request.body)}\nResponse: ${JSON.stringify(error)}\nStack Trace: ${JSON.stringify(errorStack)}`,
       );
     } else if (status >= 400) {
       this.logger.warn(
-        `${message}\nRequest: \n${JSON.stringify(
-          request.body,
-          null,
-          2,
-        )} \nResponse: \n${JSON.stringify(error, null, 2)}\nStack Trace: ${errorStack}`,
+        `${message}\nRequest: ${JSON.stringify(request.body)}\nResponse: ${JSON.stringify(error)}\nStack Trace: ${JSON.stringify(errorStack)}`,
       );
     }
 

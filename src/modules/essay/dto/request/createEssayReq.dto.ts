@@ -15,17 +15,17 @@ export class CreateEssayReqDto {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
-  linkedOutGauge: number;
+  linkedOutGauge?: number;
 
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
-  categoryId: number;
+  categoryId?: number;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  thumbnail: string;
+  thumbnail?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

@@ -71,7 +71,7 @@ export class EssayController {
 
   @Delete(':essayId')
   @ApiOperation({ summary: '에세이 삭제' })
-  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     await this.essayService.deleteEssay(req.user.id, essayId);
     return;

@@ -20,10 +20,11 @@ export class EssayService {
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userRepository.findById(requester.id);
-    let category = null;
+    let category: any;
 
     if (data.categoryId) {
       category = await this.essayRepository.findCategoryById(user, data.categoryId);
+      if (!category) throw new HttpException('Category not found.', HttpStatus.BAD_REQUEST);
     }
 
     const essayData = {
@@ -70,7 +71,8 @@ export class EssayService {
   @Transactional()
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
     const user = await this.userRepository.findById(requester.id);
-    let category = null;
+    let category: any;
+    let message = '';
 
     const essay = await this.essayRepository.findEssayById(essayId);
     if (!essay) throw new Error('Essay not found');
@@ -93,20 +95,22 @@ export class EssayService {
 
     if (requester.banned) {
       if (data.published || data.linkedOut) {
-        const reviewType = data.published ? 'published' : data.linkedOut ? 'linked_out' : null;
+        const reviewType = data.published ? 'published' : 'linked_out';
         await this.essayRepository.saveReviewRequest(user, essay, reviewType);
-        return { essay, message: 'Review request created due to policy violations.' };
+        message = 'Review request created due to policy violations.';
       }
       essayData.published = false;
       essayData.linkedOut = false;
     }
 
     await this.essayRepository.updateEssay(essay, essayData);
-
     const updatedEssay = await this.essayRepository.findEssayById(essay.id);
-    return plainToInstance(EssayResDto, updatedEssay, {
+    const resultData = plainToInstance(EssayResDto, updatedEssay, {
       excludeExtraneousValues: true,
     });
+
+    // Return data and message, handling is done in the interceptor
+    return { ...resultData, message: message };
   }
 
   async getMyEssay(

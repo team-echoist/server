@@ -11,6 +11,7 @@ import * as dotenv from 'dotenv';
 
 import { join } from 'path';
 import { ResponseTransformInterceptor } from './common/interceptros/responseTransform.interceptor';
+import { LoggingInterceptor } from './common/interceptros/logging.interceptor';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
     new ResponseTransformInterceptor(),
+    new LoggingInterceptor(),
   );
   app.useGlobalPipes(
     new ValidationPipe({

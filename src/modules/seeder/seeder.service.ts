@@ -76,7 +76,7 @@ export class SeederService {
         const essay = this.essayRepository.create({
           title: `Sample Essay Title ${j}`,
           content: 'Sample content here...',
-          linkedOutGauge: Math.floor(Math.random() * 100),
+          linkedOutGauge: Math.floor(Math.random() * 6),
           author: user,
           published: Math.random() < 0.5,
           linkedOut: user.banned,
