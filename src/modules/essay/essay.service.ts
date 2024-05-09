@@ -50,7 +50,7 @@ export class EssayService {
         excludeExtraneousValues: true,
       });
 
-      const reviewType = data.published ? 'published' : data.linkedOut ? 'linked_out' : null;
+      const reviewType = data.published ? 'published' : data.linkedOut ? 'linkedOut' : null;
 
       if (reviewType) {
         await this.essayRepository.saveReviewRequest(user, essay, reviewType);
@@ -95,7 +95,7 @@ export class EssayService {
 
     if (requester.banned) {
       if (data.published || data.linkedOut) {
-        const reviewType = data.published ? 'published' : 'linked_out';
+        const reviewType = data.published ? 'published' : 'linkedOut';
         await this.essayRepository.saveReviewRequest(user, essay, reviewType);
         message = 'Review request created due to policy violations.';
       }

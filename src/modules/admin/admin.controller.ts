@@ -66,7 +66,7 @@ export class AdminController {
   @ApiOperation({ summary: '리포트 처리' })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: ProcessReqDto })
-  async processEssayReports(
+  async processReports(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
     @Body() processReqDto: ProcessReqDto,
@@ -74,7 +74,7 @@ export class AdminController {
     return await this.adminService.processReports(req.user.id, essayId, processReqDto);
   }
 
-  @Get('review')
+  @Get('reviews')
   @ApiOperation({ summary: '리뷰 리스트' })
   @ApiResponse({ status: 200, type: ReviewsResDto })
   @ApiQuery({ name: 'page', required: false })
@@ -89,5 +89,19 @@ export class AdminController {
   @Get('review/:reviewId')
   @ApiOperation({ summary: '리뷰 상세' })
   @ApiResponse({ status: 200 })
-  async getReview() {}
+  async getReview(@Param('reviewId', ParseIntPipe) reviewId: number) {
+    return await this.adminService.detailReview(reviewId);
+  }
+
+  @Post('review/:reviewId')
+  @ApiOperation({ summary: '리뷰 처리' })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: ProcessReqDto })
+  async processReview(
+    @Req() req: ExpressRequest,
+    @Param('reviewId', ParseIntPipe) reviewId: number,
+    @Body() processReqDto: ProcessReqDto,
+  ) {
+    return await this.adminService.processReview(req.user.id, reviewId, processReqDto);
+  }
 }

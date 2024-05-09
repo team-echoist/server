@@ -13,6 +13,7 @@ import { ProcessReqDto } from './dto/request/processReq.dto';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { ReviewDto } from './dto/review.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
+import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -97,22 +98,22 @@ export class AdminService {
   }
 
   @Transactional()
-  async processReports(userId: number, essayId: number, processReqDto: ProcessReqDto) {
+  async processReports(userId: number, essayId: number, data: ProcessReqDto) {
     const essay = await this.essayRepository.findEssayById(essayId);
     if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
 
-    if (processReqDto.result === 'Approved') {
+    if (data.result === 'Approved') {
       essay.published = false;
       essay.linkedOut = false;
       await this.essayRepository.saveEssay(essay);
       // todo 여기에 앱 푸쉬알림이랑 메일링 추가해야할듯
     }
-    await this.syncProcessed(essayId, userId, processReqDto.result, processReqDto.comment);
+    await this.syncReportsProcessed(essayId, userId, data.result, data.comment);
     return;
   }
 
   @Transactional()
-  async syncProcessed(essayId: number, userId: number, result: string, comment: string) {
+  async syncReportsProcessed(essayId: number, userId: number, result: string, comment: string) {
     const reports = await this.adminRepository.findReportByEssayId(essayId);
     if (!reports.length)
       throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
@@ -154,5 +155,35 @@ export class AdminService {
       },
     );
     return { reviews: reviewsDto, totalPage, page, total };
+  }
+
+  async detailReview(reviewId: number) {
+    const review = await this.adminRepository.getReview(reviewId);
+    return plainToInstance(DetailReviewResDto, review, { excludeExtraneousValues: true });
+  }
+
+  @Transactional()
+  async processReview(userId: number, reviewId: number, data: ProcessReqDto) {
+    const review = await this.adminRepository.getReview(reviewId);
+    review.processed = true;
+
+    if (data.result === 'Approved')
+      review.type === 'published'
+        ? (review.essay.published = true)
+        : (review.essay.linkedOut = true);
+    await this.essayRepository.saveEssay(review.essay);
+    await this.adminRepository.saveReview(review);
+
+    const newHistory = new ProcessedHistory();
+    newHistory.comment = data.comment;
+    newHistory.result = data.result;
+    newHistory.processor = userId;
+    newHistory.review = review;
+    newHistory.processedDate = new Date();
+    await this.adminRepository.saveHistory(newHistory);
+
+    // todo 유저에게 결과 메일 또는 푸쉬알림
+
+    return;
   }
 }

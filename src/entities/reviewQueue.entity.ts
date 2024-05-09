@@ -17,7 +17,7 @@ export class ReviewQueue {
   id: number;
 
   @Column()
-  type: 'published' | 'linked_out';
+  type: 'published' | 'linkedOut';
 
   @Column({ default: false })
   processed: boolean;

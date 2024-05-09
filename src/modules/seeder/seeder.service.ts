@@ -87,7 +87,7 @@ export class SeederService {
             const reviewQueue = this.reviewQueueRepository.create({
               essay: savedEssay,
               user: user,
-              type: 'linked_out',
+              type: 'linkedOut',
               createdDate: new Date(),
             });
             reviewQueuePromises.push(this.reviewQueueRepository.save(reviewQueue));

@@ -93,10 +93,23 @@ export class AdminRepository {
 
   async getReviews(page: number, limit: number) {
     const [reviews, total] = await this.reviewRepository.findAndCount({
+      where: { processed: false },
       skip: (page - 1) * limit,
       take: limit,
       relations: ['user', 'essay'],
+      order: { createdDate: 'DESC' },
     });
     return { reviews, total };
+  }
+
+  async getReview(reviewId: number) {
+    return await this.reviewRepository.findOne({
+      where: { id: reviewId },
+      relations: ['essay', 'user'],
+    });
+  }
+
+  async saveReview(review: ReviewQueue) {
+    return await this.reviewRepository.save(review);
   }
 }

@@ -34,7 +34,7 @@ export class EssayRepository {
     return await this.essayRepository.save(data);
   }
 
-  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linked_out') {
+  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linkedOut') {
     await this.reviewRepository.save({
       user: user,
       essay: essay,
