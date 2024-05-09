@@ -9,6 +9,9 @@ import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class AuthService {
@@ -93,11 +96,14 @@ export class AuthService {
   }
 
   async validateGoogleUser(data: GoogleUserReqDto) {
+    console.log(process.env.GOOGLE_ANDROID_CLIENT_ID);
     const ticket = await this.oauthClient.verifyIdToken({
       idToken: data.token,
       audience: process.env.GOOGLE_ANDROID_CLIENT_ID,
     });
+
     const payload = ticket.getPayload();
+    console.log(payload);
     if (!payload) {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
     }

@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -85,4 +85,9 @@ export class AdminController {
   ) {
     return await this.adminService.getReviews(page, limit);
   }
+
+  @Get('review/:reviewId')
+  @ApiOperation({ summary: '리뷰 상세' })
+  @ApiResponse({ status: 200 })
+  async getReview() {}
 }
