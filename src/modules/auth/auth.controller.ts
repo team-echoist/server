@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { LoginReqDto } from './dto/request/loginReq.dto';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
@@ -51,10 +51,11 @@ export class AuthController {
   @ApiResponse({ status: 201 })
   async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
     req.user = await this.authService.register(token);
-    req.device === 'iPhone' || 'iPad' || 'Android'
-      ? res.redirect('todo 딥링크')
-      : res.redirect('https://www.linkedoutapp.com');
-
+    if (req.device === 'iPhone' || req.device === 'iPad' || req.device === 'Android') {
+      res.redirect('todo 딥링크');
+    } else {
+      res.redirect('https://www.linkedoutapp.com');
+    }
     return;
   }
 

@@ -17,6 +17,7 @@ import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Category } from '../../entities/category.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { AwsService } from '../aws/aws.service';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ dotenv.config();
     AuthRepository,
     EssayRepository,
     UserRepository,
+    AwsService,
     strategies.JwtStrategy,
   ],
 })
