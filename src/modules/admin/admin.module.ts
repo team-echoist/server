@@ -1,23 +1,23 @@
-import * as strategies from '../../common/guards/strategies';
-import { MailService } from '../mail/mail.service';
-import { JwtModule } from '@nestjs/jwt';
-import { AdminRepository } from './admin.repository';
-import { AdminService } from './admin.service';
-import { AdminController } from './admin.controller';
 import { Module } from '@nestjs/common';
+import { AdminController } from './admin.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailService } from '../mail/mail.service';
+import { AdminService } from './admin.service';
 import { AuthService } from '../auth/auth.service';
+import { UtilsService } from '../utils/utils.service';
+import { AdminRepository } from './admin.repository';
 import { AuthRepository } from '../auth/auth.repository';
 import { UserRepository } from '../user/user.repository';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { EssayRepository } from '../essay/essay.repository';
 import { User } from '../../entities/user.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
-import { DayUtils } from '../../common/utils/day.utils';
 import { Essay } from '../../entities/essay.entity';
-import { EssayRepository } from '../essay/essay.repository';
 import { Subscription } from '../../entities/subscription.entity';
-import { Category } from '../../entities/category.entity';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
+import { Category } from '../../entities/category.entity';
+import * as strategies from '../../common/guards/strategies';
 
 @Module({
   imports: [
@@ -43,7 +43,7 @@ import { ProcessedHistory } from '../../entities/processedHistory.entity';
     UserRepository,
     EssayRepository,
     MailService,
-    DayUtils,
+    UtilsService,
     strategies.JwtStrategy,
   ],
   exports: [],

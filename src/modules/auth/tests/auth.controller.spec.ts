@@ -3,6 +3,7 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 describe('AuthController', () => {

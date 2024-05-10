@@ -12,6 +12,10 @@ export class UserRepository {
     return await this.userRepository.findOne({ where: { id: userId } });
   }
 
+  async saveUser(user: User) {
+    return await this.userRepository.save(user);
+  }
+
   // ------------------------------------------------------admin api
   async usersCount() {
     return await this.userRepository.count();

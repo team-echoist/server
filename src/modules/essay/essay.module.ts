@@ -7,6 +7,7 @@ import { AuthService } from '../auth/auth.service';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
 import { RedisService } from '../redis/redis.service';
+import { UtilsService } from '../utils/utils.service';
 import { EssayRepository } from './essay.repository';
 import { AuthRepository } from '../auth/auth.repository';
 import { UserRepository } from '../user/user.repository';
@@ -16,6 +17,7 @@ import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Category } from '../../entities/category.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { AwsService } from '../aws/aws.service';
 
 dotenv.config();
 
@@ -29,13 +31,15 @@ dotenv.config();
   controllers: [EssayController],
   providers: [
     AuthService,
-    AuthRepository,
     MailService,
     EssayService,
-    EssayRepository,
     UserService,
-    UserRepository,
     RedisService,
+    UtilsService,
+    AuthRepository,
+    EssayRepository,
+    UserRepository,
+    AwsService,
     strategies.JwtStrategy,
   ],
 })

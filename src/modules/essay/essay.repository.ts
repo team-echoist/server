@@ -4,7 +4,6 @@ import { SaveEssayDto } from './dto/saveEssay.dto';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { Category } from '../../entities/category.entity';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
@@ -34,7 +33,7 @@ export class EssayRepository {
     return await this.essayRepository.save(data);
   }
 
-  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linked_out') {
+  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linkedOut') {
     await this.reviewRepository.save({
       user: user,
       essay: essay,
