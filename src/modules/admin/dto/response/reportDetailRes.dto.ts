@@ -2,7 +2,6 @@ import { ReportDto } from '../report.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
-import { ReportsDto } from '../reports.dto';
 
 export class ReportDetailResDto {
   @ApiProperty()

@@ -4,7 +4,6 @@ import { SaveEssayDto } from './dto/saveEssay.dto';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { Category } from '../../entities/category.entity';
 import { UpdateEssayDto } from './dto/updateEssay.dto';

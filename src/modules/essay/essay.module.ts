@@ -7,6 +7,7 @@ import { AuthService } from '../auth/auth.service';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
 import { RedisService } from '../redis/redis.service';
+import { UtilsService } from '../utils/utils.service';
 import { EssayRepository } from './essay.repository';
 import { AuthRepository } from '../auth/auth.repository';
 import { UserRepository } from '../user/user.repository';
@@ -29,13 +30,14 @@ dotenv.config();
   controllers: [EssayController],
   providers: [
     AuthService,
-    AuthRepository,
     MailService,
     EssayService,
-    EssayRepository,
     UserService,
-    UserRepository,
     RedisService,
+    UtilsService,
+    AuthRepository,
+    EssayRepository,
+    UserRepository,
     strategies.JwtStrategy,
   ],
 })

@@ -3,7 +3,6 @@ import { MailService } from '../mail/mail.service';
 import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
-import { DayUtils } from '../../common/utils/day.utils';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { plainToInstance } from 'class-transformer';
 import { ReportsDto } from './dto/reports.dto';
@@ -14,6 +13,7 @@ import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { ReviewDto } from './dto/review.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
+import { UtilsService } from '../utils/utils.service';
 
 @Injectable()
 export class AdminService {
@@ -22,14 +22,14 @@ export class AdminService {
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
     private readonly mailService: MailService,
-    private readonly dayUtils: DayUtils,
+    private readonly utilsService: UtilsService,
   ) {}
 
   @Transactional()
   async dashboard() {
     const today = new Date();
-    const todayStart = this.dayUtils.startOfDay(today);
-    const todayEnd = this.dayUtils.endOfDay(today);
+    const todayStart = this.utilsService.startOfDay(today);
+    const todayEnd = this.utilsService.endOfDay(today);
 
     const totalUser = await this.userRepository.usersCount();
     const currentSubscriber = await this.adminRepository.totalSubscriberCount(today);

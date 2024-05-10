@@ -23,6 +23,10 @@ export class UserDto {
   gender: string;
 
   @Expose()
+  @IsString()
+  profileImage: string;
+
+  @Expose()
   @IsDate()
   birthDate: Date;
 

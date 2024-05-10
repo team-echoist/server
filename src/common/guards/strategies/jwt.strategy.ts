@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../../modules/auth/auth.service';
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 @Injectable()

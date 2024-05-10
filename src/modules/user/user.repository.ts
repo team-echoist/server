@@ -16,4 +16,10 @@ export class UserRepository {
   async usersCount() {
     return await this.userRepository.count();
   }
+
+  // ------------------------------------------------------storage api
+
+  async profileImageUpload(userId: number, imageUrl: string) {
+    return await this.userRepository.update({ id: userId }, { profileImage: imageUrl });
+  }
 }

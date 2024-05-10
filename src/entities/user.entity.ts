@@ -1,11 +1,11 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Essay } from './essay.entity';
 import { Subscription } from './subscription.entity';
@@ -29,6 +29,9 @@ export class User {
 
   @Column({ nullable: true })
   gender: string;
+
+  @Column({ name: 'profile_image', nullable: true })
+  profileImage: string;
 
   @Column({ name: 'birth_date', nullable: true })
   birthDate: Date;

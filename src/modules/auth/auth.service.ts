@@ -1,17 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { generateToken } from '../../common/utils/verify.utils';
-import { AuthRepository } from './auth.repository';
+import { UtilsService } from '../utils/utils.service';
 import { MailService } from '../mail/mail.service';
+import { AuthRepository } from './auth.repository';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -19,8 +17,12 @@ export class AuthService {
     @InjectRedis() private readonly redis: Redis,
     private readonly authRepository: AuthRepository,
     private readonly mailService: MailService,
+    private readonly utilsService: UtilsService,
+    private configService: ConfigService,
   ) {}
-  private readonly oauthClient = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
+  private readonly oauthClient = new OAuth2Client(
+    this.configService.get('GOOGLE_ANDROID_CLIENT_ID'),
+  );
 
   async checkEmail(email: string) {
     const user = await this.authRepository.findByEmail(email);
@@ -37,7 +39,7 @@ export class AuthService {
       throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
     }
 
-    const token = await generateToken();
+    const token = await this.utilsService.generateVerifyToken();
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
     await this.redis.set(token, JSON.stringify(createUserDto), 'EX', 600);

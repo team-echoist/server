@@ -8,7 +8,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EssayModule } from './modules/essay/essay.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { MailModule } from './modules/mail/mail.module';
+import { UtilsModule } from './modules/utils/utils.module';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { StorageModule } from './modules/storage/storage.module';
 import { SeederService } from './modules/seeder/seeder.service';
 import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
@@ -30,6 +32,8 @@ import { TypeOrmOptions } from '../typeorm.options';
     EssayModule,
     MailModule,
     RedisModule,
+    StorageModule,
+    UtilsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
