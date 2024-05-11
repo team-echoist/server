@@ -15,7 +15,7 @@ export class UserService {
   ) {}
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.userRepository.findUserById(userId);
     const newExt = file.originalname.split('.').pop();
 
     let fileName: any;

@@ -9,7 +9,6 @@ import { AwsModule } from '../aws/aws.module';
 import { EssayController } from './essay.controller';
 import { EssayService } from './essay.service';
 import { EssayRepository } from './essay.repository';
-import { RedisService } from '../redis/redis.service';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
@@ -32,7 +31,7 @@ dotenv.config();
     AwsModule,
   ],
   controllers: [EssayController],
-  providers: [EssayService, EssayRepository, RedisService, strategies.JwtStrategy],
+  providers: [EssayService, EssayRepository, strategies.JwtStrategy],
   exports: [EssayService, EssayRepository],
 })
 export class EssayModule {}

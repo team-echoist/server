@@ -51,7 +51,7 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findMyEssay(query: FindMyEssayQueryInterface, page: number, limit: number) {
+  async findEssays(query: FindMyEssayQueryInterface, page: number, limit: number) {
     const [essays, total] = await this.essayRepository.findAndCount({
       where: query,
       skip: (page - 1) * limit,

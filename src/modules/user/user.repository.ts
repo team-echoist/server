@@ -8,7 +8,7 @@ export class UserRepository {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findById(userId: number) {
+  async findUserById(userId: number) {
     return await this.userRepository.findOne({ where: { id: userId } });
   }
 
