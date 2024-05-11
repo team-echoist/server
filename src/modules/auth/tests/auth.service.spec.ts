@@ -6,27 +6,30 @@ import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { User } from '../../../entities/user.entity';
 import { MailService } from '../../mail/mail.service';
 import * as bcrypt from 'bcrypt';
+import { UtilsService } from '../../utils/utils.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let mockAuthRepository: any;
-  let mockRedis: any;
-  let mockMailService: any;
+  const mockAuthRepository = {
+    findByEmail: jest.fn(),
+    createUser: jest.fn(),
+  };
+  const mockRedis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+  const mockMailService = {
+    sendVerificationEmail: jest.fn(),
+  };
+
+  const mockUtilsService = {
+    generateJWT: jest.fn(),
+    generateVerifyToken: jest.fn(() => 'verify token'),
+  };
 
   beforeEach(async () => {
-    mockAuthRepository = {
-      findByEmail: jest.fn(),
-      createUser: jest.fn(),
-    };
-    mockRedis = {
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-    };
-    mockMailService = {
-      sendVerificationEmail: jest.fn(),
-    };
-
     const RedisInstance = jest.fn(() => mockRedis);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -35,6 +38,8 @@ describe('AuthService', () => {
         { provide: AuthRepository, useValue: mockAuthRepository },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
         { provide: MailService, useValue: mockMailService },
+        { provide: UtilsService, useValue: mockUtilsService },
+        ConfigService,
       ],
     }).compile();
 
