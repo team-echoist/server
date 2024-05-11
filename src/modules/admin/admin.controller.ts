@@ -20,6 +20,7 @@ import { ProcessReqDto } from './dto/request/processReq.dto';
 import { Request as ExpressRequest } from 'express';
 import { ReviewsResDto } from './dto/response/reviewsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
+import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -36,6 +37,30 @@ export class AdminController {
   @ApiResponse({ status: 200, type: DashboardResDto })
   async dashboard() {
     return await this.adminService.dashboard();
+  }
+
+  @Get('statistics/essay/daily')
+  @ApiOperation({
+    summary: '월간 일별 에세이 작성 카운트',
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({ status: 200 })
+  async getDailyEssayCount(
+    @Query('year', OptionalParseIntPipe) year?: number,
+    @Query('month', OptionalParseIntPipe) month?: number,
+  ) {
+    return this.adminService.countEssaysByDailyThisMonth(year, month);
+  }
+
+  @Get('statistics/essay/month')
+  @ApiOperation({
+    summary: '년간 월별 에세이 작성 카운트',
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({ status: 200 })
+  async getMonthlyEssayCount(@Query('year', OptionalParseIntPipe) year?: number) {
+    return this.adminService.countEssaysByMonthlyThisYear(year);
   }
 
   @Get('report')
