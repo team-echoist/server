@@ -1,23 +1,21 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from '../auth/auth.module';
+import { MailModule } from '../mail/mail.module';
+import { UserModule } from '../user/user.module';
+import { UtilsModule } from '../utils/utils.module';
+import { AwsModule } from '../aws/aws.module';
 import { EssayController } from './essay.controller';
 import { EssayService } from './essay.service';
-import { AuthService } from '../auth/auth.service';
-import { MailService } from '../mail/mail.service';
-import { UserService } from '../user/user.service';
-import { RedisService } from '../redis/redis.service';
-import { UtilsService } from '../utils/utils.service';
 import { EssayRepository } from './essay.repository';
-import { AuthRepository } from '../auth/auth.repository';
-import { UserRepository } from '../user/user.repository';
+import { RedisService } from '../redis/redis.service';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Category } from '../../entities/category.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
-import { AwsService } from '../aws/aws.service';
 
 dotenv.config();
 
@@ -27,20 +25,14 @@ dotenv.config();
       secret: process.env.JWT_SECRET,
     }),
     TypeOrmModule.forFeature([User, Essay, Category, ReviewQueue]),
+    AuthModule,
+    MailModule,
+    UserModule,
+    UtilsModule,
+    AwsModule,
   ],
   controllers: [EssayController],
-  providers: [
-    AuthService,
-    MailService,
-    EssayService,
-    UserService,
-    RedisService,
-    UtilsService,
-    AuthRepository,
-    EssayRepository,
-    UserRepository,
-    AwsService,
-    strategies.JwtStrategy,
-  ],
+  providers: [EssayService, EssayRepository, RedisService, strategies.JwtStrategy],
+  exports: [EssayService, EssayRepository],
 })
 export class EssayModule {}

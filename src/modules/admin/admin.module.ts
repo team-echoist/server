@@ -2,14 +2,13 @@ import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MailService } from '../mail/mail.service';
+import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../user/user.module';
+import { EssayModule } from '../essay/essay.module';
+import { MailModule } from '../mail/mail.module';
+import { UtilsModule } from '../utils/utils.module';
 import { AdminService } from './admin.service';
-import { AuthService } from '../auth/auth.service';
-import { UtilsService } from '../utils/utils.service';
 import { AdminRepository } from './admin.repository';
-import { AuthRepository } from '../auth/auth.repository';
-import { UserRepository } from '../user/user.repository';
-import { EssayRepository } from '../essay/essay.repository';
 import { User } from '../../entities/user.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
@@ -33,19 +32,14 @@ import * as strategies from '../../common/guards/strategies';
       Subscription,
       ProcessedHistory,
     ]),
+    AuthModule,
+    UserModule,
+    EssayModule,
+    MailModule,
+    UtilsModule,
   ],
   controllers: [AdminController],
-  providers: [
-    AdminService,
-    AdminRepository,
-    AuthService,
-    AuthRepository,
-    UserRepository,
-    EssayRepository,
-    MailService,
-    UtilsService,
-    strategies.JwtStrategy,
-  ],
+  providers: [AdminService, AdminRepository, strategies.JwtStrategy],
   exports: [],
 })
 export class AdminModule {}
