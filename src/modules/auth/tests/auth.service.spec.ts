@@ -6,40 +6,41 @@ import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { User } from '../../../entities/user.entity';
 import { MailService } from '../../mail/mail.service';
 import * as bcrypt from 'bcrypt';
+import { UtilsService } from '../../utils/utils.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let mockAuthRepository: any;
-  let mockRedis: any;
-  let mockMailService: any;
+  let mockAuthRepository: jest.Mocked<AuthRepository>;
+  let mockMailService: jest.Mocked<MailService>;
+  let mockUtilsService: jest.Mocked<UtilsService>;
+  const mockRedis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
 
   beforeEach(async () => {
-    mockAuthRepository = {
-      findByEmail: jest.fn(),
-      createUser: jest.fn(),
-    };
-    mockRedis = {
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-    };
-    mockMailService = {
-      sendVerificationEmail: jest.fn(),
-    };
-
     const RedisInstance = jest.fn(() => mockRedis);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        { provide: AuthRepository, useValue: mockAuthRepository },
+        { provide: AuthRepository, useValue: { findByEmail: jest.fn(), createUser: jest.fn() } },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
-        { provide: MailService, useValue: mockMailService },
+        { provide: MailService, useValue: { sendVerificationEmail: jest.fn() } },
+        {
+          provide: UtilsService,
+          useValue: { generateJWT: jest.fn(), generateVerifyToken: jest.fn(() => 'verify token') },
+        },
+        ConfigService,
       ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
-    jest.clearAllMocks();
+    mockAuthRepository = module.get(AuthRepository);
+    mockMailService = module.get(MailService);
+    mockUtilsService = module.get(UtilsService);
   });
 
   describe('checkEmail', () => {
@@ -107,7 +108,9 @@ describe('AuthService', () => {
       const email = 'user@example.com';
       const password = '1234';
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = { email: email, password: hashedPassword };
+      const user = new User();
+      user.email = email;
+      user.password = hashedPassword;
 
       mockAuthRepository.findByEmail.mockResolvedValue(user);
 

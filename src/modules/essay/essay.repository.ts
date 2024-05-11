@@ -51,7 +51,7 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findMyEssay(query: FindMyEssayQueryInterface, page: number, limit: number) {
+  async findEssays(query: FindMyEssayQueryInterface, page: number, limit: number) {
     const [essays, total] = await this.essayRepository.findAndCount({
       where: query,
       skip: (page - 1) * limit,
@@ -88,14 +88,39 @@ export class EssayRepository {
     return await this.essayRepository.count({ where: { linkedOut: true } });
   }
 
+  async countEssaysByDailyThisMonth(firstDayOfMonth: Date, lastDayOfMonth: Date) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .select('DATE(essay.createdDate)', 'date')
+      .addSelect('COUNT(*)', 'count')
+      .where('essay.createdDate >= :start AND essay.createdDate <= :end', {
+        start: firstDayOfMonth,
+        end: lastDayOfMonth,
+      })
+      .groupBy('DATE(essay.createdDate)')
+      .orderBy('DATE(essay.createdDate)', 'ASC')
+      .getRawMany();
+  }
+
+  async countEssaysByMonthlyThisYear(year: number) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .select('EXTRACT(MONTH FROM essay.createdDate)', 'month')
+      .addSelect('COUNT(*)', 'count')
+      .where('EXTRACT(YEAR FROM essay.createdDate) = :year', { year: year })
+      .groupBy('EXTRACT(MONTH FROM essay.createdDate)')
+      .orderBy('EXTRACT(MONTH FROM essay.createdDate)', 'ASC')
+      .getRawMany();
+  }
+
   async getReportDetails(essayId: number) {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.reports', 'report', 'report.processed = :processed', {
         processed: false,
       })
-      .leftJoin('report.reporter', 'reporter') // Join without selecting all fields
-      .leftJoin('essay.author', 'author') // Assuming 'author' is a relation on the Essay entity
+      .leftJoin('report.reporter', 'reporter')
+      .leftJoin('essay.author', 'author')
       .select([
         'essay.id',
         'essay.title',

@@ -60,6 +60,54 @@ export class AdminService {
     );
   }
 
+  async countEssaysByDailyThisMonth(queryYear: number, queryMonth: number) {
+    const currentDate = new Date();
+
+    const year = queryYear ? queryYear : currentDate.getFullYear();
+    const month = queryMonth ? queryMonth - 1 : currentDate.getMonth();
+
+    const firstDayOfMonth = new Date(Date.UTC(year, month, 1));
+    const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0));
+
+    const rawData = await this.essayRepository.countEssaysByDailyThisMonth(
+      firstDayOfMonth,
+      lastDayOfMonth,
+    );
+
+    const result: Record<string, number> = {};
+
+    for (let date = firstDayOfMonth; date <= lastDayOfMonth; date.setDate(date.getDate() + 1)) {
+      const dateKey = date.toISOString().split('T')[0];
+      result[dateKey] = 0;
+    }
+
+    rawData.forEach((item) => {
+      const dateKey = item.date.toISOString().split('T')[0];
+      result[dateKey] = parseInt(item.count);
+    });
+
+    return result;
+  }
+
+  async countEssaysByMonthlyThisYear(queryYear?: number) {
+    const year = queryYear ? queryYear : new Date().getUTCFullYear();
+
+    const rawData = await this.essayRepository.countEssaysByMonthlyThisYear(year);
+
+    const result: Record<string, number> = {};
+
+    for (let month = 1; month <= 12; month++) {
+      result[`${month}`] = 0;
+    }
+
+    rawData.forEach((item) => {
+      const monthKey = item.month.toString();
+      result[monthKey] = parseInt(item.count);
+    });
+
+    return result;
+  }
+
   @Transactional()
   async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {
     const { reports, totalReports, totalEssay } = await this.adminRepository.getReports(

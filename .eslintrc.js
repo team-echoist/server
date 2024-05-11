@@ -19,6 +19,8 @@ module.exports = {
     'redisSingle.config.ts',
     'typeorm.options.ts',
     'webpack-hmr.config.js',
+    'typeorm-transactional.ts',
+    'jest.config.js',
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',

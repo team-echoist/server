@@ -5,21 +5,19 @@ import { EssayRepository } from './essay.repository';
 import { UserRepository } from '../user/user.repository';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
-import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
-import { RedisService } from '../redis/redis.service';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
+import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 
 @Injectable()
 export class EssayService {
   constructor(
-    private readonly redisService: RedisService,
     private readonly essayRepository: EssayRepository,
     private readonly userRepository: UserRepository,
   ) {}
 
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
-    const user = await this.userRepository.findById(requester.id);
+    const user = await this.userRepository.findUserById(requester.id);
     let category: any;
 
     if (data.categoryId) {
@@ -42,7 +40,6 @@ export class EssayService {
       };
 
       const savedBannedEssay = await this.essayRepository.saveEssay(adjustedData);
-
       const essay = await this.essayRepository.findEssayById(savedBannedEssay.id);
 
       const bannedEssay = plainToInstance(EssayResDto, essay, {
@@ -70,7 +67,7 @@ export class EssayService {
 
   @Transactional()
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
-    const user = await this.userRepository.findById(requester.id);
+    const user = await this.userRepository.findUserById(requester.id);
     let category: any;
     let message = '';
 
@@ -109,7 +106,6 @@ export class EssayService {
       excludeExtraneousValues: true,
     });
 
-    // Return data and message, handling is done in the interceptor
     return { ...resultData, message: message };
   }
 
@@ -127,7 +123,7 @@ export class EssayService {
     };
     if (published === true) query.published = true;
 
-    const { essays, total } = await this.essayRepository.findMyEssay(query, page, limit);
+    const { essays, total } = await this.essayRepository.findEssays(query, page, limit);
     const totalPage: number = Math.ceil(total / limit);
     const essayDtos = plainToInstance(EssayResDto, essays, {
       strategy: 'exposeAll',
