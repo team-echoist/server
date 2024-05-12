@@ -10,8 +10,8 @@ export class UtilsService {
     return v4();
   }
 
-  generateJWT(id: number, email: string) {
-    const secretKey = this.configService.get('JWT_SECRET');
+  async generateJWT(id: number, email: string) {
+    const secretKey = await this.configService.get('JWT_SECRET');
     const options = { expiresIn: '1440m' };
     return jwt.sign({ id: id, email: email }, secretKey, options);
   }
@@ -21,15 +21,30 @@ export class UtilsService {
     return randomBytes(16).toString('hex');
   }
 
-  startOfDay(date: Date): Date {
+  startOfDay(date: Date) {
     const newDate = new Date(date);
     newDate.setHours(0, 0, 0, 0);
     return newDate;
   }
 
-  endOfDay(date: Date): Date {
+  endOfDay(date: Date) {
     const newDate = new Date(date);
     newDate.setHours(23, 59, 59, 999);
     return newDate;
+  }
+
+  async formatMonthlyData(rawData: any[]) {
+    const result: Record<string, number> = {};
+
+    for (let month = 1; month <= 12; month++) {
+      result[`${month}`] = 0;
+    }
+
+    rawData.forEach((item) => {
+      const monthKey = item.month.toString();
+      result[monthKey] = parseInt(item.count);
+    });
+
+    return result;
   }
 }

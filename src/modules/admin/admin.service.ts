@@ -94,18 +94,46 @@ export class AdminService {
 
     const rawData = await this.essayRepository.countEssaysByMonthlyThisYear(year);
 
+    return this.utilsService.formatMonthlyData(rawData);
+  }
+
+  async countDailyRegistrations(queryYear: number, queryMonth: number) {
+    const currentDate = new Date();
+    const year = queryYear ? queryYear : currentDate.getFullYear();
+    const month = queryMonth ? queryMonth - 1 : currentDate.getMonth();
+
+    const firstDayOfMonth = new Date(Date.UTC(year, month, 1));
+    const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0));
+
+    const rawData = await this.userRepository.countDailyRegistrations(
+      firstDayOfMonth,
+      lastDayOfMonth,
+    );
+
     const result: Record<string, number> = {};
 
-    for (let month = 1; month <= 12; month++) {
-      result[`${month}`] = 0;
+    for (
+      let date = new Date(firstDayOfMonth);
+      date <= lastDayOfMonth;
+      date.setUTCDate(date.getUTCDate() + 1)
+    ) {
+      const dayKey = date.getUTCDate().toString();
+      result[dayKey] = 0;
     }
 
     rawData.forEach((item) => {
-      const monthKey = item.month.toString();
-      result[monthKey] = parseInt(item.count);
+      const dayKey = item.day.toString();
+      result[dayKey] = parseInt(item.count);
     });
 
     return result;
+  }
+
+  async countMonthlyRegistrations(queryYear: number) {
+    const year = queryYear ? queryYear : new Date().getUTCFullYear();
+    const rawData = await this.userRepository.countMonthlyRegistrations(year);
+
+    return this.utilsService.formatMonthlyData(rawData);
   }
 
   @Transactional()

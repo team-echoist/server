@@ -63,6 +63,24 @@ export class AdminController {
     return this.adminService.countEssaysByMonthlyThisYear(year);
   }
 
+  @Get('statistics/user/daily')
+  @ApiOperation({ summary: '월간 일별 유저 유입 통계' })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  async getDailyRegistrations(
+    @Query('year', OptionalParseIntPipe) year?: number,
+    @Query('month', OptionalParseIntPipe) month?: number,
+  ) {
+    return this.adminService.countDailyRegistrations(year, month);
+  }
+
+  @Get('statistics/user/month')
+  @ApiQuery({ name: 'year', required: false })
+  @ApiOperation({ summary: '년간 월별 유저 유입 통계' })
+  async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
+    return this.adminService.countMonthlyRegistrations(year);
+  }
+
   @Get('report')
   @ApiOperation({
     summary: '리포트 리스트',
