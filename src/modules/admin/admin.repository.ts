@@ -40,6 +40,31 @@ export class AdminRepository {
     });
   }
 
+  async countMonthlySubscriptionPayments(firstDayOfMonth: Date, lastDayOfMonth: Date) {
+    return await this.subscriptionRepository
+      .createQueryBuilder('subscription')
+      .select('EXTRACT(DAY FROM subscription.createdDate)', 'day')
+      .addSelect('COUNT(*)', 'count')
+      .where('subscription.createdDate >= :start AND subscription.createdDate <= :end', {
+        start: firstDayOfMonth,
+        end: lastDayOfMonth,
+      })
+      .groupBy('EXTRACT(DAY FROM subscription.createdDate)')
+      .orderBy('EXTRACT(DAY FROM subscription.createdDate)', 'ASC')
+      .getRawMany();
+  }
+
+  async countYearlySubscriptionPayments(year: number) {
+    return await this.subscriptionRepository
+      .createQueryBuilder('subscription')
+      .select('EXTRACT(MONTH FROM subscription.createdDate)', 'month')
+      .addSelect('COUNT(*)', 'count')
+      .where('EXTRACT(YEAR FROM subscription.createdDate) = :year', { year: year })
+      .groupBy('EXTRACT(MONTH FROM subscription.createdDate)')
+      .orderBy('EXTRACT(MONTH FROM subscription.createdDate)', 'ASC')
+      .getRawMany();
+  }
+
   async getReports(sort: string, page: number, limit: number) {
     const totalReports = await this.reportRepository
       .createQueryBuilder('report')

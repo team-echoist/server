@@ -74,19 +74,7 @@ export class AdminService {
       lastDayOfMonth,
     );
 
-    const result: Record<string, number> = {};
-
-    for (let date = firstDayOfMonth; date <= lastDayOfMonth; date.setDate(date.getDate() + 1)) {
-      const dateKey = date.toISOString().split('T')[0];
-      result[dateKey] = 0;
-    }
-
-    rawData.forEach((item) => {
-      const dateKey = item.date.toISOString().split('T')[0];
-      result[dateKey] = parseInt(item.count);
-    });
-
-    return result;
+    return await this.utilsService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
   }
 
   async countEssaysByMonthlyThisYear(queryYear?: number) {
@@ -110,23 +98,7 @@ export class AdminService {
       lastDayOfMonth,
     );
 
-    const result: Record<string, number> = {};
-
-    for (
-      let date = new Date(firstDayOfMonth);
-      date <= lastDayOfMonth;
-      date.setUTCDate(date.getUTCDate() + 1)
-    ) {
-      const dayKey = date.getUTCDate().toString();
-      result[dayKey] = 0;
-    }
-
-    rawData.forEach((item) => {
-      const dayKey = item.day.toString();
-      result[dayKey] = parseInt(item.count);
-    });
-
-    return result;
+    return await this.utilsService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
   }
 
   async countMonthlyRegistrations(queryYear: number) {
@@ -135,6 +107,31 @@ export class AdminService {
 
     return this.utilsService.formatMonthlyData(rawData);
   }
+
+  async countMonthlySubscriptionPayments(queryYear: number, queryMonth: number) {
+    const currentDate = new Date();
+    const year = queryYear ? queryYear : currentDate.getFullYear();
+    const month = queryMonth ? queryMonth - 1 : currentDate.getMonth();
+
+    const firstDayOfMonth = new Date(Date.UTC(year, month, 1));
+    const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0));
+
+    const rawData = await this.adminRepository.countMonthlySubscriptionPayments(
+      firstDayOfMonth,
+      lastDayOfMonth,
+    );
+
+    return await this.utilsService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
+  }
+
+  async countYearlySubscriptionPayments(queryYear: number) {
+    const year = queryYear ? queryYear : new Date().getUTCFullYear();
+    const rawData = await this.adminRepository.countYearlySubscriptionPayments(year);
+
+    return await this.utilsService.formatMonthlyData(rawData);
+  }
+
+  // -------------------------------------------------------------------- Statistics API up to here
 
   @Transactional()
   async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {

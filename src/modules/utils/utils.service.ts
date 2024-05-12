@@ -47,4 +47,24 @@ export class UtilsService {
 
     return result;
   }
+
+  async formatDailyData(rawData: any[], firstDayOfMonth: Date, lastDayOfMonth: Date) {
+    const result: Record<string, number> = {};
+
+    for (
+      let date = new Date(firstDayOfMonth);
+      date <= lastDayOfMonth;
+      date.setUTCDate(date.getUTCDate() + 1)
+    ) {
+      const dayKey = date.getUTCDate().toString();
+      result[dayKey] = 0;
+    }
+
+    rawData.forEach((item) => {
+      const dayKey = item.day.toString();
+      result[dayKey] = parseInt(item.count);
+    });
+
+    return result;
+  }
 }

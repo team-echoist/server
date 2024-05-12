@@ -91,14 +91,14 @@ export class EssayRepository {
   async countEssaysByDailyThisMonth(firstDayOfMonth: Date, lastDayOfMonth: Date) {
     return await this.essayRepository
       .createQueryBuilder('essay')
-      .select('DATE(essay.createdDate)', 'date')
+      .select('EXTRACT(DAY FROM essay.createdDate)', 'day') // 날짜 대신 일자만 추출
       .addSelect('COUNT(*)', 'count')
       .where('essay.createdDate >= :start AND essay.createdDate <= :end', {
         start: firstDayOfMonth,
         end: lastDayOfMonth,
       })
-      .groupBy('DATE(essay.createdDate)')
-      .orderBy('DATE(essay.createdDate)', 'ASC')
+      .groupBy('EXTRACT(DAY FROM essay.createdDate)')
+      .orderBy('EXTRACT(DAY FROM essay.createdDate)', 'ASC')
       .getRawMany();
   }
 

@@ -50,7 +50,7 @@ export class AdminController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return this.adminService.countEssaysByDailyThisMonth(year, month);
+    return await this.adminService.countEssaysByDailyThisMonth(year, month);
   }
 
   @Get('statistics/essay/month')
@@ -60,25 +60,47 @@ export class AdminController {
   @ApiQuery({ name: 'year', required: false })
   @ApiResponse({ status: 200 })
   async getMonthlyEssayCount(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countEssaysByMonthlyThisYear(year);
+    return await this.adminService.countEssaysByMonthlyThisYear(year);
   }
 
   @Get('statistics/user/daily')
   @ApiOperation({ summary: '월간 일별 유저 유입 통계' })
   @ApiQuery({ name: 'year', required: false })
   @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({ status: 200 })
   async getDailyRegistrations(
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return this.adminService.countDailyRegistrations(year, month);
+    return await this.adminService.countDailyRegistrations(year, month);
   }
 
   @Get('statistics/user/month')
-  @ApiQuery({ name: 'year', required: false })
   @ApiOperation({ summary: '년간 월별 유저 유입 통계' })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({ status: 200 })
   async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countMonthlyRegistrations(year);
+    return await this.adminService.countMonthlyRegistrations(year);
+  }
+
+  @Get('statistics/payment/daily')
+  @ApiOperation({ summary: '월간 일별 구독 가입 통계' })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({ status: 200 })
+  async getDailySubscriptionPayments(
+    @Query('year', OptionalParseIntPipe) year?: number,
+    @Query('month', OptionalParseIntPipe) month?: number,
+  ) {
+    return await this.adminService.countMonthlySubscriptionPayments(year, month);
+  }
+
+  @Get('statistics/payment/month')
+  @ApiOperation({ summary: '년간 월별 구독 가입 통계' })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({ status: 200 })
+  async getMonthlySubscriptionPayments(@Query('year', OptionalParseIntPipe) year?: number) {
+    return await this.adminService.countYearlySubscriptionPayments(year);
   }
 
   @Get('report')
