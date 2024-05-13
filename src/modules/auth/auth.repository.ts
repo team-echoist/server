@@ -10,11 +10,11 @@ export class AuthRepository {
   ) {}
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return await this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findOne({ where: { email } });
   }
 
   async createUser(createUserDto: CreateUserReqDto) {
-    return await this.userRepository.save(createUserDto);
+    return this.userRepository.save(createUserDto);
   }
 
   async updateUserOauthInfo(userId: number, oauthInfo: any): Promise<void> {
@@ -23,5 +23,6 @@ export class AuthRepository {
 
     user.oauthInfo = { ...user.oauthInfo, ...oauthInfo };
     await this.userRepository.save(user);
+    return;
   }
 }

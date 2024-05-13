@@ -17,6 +17,6 @@ export class UserController {
   @ApiBody({ type: UserImageReqDto })
   @UseInterceptors(FileInterceptor('image'))
   async saveProfileImage(@Req() req: ExpressRequest, @UploadedFile() file: Express.Multer.File) {
-    return await this.userService.saveProfileImage(req.user.id, file);
+    return this.userService.saveProfileImage(req.user.id, file);
   }
 }

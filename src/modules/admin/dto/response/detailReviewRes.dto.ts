@@ -1,4 +1,4 @@
-import { EssayDto } from '../../../essay/dto/request/essay.dto';
+import { EssayDto } from '../../../essay/dto/essay.dto';
 import { UserDto } from '../../../user/dto/user.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';

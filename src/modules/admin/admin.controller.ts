@@ -37,7 +37,7 @@ export class AdminController {
   })
   @ApiResponse({ status: 200, type: DashboardResDto })
   async dashboard() {
-    return await this.adminService.dashboard();
+    return this.adminService.dashboard();
   }
 
   @Get('statistics/essay/daily')
@@ -58,8 +58,7 @@ export class AdminController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    const a = await this.adminService.countEssaysByDailyThisMonth(year, month);
-    console.log(a);
+    return this.adminService.countEssaysByDailyThisMonth(year, month);
   }
 
   @Get('statistics/essay/month')
@@ -76,7 +75,7 @@ export class AdminController {
     },
   })
   async getMonthlyEssayCount(@Query('year', OptionalParseIntPipe) year?: number) {
-    return await this.adminService.countEssaysByMonthlyThisYear(year);
+    return this.adminService.countEssaysByMonthlyThisYear(year);
   }
 
   @Get('statistics/user/daily')
@@ -95,7 +94,7 @@ export class AdminController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return await this.adminService.countDailyRegistrations(year, month);
+    return this.adminService.countDailyRegistrations(year, month);
   }
 
   @Get('statistics/user/month')
@@ -110,7 +109,7 @@ export class AdminController {
     },
   })
   async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
-    return await this.adminService.countMonthlyRegistrations(year);
+    return this.adminService.countMonthlyRegistrations(year);
   }
 
   @Get('statistics/payment/daily')
@@ -129,7 +128,7 @@ export class AdminController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return await this.adminService.countMonthlySubscriptionPayments(year, month);
+    return this.adminService.countMonthlySubscriptionPayments(year, month);
   }
 
   @Get('statistics/payment/month')
@@ -144,7 +143,7 @@ export class AdminController {
     },
   })
   async getMonthlySubscriptionPayments(@Query('year', OptionalParseIntPipe) year?: number) {
-    return await this.adminService.countYearlySubscriptionPayments(year);
+    return this.adminService.countYearlySubscriptionPayments(year);
   }
 
   @Get('report')
@@ -161,14 +160,14 @@ export class AdminController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return await this.adminService.getReports(sort, page, limit);
+    return this.adminService.getReports(sort, page, limit);
   }
 
   @Get('report/:essayId')
   @ApiOperation({ summary: '[관리자용] 리포트 상세 조회' })
   @ApiResponse({ status: 200, type: ReportDetailResDto })
   async getEssayReports(@Param('essayId', ParseIntPipe) essayId: number) {
-    return await this.adminService.getReportDetails(essayId);
+    return this.adminService.getReportDetails(essayId);
   }
 
   @Post('report/:essayId')
@@ -180,7 +179,7 @@ export class AdminController {
     @Param('essayId', ParseIntPipe) essayId: number,
     @Body() processReqDto: ProcessReqDto,
   ) {
-    return await this.adminService.processReports(req.user.id, essayId, processReqDto);
+    return this.adminService.processReports(req.user.id, essayId, processReqDto);
   }
 
   @Get('reviews')
@@ -192,14 +191,14 @@ export class AdminController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return await this.adminService.getReviews(page, limit);
+    return this.adminService.getReviews(page, limit);
   }
 
   @Get('review/:reviewId')
   @ApiOperation({ summary: '[관리자용] 리뷰 상세' })
   @ApiResponse({ status: 200 })
   async getReview(@Param('reviewId', ParseIntPipe) reviewId: number) {
-    return await this.adminService.detailReview(reviewId);
+    return this.adminService.detailReview(reviewId);
   }
 
   @Post('review/:reviewId')
@@ -211,7 +210,7 @@ export class AdminController {
     @Param('reviewId', ParseIntPipe) reviewId: number,
     @Body() processReqDto: ProcessReqDto,
   ) {
-    return await this.adminService.processReview(req.user.id, reviewId, processReqDto);
+    return this.adminService.processReview(req.user.id, reviewId, processReqDto);
   }
 
   @Get('history')
@@ -223,7 +222,7 @@ export class AdminController {
     @Query('page', new PagingParseIntPipe(1)) page?: number,
     @Query('limit', new PagingParseIntPipe(10)) limit?: number,
   ) {
-    return await this.adminService.getHistories(page, limit);
+    return this.adminService.getHistories(page, limit);
   }
 
   @Get('users')
@@ -237,6 +236,6 @@ export class AdminController {
     @Query('limit', new PagingParseIntPipe(10)) limit?: number,
     @Query('filter') filter?: string,
   ) {
-    return await this.adminService.getUsers(filter, page, limit);
+    return this.adminService.getUsers(filter, page, limit);
   }
 }
