@@ -138,10 +138,13 @@ export class AdminRepository {
     return await this.reviewRepository.save(review);
   }
 
-  async getHistories() {
-    return await this.processedRepository.find({
+  async getHistories(page: number, limit: number) {
+    const [histories, total] = await this.processedRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
       order: { processedDate: 'DESC' },
       relations: ['report', 'review'],
     });
+    return { histories, total };
   }
 }

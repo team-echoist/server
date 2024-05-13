@@ -17,7 +17,8 @@ export class Subscription {
   @Column({ name: 'billing_cycle' })
   billingCycle: 'monthly' | 'yearly';
 
-  @Column({ name: 'payment_details', type: 'json' })
+  // todo 테스트중. 프로덕션에선 널 안됨
+  @Column({ name: 'payment_details', type: 'json', nullable: true })
   paymentDetails: any;
 
   @CreateDateColumn({ name: 'created_date', type: 'timestamp' })

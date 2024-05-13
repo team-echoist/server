@@ -15,6 +15,7 @@ import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { UtilsService } from '../utils/utils.service';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
+import { UsersResDto } from './dto/response/usersRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -261,8 +262,24 @@ export class AdminService {
     return;
   }
 
-  async getHistories() {
-    const histories = await this.adminRepository.getHistories();
-    return plainToInstance(HistoriesResDto, histories, { excludeExtraneousValues: true });
+  async getHistories(page: number, limit: number) {
+    const { histories, total } = await this.adminRepository.getHistories(page, limit);
+    const totalPage: number = Math.ceil(total / limit);
+    const historiesDto = plainToInstance(HistoriesResDto, histories, {
+      excludeExtraneousValues: true,
+    });
+
+    return { histories: historiesDto, totalPage, page, total };
+  }
+
+  async getUsers(filter: string, page: number, limit: number) {
+    const today = new Date();
+    const { users, total } = await this.userRepository.findUsers(today, filter, page, limit);
+
+    const totalPage: number = Math.ceil(total / limit);
+    const usersDto = plainToInstance(UsersResDto, users, {
+      excludeExtraneousValues: true,
+    });
+    return { users: usersDto, totalPage, page, total };
   }
 }

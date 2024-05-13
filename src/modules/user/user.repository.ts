@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 
 export class UserRepository {
   constructor(
@@ -44,5 +44,37 @@ export class UserRepository {
       .groupBy('EXTRACT(MONTH FROM user.createdDate)')
       .orderBy('EXTRACT(MONTH FROM user.createdDate)', 'ASC')
       .getRawMany();
+  }
+
+  async findUsers(today: Date, filter: string, page: number, limit: number) {
+    let users: User[], total: number;
+
+    switch (filter) {
+      case 'banned':
+        [users, total] = await this.userRepository.findAndCount({
+          where: { banned: true },
+          skip: (page - 1) * limit,
+          take: limit,
+          order: { createdDate: 'DESC' },
+        });
+        break;
+      case 'activeSubscription':
+        [users, total] = await this.userRepository.findAndCount({
+          where: { subscriptionEnd: MoreThan(today) },
+          skip: (page - 1) * limit,
+          take: limit,
+          order: { createdDate: 'DESC' },
+        });
+        break;
+      default:
+        [users, total] = await this.userRepository.findAndCount({
+          skip: (page - 1) * limit,
+          take: limit,
+          order: { createdDate: 'DESC' },
+        });
+        break;
+    }
+
+    return { users, total };
   }
 }

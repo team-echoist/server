@@ -19,6 +19,7 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
     username: process.env.DB_USER,
     password: String(process.env.DB_PASSWORD),
     database: process.env.DB_NAME,
+    timezone: 'Asia/Seoul',
     entities: [User, Essay, Subscription, Category, ReportQueue, ReviewQueue],
     dropSchema: process.env.ENV === 'prod',
     synchronize: true,
