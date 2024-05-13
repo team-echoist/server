@@ -31,7 +31,7 @@ export class AdminController {
 
   @Get()
   @ApiOperation({
-    summary: 'Dashboard',
+    summary: '[관리자용] Dashboard',
     description:
       '총 가입자, 프리미엄 구독자, 오늘 가입자, 오늘자 에세이, 총 에세이, 발행된 에세이, 링크드아웃된 에세이, 처리되지않은 리포트, 처리되지 않은 리뷰',
   })
@@ -42,33 +42,55 @@ export class AdminController {
 
   @Get('statistics/essay/daily')
   @ApiOperation({
-    summary: '월간 일별 에세이 작성 카운트',
+    summary: '[관리자용] 월간 일별 에세이 작성 카운트',
   })
   @ApiQuery({ name: 'year', required: false })
   @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 일(1~31)',
+    schema: {
+      type: 'object',
+      example: { '1': 126, '2': 89, '31': 150 },
+    },
+  })
   async getDailyEssayCount(
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return await this.adminService.countEssaysByDailyThisMonth(year, month);
+    const a = await this.adminService.countEssaysByDailyThisMonth(year, month);
+    console.log(a);
   }
 
   @Get('statistics/essay/month')
   @ApiOperation({
-    summary: '년간 월별 에세이 작성 카운트',
+    summary: '[관리자용] 년간 월별 에세이 작성 카운트',
   })
   @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 월(1~12)',
+    schema: {
+      type: 'object',
+      example: { '1': 542, '2': 753, '12': '347' },
+    },
+  })
   async getMonthlyEssayCount(@Query('year', OptionalParseIntPipe) year?: number) {
     return await this.adminService.countEssaysByMonthlyThisYear(year);
   }
 
   @Get('statistics/user/daily')
-  @ApiOperation({ summary: '월간 일별 유저 유입 통계' })
+  @ApiOperation({ summary: '[관리자용] 월간 일별 유저 유입 통계' })
   @ApiQuery({ name: 'year', required: false })
   @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 일(1~31)',
+    schema: {
+      type: 'object',
+      example: { '1': 126, '2': 89, '31': 150 },
+    },
+  })
   async getDailyRegistrations(
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
@@ -77,18 +99,32 @@ export class AdminController {
   }
 
   @Get('statistics/user/month')
-  @ApiOperation({ summary: '년간 월별 유저 유입 통계' })
+  @ApiOperation({ summary: '[관리자용] 년간 월별 유저 유입 통계' })
   @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 월(1~12)',
+    schema: {
+      type: 'object',
+      example: { '1': 542, '2': 753, '12': '347' },
+    },
+  })
   async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
     return await this.adminService.countMonthlyRegistrations(year);
   }
 
   @Get('statistics/payment/daily')
-  @ApiOperation({ summary: '월간 일별 구독 가입 통계' })
+  @ApiOperation({ summary: '[관리자용] 월간 일별 구독 가입 통계' })
   @ApiQuery({ name: 'year', required: false })
   @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 일(1~31)',
+    schema: {
+      type: 'object',
+      example: { '1': 126, '2': 89, '31': 150 },
+    },
+  })
   async getDailySubscriptionPayments(
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
@@ -97,16 +133,23 @@ export class AdminController {
   }
 
   @Get('statistics/payment/month')
-  @ApiOperation({ summary: '년간 월별 구독 가입 통계' })
+  @ApiOperation({ summary: '[관리자용] 년간 월별 구독 가입 통계' })
   @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 월(1~12)',
+    schema: {
+      type: 'object',
+      example: { '1': 542, '2': 753, '12': '347' },
+    },
+  })
   async getMonthlySubscriptionPayments(@Query('year', OptionalParseIntPipe) year?: number) {
     return await this.adminService.countYearlySubscriptionPayments(year);
   }
 
   @Get('report')
   @ApiOperation({
-    summary: '리포트 리스트',
+    summary: '[관리자용] 리포트 리스트',
     description: '확인되지 않은 신고 중 신고 수가 많은 순으로 정렬',
   })
   @ApiResponse({ status: 200, type: ReportsResDto })
@@ -122,14 +165,14 @@ export class AdminController {
   }
 
   @Get('report/:essayId')
-  @ApiOperation({ summary: '리포트 상세 조회' })
+  @ApiOperation({ summary: '[관리자용] 리포트 상세 조회' })
   @ApiResponse({ status: 200, type: ReportDetailResDto })
   async getEssayReports(@Param('essayId', ParseIntPipe) essayId: number) {
     return await this.adminService.getReportDetails(essayId);
   }
 
   @Post('report/:essayId')
-  @ApiOperation({ summary: '리포트 처리' })
+  @ApiOperation({ summary: '[관리자용] 리포트 처리' })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: ProcessReqDto })
   async processReports(
@@ -141,7 +184,7 @@ export class AdminController {
   }
 
   @Get('reviews')
-  @ApiOperation({ summary: '리뷰 리스트' })
+  @ApiOperation({ summary: '[관리자용] 리뷰 리스트' })
   @ApiResponse({ status: 200, type: ReviewsResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -153,14 +196,14 @@ export class AdminController {
   }
 
   @Get('review/:reviewId')
-  @ApiOperation({ summary: '리뷰 상세' })
+  @ApiOperation({ summary: '[관리자용] 리뷰 상세' })
   @ApiResponse({ status: 200 })
   async getReview(@Param('reviewId', ParseIntPipe) reviewId: number) {
     return await this.adminService.detailReview(reviewId);
   }
 
   @Post('review/:reviewId')
-  @ApiOperation({ summary: '리뷰 처리' })
+  @ApiOperation({ summary: '[관리자용] 리뷰 처리' })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: ProcessReqDto })
   async processReview(
@@ -172,9 +215,28 @@ export class AdminController {
   }
 
   @Get('history')
-  @ApiOperation({ summary: '리포트 및 리뷰 관리자 처리 기록' })
+  @ApiOperation({ summary: '[관리자용] 리포트 및 리뷰 관리자 처리 기록' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({ status: 200, type: HistoriesResDto })
-  async getHistories() {
-    return await this.adminService.getHistories();
+  async getHistories(
+    @Query('page', new PagingParseIntPipe(1)) page?: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+  ) {
+    return await this.adminService.getHistories(page, limit);
+  }
+
+  @Get('users')
+  @ApiOperation({ summary: '[관리자용] 유저 리스트 조회' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'filter', enum: ['all', 'banned', 'activeSubscription'], required: false })
+  @ApiResponse({ status: 200 })
+  async getUsers(
+    @Query('page', new PagingParseIntPipe(1)) page?: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+    @Query('filter') filter?: string,
+  ) {
+    return await this.adminService.getUsers(filter, page, limit);
   }
 }
