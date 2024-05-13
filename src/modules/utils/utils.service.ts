@@ -10,8 +10,8 @@ export class UtilsService {
     return v4();
   }
 
-  async generateJWT(id: number, email: string) {
-    const secretKey = await this.configService.get('JWT_SECRET');
+  generateJWT(id: number, email: string) {
+    const secretKey = this.configService.get('JWT_SECRET');
     const options = { expiresIn: '1440m' };
     return jwt.sign({ id: id, email: email }, secretKey, options);
   }

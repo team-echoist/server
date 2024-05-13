@@ -10,6 +10,7 @@ export class AdminRepository {
   @InjectRepository(ReportQueue) private readonly reportRepository: Repository<ReportQueue>;
   @InjectRepository(ReviewQueue) private readonly reviewRepository: Repository<ReviewQueue>;
   @InjectRepository(ProcessedHistory)
+  private readonly processedHistory: Repository<ProcessedHistory>;
   private readonly processedRepository: Repository<ProcessedHistory>;
 
   async totalSubscriberCount(today: Date) {
@@ -136,5 +137,9 @@ export class AdminRepository {
 
   async saveReview(review: ReviewQueue) {
     return await this.reviewRepository.save(review);
+  }
+
+  async getHistories() {
+    return await this.processedHistory.find({ order: { processedDate: 'DESC' } });
   }
 }
