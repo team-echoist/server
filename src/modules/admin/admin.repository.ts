@@ -140,6 +140,9 @@ export class AdminRepository {
   }
 
   async getHistories() {
-    return await this.processedHistory.find({ order: { processedDate: 'DESC' } });
+    return await this.processedHistory.find({
+      order: { processedDate: 'DESC' },
+      relations: ['report', 'review'],
+    });
   }
 }
