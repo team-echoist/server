@@ -263,7 +263,6 @@ export class AdminService {
 
   async getHistories() {
     const histories = await this.adminRepository.getHistories();
-
     return plainToInstance(HistoriesResDto, histories, { excludeExtraneousValues: true });
   }
 }
