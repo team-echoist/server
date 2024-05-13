@@ -14,6 +14,7 @@ import { ReviewDto } from './dto/review.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { UtilsService } from '../utils/utils.service';
+import { HistoriesResDto } from './dto/response/historiesRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -258,5 +259,10 @@ export class AdminService {
     // todo 유저에게 결과 메일 또는 푸쉬알림
 
     return;
+  }
+
+  async getHistories() {
+    const histories = await this.adminRepository.getHistories();
+    return plainToInstance(HistoriesResDto, histories, { excludeExtraneousValues: true });
   }
 }

@@ -13,14 +13,15 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/s
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
+import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
-import { Request as ExpressRequest } from 'express';
 import { ReviewsResDto } from './dto/response/reviewsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
-import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
+import { HistoriesResDto } from './dto/response/historiesRes.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -168,5 +169,12 @@ export class AdminController {
     @Body() processReqDto: ProcessReqDto,
   ) {
     return await this.adminService.processReview(req.user.id, reviewId, processReqDto);
+  }
+
+  @Get('history')
+  @ApiOperation({ summary: '리포트 및 리뷰 관리자 처리 기록' })
+  @ApiResponse({ status: 200, type: HistoriesResDto })
+  async getHistories() {
+    return await this.adminService.getHistories();
   }
 }
