@@ -1,6 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { MoreThan, Repository } from 'typeorm';
+import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 
 export class UserRepository {
   constructor(
@@ -83,5 +84,10 @@ export class UserRepository {
       where: { id: userId },
       relations: ['essays', 'reports', 'reviews'],
     });
+  }
+
+  async updateUser(user: User, data: UpdateUserReqDto) {
+    const userData = this.userRepository.create({ ...user, ...data });
+    return this.userRepository.save(userData);
   }
 }

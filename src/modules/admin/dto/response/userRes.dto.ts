@@ -1,8 +1,8 @@
-import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsNumber, IsObject, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
+import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 
-export class UserDetailResDto {
+export class UserResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
@@ -10,38 +10,37 @@ export class UserDetailResDto {
 
   @ApiProperty()
   @Expose()
-  @IsString()
-  nickname: string;
+  @IsEmail()
+  email: string;
 
   @ApiProperty()
   @Expose()
   @IsString()
-  email: string;
+  nickname?: string;
 
   @ApiProperty()
   @Exclude()
   @IsString()
-  password: string;
+  password?: string;
 
   @ApiProperty()
   @Expose()
   @IsString()
-  gender: string;
+  gender?: string;
 
   @ApiProperty()
   @Expose()
   @IsString()
-  profileImage: string;
+  profileImage?: string;
 
   @ApiProperty()
   @Expose()
   @IsDate()
-  birthDate: Date;
+  birthDate?: Date;
 
   @ApiProperty()
   @Expose()
-  @IsObject()
-  oauthInfo: object;
+  oauthInfo?: any;
 
   @ApiProperty()
   @Expose()
@@ -56,7 +55,7 @@ export class UserDetailResDto {
   @ApiProperty()
   @Expose()
   @IsDate()
-  subscriptionEnd: Date;
+  subscriptionEnd?: Date;
 
   @ApiProperty()
   @Expose()
@@ -71,20 +70,5 @@ export class UserDetailResDto {
   @ApiProperty()
   @Expose()
   @IsDate()
-  deletedDate: Date;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  reportCount: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  reviewCount: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  essayCount: number;
+  deletedDate?: Date;
 }

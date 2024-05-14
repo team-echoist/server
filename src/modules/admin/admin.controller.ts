@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -23,6 +24,8 @@ import { ReviewsResDto } from './dto/response/reviewsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
+import { UsersResDto } from './dto/response/usersRes.dto';
+import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -216,9 +219,9 @@ export class AdminController {
 
   @Get('histories')
   @ApiOperation({ summary: '[관리자용] 리포트 및 리뷰 관리자 처리 기록' })
+  @ApiResponse({ status: 200, type: HistoriesResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @ApiResponse({ status: 200, type: HistoriesResDto })
   async getHistories(
     @Query('page', new PagingParseIntPipe(1)) page?: number,
     @Query('limit', new PagingParseIntPipe(10)) limit?: number,
@@ -228,10 +231,10 @@ export class AdminController {
 
   @Get('users')
   @ApiOperation({ summary: '[관리자용] 유저 리스트 조회' })
+  @ApiResponse({ status: 200, type: UsersResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'filter', enum: ['all', 'banned', 'activeSubscription'], required: false })
-  @ApiResponse({ status: 200 })
   async getUsers(
     @Query('page', new PagingParseIntPipe(1)) page?: number,
     @Query('limit', new PagingParseIntPipe(10)) limit?: number,
@@ -245,5 +248,16 @@ export class AdminController {
   @ApiResponse({ status: 200, type: UserDetailResDto })
   async getUser(@Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.getUser(userId);
+  }
+
+  @Put('users/:userId')
+  @ApiOperation({ summary: '[관리자용] 유저 정보 수정' })
+  @ApiResponse({ status: 200, type: UserDetailResDto })
+  @ApiBody({ type: UpdateFullUserReqDto })
+  async updateUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() data: UpdateFullUserReqDto,
+  ) {
+    return this.adminService.updateUser(userId, data);
   }
 }
