@@ -50,7 +50,7 @@ describe('EssayController', () => {
     mockEssayService.saveEssay.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer())
-      .post('/essay')
+      .post('/essays')
       .send(createEssayDto)
       .expect(201)
       .expect(expectedResponse);
@@ -64,7 +64,7 @@ describe('EssayController', () => {
     mockEssayService.updateEssay.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer())
-      .put(`/essay/${essayId}`)
+      .put(`/essays/${essayId}`)
       .send(updateEssayDto)
       .expect(200)
       .expect(expectedResponse);
@@ -75,7 +75,7 @@ describe('EssayController', () => {
     mockEssayService.getMyEssay.mockResolvedValue(mockResponse);
 
     await request(app.getHttpServer())
-      .get('/essay')
+      .get('/essays')
       .query({ page: 1, limit: 10, published: true, categoryId: 5 })
       .expect(200)
       .expect(mockResponse);
@@ -86,7 +86,7 @@ describe('EssayController', () => {
 
     mockEssayService.deleteEssay.mockResolvedValue(true);
 
-    await request(app.getHttpServer()).delete(`/essay/${essayId}`).expect(200);
+    await request(app.getHttpServer()).delete(`/essays/${essayId}`).expect(200);
   });
 
   afterAll(async () => {

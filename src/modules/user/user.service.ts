@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { plainToInstance } from 'class-transformer';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { UserRepository } from './user.repository';
-import Redis from 'ioredis';
+import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
+import { UserResDto } from './dto/response/userRes.dto';
+import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -32,5 +37,14 @@ export class UserService {
     await this.userRepository.saveUser(user);
 
     return { imageUrl };
+  }
+
+  async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
+    const user = await this.userRepository.findUserById(userId);
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    const updatedUser = await this.userRepository.updateUser(user, data);
+    return plainToInstance(UserResDto, updatedUser, { excludeExtraneousValues: true });
   }
 }

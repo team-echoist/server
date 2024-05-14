@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MailService } from '../mail/mail.service';
+import { UserService } from '../user/user.service';
 import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
@@ -15,8 +16,9 @@ import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { UtilsService } from '../utils/utils.service';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
-import { UsersResDto } from './dto/response/usersRes.dto';
+import { UserResDto } from './dto/response/userRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
+import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 
 @Injectable()
 export class AdminService {
@@ -24,6 +26,7 @@ export class AdminService {
     private readonly adminRepository: AdminRepository,
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
+    private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
   ) {}
@@ -278,10 +281,10 @@ export class AdminService {
     const { users, total } = await this.userRepository.findUsers(today, filter, page, limit);
 
     const totalPage: number = Math.ceil(total / limit);
-    const usersDto = plainToInstance(UsersResDto, users, {
+    const userDtos = plainToInstance(UserResDto, users, {
       excludeExtraneousValues: true,
     });
-    return { users: usersDto, totalPage, page, total };
+    return { users: userDtos, totalPage, page, total };
   }
 
   async getUser(userId: number) {
@@ -293,5 +296,10 @@ export class AdminService {
       reviewCount: user.reviews.length,
     };
     return plainToInstance(UserDetailResDto, data, { excludeExtraneousValues: true });
+  }
+
+  async updateUser(userId: number, data: UpdateFullUserReqDto) {
+    await this.userService.updateUser(userId, data);
+    return await this.getUser(userId);
   }
 }
