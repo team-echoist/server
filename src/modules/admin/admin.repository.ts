@@ -13,7 +13,7 @@ export class AdminRepository {
   private readonly processedRepository: Repository<ProcessedHistory>;
 
   async totalSubscriberCount(today: Date) {
-    return await this.subscriptionRepository.count({
+    return this.subscriptionRepository.count({
       where: {
         endDate: Between(today, new Date('2100-01-01')),
       },
@@ -21,7 +21,7 @@ export class AdminRepository {
   }
 
   async todaySubscribers(todayStart: Date, todayEnd: Date) {
-    return await this.subscriptionRepository.count({
+    return this.subscriptionRepository.count({
       where: {
         createdDate: Between(todayStart, todayEnd),
       },
@@ -29,19 +29,19 @@ export class AdminRepository {
   }
 
   async unprocessedReports() {
-    return await this.reportRepository.count({
+    return this.reportRepository.count({
       where: { processed: false },
     });
   }
 
   async unprocessedReviews() {
-    return await this.reviewRepository.count({
+    return this.reviewRepository.count({
       where: { processed: false },
     });
   }
 
   async countMonthlySubscriptionPayments(firstDayOfMonth: Date, lastDayOfMonth: Date) {
-    return await this.subscriptionRepository
+    return this.subscriptionRepository
       .createQueryBuilder('subscription')
       .select('EXTRACT(DAY FROM subscription.createdDate)', 'day')
       .addSelect('COUNT(*)', 'count')
@@ -55,7 +55,7 @@ export class AdminRepository {
   }
 
   async countYearlySubscriptionPayments(year: number) {
-    return await this.subscriptionRepository
+    return this.subscriptionRepository
       .createQueryBuilder('subscription')
       .select('EXTRACT(MONTH FROM subscription.createdDate)', 'month')
       .addSelect('COUNT(*)', 'count')
@@ -110,10 +110,12 @@ export class AdminRepository {
 
   async saveReport(report: ReportQueue) {
     await this.reportRepository.save(report);
+    return;
   }
 
   async saveHistory(history: ProcessedHistory) {
     await this.processedRepository.save(history);
+    return;
   }
 
   async getReviews(page: number, limit: number) {
@@ -128,14 +130,14 @@ export class AdminRepository {
   }
 
   async getReview(reviewId: number) {
-    return await this.reviewRepository.findOne({
+    return this.reviewRepository.findOne({
       where: { id: reviewId },
       relations: ['essay', 'user'],
     });
   }
 
   async saveReview(review: ReviewQueue) {
-    return await this.reviewRepository.save(review);
+    return this.reviewRepository.save(review);
   }
 
   async getHistories(page: number, limit: number) {

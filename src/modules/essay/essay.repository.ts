@@ -26,11 +26,11 @@ export class EssayRepository {
   }
 
   async findCategoryById(user: User, categoryId: number) {
-    return await this.categoryRepository.findOne({ where: { id: categoryId, user: user } });
+    return this.categoryRepository.findOne({ where: { id: categoryId, user: user } });
   }
 
   async saveEssay(data: SaveEssayDto) {
-    return await this.essayRepository.save(data);
+    return this.essayRepository.save(data);
   }
 
   async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linkedOut') {
@@ -48,7 +48,7 @@ export class EssayRepository {
 
   async updateEssay(essay: Essay, data: UpdateEssayDto) {
     const essayData = this.essayRepository.create({ ...essay, ...data });
-    return await this.essayRepository.save(essayData);
+    return this.essayRepository.save(essayData);
   }
 
   async findEssays(query: FindMyEssayQueryInterface, page: number, limit: number) {
@@ -71,7 +71,7 @@ export class EssayRepository {
 
   // ------------------------------------------------------admin api
   async totalEssayCount() {
-    return await this.essayRepository.count();
+    return this.essayRepository.count();
   }
 
   async todayEssays(todayStart: Date, todayEnd: Date) {
@@ -81,15 +81,15 @@ export class EssayRepository {
   }
 
   async totalPublishedEssays() {
-    return await this.essayRepository.count({ where: { published: true } });
+    return this.essayRepository.count({ where: { published: true } });
   }
 
   async totalLinkedOutEssays() {
-    return await this.essayRepository.count({ where: { linkedOut: true } });
+    return this.essayRepository.count({ where: { linkedOut: true } });
   }
 
   async countEssaysByDailyThisMonth(firstDayOfMonth: Date, lastDayOfMonth: Date) {
-    return await this.essayRepository
+    return this.essayRepository
       .createQueryBuilder('essay')
       .select('EXTRACT(DAY FROM essay.createdDate)', 'day') // 날짜 대신 일자만 추출
       .addSelect('COUNT(*)', 'count')
@@ -103,7 +103,7 @@ export class EssayRepository {
   }
 
   async countEssaysByMonthlyThisYear(year: number) {
-    return await this.essayRepository
+    return this.essayRepository
       .createQueryBuilder('essay')
       .select('EXTRACT(MONTH FROM essay.createdDate)', 'month')
       .addSelect('COUNT(*)', 'count')
@@ -114,7 +114,7 @@ export class EssayRepository {
   }
 
   async getReportDetails(essayId: number) {
-    return await this.essayRepository
+    return this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.reports', 'report', 'report.processed = :processed', {
         processed: false,

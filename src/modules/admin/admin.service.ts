@@ -16,6 +16,7 @@ import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { UtilsService } from '../utils/utils.service';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { UsersResDto } from './dto/response/usersRes.dto';
+import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -281,5 +282,16 @@ export class AdminService {
       excludeExtraneousValues: true,
     });
     return { users: usersDto, totalPage, page, total };
+  }
+
+  async getUser(userId: number) {
+    const user = await this.userRepository.findUserDetailById(userId);
+    const data = {
+      ...user,
+      reportCount: user.reports.length,
+      essayCount: user.essays.length,
+      reviewCount: user.reviews.length,
+    };
+    return plainToInstance(UserDetailResDto, data, { excludeExtraneousValues: true });
   }
 }

@@ -27,7 +27,7 @@ export class AuthController {
   @ApiQuery({ name: 'email', required: true })
   @ApiResponse({ status: 200, type: 'success: boolean' })
   async checkEmail(@Query('email') email: string) {
-    return await this.authService.checkEmail(email);
+    return this.authService.checkEmail(email);
   }
 
   @Post('verify')

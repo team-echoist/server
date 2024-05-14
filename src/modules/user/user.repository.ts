@@ -9,20 +9,20 @@ export class UserRepository {
   ) {}
 
   async findUserById(userId: number) {
-    return await this.userRepository.findOne({ where: { id: userId } });
+    return this.userRepository.findOne({ where: { id: userId } });
   }
 
   async saveUser(user: User) {
-    return await this.userRepository.save(user);
+    return this.userRepository.save(user);
   }
 
   // ------------------------------------------------------admin api
   async usersCount() {
-    return await this.userRepository.count();
+    return this.userRepository.count();
   }
 
   async countDailyRegistrations(firstDayOfMonth: Date, lastDayOfMonth: Date) {
-    return await this.userRepository
+    return this.userRepository
       .createQueryBuilder('user')
       .select('EXTRACT(DAY FROM user.createdDate)', 'day')
       .addSelect('COUNT(*)', 'count')
@@ -36,7 +36,7 @@ export class UserRepository {
   }
 
   async countMonthlyRegistrations(year: number) {
-    return await this.userRepository
+    return this.userRepository
       .createQueryBuilder('user')
       .select('EXTRACT(MONTH FROM user.createdDate)', 'month')
       .addSelect('COUNT(*)', 'count')
@@ -76,5 +76,12 @@ export class UserRepository {
     }
 
     return { users, total };
+  }
+
+  async findUserDetailById(userId: number) {
+    return this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['essays', 'reports', 'reviews'],
+    });
   }
 }

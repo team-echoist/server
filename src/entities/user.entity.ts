@@ -75,5 +75,5 @@ export class User {
   reports: ReportQueue[];
 
   @OneToMany(() => ReviewQueue, (review) => review.user)
-  review: ReviewQueue[];
+  reviews: ReviewQueue[];
 }

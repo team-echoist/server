@@ -25,7 +25,7 @@ import { EssaysResDto } from './dto/response/essaysRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
-@Controller('essay')
+@Controller('essays')
 export class EssayController {
   constructor(private readonly essayService: EssayService) {}
 
@@ -34,7 +34,7 @@ export class EssayController {
   @ApiResponse({ status: 201, type: EssayResDto })
   @ApiBody({ type: CreateEssayReqDto })
   async saveEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
-    return await this.essayService.saveEssay(req.user, req.device, createEssayDto);
+    return this.essayService.saveEssay(req.user, req.device, createEssayDto);
     // todo 태그 기능 추가
   }
 
@@ -47,7 +47,7 @@ export class EssayController {
     @Param('essayId', ParseIntPipe) essayId: number,
     @Body() updateEssayDto: UpdateEssayReqDto,
   ) {
-    return await this.essayService.updateEssay(req.user, essayId, updateEssayDto);
+    return this.essayService.updateEssay(req.user, essayId, updateEssayDto);
     // todo 태그 기능 추가
   }
 
@@ -66,14 +66,13 @@ export class EssayController {
     @Query('categoryId', OptionalParseIntPipe) categoryId: number,
   ) {
     // todo 일반, 프리미엄 구독자 구별 기능
-    return await this.essayService.getMyEssay(req.user.id, published, categoryId, page, limit);
+    return this.essayService.getMyEssay(req.user.id, published, categoryId, page, limit);
   }
 
   @Delete(':essayId')
   @ApiOperation({ summary: '에세이 삭제' })
   @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
-    await this.essayService.deleteEssay(req.user.id, essayId);
-    return;
+    return this.essayService.deleteEssay(req.user.id, essayId);
   }
 }
