@@ -77,4 +77,11 @@ export class UserRepository {
 
     return { users, total };
   }
+
+  async findUserDetailById(userId: number) {
+    return this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['essays', 'reports', 'reviews'],
+    });
+  }
 }

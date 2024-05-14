@@ -68,5 +68,5 @@ export class Essay {
   reports: ReportQueue[];
 
   @OneToMany(() => ReviewQueue, (review) => review.essay, { onDelete: 'CASCADE' })
-  review: ReviewQueue[];
+  reviews: ReviewQueue[];
 }

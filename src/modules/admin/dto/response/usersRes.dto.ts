@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 
 export class UsersResDto {
@@ -19,7 +19,7 @@ export class UsersResDto {
   nickname?: string;
 
   @ApiProperty()
-  @Expose()
+  @Exclude()
   @IsString()
   password?: string;
 

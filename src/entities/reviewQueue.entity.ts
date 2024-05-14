@@ -29,11 +29,11 @@ export class ReviewQueue {
   processedDate: Date;
 
   @JoinColumn({ name: 'essay_id' })
-  @ManyToOne(() => Essay, (essay) => essay.review)
+  @ManyToOne(() => Essay, (essay) => essay.reviews)
   essay: Essay;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.review)
+  @ManyToOne(() => User, (user) => user.reviews)
   user: User;
 
   @JoinColumn({ name: 'processed_histories' })

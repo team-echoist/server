@@ -8,11 +8,11 @@ import { UserImageReqDto } from './dto/request/userImageReq.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('image')
+  @Post('images')
   @ApiOperation({ summary: '프로필 이미지 업로드' })
   @ApiBody({ type: UserImageReqDto })
   @UseInterceptors(FileInterceptor('image'))

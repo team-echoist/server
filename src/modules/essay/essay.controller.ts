@@ -25,7 +25,7 @@ import { EssaysResDto } from './dto/response/essaysRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
-@Controller('essay')
+@Controller('essays')
 export class EssayController {
   constructor(private readonly essayService: EssayService) {}
 

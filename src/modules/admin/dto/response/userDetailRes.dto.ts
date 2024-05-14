@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNumber, IsObject, IsString } from 'class-validator';
 
-export class UserDto {
+export class UserDetailResDto {
   @Expose()
   @IsNumber()
   id: number;
@@ -57,4 +57,16 @@ export class UserDto {
   @Expose()
   @IsDate()
   deletedDate: Date;
+
+  @Expose()
+  @IsNumber()
+  reportCount: number;
+
+  @Expose()
+  @IsNumber()
+  reviewCount: number;
+
+  @Expose()
+  @IsNumber()
+  essayCount: number;
 }
