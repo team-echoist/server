@@ -1,18 +1,24 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import { plainToInstance } from 'class-transformer';
+import { UtilsService } from '../utils/utils.service';
+import { AwsService } from '../aws/aws.service';
 import { EssayRepository } from './essay.repository';
 import { UserRepository } from '../user/user.repository';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
+import { Essay } from '../../entities/essay.entity';
+import { ThumbanilResDto } from './dto/response/ThumbanilRes.dto';
 
 @Injectable()
 export class EssayService {
   constructor(
     private readonly essayRepository: EssayRepository,
     private readonly userRepository: UserRepository,
+    private readonly utilsService: UtilsService,
+    private readonly awsService: AwsService,
   ) {}
 
   @Transactional()
@@ -143,5 +149,23 @@ export class EssayService {
 
     await this.essayRepository.deleteEssay(essay);
     return;
+  }
+
+  async saveThumbnailImage(file: Express.Multer.File, essayId?: number) {
+    let fileName: any;
+    let essay: Essay;
+    const newExt = file.originalname.split('.').pop();
+
+    if (essayId) {
+      essay = await this.essayRepository.findEssayById(essayId);
+
+      fileName = essay?.thumbnail ? essay.thumbnail.split('/').pop() : this.utilsService.getUUID();
+    } else {
+      fileName = this.utilsService.getUUID();
+    }
+
+    const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
+
+    return plainToInstance(ThumbanilResDto, imageUrl, { excludeExtraneousValues: true });
   }
 }

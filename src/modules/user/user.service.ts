@@ -9,6 +9,7 @@ import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
 import * as bcrypt from 'bcrypt';
+import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
 
 @Injectable()
 export class UserService {
@@ -36,7 +37,7 @@ export class UserService {
     user.profileImage = imageUrl;
     await this.userRepository.saveUser(user);
 
-    return { imageUrl };
+    return plainToInstance(ProfileImageResDto, imageUrl, { excludeExtraneousValues: true });
   }
 
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
