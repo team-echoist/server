@@ -1,24 +1,30 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
+import { UtilsService } from '../utils/utils.service';
+import { AuthService } from '../auth/auth.service';
 import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
-import { DashboardResDto } from './dto/response/dashboardRes.dto';
+import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { plainToInstance } from 'class-transformer';
+import { Transactional } from 'typeorm-transactional';
+import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { ReportsDto } from './dto/reports.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
-import { Transactional } from 'typeorm-transactional';
 import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { ReviewDto } from './dto/review.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
-import { UtilsService } from '../utils/utils.service';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
+import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
+import { AuthRepository } from '../auth/auth.repository';
+import { CreateAdminDto } from './dto/createAdmin.dto';
+import * as bcrypt from 'bcrypt';
+import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -26,10 +32,24 @@ export class AdminService {
     private readonly adminRepository: AdminRepository,
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
+    private readonly authRepository: AuthRepository,
     private readonly userService: UserService,
+    private readonly authService: AuthService,
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
   ) {}
+
+  async createAdmin(userId: number, data: CreateAdminReqDto) {
+    if (userId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    await this.authService.checkEmail(data.email);
+    data.password = await bcrypt.hash(data.password, 10);
+    const newAdmin: CreateAdminDto = {
+      ...data,
+      role: 'admin',
+    };
+    const savedAdmin = await this.authRepository.createUser(newAdmin);
+    return plainToInstance(SavedAdminResDto, savedAdmin, { excludeExtraneousValues: true });
+  }
 
   @Transactional()
   async dashboard() {
