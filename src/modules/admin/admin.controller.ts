@@ -26,12 +26,21 @@ import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 import { UsersResDto } from './dto/response/usersRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
+import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  @Post()
+  @ApiOperation({ summary: '[루트 관리자용] 관리자생성' })
+  @ApiBody({ type: CreateAdminReqDto })
+  @ApiResponse({ status: 200 })
+  async createAdmin(@Req() req: ExpressRequest, @Body() data: CreateAdminReqDto) {
+    return this.adminService.createAdmin(req.user.id, data);
+  }
 
   @Get()
   @ApiOperation({

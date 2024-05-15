@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
+import { CreateAdminDto } from '../admin/dto/createAdmin.dto';
 
 export class AuthRepository {
   constructor(
@@ -13,7 +14,7 @@ export class AuthRepository {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async createUser(createUserDto: CreateUserReqDto) {
+  async createUser(createUserDto: CreateUserReqDto | CreateAdminDto) {
     return this.userRepository.save(createUserDto);
   }
 
