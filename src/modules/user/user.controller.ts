@@ -18,6 +18,7 @@ import { UserService } from './user.service';
 import { UserImageReqDto } from './dto/request/userImageReq.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
+import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -27,6 +28,7 @@ export class UserController {
 
   @Post('images')
   @ApiOperation({ summary: '프로필 이미지 업로드' })
+  @ApiResponse({ type: ProfileImageResDto })
   @ApiBody({ type: UserImageReqDto })
   @UseInterceptors(FileInterceptor('image'))
   async saveProfileImage(@Req() req: ExpressRequest, @UploadedFile() file: Express.Multer.File) {

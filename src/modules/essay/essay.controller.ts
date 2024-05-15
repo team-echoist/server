@@ -10,11 +10,14 @@ import {
   Put,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { EssayService } from './essay.service';
 import { Request as ExpressRequest } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
@@ -22,6 +25,8 @@ import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
+import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
+import { ThumbanilResDto } from './dto/response/ThumbanilRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -74,5 +79,17 @@ export class EssayController {
   @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.deleteEssay(req.user.id, essayId);
+  }
+
+  @Post('images')
+  @ApiOperation({ summary: '썸네일 업로드' })
+  @ApiResponse({ status: 201, type: ThumbanilResDto })
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiBody({ type: ThumbnailReqDto })
+  async saveThumbnail(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('essayId', OptionalParseIntPipe) essayId?: number,
+  ) {
+    return this.essayService.saveThumbnailImage(file, essayId);
   }
 }
