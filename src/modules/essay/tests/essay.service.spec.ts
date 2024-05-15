@@ -8,6 +8,8 @@ import { Essay } from '../../../entities/essay.entity';
 import { Category } from '../../../entities/category.entity';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { ReviewQueue } from '../../../entities/reviewQueue.entity';
+import { UtilsModule } from '../../utils/utils.module';
+import { AwsService } from '../../aws/aws.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -17,38 +19,32 @@ jest.mock('typeorm-transactional', () => ({
 
 describe('EssayService', () => {
   let essayService: EssayService;
-  let mockEssayRepository: jest.Mocked<EssayRepository>;
-  let mockUserRepository: jest.Mocked<UserRepository>;
+  const mockEssayRepository = {
+    saveEssay: jest.fn(),
+    findEssayById: jest.fn(),
+    findCategoryById: jest.fn(),
+    saveReviewRequest: jest.fn(),
+    findReviewByEssayId: jest.fn(),
+    updateEssay: jest.fn(),
+    findEssays: jest.fn(),
+    deleteEssay: jest.fn(),
+  };
+  const mockUserRepository = {
+    findUserById: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [UtilsModule],
       providers: [
         EssayService,
-        {
-          provide: EssayRepository,
-          useValue: {
-            saveEssay: jest.fn(),
-            findEssayById: jest.fn(),
-            findCategoryById: jest.fn(),
-            saveReviewRequest: jest.fn(),
-            findReviewByEssayId: jest.fn(),
-            updateEssay: jest.fn(),
-            findEssays: jest.fn(),
-            deleteEssay: jest.fn(),
-          },
-        },
-        {
-          provide: UserRepository,
-          useValue: {
-            findUserById: jest.fn(),
-          },
-        },
+        { provide: EssayRepository, useValue: mockEssayRepository },
+        { provide: UserRepository, useValue: mockUserRepository },
+        { provide: AwsService, useValue: {} },
       ],
     }).compile();
 
     essayService = module.get<EssayService>(EssayService);
-    mockEssayRepository = module.get(EssayRepository);
-    mockUserRepository = module.get(UserRepository);
   });
 
   describe('saveEssay', () => {
@@ -132,7 +128,7 @@ describe('EssayService', () => {
       const essay = new Essay();
       essay.id = 1;
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
-      mockEssayRepository.saveReviewRequest.mockResolvedValue();
+      mockEssayRepository.findReviewByEssayId.mockResolvedValue(null);
 
       const result = await essayService.updateEssay(user as any, essay.id, data as any);
 
