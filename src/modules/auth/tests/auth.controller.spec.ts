@@ -8,16 +8,15 @@ dotenv.config();
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let mockAuthService: any;
+  const mockAuthService = {
+    checkEmail: jest.fn(),
+    isEmailOwned: jest.fn(),
+    register: jest.fn(),
+    validateUser: jest.fn(),
+    validatePayload: jest.fn(),
+  };
 
   beforeEach(async () => {
-    mockAuthService = {
-      checkEmail: jest.fn(),
-      isEmailOwned: jest.fn(),
-      register: jest.fn(),
-      validateUser: jest.fn(),
-      validatePayload: jest.fn(),
-    };
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
