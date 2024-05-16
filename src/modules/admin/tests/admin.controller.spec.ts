@@ -35,6 +35,7 @@ describe('AdminController', () => {
     getUsers: jest.fn(),
     getUser: jest.fn(),
     updateUser: jest.fn(),
+    getEssays: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -247,6 +248,17 @@ describe('AdminController', () => {
     await request(app.getHttpServer())
       .put('/admin/users/1')
       .send(updateFullUserReqDto)
+      .expect(200)
+      .expect(expectedResponse);
+  });
+
+  it('에세이 리스트 조회', async () => {
+    const expectedResponse = { essays: [], total: 0 };
+    adminService.getEssays.mockResolvedValue(expectedResponse);
+
+    await request(app.getHttpServer())
+      .get('/admin/essays')
+      .query({ page: 1, limit: 10 })
       .expect(200)
       .expect(expectedResponse);
   });

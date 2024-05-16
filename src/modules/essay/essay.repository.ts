@@ -59,7 +59,7 @@ export class EssayRepository {
       order: {
         createdDate: 'DESC',
       },
-      relations: ['user', 'category'],
+      relations: ['author', 'category'],
     });
 
     return { essays, total };

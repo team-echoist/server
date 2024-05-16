@@ -327,14 +327,14 @@ export class AdminService {
   async getEssays(page: number, limit: number) {
     const { essays, total } = await this.essayRepository.findEssays({}, page, limit);
     const totalPage: number = Math.ceil(total / limit);
-
+    console.log(essays[0]);
     const data = essays.map((essay) => ({
       ...essay,
       authorId: essay.author.id,
-      categoryId: essay.category.id,
+      categoryId: essay.category?.id ?? null,
     }));
 
-    const essaysDto = plainToInstance(FullEssayResDto, data);
+    const essaysDto = plainToInstance(FullEssayResDto, data, { excludeExtraneousValues: true });
     return { essays: essaysDto, total, page, totalPage };
   }
 }
