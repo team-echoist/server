@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 
-export class UserResDto {
+export class FullUserResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()

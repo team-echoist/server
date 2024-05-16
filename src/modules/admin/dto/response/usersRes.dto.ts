@@ -1,12 +1,12 @@
-import { UserResDto } from './userRes.dto';
+import { FullUserResDto } from './fullUserRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
 
 export class UsersResDto {
-  @ApiProperty({ type: UserResDto })
+  @ApiProperty({ type: [FullUserResDto] })
   @Expose()
-  users: UserResDto[];
+  users: FullUserResDto[];
 
   @ApiProperty()
   @Expose()

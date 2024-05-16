@@ -56,6 +56,7 @@ describe('AdminService', () => {
     getReportDetails: jest.fn(),
     findEssayById: jest.fn(),
     saveEssay: jest.fn(),
+    findEssays: jest.fn(),
   };
   const mockAuthService = {
     checkEmail: jest.fn(),
@@ -564,6 +565,27 @@ describe('AdminService', () => {
       expect(mockUserService.updateUser).toHaveBeenCalledWith(userId, data);
       expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
       expect(result).toEqual(expect.objectContaining({ id: userId, nickname: 'updatedUser' }));
+    });
+  });
+
+  describe('getEssays', () => {
+    it('에세이 리스트 조회', async () => {
+      const page = 1;
+      const limit = 10;
+      const essays = [];
+      const total = 0;
+
+      mockEssayRepository.findEssays.mockResolvedValue({ essays, total });
+
+      const result = await adminService.getEssays(page, limit);
+
+      expect(mockEssayRepository.findEssays).toHaveBeenCalledWith({}, page, limit);
+      expect(result).toEqual({
+        essays: [],
+        totalPage: 0,
+        page,
+        total,
+      });
     });
   });
 });
