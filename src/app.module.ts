@@ -1,6 +1,6 @@
 import { redisConfig } from '../redis.config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { Module, OnModuleInit } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule } from '@nestjs/config';
@@ -16,6 +16,7 @@ import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TypeOrmOptions } from '../typeorm.options';
 import { UserModule } from './modules/user/user.module';
+import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 
 @Module({
   imports: [
@@ -42,7 +43,7 @@ import { UserModule } from './modules/user/user.module';
     { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
   ],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule implements OnModuleInit, NestModule {
   constructor(private readonly seederService: SeederService) {}
 
   async onModuleInit() {
@@ -50,5 +51,9 @@ export class AppModule implements OnModuleInit {
       await this.seederService.seedAdmin();
       await this.seederService.seedAll();
     }
+  }
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TimezoneMiddleware).forRoutes('*');
   }
 }

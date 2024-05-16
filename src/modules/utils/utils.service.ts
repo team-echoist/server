@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { v4 } from 'uuid';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class UtilsService {
@@ -19,6 +20,11 @@ export class UtilsService {
   async generateVerifyToken() {
     const { randomBytes } = await import('crypto');
     return randomBytes(16).toString('hex');
+  }
+
+  newDate() {
+    const seoulTime = moment().tz('Asia/Seoul');
+    return new Date(seoulTime.format('YYYY-MM-DDTHH:mm:ss.SSS') + 'Z');
   }
 
   startOfDay(date: Date) {

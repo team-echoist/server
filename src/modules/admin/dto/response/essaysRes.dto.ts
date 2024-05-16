@@ -1,18 +1,21 @@
-import { FullUserResDto } from './fullUserRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { FullEssayResDto } from './fullEssayRes.dto';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
 
-export class UsersResDto {
-  @ApiProperty({ type: [FullUserResDto] })
+export class EssaysResDto {
+  @ApiProperty({ type: [FullEssayResDto] })
   @Expose()
-  users: FullUserResDto[];
+  essays: FullEssayResDto[];
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  totalPage: number;
+  total: number;
 
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
   @ApiProperty()
   @Expose()
   @IsNumber()
@@ -21,5 +24,5 @@ export class UsersResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
-  total: number;
+  totalPage: number;
 }

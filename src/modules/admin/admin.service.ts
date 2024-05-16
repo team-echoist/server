@@ -17,7 +17,7 @@ import { ReviewDto } from './dto/review.dto';
 import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
-import { UserResDto } from './dto/response/userRes.dto';
+import { FullUserResDto } from './dto/response/fullUserRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
@@ -25,6 +25,7 @@ import { AuthRepository } from '../auth/auth.repository';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import * as bcrypt from 'bcrypt';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
+import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -53,7 +54,7 @@ export class AdminService {
 
   @Transactional()
   async dashboard() {
-    const today = new Date();
+    const today = this.utilsService.newDate();
     const todayStart = this.utilsService.startOfDay(today);
     const todayEnd = this.utilsService.endOfDay(today);
 
@@ -301,7 +302,7 @@ export class AdminService {
     const { users, total } = await this.userRepository.findUsers(today, filter, page, limit);
 
     const totalPage: number = Math.ceil(total / limit);
-    const userDtos = plainToInstance(UserResDto, users, {
+    const userDtos = plainToInstance(FullUserResDto, users, {
       excludeExtraneousValues: true,
     });
     return { users: userDtos, totalPage, page, total };
@@ -321,5 +322,20 @@ export class AdminService {
   async updateUser(userId: number, data: UpdateFullUserReqDto) {
     await this.userService.updateUser(userId, data);
     return await this.getUser(userId);
+  }
+
+  async getEssays(page: number, limit: number) {
+    const { essays, total } = await this.essayRepository.findFullEssays(page, limit);
+    const totalPage: number = Math.ceil(total / limit);
+    const data = essays.map((essay) => ({
+      ...essay,
+      authorId: essay.author.id,
+      categoryId: essay.category?.id ?? null,
+      reportCount: essay?.reports ? essay.reports.length : null,
+      reviewCount: essay?.createdDate ? essay.reviews.length : null,
+    }));
+
+    const essaysDto = plainToInstance(FullEssayResDto, data, { excludeExtraneousValues: true });
+    return { essays: essaysDto, total, page, totalPage };
   }
 }

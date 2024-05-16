@@ -59,6 +59,7 @@ export class EssayRepository {
       order: {
         createdDate: 'DESC',
       },
+      relations: ['author', 'category'],
     });
 
     return { essays, total };
@@ -146,5 +147,18 @@ export class EssayRepository {
       ])
       .where('essay.id = :id', { id: essayId })
       .getOne();
+  }
+
+  async findFullEssays(page: number, limit: number) {
+    const [essays, total] = await this.essayRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: {
+        createdDate: 'DESC',
+      },
+      relations: ['author', 'category', 'reports', 'reviews'],
+    });
+
+    return { essays, total };
   }
 }

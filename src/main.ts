@@ -12,12 +12,18 @@ import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
 import { join } from 'path';
+import { UtilsService } from './modules/utils/utils.service';
+import { ConfigService } from '@nestjs/config';
 
 dotenv.config();
 
 declare const module: any;
 async function bootstrap() {
   initializeTransactionalContext();
+
+  const configService = new ConfigService();
+  const utilsService = new UtilsService(configService);
+
   const app: INestApplication = await NestFactory.create(AppModule);
 
   app.enableCors({
@@ -37,10 +43,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('/api');
   app.use(helmet.default());
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter(utilsService));
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
-    new ResponseTransformInterceptor(),
+    new ResponseTransformInterceptor(utilsService),
     new LoggingInterceptor(),
   );
   app.useGlobalPipes(
