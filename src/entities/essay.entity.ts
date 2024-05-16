@@ -29,10 +29,16 @@ export class Essay {
   linkedOutGauge: number;
 
   @Index()
-  @CreateDateColumn({ name: 'created_date' })
+  @CreateDateColumn({
+    name: 'created_date',
+    type: 'timestamptz',
+  })
   createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_date' })
+  @UpdateDateColumn({
+    name: 'updated_date',
+    type: 'timestamptz',
+  })
   updatedDate: Date;
 
   @Column({ name: 'thumbnail', nullable: true })

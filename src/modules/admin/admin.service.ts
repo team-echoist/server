@@ -54,7 +54,7 @@ export class AdminService {
 
   @Transactional()
   async dashboard() {
-    const today = new Date();
+    const today = this.utilsService.newDate();
     const todayStart = this.utilsService.startOfDay(today);
     const todayEnd = this.utilsService.endOfDay(today);
 
@@ -325,13 +325,14 @@ export class AdminService {
   }
 
   async getEssays(page: number, limit: number) {
-    const { essays, total } = await this.essayRepository.findEssays({}, page, limit);
+    const { essays, total } = await this.essayRepository.findFullEssays(page, limit);
     const totalPage: number = Math.ceil(total / limit);
-    console.log(essays[0]);
     const data = essays.map((essay) => ({
       ...essay,
       authorId: essay.author.id,
       categoryId: essay.category?.id ?? null,
+      reportCount: essay?.reports ? essay.reports.length : null,
+      reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
 
     const essaysDto = plainToInstance(FullEssayResDto, data, { excludeExtraneousValues: true });

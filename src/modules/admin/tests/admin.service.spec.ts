@@ -56,7 +56,7 @@ describe('AdminService', () => {
     getReportDetails: jest.fn(),
     findEssayById: jest.fn(),
     saveEssay: jest.fn(),
-    findEssays: jest.fn(),
+    findFullEssays: jest.fn(),
   };
   const mockAuthService = {
     checkEmail: jest.fn(),
@@ -575,11 +575,11 @@ describe('AdminService', () => {
       const essays = [];
       const total = 0;
 
-      mockEssayRepository.findEssays.mockResolvedValue({ essays, total });
+      mockEssayRepository.findFullEssays.mockResolvedValue({ essays, total });
 
       const result = await adminService.getEssays(page, limit);
 
-      expect(mockEssayRepository.findEssays).toHaveBeenCalledWith({}, page, limit);
+      expect(mockEssayRepository.findFullEssays).toHaveBeenCalledWith(page, limit);
       expect(result).toEqual({
         essays: [],
         totalPage: 0,

@@ -84,4 +84,16 @@ export class FullEssayResDto {
   @IsNumber()
   @IsOptional()
   categoryId?: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  @IsOptional()
+  reportCount: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  @IsOptional()
+  reviewCount: number;
 }

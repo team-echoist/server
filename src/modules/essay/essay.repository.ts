@@ -51,7 +51,7 @@ export class EssayRepository {
     return this.essayRepository.save(essayData);
   }
 
-  async findEssays(query: FindMyEssayQueryInterface | object, page: number, limit: number) {
+  async findEssays(query: FindMyEssayQueryInterface, page: number, limit: number) {
     const [essays, total] = await this.essayRepository.findAndCount({
       where: query,
       skip: (page - 1) * limit,
@@ -147,5 +147,18 @@ export class EssayRepository {
       ])
       .where('essay.id = :id', { id: essayId })
       .getOne();
+  }
+
+  async findFullEssays(page: number, limit: number) {
+    const [essays, total] = await this.essayRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: {
+        createdDate: 'DESC',
+      },
+      relations: ['author', 'category', 'reports', 'reviews'],
+    });
+
+    return { essays, total };
   }
 }
