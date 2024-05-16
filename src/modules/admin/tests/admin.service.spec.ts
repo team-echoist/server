@@ -69,6 +69,7 @@ describe('AdminService', () => {
     endOfDay: jest.fn(),
     formatDailyData: jest.fn(),
     formatMonthlyData: jest.fn(),
+    newDate: jest.fn(),
   };
   const mockAuthRepository = {
     createUser: jest.fn(),
