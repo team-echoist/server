@@ -1,12 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { CategoryInfoDto } from '../../../essay/dto/categoryInfo.dto';
-import { FullUserResDto } from './fullUserRes.dto';
-import { ReportDto } from '../report.dto';
-import { ReviewDto } from '../review.dto';
 
-export class FullEssayResDto {
+export class EssaysInfoDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
@@ -77,31 +73,27 @@ export class FullEssayResDto {
   @IsNotEmpty()
   device: string;
 
-  @ApiProperty({ type: () => FullUserResDto })
-  @Type(() => FullUserResDto)
+  @ApiProperty()
   @Expose()
   @IsNumber()
   @IsNotEmpty()
-  author: FullUserResDto;
+  authorId: number;
 
-  @ApiProperty({ type: () => CategoryInfoDto })
-  @Type(() => CategoryInfoDto)
+  @ApiProperty()
   @Expose()
   @IsNumber()
   @IsOptional()
-  category?: CategoryInfoDto;
+  categoryId?: number;
 
-  @ApiProperty({ type: () => [ReportDto] })
-  @Type(() => ReportDto)
+  @ApiProperty()
   @Expose()
   @IsNumber()
   @IsOptional()
-  reports: ReportDto[];
+  reportCount: number;
 
-  @ApiProperty({ type: () => [ReviewDto] })
-  @Type(() => ReviewDto)
+  @ApiProperty()
   @Expose()
   @IsNumber()
   @IsOptional()
-  reviews: ReviewDto[];
+  reviewCount: number;
 }

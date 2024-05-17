@@ -22,14 +22,14 @@ export class Category {
   name: string;
 
   @CreateDateColumn({
-    name: 'create_date',
+    name: 'created_date',
     type: 'timestamptz',
     transformer: KSTTransformer,
   })
-  createDate: Date;
+  createdDate: Date;
 
-  @UpdateDateColumn({ name: 'update_date', type: 'timestamptz', transformer: KSTTransformer })
-  updateDate: Date;
+  @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz', transformer: KSTTransformer })
+  updatedDate: Date;
 
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.category)

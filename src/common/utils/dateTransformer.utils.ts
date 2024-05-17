@@ -3,9 +3,15 @@ import * as moment from 'moment-timezone';
 
 export const KSTTransformer: ValueTransformer = {
   to: (value: Date) => {
-    return moment(value).utc().toDate();
+    if (value) {
+      return moment(value).utc().toDate();
+    }
+    return value;
   },
   from: (value: string) => {
-    return moment(value).tz('Asia/Seoul').format();
+    if (value) {
+      return moment(value).tz('Asia/Seoul').toDate();
+    }
+    return value;
   },
 };
