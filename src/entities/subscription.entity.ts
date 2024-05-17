@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { KSTTransformer } from '../common/utils';
 
 @Entity()
 export class Subscription {
@@ -21,13 +22,25 @@ export class Subscription {
   @Column({ name: 'payment_details', type: 'json', nullable: true })
   paymentDetails: any;
 
-  @CreateDateColumn({ name: 'created_date', type: 'timestamp' })
+  @CreateDateColumn({
+    name: 'created_date',
+    type: 'timestamptz',
+    transformer: KSTTransformer,
+  })
   createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_date', type: 'timestamp' })
+  @UpdateDateColumn({
+    name: 'updated_date',
+    type: 'timestamptz',
+    transformer: KSTTransformer,
+  })
   updatedDate: Date;
 
-  @UpdateDateColumn({ name: 'end_date', type: 'timestamp' })
+  @UpdateDateColumn({
+    name: 'end_date',
+    type: 'timestamptz',
+    transformer: KSTTransformer,
+  })
   endDate: Date;
 
   @JoinColumn({ name: 'user_id' })

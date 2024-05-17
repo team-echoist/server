@@ -13,6 +13,7 @@ import { User } from './user.entity';
 import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
+import { KSTTransformer } from '../common/utils';
 
 @Entity()
 export class Essay {
@@ -25,19 +26,20 @@ export class Essay {
   @Column()
   content: string;
 
-  @Column({ name: 'linked_out_gauge' })
+  @Column({ name: 'linked_out_gauge', nullable: true })
   linkedOutGauge: number;
 
-  @Index()
   @CreateDateColumn({
     name: 'created_date',
     type: 'timestamptz',
+    transformer: KSTTransformer,
   })
   createdDate: Date;
 
   @UpdateDateColumn({
     name: 'updated_date',
     type: 'timestamptz',
+    transformer: KSTTransformer,
   })
   updatedDate: Date;
 

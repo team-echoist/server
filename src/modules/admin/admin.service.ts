@@ -54,7 +54,7 @@ export class AdminService {
 
   @Transactional()
   async dashboard() {
-    const today = this.utilsService.newDate();
+    const today = new Date();
     const todayStart = this.utilsService.startOfDay(today);
     const todayEnd = this.utilsService.endOfDay(today);
 
@@ -88,7 +88,7 @@ export class AdminService {
   }
 
   async countEssaysByDailyThisMonth(queryYear: number, queryMonth: number) {
-    const currentDate = new Date();
+    const currentDate = this.utilsService.newDate();
 
     const year = queryYear ? queryYear : currentDate.getFullYear();
     const month = queryMonth ? queryMonth - 1 : currentDate.getMonth();

@@ -12,6 +12,7 @@ import { Subscription } from './subscription.entity';
 import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
+import { KSTTransformer } from '../common/utils';
 
 @Entity()
 export class User {
@@ -33,7 +34,7 @@ export class User {
   @Column({ name: 'profile_image', nullable: true })
   profileImage: string;
 
-  @Column({ name: 'birth_date', nullable: true })
+  @Column({ name: 'birth_date', nullable: true, type: 'timestamptz', transformer: KSTTransformer })
   birthDate: Date;
 
   @Column({ name: 'oauth_info', type: 'jsonb', nullable: true })
@@ -50,16 +51,21 @@ export class User {
   @Column({ default: false })
   banned: boolean;
 
-  @Column({ name: 'subscription_end', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'subscription_end',
+    nullable: true,
+    type: 'timestamptz',
+    transformer: KSTTransformer,
+  })
   subscriptionEnd: Date;
 
-  @CreateDateColumn({ name: 'created_date', type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_date', type: 'timestamptz', transformer: KSTTransformer })
   createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_date', type: 'timestamp' })
+  @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz', transformer: KSTTransformer })
   updatedDate: Date;
 
-  @DeleteDateColumn({ name: 'deleted_date', type: 'timestamp' })
+  @DeleteDateColumn({ name: 'deleted_date', type: 'timestamptz', transformer: KSTTransformer })
   deletedDate?: Date;
 
   @OneToMany(() => Category, (category) => category.user)
