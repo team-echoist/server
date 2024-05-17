@@ -161,4 +161,11 @@ export class EssayRepository {
 
     return { essays, total };
   }
+
+  async findFullEssay(essayId: number) {
+    return this.essayRepository.findOne({
+      where: { id: essayId },
+      relations: ['author', 'category', 'reports', 'reviews'],
+    });
+  }
 }

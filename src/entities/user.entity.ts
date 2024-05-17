@@ -65,7 +65,12 @@ export class User {
   @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz', transformer: KSTTransformer })
   updatedDate: Date;
 
-  @DeleteDateColumn({ name: 'deleted_date', type: 'timestamptz', transformer: KSTTransformer })
+  @DeleteDateColumn({
+    name: 'deleted_date',
+    type: 'timestamptz',
+    transformer: KSTTransformer,
+    nullable: true,
+  })
   deletedDate?: Date;
 
   @OneToMany(() => Category, (category) => category.user)

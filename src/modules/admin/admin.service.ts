@@ -25,6 +25,7 @@ import { AuthRepository } from '../auth/auth.repository';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import * as bcrypt from 'bcrypt';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
+import { EssaysInfoDto } from './dto/essaysInfo.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 
 @Injectable()
@@ -324,7 +325,7 @@ export class AdminService {
     return await this.getUser(userId);
   }
 
-  async getEssays(page: number, limit: number) {
+  async getFullEssays(page: number, limit: number) {
     const { essays, total } = await this.essayRepository.findFullEssays(page, limit);
     const totalPage: number = Math.ceil(total / limit);
     const data = essays.map((essay) => ({
@@ -335,7 +336,12 @@ export class AdminService {
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
 
-    const essaysDto = plainToInstance(FullEssayResDto, data, { excludeExtraneousValues: true });
+    const essaysDto = plainToInstance(EssaysInfoDto, data, { excludeExtraneousValues: true });
     return { essays: essaysDto, total, page, totalPage };
+  }
+
+  async getFullEssay(essayId: number) {
+    const essay = await this.essayRepository.findFullEssay(essayId);
+    return plainToInstance(FullEssayResDto, essay, { excludeExtraneousValues: true });
   }
 }

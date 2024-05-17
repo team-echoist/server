@@ -28,6 +28,7 @@ import { UsersResDto } from './dto/response/usersRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
+import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -280,6 +281,13 @@ export class AdminController {
     @Query('page', new PagingParseIntPipe(1)) page?: number,
     @Query('limit', new PagingParseIntPipe(10)) limit?: number,
   ) {
-    return this.adminService.getEssays(page, limit);
+    return this.adminService.getFullEssays(page, limit);
+  }
+
+  @Get('essays/:essayId')
+  @ApiOperation({ summary: '[관리자용] 에세이 상세 데이터 조회' })
+  @ApiResponse({ status: 200, type: FullEssayResDto })
+  async getEssay(@Param('essayId', ParseIntPipe) essayId: number) {
+    return this.adminService.getFullEssay(essayId);
   }
 }
