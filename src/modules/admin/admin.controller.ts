@@ -62,7 +62,7 @@ export class AdminController {
   @ApiQuery({ name: 'month', required: false })
   @ApiResponse({
     status: 200,
-    description: 'key = 일(1~31)',
+    description: 'key = month(1~12), year(4자리)',
     schema: {
       type: 'object',
       example: { '1': 126, '2': 89, '31': 150 },
@@ -98,7 +98,7 @@ export class AdminController {
   @ApiQuery({ name: 'month', required: false })
   @ApiResponse({
     status: 200,
-    description: 'key = 일(1~31)',
+    description: 'key = month(1~12), year(4자리)',
     schema: {
       type: 'object',
       example: { '1': 126, '2': 89, '31': 150 },
@@ -132,7 +132,7 @@ export class AdminController {
   @ApiQuery({ name: 'month', required: false })
   @ApiResponse({
     status: 200,
-    description: 'key = 일(1~31)',
+    description: 'key = month(1~12), year(4자리)',
     schema: {
       type: 'object',
       example: { '1': 126, '2': 89, '31': 150 },

@@ -66,7 +66,6 @@ export class EssayService {
     }
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
-    console.log(savedEssay);
     return plainToInstance(EssayResDto, savedEssay, {
       excludeExtraneousValues: true,
     });

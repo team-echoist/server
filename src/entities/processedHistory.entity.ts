@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { ReportQueue } from './reportQueue.entity';
 import { ReviewQueue } from './reviewQueue.entity';
+import { KSTTransformer } from '../common/utils';
 
 @Entity()
 export class ProcessedHistory {
@@ -23,7 +24,7 @@ export class ProcessedHistory {
   @Column()
   processor: number;
 
-  @CreateDateColumn({ name: 'processed_date' })
+  @CreateDateColumn({ name: 'processed_date', type: 'timestamptz', transformer: KSTTransformer })
   processedDate: Date;
 
   @JoinColumn({ name: 'report_id' })
