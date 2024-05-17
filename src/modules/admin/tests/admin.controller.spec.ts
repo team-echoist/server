@@ -35,7 +35,7 @@ describe('AdminController', () => {
     getUsers: jest.fn(),
     getUser: jest.fn(),
     updateUser: jest.fn(),
-    getEssays: jest.fn(),
+    getFullEssays: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -254,7 +254,7 @@ describe('AdminController', () => {
 
   it('에세이 리스트 조회', async () => {
     const expectedResponse = { essays: [], total: 0 };
-    adminService.getEssays.mockResolvedValue(expectedResponse);
+    adminService.getFullEssays.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer())
       .get('/admin/essays')

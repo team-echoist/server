@@ -578,7 +578,7 @@ describe('AdminService', () => {
 
       mockEssayRepository.findFullEssays.mockResolvedValue({ essays, total });
 
-      const result = await adminService.getEssays(page, limit);
+      const result = await adminService.getFullEssays(page, limit);
 
       expect(mockEssayRepository.findFullEssays).toHaveBeenCalledWith(page, limit);
       expect(result).toEqual({
