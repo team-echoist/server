@@ -13,6 +13,7 @@ import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { KSTTransformer } from '../common/utils';
+import { ProcessedHistory } from './processedHistory.entity';
 
 @Entity()
 export class User {
@@ -47,6 +48,9 @@ export class User {
 
   @Column({ default: 'client' })
   role: string;
+
+  @Column({ default: false })
+  monitored: boolean;
 
   @Column({ default: false })
   banned: boolean;
@@ -87,4 +91,7 @@ export class User {
 
   @OneToMany(() => ReviewQueue, (review) => review.user)
   reviews: ReviewQueue[];
+
+  @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.user)
+  processedHistories: ProcessedHistory[];
 }

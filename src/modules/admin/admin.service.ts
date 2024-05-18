@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
 import { UtilsService } from '../utils/utils.service';
@@ -27,6 +27,9 @@ import * as bcrypt from 'bcrypt';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { EssaysInfoDto } from './dto/essaysInfo.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
+import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
+import { UpdateEssayDto } from '../essay/dto/updateEssay.dto';
+import { FindManyOptions } from 'typeorm';
 
 @Injectable()
 export class AdminService {
@@ -201,20 +204,22 @@ export class AdminService {
   @Transactional()
   async processReports(userId: number, essayId: number, data: ProcessReqDto) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
+    if (!essay) {
+      throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
+    }
 
-    if (data.result === 'Approved') {
+    if (data.actionType === 'approved') {
       essay.published = false;
       essay.linkedOut = false;
       await this.essayRepository.saveEssay(essay);
       // todo 여기에 앱 푸쉬알림이랑 메일링 추가해야할듯
     }
-    await this.syncReportsProcessed(essayId, userId, data.result, data.comment);
+    await this.syncReportsProcessed(essayId, userId, data);
     return;
   }
 
   @Transactional()
-  async syncReportsProcessed(essayId: number, userId: number, result: string, comment: string) {
+  async syncReportsProcessed(essayId: number, adminId: number, data: ProcessReqDto) {
     const reports = await this.adminRepository.findReportByEssayId(essayId);
     if (!reports.length)
       throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
@@ -225,9 +230,10 @@ export class AdminService {
       await this.adminRepository.saveReport(report);
 
       const newHistory = new ProcessedHistory();
-      newHistory.comment = comment;
-      newHistory.result = result;
-      newHistory.processor = userId;
+      newHistory.comment = data.comment;
+      newHistory.actionType = data.actionType;
+      newHistory.target = 'report';
+      newHistory.processor = adminId;
       newHistory.report = report;
       newHistory.processedDate = new Date();
       await this.adminRepository.saveHistory(newHistory);
@@ -264,11 +270,11 @@ export class AdminService {
   }
 
   @Transactional()
-  async processReview(userId: number, reviewId: number, data: ProcessReqDto) {
+  async processReview(adminId: number, reviewId: number, data: ProcessReqDto) {
     const review = await this.adminRepository.getReview(reviewId);
     review.processed = true;
 
-    if (data.result === 'Approved')
+    if (data.actionType === 'approved')
       review.type === 'published'
         ? (review.essay.published = true)
         : (review.essay.linkedOut = true);
@@ -277,25 +283,16 @@ export class AdminService {
 
     const newHistory = new ProcessedHistory();
     newHistory.comment = data.comment;
-    newHistory.result = data.result;
-    newHistory.processor = userId;
+    newHistory.actionType = data.actionType;
+    newHistory.processor = adminId;
     newHistory.review = review;
+    newHistory.target = 'review';
     newHistory.processedDate = new Date();
     await this.adminRepository.saveHistory(newHistory);
 
     // todo 유저에게 결과 메일 또는 푸쉬알림
 
     return;
-  }
-
-  async getHistories(page: number, limit: number) {
-    const { histories, total } = await this.adminRepository.getHistories(page, limit);
-    const totalPage: number = Math.ceil(total / limit);
-    const historiesDto = plainToInstance(HistoriesResDto, histories, {
-      excludeExtraneousValues: true,
-    });
-
-    return { histories: historiesDto, totalPage, page, total };
   }
 
   async getUsers(filter: string, page: number, limit: number) {
@@ -320,9 +317,48 @@ export class AdminService {
     return plainToInstance(UserDetailResDto, data, { excludeExtraneousValues: true });
   }
 
-  async updateUser(userId: number, data: UpdateFullUserReqDto) {
+  @Transactional()
+  async updateUser(adminId: number, userId: number, data: UpdateFullUserReqDto) {
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
     await this.userService.updateUser(userId, data);
+
+    const newHistory = new ProcessedHistory();
+    newHistory.actionType = 'updated';
+    newHistory.target = 'user';
+
+    if (data.monitored) {
+      newHistory.actionType = 'monitored';
+    }
+    if (data.banned) {
+      newHistory.actionType = 'banned';
+    }
+    newHistory.processor = adminId;
+    newHistory.user = user;
+    newHistory.processedDate = new Date();
+
+    await this.adminRepository.saveHistory(newHistory);
+
+    if (data.banned) {
+      await this.handleBannedUser(userId);
+    }
+
+    if (data.banned === false) {
+      await this.essayRepository.restoreAllEssay(userId);
+    }
+
     return await this.getUser(userId);
+  }
+
+  private async handleBannedUser(userId: number) {
+    const deletedEssayIds = await this.essayRepository.deleteAllEssay(userId);
+    console.log(deletedEssayIds);
+    await this.adminRepository.handleBannedReports(deletedEssayIds);
+    await this.adminRepository.handleBannedReviews(userId);
+    return;
   }
 
   async getFullEssays(page: number, limit: number) {
@@ -343,5 +379,76 @@ export class AdminService {
   async getFullEssay(essayId: number) {
     const essay = await this.essayRepository.findFullEssay(essayId);
     return plainToInstance(FullEssayResDto, essay, { excludeExtraneousValues: true });
+  }
+
+  @Transactional()
+  async updateEssayStatus(adminId: number, essayId: number, data: UpdateEssayStatusReqDto) {
+    const essay = await this.essayRepository.findFullEssay(essayId);
+    if (!essay) {
+      throw new NotFoundException(`Essay with ID ${essayId} not found`);
+    }
+
+    const newHistory = new ProcessedHistory();
+    newHistory.target = 'essay';
+
+    const updateData = new UpdateEssayDto();
+
+    if (data.published !== undefined) {
+      newHistory.actionType = 'unpublished';
+      updateData.published = data.published;
+    }
+    if (data.linkedOut !== undefined) {
+      newHistory.actionType = 'unlinkedout';
+      updateData.linkedOut = data.linkedOut;
+    }
+
+    const processData: ProcessReqDto = {
+      comment: '',
+      actionType: 'pending',
+    };
+    if (essay.reviews) {
+      await this.processReview(adminId, essay.reviews[0].id, processData);
+    }
+    if (essay.reports) {
+      await this.syncReportsProcessed(essayId, adminId, processData);
+    }
+
+    newHistory.processor = adminId;
+    newHistory.essay = essay;
+    newHistory.processedDate = new Date();
+
+    await this.adminRepository.saveHistory(newHistory);
+    await this.essayRepository.updateEssay(essay, updateData);
+
+    return await this.getFullEssay(essayId);
+  }
+
+  async getHistories(page: number, limit: number, target?: string, action?: string) {
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const whereConditions: any = {};
+    if (target) {
+      whereConditions.target = target;
+    }
+    if (action) {
+      whereConditions.actionType = action;
+    }
+
+    const query: FindManyOptions<ProcessedHistory> = {
+      skip,
+      take,
+      order: { processedDate: 'DESC' },
+      relations: ['report', 'review', 'user', 'essay'],
+      where: whereConditions,
+    };
+
+    const { histories, total } = await this.adminRepository.getHistories(query);
+    const totalPage: number = Math.ceil(total / limit);
+    const historiesDto = plainToInstance(HistoriesResDto, histories, {
+      excludeExtraneousValues: true,
+    });
+
+    return { histories: historiesDto, totalPage, page, total };
   }
 }

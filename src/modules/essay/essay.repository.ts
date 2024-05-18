@@ -48,7 +48,7 @@ export class EssayRepository {
 
   async updateEssay(essay: Essay, data: UpdateEssayDto) {
     const essayData = this.essayRepository.create({ ...essay, ...data });
-    return this.essayRepository.save(essayData);
+    return await this.essayRepository.save(essayData);
   }
 
   async findEssays(query: FindMyEssayQueryInterface, page: number, limit: number) {
@@ -66,7 +66,7 @@ export class EssayRepository {
   }
 
   async deleteEssay(essay: Essay) {
-    await this.essayRepository.delete(essay.id);
+    await this.essayRepository.update(essay.id, { deletedDate: new Date() });
     return;
   }
 
@@ -168,4 +168,34 @@ export class EssayRepository {
       relations: ['author', 'category', 'reports', 'reviews'],
     });
   }
+
+  async deleteAllEssay(userId: number) {
+    const deletedEssay = await this.essayRepository
+      .createQueryBuilder()
+      .update(Essay)
+      .set({ deletedDate: new Date() })
+      .where('author_id = :userId', { userId })
+      .returning('id')
+      .execute();
+
+    return deletedEssay.raw.map((essay: any) => essay.id);
+  }
+
+  async restoreAllEssay(userId: number) {
+    await this.essayRepository
+      .createQueryBuilder()
+      .update(Essay)
+      .set({ deletedDate: null })
+      .where('author_id = :userId', { userId })
+      .execute();
+    return;
+  }
+
+  async findEssayIds(userId: number) {
+    await this.essayRepository
+      .createQueryBuilder('essay')
+      .select('essay.id')
+      .where('essay.author_id = :userId', { userId })
+      .getRawMany();
+  } //todo delete?
 }

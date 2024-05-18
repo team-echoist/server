@@ -43,19 +43,18 @@ export class UserResDto {
   @IsObject()
   oauthInfo: object;
 
+  @ApiProperty()
   @Expose()
   @IsDate()
   subscriptionEnd: Date;
 
+  @ApiProperty()
   @Expose()
   @IsDate()
   createdDate: Date;
 
+  @ApiProperty()
   @Expose()
   @IsDate()
   updatedDate: Date;
-
-  @Expose()
-  @IsDate()
-  deletedDate: Date;
 }

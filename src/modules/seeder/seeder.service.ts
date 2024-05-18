@@ -51,12 +51,12 @@ export class SeederService {
 
     for (let i = 1; i <= 50; i++) {
       const userEmail = `user${i}@linkedoutapp.com`;
-      const isBanned = Math.random() < 0.2;
+      const isMonitored = Math.random() < 0.2;
       const user = this.seederRepository.create({
         email: userEmail,
         password: hashedPassword,
         role: 'client',
-        banned: isBanned,
+        monitored: isMonitored,
       });
 
       userPromises.push(this.seederRepository.save(user));
@@ -79,11 +79,11 @@ export class SeederService {
           linkedOutGauge: Math.floor(Math.random() * 6),
           author: user,
           published: Math.random() < 0.5,
-          linkedOut: user.banned,
+          linkedOut: user.monitored,
         });
 
         const essayPromise = this.essayRepository.save(essay).then((savedEssay) => {
-          if (user.banned) {
+          if (user.monitored) {
             const reviewQueue = this.reviewQueueRepository.create({
               essay: savedEssay,
               user: user,

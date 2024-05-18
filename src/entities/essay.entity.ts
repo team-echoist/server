@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -14,6 +15,7 @@ import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { KSTTransformer } from '../common/utils';
+import { ProcessedHistory } from './processedHistory.entity';
 
 @Entity()
 export class Essay {
@@ -43,6 +45,13 @@ export class Essay {
   })
   updatedDate: Date;
 
+  @DeleteDateColumn({
+    name: 'deleted_date',
+    type: 'timestamptz',
+    transformer: KSTTransformer,
+  })
+  deletedDate: Date;
+
   @Column({ name: 'thumbnail', nullable: true })
   thumbnail: string;
 
@@ -68,7 +77,7 @@ export class Essay {
   category: Category;
 
   @Index()
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'author_id' })
   @ManyToOne(() => User, (user) => user.essays)
   author: User;
 
@@ -77,4 +86,7 @@ export class Essay {
 
   @OneToMany(() => ReviewQueue, (review) => review.essay, { onDelete: 'CASCADE' })
   reviews: ReviewQueue[];
+
+  @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.essay)
+  processedHistories: ProcessedHistory[];
 }

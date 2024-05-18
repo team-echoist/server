@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../../../modules/auth/auth.service';
@@ -21,7 +21,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   async validate(email: string, password: string): Promise<any> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new HttpException('Invalid email or password.', HttpStatus.UNAUTHORIZED);
+    }
+    if (user.banned) {
+      throw new HttpException(
+        'Your account has been banned. Please contact support for more information.',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     return user;
   }

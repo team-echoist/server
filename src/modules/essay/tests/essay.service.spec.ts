@@ -49,7 +49,7 @@ describe('EssayService', () => {
 
   describe('saveEssay', () => {
     it('요청 데이터에 카테고리 아이디가 있지만 찾을 수 없다면', async () => {
-      const user = { id: 1, banned: false };
+      const user = { id: 1, monitored: false };
       const data = { id: 1, title: 'New Essay', categoryId: 10 };
       mockEssayRepository.findCategoryById.mockResolvedValue(null);
 
@@ -61,18 +61,18 @@ describe('EssayService', () => {
     it('밴 유저의 경우 발행 및 링크드아웃 요청시 리뷰 생성', async () => {
       const user = new User();
       const data = new CreateEssayReqDto();
-      const savedBannedEssay = new Essay();
+      const savedMonitoredEssay = new Essay();
 
       user.id = 1;
-      user.banned = true;
+      user.monitored = true;
       data.title = 'New Essay';
       data.content = 'New Essay content';
       data.published = true;
-      savedBannedEssay.id = 1;
-      savedBannedEssay.published = false;
+      savedMonitoredEssay.id = 1;
+      savedMonitoredEssay.published = false;
 
       mockUserRepository.findUserById.mockResolvedValue(user);
-      mockEssayRepository.saveEssay.mockResolvedValue(savedBannedEssay);
+      mockEssayRepository.saveEssay.mockResolvedValue(savedMonitoredEssay);
 
       const result = await essayService.saveEssay(user, 'web', data);
       expect(mockEssayRepository.saveReviewRequest).toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe('EssayService', () => {
       const savedEssay = new Essay();
       const category = new Category();
 
-      user.banned = false;
+      user.monitored = false;
       savedEssay.published = true;
       mockUserRepository.findUserById.mockResolvedValue(user);
       mockEssayRepository.findCategoryById.mockResolvedValue(category);
@@ -107,7 +107,7 @@ describe('EssayService', () => {
     });
 
     it('에세이가 검토 중인 경우 에러 발생', async () => {
-      const user = { id: 1, banned: false };
+      const user = { id: 1, monitored: false };
       const data = { categoryId: 10, linkedOut: true };
       const essay = new Essay();
       const reviewQueue = new ReviewQueue();
@@ -123,7 +123,7 @@ describe('EssayService', () => {
     });
 
     it('밴 사용자가 발행 또는 링크드아웃으로 수정 요청시', async () => {
-      const user = { id: 1, banned: true };
+      const user = { id: 1, monitored: true };
       const data = { categoryId: 10, published: true };
       const essay = new Essay();
       essay.id = 1;

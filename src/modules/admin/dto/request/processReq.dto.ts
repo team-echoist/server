@@ -10,5 +10,5 @@ export class ProcessReqDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  result: 'Approved' | 'Rejected' | 'Pending';
+  actionType: 'approved' | 'rejected' | 'pending';
 }

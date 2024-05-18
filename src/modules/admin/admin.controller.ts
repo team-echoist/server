@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -29,6 +30,7 @@ import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
+import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
 
 @ApiTags('Admin')
 @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -228,24 +230,12 @@ export class AdminController {
     return this.adminService.processReview(req.user.id, reviewId, processReqDto);
   }
 
-  @Get('histories')
-  @ApiOperation({ summary: '[관리자용] 리포트 및 리뷰 관리자 처리 기록' })
-  @ApiResponse({ status: 200, type: HistoriesResDto })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  async getHistories(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
-  ) {
-    return this.adminService.getHistories(page, limit);
-  }
-
   @Get('users')
   @ApiOperation({ summary: '[관리자용] 유저 리스트 조회' })
   @ApiResponse({ status: 200, type: UsersResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'filter', enum: ['all', 'banned', 'activeSubscription'], required: false })
+  @ApiQuery({ name: 'filter', enum: ['all', 'monitored', 'activeSubscription'], required: false })
   async getUsers(
     @Query('page', new PagingParseIntPipe(1)) page?: number,
     @Query('limit', new PagingParseIntPipe(10)) limit?: number,
@@ -262,14 +252,18 @@ export class AdminController {
   }
 
   @Put('users/:userId')
-  @ApiOperation({ summary: '[관리자용] 유저 정보 수정' })
+  @ApiOperation({
+    summary: '[관리자용] 유저 정보 수정',
+    description: 'banned를 true로 요청시 사용자 에세이 논리삭제 및 ',
+  })
   @ApiResponse({ status: 200, type: UserDetailResDto })
   @ApiBody({ type: UpdateFullUserReqDto })
   async updateUser(
+    @Req() req: ExpressRequest,
     @Param('userId', ParseIntPipe) userId: number,
     @Body() data: UpdateFullUserReqDto,
   ) {
-    return this.adminService.updateUser(userId, data);
+    return this.adminService.updateUser(req.user.id, userId, data);
   }
 
   @Get('essays')
@@ -289,5 +283,41 @@ export class AdminController {
   @ApiResponse({ status: 200, type: FullEssayResDto })
   async getEssay(@Param('essayId', ParseIntPipe) essayId: number) {
     return this.adminService.getFullEssay(essayId);
+  }
+
+  @Put('essays/:essayId')
+  @ApiOperation({
+    summary: '[관리자용] 에세이 상태 수정',
+    description:
+      '발행 및 링크드아웃 취소용. 타겟 에세이에 포함된 리포트 및 리뷰 일괄 처리(보류로 변경)',
+  })
+  @ApiResponse({ status: 200, type: UpdateEssayStatusReqDto })
+  @ApiBody({ type: '' })
+  async updateEssayStatus(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+    @Body() data: UpdateEssayStatusReqDto,
+  ) {
+    return this.adminService.updateEssayStatus(req.user.id, essayId, data);
+  }
+
+  @Get('histories')
+  @ApiOperation({
+    summary: '[관리자용] 관리자 처리 기록',
+    description:
+      '[target] = report | review | essay | user, [action] = approved | rejected | pending | unpublished | unlinkedout | deleted',
+  })
+  @ApiResponse({ status: 200, type: HistoriesResDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'target', required: false })
+  @ApiQuery({ name: 'action', required: false })
+  async getHistories(
+    @Query('page', new PagingParseIntPipe(1)) page?: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+    @Query('target') target?: string,
+    @Query('action') action?: string,
+  ) {
+    return this.adminService.getHistories(page, limit, target, action);
   }
 }

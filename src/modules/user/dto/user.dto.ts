@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNumber, IsObject, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UserDto {
   @Expose()
@@ -37,6 +38,10 @@ export class UserDto {
   @Expose()
   @IsString()
   role: string;
+
+  @Expose()
+  @IsBoolean()
+  monitored: boolean;
 
   @Expose()
   @IsBoolean()

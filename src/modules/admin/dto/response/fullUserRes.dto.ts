@@ -50,6 +50,11 @@ export class FullUserResDto {
   @ApiProperty()
   @Expose()
   @IsBoolean()
+  monitored: boolean;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
   banned: boolean;
 
   @ApiProperty()
