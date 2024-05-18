@@ -3,12 +3,24 @@ import { Expose, Type } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ReportDto } from '../report.dto';
 import { ReviewDto } from '../review.dto';
+import { UserDto } from '../../../user/dto/user.dto';
+import { EssayDto } from '../../../essay/dto/essay.dto';
 
 export class HistoriesResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
   id: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  actionType: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  target: string;
 
   @ApiProperty()
   @Expose()
@@ -39,4 +51,14 @@ export class HistoriesResDto {
   @Type(() => ReviewDto)
   @Expose()
   review: ReviewDto;
+
+  @ApiProperty({ type: () => UserDto })
+  @Type(() => UserDto)
+  @Expose()
+  user: UserDto;
+
+  @ApiProperty({ type: () => EssayDto })
+  @Type(() => EssayDto)
+  @Expose()
+  essay: EssayDto;
 }

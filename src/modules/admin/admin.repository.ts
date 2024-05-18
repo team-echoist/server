@@ -1,9 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, FindManyOptions, Repository } from 'typeorm';
 import { Subscription } from '../../entities/subscription.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
+import { Essay } from '../../entities/essay.entity';
 
 export class AdminRepository {
   @InjectRepository(Subscription) private readonly subscriptionRepository: Repository<Subscription>;
@@ -140,13 +141,28 @@ export class AdminRepository {
     return this.reviewRepository.save(review);
   }
 
-  async getHistories(page: number, limit: number) {
-    const [histories, total] = await this.processedRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { processedDate: 'DESC' },
-      relations: ['report', 'review'],
-    });
+  async getHistories(query: FindManyOptions) {
+    const [histories, total] = await this.processedRepository.findAndCount(query);
     return { histories, total };
+  }
+
+  async handleBannedReports(essayIds: number[]) {
+    if (essayIds.length > 0) {
+      await this.reportRepository
+        .createQueryBuilder()
+        .update(ReportQueue)
+        .set({ processed: true, processedDate: new Date() })
+        .where('essay_id IN (:...essayIds)', { essayIds })
+        .execute();
+    }
+  }
+
+  async handleBannedReviews(userId: number) {
+    await this.reviewRepository
+      .createQueryBuilder()
+      .update(ReviewQueue)
+      .set({ processed: true, processedDate: () => 'CURRENT_TIMESTAMP' })
+      .where('user_id = :userId', { userId })
+      .execute();
   }
 }

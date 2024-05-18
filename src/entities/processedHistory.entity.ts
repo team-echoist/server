@@ -9,17 +9,23 @@ import {
 import { ReportQueue } from './reportQueue.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { KSTTransformer } from '../common/utils';
+import { Essay } from './essay.entity';
+import { User } from './user.entity';
+import { IsOptional } from 'class-validator';
 
 @Entity()
 export class ProcessedHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  comment: string;
+  @Column({ nullable: true })
+  comment?: string;
 
   @Column()
-  result: string;
+  target: string;
+
+  @Column({ name: 'action_type' })
+  actionType: string;
 
   @Column()
   processor: number;
@@ -34,4 +40,12 @@ export class ProcessedHistory {
   @JoinColumn({ name: 'review_id' })
   @ManyToOne(() => ReviewQueue, (review) => review.processedHistories)
   review: ReviewQueue;
+
+  @JoinColumn({ name: 'essay_id' })
+  @ManyToOne(() => Essay, (essay) => essay.processedHistories)
+  essay: Essay;
+
+  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, (user) => user.processedHistories)
+  user: User;
 }

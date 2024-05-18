@@ -51,9 +51,9 @@ export class UserRepository {
     let users: User[], total: number;
 
     switch (filter) {
-      case 'banned':
+      case 'monitored':
         [users, total] = await this.userRepository.findAndCount({
-          where: { banned: true },
+          where: { monitored: true },
           skip: (page - 1) * limit,
           take: limit,
           order: { createdDate: 'DESC' },

@@ -38,17 +38,17 @@ export class EssayService {
       category: category,
     };
 
-    if (requester.banned) {
+    if (requester.monitored) {
       const adjustedData = {
         ...essayData,
         published: false,
         linkedOut: false,
       };
 
-      const savedBannedEssay = await this.essayRepository.saveEssay(adjustedData);
-      const essay = await this.essayRepository.findEssayById(savedBannedEssay.id);
+      const savedMonitoredEssay = await this.essayRepository.saveEssay(adjustedData);
+      const essay = await this.essayRepository.findEssayById(savedMonitoredEssay.id);
 
-      const bannedEssay = plainToInstance(EssayResDto, essay, {
+      const monitoredEssay = plainToInstance(EssayResDto, essay, {
         strategy: 'exposeAll',
         excludeExtraneousValues: true,
       });
@@ -58,11 +58,11 @@ export class EssayService {
       if (reviewType) {
         await this.essayRepository.saveReviewRequest(user, essay, reviewType);
         return {
-          ...bannedEssay,
+          ...monitoredEssay,
           message: 'Your essay is under review due to policy violations.',
         };
       }
-      return bannedEssay;
+      return monitoredEssay;
     }
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
@@ -96,7 +96,7 @@ export class EssayService {
         HttpStatus.BAD_REQUEST,
       );
 
-    if (requester.banned) {
+    if (requester.monitored) {
       if (data.published || data.linkedOut) {
         const reviewType = data.published ? 'published' : 'linkedOut';
         await this.essayRepository.saveReviewRequest(user, essay, reviewType);

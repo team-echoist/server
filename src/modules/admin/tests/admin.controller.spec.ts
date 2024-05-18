@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { AdminController } from '../admin.controller';
 import { AdminService } from '../admin.service';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
-import { setTestUserMiddleware } from '../../../common/utils/test.utils';
+import { setTestUserMiddleware } from '../../../common/utils';
 
 jest.mock('@nestjs/passport', () => ({
   AuthGuard: () => {
@@ -36,6 +36,7 @@ describe('AdminController', () => {
     getUser: jest.fn(),
     updateUser: jest.fn(),
     getFullEssays: jest.fn(),
+    getFullEssay: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -261,5 +262,12 @@ describe('AdminController', () => {
       .query({ page: 1, limit: 10 })
       .expect(200)
       .expect(expectedResponse);
+  });
+
+  it('에세이 상세 조회', async () => {
+    const expectedResponse = { id: 1 };
+    adminService.getFullEssay.mockResolvedValue(expectedResponse);
+
+    await request(app.getHttpServer()).get('/admin/essays/1').expect(200).expect(expectedResponse);
   });
 });

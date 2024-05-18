@@ -45,6 +45,7 @@ describe('AdminService', () => {
     countMonthlyRegistrations: jest.fn(),
     findUsers: jest.fn(),
     findUserDetailById: jest.fn(),
+    findUserById: jest.fn(),
   };
   const mockEssayRepository = {
     totalEssayCount: jest.fn(),
@@ -57,6 +58,7 @@ describe('AdminService', () => {
     findEssayById: jest.fn(),
     saveEssay: jest.fn(),
     findFullEssays: jest.fn(),
+    findFullEssay: jest.fn(),
   };
   const mockAuthService = {
     checkEmail: jest.fn(),
@@ -354,7 +356,7 @@ describe('AdminService', () => {
     it('리포트 처리', async () => {
       const userId = 1;
       const essayId = 1;
-      const data: ProcessReqDto = { result: 'Approved', comment: 'This is approved' };
+      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
       const essay = { id: 1, published: true, linkedOut: true };
 
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
@@ -380,7 +382,7 @@ describe('AdminService', () => {
     it('리포트 처리중 해당 에세이를 찾지 못한 경우 에러 발생', async () => {
       const userId = 1;
       const essayId = 1;
-      const data: ProcessReqDto = { result: 'Approved', comment: 'This is approved' };
+      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
 
       mockEssayRepository.findEssayById.mockResolvedValue(null);
 
@@ -394,15 +396,14 @@ describe('AdminService', () => {
     it('에세이에 할당된 모든 신고 동기화 처리', async () => {
       const essayId = 1;
       const userId = 1;
-      const result = 'Approved';
-      const comment = 'This is approved';
+      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
       const reports = [{ id: 1 }];
 
       mockAdminRepository.findReportByEssayId.mockResolvedValue(reports);
       mockAdminRepository.saveReport.mockResolvedValue({});
       mockAdminRepository.saveHistory.mockResolvedValue({});
 
-      await adminService.syncReportsProcessed(essayId, userId, result, comment);
+      await adminService.syncReportsProcessed(essayId, userId, data);
 
       expect(mockAdminRepository.findReportByEssayId).toHaveBeenCalledWith(essayId);
       expect(mockAdminRepository.saveReport).toHaveBeenCalled();
@@ -412,14 +413,11 @@ describe('AdminService', () => {
     it('에세이에 할당된 신고 동기화 처리중 에세이를 찾지 못하면 에러 발생', async () => {
       const essayId = 1;
       const userId = 1;
-      const result = 'Approved';
-      const comment = 'This is approved';
+      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
 
       mockAdminRepository.findReportByEssayId.mockResolvedValue([]);
 
-      await expect(
-        adminService.syncReportsProcessed(essayId, userId, result, comment),
-      ).rejects.toThrow(
+      await expect(adminService.syncReportsProcessed(essayId, userId, data)).rejects.toThrow(
         new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND),
       );
     });
@@ -464,7 +462,7 @@ describe('AdminService', () => {
     it('리뷰 처리', async () => {
       const userId = 1;
       const reviewId = 1;
-      const data: ProcessReqDto = { result: 'Approved', comment: 'This is approved' };
+      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
       const review = { id: reviewId, type: 'published', essay: { id: 1, published: false } };
 
       mockAdminRepository.getReview.mockResolvedValue(review);
@@ -491,12 +489,22 @@ describe('AdminService', () => {
       const limit = 10;
       const histories = [];
       const total = 0;
+      const action = '';
+      const target = '';
+
+      const expectedArgs = {
+        order: { processedDate: 'DESC' },
+        relations: ['report', 'review', 'user', 'essay'],
+        skip: 0,
+        take: limit,
+        where: {},
+      };
 
       mockAdminRepository.getHistories.mockResolvedValue({ histories, total });
 
-      const result = await adminService.getHistories(page, limit);
+      const result = await adminService.getHistories(page, limit, target, action);
 
-      expect(mockAdminRepository.getHistories).toHaveBeenCalledWith(page, limit);
+      expect(mockAdminRepository.getHistories).toHaveBeenCalledWith(expectedArgs);
       expect(result).toEqual({
         histories: [],
         totalPage: 0,
@@ -554,14 +562,16 @@ describe('AdminService', () => {
 
   describe('updateUser', () => {
     it('유저 정보 강제 업데이트', async () => {
+      const adminId = 1;
       const userId = 1;
       const data: UpdateFullUserReqDto = { nickname: 'updatedUser' };
       const updatedUser = { id: userId, ...data, reports: [], essays: [], reviews: [] };
 
       mockUserService.updateUser.mockResolvedValue(updatedUser);
+      mockUserRepository.findUserById.mockResolvedValue(true);
       mockUserRepository.findUserDetailById.mockResolvedValue(updatedUser);
 
-      const result = await adminService.updateUser(userId, data);
+      const result = await adminService.updateUser(adminId, userId, data);
 
       expect(mockUserService.updateUser).toHaveBeenCalledWith(userId, data);
       expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
@@ -569,7 +579,7 @@ describe('AdminService', () => {
     });
   });
 
-  describe('getEssays', () => {
+  describe('getFullEssays', () => {
     it('에세이 리스트 조회', async () => {
       const page = 1;
       const limit = 10;
@@ -587,6 +597,19 @@ describe('AdminService', () => {
         page,
         total,
       });
+    });
+  });
+
+  describe('getFullEssay', () => {
+    it('에세이 조회(검색)', async () => {
+      const essayId = 1;
+      const essay = { id: 1 };
+
+      mockEssayRepository.findFullEssay.mockResolvedValue(essay);
+
+      const result = await adminService.getFullEssay(essayId);
+      expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
+      expect(result).toEqual(expect.objectContaining({ id: 1 }));
     });
   });
 });

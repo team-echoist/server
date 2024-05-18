@@ -40,10 +40,10 @@ export class UpdateFullUserReqDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  banned?: boolean;
+  monitored?: boolean;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString()
-  deletedDate?: Date;
+  @IsBoolean()
+  banned?: boolean;
 }
