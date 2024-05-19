@@ -10,7 +10,7 @@ export const KSTTransformer: ValueTransformer = {
   },
   from: (value: string) => {
     if (value) {
-      return moment(value).tz('Asia/Seoul').toDate();
+      return moment(value).tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
     }
     return value;
   },

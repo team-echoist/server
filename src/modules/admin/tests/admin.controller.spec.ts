@@ -37,6 +37,7 @@ describe('AdminController', () => {
     updateUser: jest.fn(),
     getFullEssays: jest.fn(),
     getFullEssay: jest.fn(),
+    updateEssayStatus: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -269,5 +270,17 @@ describe('AdminController', () => {
     adminService.getFullEssay.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer()).get('/admin/essays/1').expect(200).expect(expectedResponse);
+  });
+
+  it('에세이 상태 수정', async () => {
+    const updatedEssayStatusReqDto = { published: false };
+    const expectedResponse = { id: 1, published: false };
+    adminService.updateEssayStatus.mockResolvedValue(expectedResponse);
+
+    await request(app.getHttpServer())
+      .put('/admin/essays/1')
+      .send(updatedEssayStatusReqDto)
+      .expect(200)
+      .expect(expectedResponse);
   });
 });

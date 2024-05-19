@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { v4 } from 'uuid';
 import * as moment from 'moment-timezone';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UtilsService {
@@ -72,5 +73,12 @@ export class UtilsService {
     });
 
     return result;
+  }
+
+  transformToDto<T, V>(cls: ClassConstructor<T>, plain: V | V[]): T | T[] {
+    if (Array.isArray(plain)) {
+      return plain.map((item) => plainToInstance(cls, item, { excludeExtraneousValues: true }));
+    }
+    return plainToInstance(cls, plain, { excludeExtraneousValues: true });
   }
 }

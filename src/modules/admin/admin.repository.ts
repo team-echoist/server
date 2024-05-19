@@ -4,7 +4,6 @@ import { Subscription } from '../../entities/subscription.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
-import { Essay } from '../../entities/essay.entity';
 
 export class AdminRepository {
   @InjectRepository(Subscription) private readonly subscriptionRepository: Repository<Subscription>;
