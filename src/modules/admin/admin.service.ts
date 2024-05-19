@@ -1,4 +1,7 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { FindManyOptions } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
+import { Transactional } from 'typeorm-transactional';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
 import { UtilsService } from '../utils/utils.service';
@@ -7,8 +10,6 @@ import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
-import { plainToInstance } from 'class-transformer';
-import { Transactional } from 'typeorm-transactional';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { ReportsDto } from './dto/reports.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
@@ -23,13 +24,13 @@ import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 import { AuthRepository } from '../auth/auth.repository';
 import { CreateAdminDto } from './dto/createAdmin.dto';
-import * as bcrypt from 'bcrypt';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { EssaysInfoDto } from './dto/essaysInfo.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
 import { UpdateEssayDto } from '../essay/dto/updateEssay.dto';
-import { FindManyOptions } from 'typeorm';
+import { Essay } from '../../entities/essay.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -44,6 +45,97 @@ export class AdminService {
     private readonly utilsService: UtilsService,
   ) {}
 
+  private createProcessedHistory(
+    actionType: string,
+    targetName: string,
+    target: any,
+    adminId: number,
+    comment?: string,
+  ): ProcessedHistory {
+    const newHistory = new ProcessedHistory();
+    newHistory.actionType = actionType;
+    newHistory.target = targetName;
+    newHistory.processor = adminId;
+    newHistory.processedDate = new Date();
+
+    this.assignTargetToHistory(newHistory, targetName, target);
+
+    if (comment) {
+      newHistory.comment = comment;
+    }
+
+    return newHistory;
+  }
+
+  private assignTargetToHistory(history: ProcessedHistory, targetName: string, target: any) {
+    switch (targetName) {
+      case 'user':
+        history.user = target;
+        break;
+      case 'report':
+        history.report = target;
+        break;
+      case 'essay':
+        history.essay = target;
+        break;
+      case 'review':
+        history.review = target;
+        break;
+      default:
+        throw new Error(`Unknown target name: ${targetName}`);
+    }
+  }
+
+  private determineUserActionType(data: UpdateFullUserReqDto): string {
+    if (data.banned) return 'banned';
+    if (data.monitored) return 'monitored';
+    return 'updated';
+  }
+
+  private determineEssayActionType(data: UpdateEssayStatusReqDto): string {
+    if (data.published !== undefined) return 'unpublished';
+    if (data.linkedOut !== undefined) return 'unlinkedout';
+    return 'updated';
+  }
+
+  private async handleUserBanStatus(userId: number, banned: boolean) {
+    if (banned) {
+      await this.handleBannedUser(userId);
+    } else {
+      await this.essayRepository.restoreAllEssay(userId);
+    }
+  }
+
+  private async handleBannedUser(userId: number) {
+    const deletedEssayIds = await this.essayRepository.deleteAllEssay(userId);
+    await this.adminRepository.handleBannedReports(deletedEssayIds);
+    await this.adminRepository.handleBannedReviews(userId);
+  }
+
+  private buildWhereConditions(target?: string, action?: string): any {
+    const whereConditions: any = {};
+    if (target) {
+      whereConditions.target = target;
+    }
+    if (action) {
+      whereConditions.actionType = action;
+    }
+    return whereConditions;
+  }
+
+  private async handleEssayDependencies(essay: Essay, adminId: number, processData: ProcessReqDto) {
+    if (essay.reviews) {
+      await this.processReview(adminId, essay.reviews[0].id, processData);
+    }
+    if (essay.reports) {
+      await this.syncReportsProcessed(essay.id, adminId, processData);
+    }
+  }
+
+  // --------------------------------------------------------------------
+  // --------------------------------------------------------------------
+  // --------------------------------------------------------------------
+
   async createAdmin(userId: number, data: CreateAdminReqDto) {
     if (userId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
     await this.authService.checkEmail(data.email);
@@ -53,7 +145,8 @@ export class AdminService {
       role: 'admin',
     };
     const savedAdmin = await this.authRepository.createUser(newAdmin);
-    return plainToInstance(SavedAdminResDto, savedAdmin, { excludeExtraneousValues: true });
+
+    return this.utilsService.transformToDto(SavedAdminResDto, savedAdmin);
   }
 
   @Transactional()
@@ -72,23 +165,17 @@ export class AdminService {
     const unprocessedReports = await this.adminRepository.unprocessedReports();
     const unprocessedReviews = await this.adminRepository.unprocessedReviews();
 
-    return plainToInstance(
-      DashboardResDto,
-      {
-        totalUser,
-        currentSubscriber,
-        todaySubscribers,
-        totalEssays,
-        todayEssays,
-        publishedEssays,
-        linkedOutEssays,
-        unprocessedReports,
-        unprocessedReviews,
-      },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+    return this.utilsService.transformToDto(DashboardResDto, {
+      totalUser,
+      currentSubscriber,
+      todaySubscribers,
+      totalEssays,
+      todayEssays,
+      publishedEssays,
+      linkedOutEssays,
+      unprocessedReports,
+      unprocessedReviews,
+    });
   }
 
   async countEssaysByDailyThisMonth(queryYear: number, queryMonth: number) {
@@ -163,6 +250,8 @@ export class AdminService {
   }
 
   // -------------------------------------------------------------------- Statistics API up to here
+  // -------------------------------------------------------------------- Statistics API up to here
+  // -------------------------------------------------------------------- Statistics API up to here
 
   @Transactional()
   async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {
@@ -172,33 +261,29 @@ export class AdminService {
       limit,
     );
     const totalPage: number = Math.ceil(totalEssay / limit);
-    const reportDtos = plainToInstance(ReportsDto, reports, {
-      excludeExtraneousValues: true,
-    });
+    // const reportDtos = plainToInstance(ReportsDto, reports, {
+    //   excludeExtraneousValues: true,
+    // });
+    const reportDtos = this.utilsService.transformToDto(ReportsDto, reports) as ReportsDto[];
 
     return { reports: reportDtos, totalReports, totalEssay, totalPage, page };
   }
 
   async getReportDetails(essayId: number) {
     const essayWithReports = await this.essayRepository.getReportDetails(essayId);
-    return plainToInstance(
-      ReportDetailResDto,
-      {
-        ...essayWithReports,
-        authorId: essayWithReports.author ? essayWithReports.author.id : null,
-        reports: essayWithReports.reports.map((report) => ({
-          id: report.id,
-          reason: report.reason,
-          processed: report.processed,
-          processedDate: report.processedDate,
-          createdDate: report.createdDate,
-          reporterId: report.reporter ? report.reporter.id : null,
-        })),
-      },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+
+    return this.utilsService.transformToDto(ReportDetailResDto, {
+      ...essayWithReports,
+      authorId: essayWithReports.author ? essayWithReports.author.id : null,
+      reports: essayWithReports.reports.map((report) => ({
+        id: report.id,
+        reason: report.reason,
+        processed: report.processed,
+        processedDate: report.processedDate,
+        createdDate: report.createdDate,
+        reporterId: report.reporter ? report.reporter.id : null,
+      })),
+    });
   }
 
   @Transactional()
@@ -215,7 +300,6 @@ export class AdminService {
       // todo 여기에 앱 푸쉬알림이랑 메일링 추가해야할듯
     }
     await this.syncReportsProcessed(essayId, userId, data);
-    return;
   }
 
   @Transactional()
@@ -229,23 +313,22 @@ export class AdminService {
       report.processedDate = new Date();
       await this.adminRepository.saveReport(report);
 
-      const newHistory = new ProcessedHistory();
-      newHistory.comment = data.comment;
-      newHistory.actionType = data.actionType;
-      newHistory.target = 'report';
-      newHistory.processor = adminId;
-      newHistory.report = report;
-      newHistory.processedDate = new Date();
+      const newHistory = this.createProcessedHistory(
+        data.actionType,
+        'report',
+        report,
+        adminId,
+        data.comment,
+      );
       await this.adminRepository.saveHistory(newHistory);
     }
-    return;
   }
 
   async getReviews(page: number, limit: number) {
     const { reviews, total } = await this.adminRepository.getReviews(page, limit);
     const totalPage: number = Math.ceil(total / limit);
 
-    const reviewsDto = plainToInstance(
+    const reviewsDto = this.utilsService.transformToDto(
       ReviewDto,
       reviews.map((review) => ({
         id: review.id,
@@ -257,16 +340,14 @@ export class AdminService {
         essayId: review.essay.id,
         essayTitle: review.essay.title,
       })),
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+    ) as ReviewDto[];
+
     return { reviews: reviewsDto, totalPage, page, total };
   }
 
   async detailReview(reviewId: number) {
     const review = await this.adminRepository.getReview(reviewId);
-    return plainToInstance(DetailReviewResDto, review, { excludeExtraneousValues: true });
+    return this.utilsService.transformToDto(DetailReviewResDto, review);
   }
 
   @Transactional()
@@ -281,18 +362,16 @@ export class AdminService {
     await this.essayRepository.saveEssay(review.essay);
     await this.adminRepository.saveReview(review);
 
-    const newHistory = new ProcessedHistory();
-    newHistory.comment = data.comment;
-    newHistory.actionType = data.actionType;
-    newHistory.processor = adminId;
-    newHistory.review = review;
-    newHistory.target = 'review';
-    newHistory.processedDate = new Date();
+    const newHistory = this.createProcessedHistory(
+      data.actionType,
+      'review',
+      review,
+      adminId,
+      data.comment,
+    );
     await this.adminRepository.saveHistory(newHistory);
 
     // todo 유저에게 결과 메일 또는 푸쉬알림
-
-    return;
   }
 
   async getUsers(filter: string, page: number, limit: number) {
@@ -300,9 +379,8 @@ export class AdminService {
     const { users, total } = await this.userRepository.findUsers(today, filter, page, limit);
 
     const totalPage: number = Math.ceil(total / limit);
-    const userDtos = plainToInstance(FullUserResDto, users, {
-      excludeExtraneousValues: true,
-    });
+    const userDtos = this.utilsService.transformToDto(FullUserResDto, users);
+
     return { users: userDtos, totalPage, page, total };
   }
 
@@ -314,7 +392,7 @@ export class AdminService {
       essayCount: user.essays.length,
       reviewCount: user.reviews.length,
     };
-    return plainToInstance(UserDetailResDto, data, { excludeExtraneousValues: true });
+    return this.utilsService.transformToDto(UserDetailResDto, data);
   }
 
   @Transactional()
@@ -326,39 +404,16 @@ export class AdminService {
 
     await this.userService.updateUser(userId, data);
 
-    const newHistory = new ProcessedHistory();
-    newHistory.actionType = 'updated';
-    newHistory.target = 'user';
-
-    if (data.monitored) {
-      newHistory.actionType = 'monitored';
-    }
-    if (data.banned) {
-      newHistory.actionType = 'banned';
-    }
-    newHistory.processor = adminId;
-    newHistory.user = user;
-    newHistory.processedDate = new Date();
+    const actionType = this.determineUserActionType(data);
+    const newHistory = this.createProcessedHistory(actionType, 'user', user, adminId);
 
     await this.adminRepository.saveHistory(newHistory);
 
-    if (data.banned) {
-      await this.handleBannedUser(userId);
-    }
-
-    if (data.banned === false) {
-      await this.essayRepository.restoreAllEssay(userId);
+    if (data.banned !== undefined) {
+      await this.handleUserBanStatus(userId, data.banned);
     }
 
     return await this.getUser(userId);
-  }
-
-  private async handleBannedUser(userId: number) {
-    const deletedEssayIds = await this.essayRepository.deleteAllEssay(userId);
-    console.log(deletedEssayIds);
-    await this.adminRepository.handleBannedReports(deletedEssayIds);
-    await this.adminRepository.handleBannedReviews(userId);
-    return;
   }
 
   async getFullEssays(page: number, limit: number) {
@@ -372,13 +427,13 @@ export class AdminService {
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
 
-    const essaysDto = plainToInstance(EssaysInfoDto, data, { excludeExtraneousValues: true });
+    const essaysDto = this.utilsService.transformToDto(EssaysInfoDto, data);
     return { essays: essaysDto, total, page, totalPage };
   }
 
   async getFullEssay(essayId: number) {
     const essay = await this.essayRepository.findFullEssay(essayId);
-    return plainToInstance(FullEssayResDto, essay, { excludeExtraneousValues: true });
+    return this.utilsService.transformToDto(FullEssayResDto, essay);
   }
 
   @Transactional()
@@ -388,34 +443,22 @@ export class AdminService {
       throw new NotFoundException(`Essay with ID ${essayId} not found`);
     }
 
-    const newHistory = new ProcessedHistory();
-    newHistory.target = 'essay';
+    const actionType = this.determineEssayActionType(data);
+    const newHistory = this.createProcessedHistory(actionType, 'essay', essay, adminId);
 
     const updateData = new UpdateEssayDto();
 
     if (data.published !== undefined) {
-      newHistory.actionType = 'unpublished';
       updateData.published = data.published;
     }
     if (data.linkedOut !== undefined) {
-      newHistory.actionType = 'unlinkedout';
       updateData.linkedOut = data.linkedOut;
     }
 
-    const processData: ProcessReqDto = {
-      comment: '',
-      actionType: 'pending',
-    };
-    if (essay.reviews) {
-      await this.processReview(adminId, essay.reviews[0].id, processData);
-    }
-    if (essay.reports) {
-      await this.syncReportsProcessed(essayId, adminId, processData);
-    }
+    const processData = new ProcessReqDto();
+    processData.actionType = 'pending';
 
-    newHistory.processor = adminId;
-    newHistory.essay = essay;
-    newHistory.processedDate = new Date();
+    await this.handleEssayDependencies(essay, adminId, processData);
 
     await this.adminRepository.saveHistory(newHistory);
     await this.essayRepository.updateEssay(essay, updateData);
@@ -423,21 +466,13 @@ export class AdminService {
     return await this.getFullEssay(essayId);
   }
 
+  @Transactional()
   async getHistories(page: number, limit: number, target?: string, action?: string) {
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    const whereConditions: any = {};
-    if (target) {
-      whereConditions.target = target;
-    }
-    if (action) {
-      whereConditions.actionType = action;
-    }
+    const whereConditions: any = this.buildWhereConditions(target, action);
 
     const query: FindManyOptions<ProcessedHistory> = {
-      skip,
-      take,
+      skip: (page - 1) * limit,
+      take: limit,
       order: { processedDate: 'DESC' },
       relations: ['report', 'review', 'user', 'essay'],
       where: whereConditions,
@@ -445,9 +480,7 @@ export class AdminService {
 
     const { histories, total } = await this.adminRepository.getHistories(query);
     const totalPage: number = Math.ceil(total / limit);
-    const historiesDto = plainToInstance(HistoriesResDto, histories, {
-      excludeExtraneousValues: true,
-    });
+    const historiesDto = this.utilsService.transformToDto(HistoriesResDto, histories);
 
     return { histories: historiesDto, totalPage, page, total };
   }

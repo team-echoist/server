@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { CategoryInfoDto } from '../../../essay/dto/categoryInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
@@ -33,7 +41,7 @@ export class FullEssayResDto {
 
   @ApiProperty()
   @Expose()
-  @IsDate()
+  @IsDateString()
   createdDate: Date;
 
   @ApiProperty()

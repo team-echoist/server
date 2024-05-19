@@ -124,10 +124,15 @@ export class EssayService {
   ) {
     const query: FindMyEssayQueryInterface = {
       author: { id: userId },
-      category: { id: categoryId },
       linkedOut: false,
     };
-    if (published === true) query.published = true;
+
+    if (categoryId !== undefined) {
+      query.category = { id: categoryId };
+    }
+    if (published !== undefined) {
+      query.published = published;
+    }
 
     const { essays, total } = await this.essayRepository.findEssays(query, page, limit);
     const totalPage: number = Math.ceil(total / limit);

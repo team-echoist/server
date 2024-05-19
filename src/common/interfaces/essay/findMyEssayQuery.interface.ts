@@ -1,6 +1,6 @@
 export interface FindMyEssayQueryInterface {
-  author: object;
-  category: object;
+  author: { id: number };
   linkedOut: boolean;
+  category?: { id: number };
   published?: boolean;
 }

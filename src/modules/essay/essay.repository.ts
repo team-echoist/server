@@ -190,12 +190,4 @@ export class EssayRepository {
       .execute();
     return;
   }
-
-  async findEssayIds(userId: number) {
-    await this.essayRepository
-      .createQueryBuilder('essay')
-      .select('essay.id')
-      .where('essay.author_id = :userId', { userId })
-      .getRawMany();
-  } //todo delete?
 }

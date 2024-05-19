@@ -291,8 +291,8 @@ export class AdminController {
     description:
       '발행 및 링크드아웃 취소용. 타겟 에세이에 포함된 리포트 및 리뷰 일괄 처리(보류로 변경)',
   })
-  @ApiResponse({ status: 200, type: UpdateEssayStatusReqDto })
-  @ApiBody({ type: '' })
+  @ApiResponse({ status: 200, type: FullEssayResDto })
+  @ApiBody({ type: UpdateEssayStatusReqDto })
   async updateEssayStatus(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,

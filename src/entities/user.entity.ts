@@ -57,9 +57,9 @@ export class User {
 
   @Column({
     name: 'subscription_end',
-    nullable: true,
     type: 'timestamptz',
     transformer: KSTTransformer,
+    nullable: true,
   })
   subscriptionEnd: Date;
 

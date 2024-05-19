@@ -3,7 +3,10 @@ import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from
 @Injectable()
 export class OptionalBoolPipe implements PipeTransform<string, boolean | undefined> {
   transform(value: string | undefined, metadata: ArgumentMetadata): boolean | undefined {
-    if (value === '' || value === 'false') {
+    if (value === '') {
+      return undefined;
+    }
+    if (value === 'false') {
       return false;
     }
     if (value === 'true') {

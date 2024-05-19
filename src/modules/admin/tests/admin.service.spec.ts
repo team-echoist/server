@@ -59,6 +59,7 @@ describe('AdminService', () => {
     saveEssay: jest.fn(),
     findFullEssays: jest.fn(),
     findFullEssay: jest.fn(),
+    updateEssay: jest.fn(),
   };
   const mockAuthService = {
     checkEmail: jest.fn(),
@@ -72,6 +73,7 @@ describe('AdminService', () => {
     formatDailyData: jest.fn(),
     formatMonthlyData: jest.fn(),
     newDate: jest.fn(),
+    transformToDto: jest.fn(),
   };
   const mockAuthRepository = {
     createUser: jest.fn(),
@@ -111,6 +113,7 @@ describe('AdminService', () => {
 
       mockAuthService.checkEmail.mockResolvedValue(true);
       mockAuthRepository.createUser.mockResolvedValue(savedAdmin);
+      mockUtilsService.transformToDto.mockResolvedValue(savedAdmin);
 
       const result = await adminService.createAdmin(1, createAdminDto);
 
@@ -137,6 +140,18 @@ describe('AdminService', () => {
       mockEssayRepository.totalLinkedOutEssays.mockResolvedValue(20);
       mockAdminRepository.unprocessedReports.mockResolvedValue(3);
       mockAdminRepository.unprocessedReviews.mockResolvedValue(4);
+
+      mockUtilsService.transformToDto.mockReturnValue({
+        totalUser: 100,
+        currentSubscriber: 50,
+        todaySubscribers: 5,
+        totalEssays: 200,
+        todayEssays: 10,
+        publishedEssays: 150,
+        linkedOutEssays: 20,
+        unprocessedReports: 3,
+        unprocessedReviews: 4,
+      });
 
       const result = await adminService.dashboard();
 
@@ -299,6 +314,7 @@ describe('AdminService', () => {
       const totalReports = 0;
       const totalEssay = 0;
 
+      mockUtilsService.transformToDto.mockReturnValue(reports);
       mockAdminRepository.getReports.mockResolvedValue({ reports, totalReports, totalEssay });
 
       const result = await adminService.getReports(sort, page, limit);
@@ -332,6 +348,19 @@ describe('AdminService', () => {
       };
 
       mockEssayRepository.getReportDetails.mockResolvedValue(essayWithReports);
+      mockUtilsService.transformToDto.mockResolvedValue({
+        authorId: 1,
+        reports: [
+          {
+            id: 1,
+            reason: 'spam',
+            processed: false,
+            processedDate: null,
+            createdDate: expect.any(Date),
+            reporterId: 2,
+          },
+        ],
+      });
 
       const result = await adminService.getReportDetails(essayId);
 
@@ -430,6 +459,7 @@ describe('AdminService', () => {
       const reviews = [];
       const total = 0;
 
+      mockUtilsService.transformToDto.mockReturnValue(reviews);
       mockAdminRepository.getReviews.mockResolvedValue({ reviews, total });
 
       const result = await adminService.getReviews(page, limit);
@@ -449,6 +479,7 @@ describe('AdminService', () => {
       const reviewId = 1;
       const review = { id: reviewId, type: 'published', essay: { id: 1, title: 'Test Essay' } };
 
+      mockUtilsService.transformToDto.mockReturnValue(review);
       mockAdminRepository.getReview.mockResolvedValue(review);
 
       const result = await adminService.detailReview(reviewId);
@@ -500,6 +531,7 @@ describe('AdminService', () => {
         where: {},
       };
 
+      mockUtilsService.transformToDto.mockReturnValue(histories);
       mockAdminRepository.getHistories.mockResolvedValue({ histories, total });
 
       const result = await adminService.getHistories(page, limit, target, action);
@@ -551,6 +583,7 @@ describe('AdminService', () => {
         reviews: [],
       };
 
+      mockUtilsService.transformToDto.mockReturnValue(user);
       mockUserRepository.findUserDetailById.mockResolvedValue(user);
 
       const result = await adminService.getUser(userId);
@@ -575,7 +608,9 @@ describe('AdminService', () => {
 
       expect(mockUserService.updateUser).toHaveBeenCalledWith(userId, data);
       expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(expect.objectContaining({ id: userId, nickname: 'updatedUser' }));
+      expect(result).toEqual(
+        expect.objectContaining({ id: 1, reports: [], essays: [], reviews: [] }),
+      );
     });
   });
 
@@ -586,6 +621,7 @@ describe('AdminService', () => {
       const essays = [];
       const total = 0;
 
+      mockUtilsService.transformToDto.mockReturnValue(essays);
       mockEssayRepository.findFullEssays.mockResolvedValue({ essays, total });
 
       const result = await adminService.getFullEssays(page, limit);
@@ -605,11 +641,57 @@ describe('AdminService', () => {
       const essayId = 1;
       const essay = { id: 1 };
 
+      mockUtilsService.transformToDto.mockReturnValue(essay);
       mockEssayRepository.findFullEssay.mockResolvedValue(essay);
 
       const result = await adminService.getFullEssay(essayId);
       expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
       expect(result).toEqual(expect.objectContaining({ id: 1 }));
+    });
+  });
+
+  describe('updateEssayStatus', () => {
+    it('에세이 강제 업데이트', async () => {
+      const adminId = 1;
+      const essayId = 1;
+      const data = { published: false };
+      const processData = { actionType: 'pending' };
+
+      const existingEssay = {
+        id: essayId,
+        author: {},
+        published: true,
+        linkedOut: false,
+      };
+
+      const updatedEssay = {
+        ...existingEssay,
+        published: false,
+      };
+
+      const newHistory = {
+        id: 1,
+        actionType: 'update',
+        entityType: 'essay',
+        entityId: essayId,
+        adminId: adminId,
+      };
+
+      mockEssayRepository.findFullEssay.mockResolvedValue(existingEssay);
+      mockAdminRepository.saveHistory.mockResolvedValue(newHistory);
+      mockEssayRepository.updateEssay.mockResolvedValue(updatedEssay);
+      mockUtilsService.transformToDto.mockReturnValue(updatedEssay);
+
+      const result = await adminService.updateEssayStatus(adminId, essayId, data);
+
+      expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
+      expect(mockEssayRepository.updateEssay).toHaveBeenCalledWith(
+        existingEssay,
+        expect.objectContaining({
+          published: data.published,
+        }),
+      );
+      expect(result).toEqual(updatedEssay);
     });
   });
 });
