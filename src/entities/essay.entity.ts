@@ -16,7 +16,6 @@ import { User } from './user.entity';
 import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
-import { KSTTransformer } from '../common/utils';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Tag } from './tag.entity';
 
@@ -37,21 +36,18 @@ export class Essay {
   @CreateDateColumn({
     name: 'created_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   createdDate: Date;
 
   @UpdateDateColumn({
     name: 'updated_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   updatedDate: Date;
 
   @DeleteDateColumn({
     name: 'deleted_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   deletedDate: Date;
 

@@ -17,7 +17,6 @@ export class UserRepository {
     return this.userRepository.save(user);
   }
 
-  // ------------------------------------------------------admin api
   async usersCount() {
     return this.userRepository.count();
   }

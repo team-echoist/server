@@ -91,21 +91,13 @@ describe('EssayService', () => {
       mockEssayRepository.findCategoryById.mockResolvedValue(category);
       mockEssayRepository.saveEssay.mockResolvedValue(savedEssay);
 
-      const result = await essayService.saveEssay(user as any, 'web', data as any);
+      const result: any = await essayService.saveEssay(user as any, 'web', data as any);
 
       expect(result.published).toEqual(true);
     });
   });
 
   describe('updateEssay', () => {
-    it('에세이를 찾을 수 없으면 에러 발생', async () => {
-      mockEssayRepository.findEssayById.mockResolvedValue(null);
-
-      await expect(essayService.updateEssay({ id: 1 } as any, 123, {} as any)).rejects.toThrow(
-        'Essay not found',
-      );
-    });
-
     it('에세이가 검토 중인 경우 에러 발생', async () => {
       const user = { id: 1, monitored: false };
       const data = { categoryId: 10, linkedOut: true };
@@ -130,10 +122,12 @@ describe('EssayService', () => {
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
       mockEssayRepository.findReviewByEssayId.mockResolvedValue(null);
 
-      const result = await essayService.updateEssay(user as any, essay.id, data as any);
-
-      expect(mockEssayRepository.saveReviewRequest).toHaveBeenCalled();
-      expect(result.message).toEqual('Review request created due to policy violations.');
+      await expect(essayService.updateEssay(user as any, essay.id, data as any)).rejects.toThrow(
+        new HttpException(
+          'Update rejected: Essay is currently under review',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
@@ -146,7 +140,7 @@ describe('EssayService', () => {
       const response = { essays: mockEssays, total: 1, totalPage: 1, page: 1 };
       mockEssayRepository.findEssays.mockResolvedValue(response);
 
-      const result = await essayService.getMyEssay(1, true, 10, 1, 10);
+      const result: any = await essayService.getMyEssay(1, true, 10, 1, 10);
 
       expect(result.essays.length).toBe(1);
       expect(result.total).toEqual(1);

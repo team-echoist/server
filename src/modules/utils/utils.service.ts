@@ -75,10 +75,46 @@ export class UtilsService {
     return result;
   }
 
+  convertToKST(date: Date): string {
+    return moment(date).tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+  }
+
+  transformDatesToKST(data: any): any {
+    const dateFields = [
+      'createdDate',
+      'updatedDate',
+      'deletedDate',
+      'processedDate',
+      'endDate',
+      'subscriptionEnd',
+    ];
+
+    const result = { ...data };
+
+    dateFields.forEach((field) => {
+      if (result[field]) {
+        result[field] = this.convertToKST(new Date(result[field]));
+      }
+    });
+
+    return result;
+  }
+
+  transformTagsToNames(data: any): any {
+    if (data.tags && Array.isArray(data.tags)) {
+      data.tags = data.tags.map((tag: any) => tag.name);
+    }
+    return data;
+  }
+
   transformToDto<T, V>(cls: ClassConstructor<T>, plain: V | V[]): T | T[] {
     if (Array.isArray(plain)) {
-      return plain.map((item) => plainToInstance(cls, item, { excludeExtraneousValues: true }));
+      return plain.map((item) => {
+        const transformedItem = plainToInstance(cls, item, { excludeExtraneousValues: true });
+        return this.transformDatesToKST(transformedItem);
+      });
     }
-    return plainToInstance(cls, plain, { excludeExtraneousValues: true });
+    const transformedPlain = plainToInstance(cls, plain, { excludeExtraneousValues: true });
+    return this.transformDatesToKST(transformedPlain);
   }
 }

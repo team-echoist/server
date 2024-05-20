@@ -10,8 +10,6 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
-import * as moment from 'moment-timezone';
-import { KSTTransformer } from '../common/utils';
 
 @Entity()
 export class Category {
@@ -24,11 +22,10 @@ export class Category {
   @CreateDateColumn({
     name: 'created_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz', transformer: KSTTransformer })
+  @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
 
   @JoinColumn({ name: 'user_id' })

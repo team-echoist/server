@@ -43,7 +43,6 @@ export class EssayController {
   @ApiBody({ type: CreateEssayReqDto })
   async saveEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
     return this.essayService.saveEssay(req.user, req.device, createEssayDto);
-    // todo 태그 기능 추가
   }
 
   @Put(':essayId')
@@ -56,7 +55,6 @@ export class EssayController {
     @Body() updateEssayDto: UpdateEssayReqDto,
   ) {
     return this.essayService.updateEssay(req.user, essayId, updateEssayDto);
-    // todo 태그 기능 추가
   }
 
   @Get()

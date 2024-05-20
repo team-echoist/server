@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 
 export class UpdateEssayReqDto {
@@ -7,41 +7,47 @@ export class UpdateEssayReqDto {
   @Expose()
   @IsString()
   @IsOptional()
-  title: string;
+  title?: string;
 
   @ApiProperty({ required: false })
   @Expose()
   @IsString()
   @IsOptional()
-  content: string;
+  content?: string;
 
   @ApiProperty({ required: false })
   @Expose()
   @IsNumber()
   @IsOptional()
-  linkedOutGauge: number;
+  linkedOutGauge?: number;
 
   @ApiProperty({ required: false })
   @Expose()
   @IsNumber()
   @IsOptional()
-  categoryId: number;
+  categoryId?: number;
 
   @ApiProperty({ required: false })
   @Expose()
   @IsString()
   @IsOptional()
-  thumbnail: string;
+  thumbnail?: string;
 
   @ApiProperty({ required: false })
   @Expose()
   @IsBoolean()
   @IsOptional()
-  published: boolean;
+  published?: boolean;
 
   @ApiProperty({ required: false })
   @Expose()
   @IsBoolean()
   @IsOptional()
-  linkedOut: boolean;
+  linkedOut?: boolean;
+
+  @ApiProperty({ required: false, type: [String], maxItems: 4 })
+  @IsArray()
+  @ArrayMaxSize(4)
+  @IsOptional()
+  tags?: string[];
 }

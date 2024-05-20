@@ -12,7 +12,6 @@ import { Subscription } from './subscription.entity';
 import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
-import { KSTTransformer } from '../common/utils';
 import { ProcessedHistory } from './processedHistory.entity';
 
 @Entity()
@@ -35,7 +34,7 @@ export class User {
   @Column({ name: 'profile_image', nullable: true })
   profileImage: string;
 
-  @Column({ name: 'birth_date', nullable: true, type: 'timestamptz', transformer: KSTTransformer })
+  @Column({ name: 'birth_date', nullable: true })
   birthDate: Date;
 
   @Column({ name: 'oauth_info', type: 'jsonb', nullable: true })
@@ -57,23 +56,21 @@ export class User {
 
   @Column({
     name: 'subscription_end',
-    type: 'timestamptz',
-    transformer: KSTTransformer,
     nullable: true,
+    type: 'timestamptz',
   })
   subscriptionEnd: Date;
 
-  @CreateDateColumn({ name: 'created_date', type: 'timestamptz', transformer: KSTTransformer })
+  @CreateDateColumn({ name: 'created_date', type: 'timestamptz' })
   createdDate: Date;
 
-  @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz', transformer: KSTTransformer })
+  @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
 
   @DeleteDateColumn({
     name: 'deleted_date',
-    type: 'timestamptz',
-    transformer: KSTTransformer,
     nullable: true,
+    type: 'timestamptz',
   })
   deletedDate?: Date;
 

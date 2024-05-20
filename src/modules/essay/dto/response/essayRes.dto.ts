@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
 
@@ -10,12 +10,12 @@ export class EssayResDto {
   id: number;
 
   @ApiProperty()
-  @IsDate()
+  @IsDateString()
   @Expose()
   createdDate: Date;
 
   @ApiProperty()
-  @IsDate()
+  @IsDateString()
   @Expose()
   updatedDate: Date;
 

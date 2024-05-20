@@ -1,13 +1,13 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { SaveEssayDto } from './dto/saveEssay.dto';
+import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { Category } from '../../entities/category.entity';
-import { UpdateEssayDto } from './dto/updateEssay.dto';
 import { Tag } from '../../entities/tag.entity';
+import { SaveEssayDto } from './dto/saveEssay.dto';
+import { UpdateEssayDto } from './dto/updateEssay.dto';
 
 export class EssayRepository {
   constructor(
@@ -24,7 +24,7 @@ export class EssayRepository {
   async findEssayById(essayId: number) {
     return await this.essayRepository.findOne({
       where: { id: essayId },
-      relations: ['author', 'category'],
+      relations: ['author', 'category', 'tags'],
     });
   }
 
@@ -62,7 +62,7 @@ export class EssayRepository {
       order: {
         createdDate: 'DESC',
       },
-      relations: ['author', 'category'],
+      relations: ['author', 'category', 'tags'],
     });
 
     return { essays, total };

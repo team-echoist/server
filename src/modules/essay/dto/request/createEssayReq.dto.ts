@@ -49,5 +49,5 @@ export class CreateEssayReqDto {
   @IsArray()
   @ArrayMaxSize(4)
   @IsOptional()
-  tagNames?: string[];
+  tags?: string[];
 }
