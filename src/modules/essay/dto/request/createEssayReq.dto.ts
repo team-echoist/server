@@ -7,17 +7,20 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Length,
 } from 'class-validator';
 
 export class CreateEssayReqDto {
-  @ApiProperty()
+  @ApiProperty({ description: '30자 제한' })
   @IsString()
   @IsNotEmpty()
+  @Length(1, 30)
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: '4000자 제한' })
   @IsString()
   @IsNotEmpty()
+  @Length(10, 4000)
   content: string;
 
   @ApiProperty({ required: false })
@@ -45,7 +48,12 @@ export class CreateEssayReqDto {
   @IsBoolean()
   linkedOut: boolean;
 
-  @ApiProperty({ required: false, type: [String], maxItems: 4 })
+  @ApiProperty({
+    description: '에세이와 연결시킬 태그들. 최대 4개',
+    required: false,
+    type: [String],
+    maxItems: 4,
+  })
   @IsArray()
   @ArrayMaxSize(4)
   @IsOptional()
