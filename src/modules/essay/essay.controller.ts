@@ -26,7 +26,7 @@ import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
-import { ThumbanilResDto } from './dto/response/ThumbanilRes.dto';
+import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -35,12 +35,14 @@ export class EssayController {
   constructor(private readonly essayService: EssayService) {}
 
   @Post()
-  @ApiOperation({ summary: '에세이 작성', description: '블랙 유저의 경우 리뷰 대기' })
+  @ApiOperation({
+    summary: '에세이 작성',
+    description: '모니터링 유저의 경우 발행 및 링크드아웃시 리뷰 대기',
+  })
   @ApiResponse({ status: 201, type: EssayResDto })
   @ApiBody({ type: CreateEssayReqDto })
   async saveEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
     return this.essayService.saveEssay(req.user, req.device, createEssayDto);
-    // todo 태그 기능 추가
   }
 
   @Put(':essayId')
@@ -53,7 +55,6 @@ export class EssayController {
     @Body() updateEssayDto: UpdateEssayReqDto,
   ) {
     return this.essayService.updateEssay(req.user, essayId, updateEssayDto);
-    // todo 태그 기능 추가
   }
 
   @Get()
@@ -83,7 +84,7 @@ export class EssayController {
 
   @Post('images')
   @ApiOperation({ summary: '썸네일 업로드' })
-  @ApiResponse({ status: 201, type: ThumbanilResDto })
+  @ApiResponse({ status: 201, type: ThumbnailResDto })
   @UseInterceptors(FileInterceptor('image'))
   @ApiBody({ type: ThumbnailReqDto })
   async saveThumbnail(

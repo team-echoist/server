@@ -14,9 +14,9 @@ import { AwsModule } from './modules/aws/aws.module';
 import { SeederService } from './modules/seeder/seeder.service';
 import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
-import { TypeOrmOptions } from '../typeorm.options';
 import { UserModule } from './modules/user/user.module';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
+import { TypeOrmOptions } from '../typeorm.options';
 
 @Module({
   imports: [

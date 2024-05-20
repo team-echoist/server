@@ -8,10 +8,8 @@ import {
 } from 'typeorm';
 import { ReportQueue } from './reportQueue.entity';
 import { ReviewQueue } from './reviewQueue.entity';
-import { KSTTransformer } from '../common/utils';
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
-import { IsOptional } from 'class-validator';
 
 @Entity()
 export class ProcessedHistory {
@@ -30,7 +28,7 @@ export class ProcessedHistory {
   @Column()
   processor: number;
 
-  @CreateDateColumn({ name: 'processed_date', type: 'timestamptz', transformer: KSTTransformer })
+  @CreateDateColumn({ name: 'processed_date', type: 'timestamptz' })
   processedDate: Date;
 
   @JoinColumn({ name: 'report_id' })

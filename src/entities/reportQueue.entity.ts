@@ -10,7 +10,6 @@ import {
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
 import { ProcessedHistory } from './processedHistory.entity';
-import { KSTTransformer } from '../common/utils';
 
 @Entity()
 export class ReportQueue {
@@ -27,11 +26,10 @@ export class ReportQueue {
     name: 'processed_date',
     nullable: true,
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   processedDate: Date;
 
-  @CreateDateColumn({ name: 'created_date', type: 'timestamptz', transformer: KSTTransformer })
+  @CreateDateColumn({ name: 'created_date', type: 'timestamptz' })
   createdDate: Date;
 
   @JoinColumn({ name: 'reporter_id' })

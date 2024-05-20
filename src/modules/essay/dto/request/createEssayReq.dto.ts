@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateEssayReqDto {
   @ApiProperty()
@@ -36,4 +44,10 @@ export class CreateEssayReqDto {
   @IsOptional()
   @IsBoolean()
   linkedOut: boolean;
+
+  @ApiProperty({ required: false, type: [String], maxItems: 4 })
+  @IsArray()
+  @ArrayMaxSize(4)
+  @IsOptional()
+  tags?: string[];
 }

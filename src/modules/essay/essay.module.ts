@@ -13,6 +13,7 @@ import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Category } from '../../entities/category.entity';
+import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
 
@@ -23,7 +24,7 @@ dotenv.config();
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Essay, Category, ReviewQueue]),
+    TypeOrmModule.forFeature([User, Essay, Category, ReviewQueue, Tag]),
     AuthModule,
     MailModule,
     UserModule,

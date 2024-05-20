@@ -5,6 +5,8 @@ import {
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -14,8 +16,8 @@ import { User } from './user.entity';
 import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
-import { KSTTransformer } from '../common/utils';
 import { ProcessedHistory } from './processedHistory.entity';
+import { Tag } from './tag.entity';
 
 @Entity()
 export class Essay {
@@ -34,21 +36,18 @@ export class Essay {
   @CreateDateColumn({
     name: 'created_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   createdDate: Date;
 
   @UpdateDateColumn({
     name: 'updated_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   updatedDate: Date;
 
   @DeleteDateColumn({
     name: 'deleted_date',
     type: 'timestamptz',
-    transformer: KSTTransformer,
   })
   deletedDate: Date;
 
@@ -71,6 +70,10 @@ export class Essay {
   @Index()
   @Column({ nullable: true, name: 'device_info' })
   device: string;
+
+  @JoinTable({ name: 'essay_tags' })
+  @ManyToMany(() => Tag, (tag) => tag.essays)
+  tags: Tag[];
 
   @JoinColumn({ name: 'category_id' })
   @ManyToOne(() => Category, (category) => category.essays)
