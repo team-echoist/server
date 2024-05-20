@@ -8,6 +8,7 @@ import { Subscription } from './src/entities/subscription.entity';
 import { Category } from './src/entities/category.entity';
 import { ReportQueue } from './src/entities/reportQueue.entity';
 import { ReviewQueue } from './src/entities/reviewQueue.entity';
+import { Tag } from './src/entities/tag.entity';
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
     username: process.env.DB_USER,
     password: String(process.env.DB_PASSWORD),
     database: process.env.DB_NAME,
-    entities: [User, Essay, Subscription, Category, ReportQueue, ReviewQueue],
+    entities: [User, Essay, Subscription, Category, ReportQueue, ReviewQueue, Tag],
     dropSchema: process.env.ENV === 'prod',
     timezone: 'Asia/Seoul',
     synchronize: true,

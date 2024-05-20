@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
-import { Exclude, Expose } from 'class-transformer';
+import { IsArray, IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { TagDto } from '../tag.dto';
 
 export class EssayResDto {
   @ApiProperty()
@@ -52,4 +53,10 @@ export class EssayResDto {
   @IsString()
   @Expose()
   content: string;
+
+  @ApiProperty({ type: [TagDto] })
+  @Type(() => TagDto)
+  @IsArray()
+  @Expose()
+  tags: TagDto[];
 }

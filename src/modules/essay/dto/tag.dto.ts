@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsString } from 'class-validator';
 
-export class ThumbanilResDto {
+export class TagDto {
   @ApiProperty()
   @Expose()
-  @IsString()
-  imageUrl: string;
+  id: number;
+
+  @ApiProperty()
+  @Expose()
+  name: string;
 }

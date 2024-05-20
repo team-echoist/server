@@ -7,11 +7,14 @@ import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { Category } from '../../entities/category.entity';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
+import { Tag } from '../../entities/tag.entity';
 
 export class EssayRepository {
   constructor(
     @InjectRepository(Essay)
     private readonly essayRepository: Repository<Essay>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
     @InjectRepository(ReviewQueue)
     private readonly reviewRepository: Repository<ReviewQueue>,
     @InjectRepository(Category)
@@ -189,5 +192,14 @@ export class EssayRepository {
       .where('author_id = :userId', { userId })
       .execute();
     return;
+  }
+
+  async findTag(name: string) {
+    return this.tagRepository.findOne({ where: { name } });
+  }
+
+  async saveTag(name: string) {
+    const tag = this.tagRepository.create({ name });
+    return await this.tagRepository.save(tag);
   }
 }

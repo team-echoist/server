@@ -5,12 +5,14 @@ import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { EssayRepository } from './essay.repository';
 import { UserRepository } from '../user/user.repository';
+import { Essay } from '../../entities/essay.entity';
+import { Tag } from '../../entities/tag.entity';
+import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
-import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
-import { Essay } from '../../entities/essay.entity';
-import { ThumbanilResDto } from './dto/response/ThumbanilRes.dto';
+import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
+import { Category } from '../../entities/category.entity';
 
 @Injectable()
 export class EssayService {
@@ -24,18 +26,25 @@ export class EssayService {
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userRepository.findUserById(requester.id);
-    let category: any;
+    let category: Category;
+    let tags: Tag[];
 
     if (data.categoryId) {
       category = await this.essayRepository.findCategoryById(user, data.categoryId);
       if (!category) throw new HttpException('Category not found.', HttpStatus.BAD_REQUEST);
     }
 
+    if (data.tagNames.length !== 0) {
+      tags = await this.processTags(data.tagNames);
+    }
+    console.log(tags);
+
     const essayData = {
       ...data,
       device: device,
       author: user,
       category: category,
+      tags: tags,
     };
 
     if (requester.monitored) {
@@ -69,6 +78,20 @@ export class EssayService {
     return plainToInstance(EssayResDto, savedEssay, {
       excludeExtraneousValues: true,
     });
+  }
+
+  private async processTags(tagNames: string[]): Promise<Tag[]> {
+    if (!tagNames || tagNames.length === 0) return [];
+
+    return await Promise.all(
+      tagNames.map(async (name) => {
+        let tag = await this.essayRepository.findTag(name);
+        if (!tag) {
+          tag = await this.essayRepository.saveTag(name);
+        }
+        return tag;
+      }),
+    );
   }
 
   @Transactional()
@@ -171,6 +194,6 @@ export class EssayService {
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
 
-    return plainToInstance(ThumbanilResDto, imageUrl, { excludeExtraneousValues: true });
+    return plainToInstance(ThumbnailResDto, imageUrl, { excludeExtraneousValues: true });
   }
 }
