@@ -3,6 +3,8 @@ import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsLatitude,
+  IsLongitude,
   IsNumber,
   IsOptional,
   IsString,
@@ -52,6 +54,16 @@ export class UpdateEssayReqDto {
   @IsBoolean()
   @IsOptional()
   linkedOut?: boolean;
+
+  @ApiProperty({
+    description: '장소 이름',
+    required: false,
+  })
+  @Length(1, 20)
+  @IsString()
+  @Expose()
+  @IsOptional()
+  location?: string;
 
   @ApiProperty({
     description: '에세이와 연결시킬 태그들. 최대 4개',

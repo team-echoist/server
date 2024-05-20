@@ -36,4 +36,9 @@ export class UpdateEssayDto {
   @IsBoolean()
   @IsOptional()
   linkedOut: boolean;
+
+  @IsString()
+  @IsOptional()
+  @Expose()
+  location?: string;
 }

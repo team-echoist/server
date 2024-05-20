@@ -3,6 +3,8 @@ import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsLatitude,
+  IsLongitude,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -47,6 +49,31 @@ export class CreateEssayReqDto {
   @IsOptional()
   @IsBoolean()
   linkedOut: boolean;
+
+  @ApiProperty({
+    description: '위도 좌표',
+    required: false,
+  })
+  @IsLatitude()
+  @IsOptional()
+  latitude?: number;
+
+  @ApiProperty({
+    description: '경도 좌표',
+    required: false,
+  })
+  @IsLongitude()
+  @IsOptional()
+  longitude?: number;
+
+  @ApiProperty({
+    description: '장소 이름',
+    required: false,
+  })
+  @Length(1, 20)
+  @IsString()
+  @IsOptional()
+  location?: string;
 
   @ApiProperty({
     description: '에세이와 연결시킬 태그들. 최대 4개',
