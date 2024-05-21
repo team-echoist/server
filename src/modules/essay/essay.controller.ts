@@ -93,4 +93,9 @@ export class EssayController {
   ) {
     return this.essayService.saveThumbnailImage(file, essayId);
   }
+
+  @Get('recommend')
+  async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
+    return this.essayService.getRecommendEssays(limit);
+  }
 }
