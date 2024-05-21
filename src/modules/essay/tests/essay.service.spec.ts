@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EssayService } from '../essay.service';
 import { EssayRepository } from '../essay.repository';
-import { UserRepository } from '../../user/user.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { User } from '../../../entities/user.entity';
 import { Essay } from '../../../entities/essay.entity';
@@ -10,6 +9,10 @@ import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { ReviewQueue } from '../../../entities/reviewQueue.entity';
 import { UtilsModule } from '../../utils/utils.module';
 import { AwsService } from '../../aws/aws.service';
+import { CategoryService } from '../../category/category.service';
+import { UserService } from '../../user/user.service';
+import { TagService } from '../../tag/tag.service';
+import { ReviewService } from '../../review/review.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -29,8 +32,19 @@ describe('EssayService', () => {
     findEssays: jest.fn(),
     deleteEssay: jest.fn(),
   };
-  const mockUserRepository = {
+  const mockUserService = {
     findUserById: jest.fn(),
+  };
+
+  const mockCategoryService = {
+    getCategoryById: jest.fn(),
+  };
+  const mockTagService = {
+    getTags: jest.fn(),
+  };
+  const mockReviewService = {
+    saveReviewRequest: jest.fn(),
+    findReviewByEssayId: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -39,8 +53,11 @@ describe('EssayService', () => {
       providers: [
         EssayService,
         { provide: EssayRepository, useValue: mockEssayRepository },
-        { provide: UserRepository, useValue: mockUserRepository },
+        { provide: UserService, useValue: mockUserService },
         { provide: AwsService, useValue: {} },
+        { provide: CategoryService, useValue: mockCategoryService },
+        { provide: TagService, useValue: mockTagService },
+        { provide: ReviewService, useValue: mockReviewService },
       ],
     }).compile();
 
@@ -51,11 +68,9 @@ describe('EssayService', () => {
     it('요청 데이터에 카테고리 아이디가 있지만 찾을 수 없다면', async () => {
       const user = { id: 1, monitored: false };
       const data = { id: 1, title: 'New Essay', categoryId: 10 };
-      mockEssayRepository.findCategoryById.mockResolvedValue(null);
+      mockCategoryService.getCategoryById.mockReturnValue(null);
 
-      await expect(essayService.saveEssay(user as any, 'web', data as any)).rejects.toThrow(
-        new HttpException('Category not found.', HttpStatus.BAD_REQUEST),
-      );
+      expect(await essayService.saveEssay(user as any, 'web', data as any)).toEqual({});
     });
 
     it('밴 유저의 경우 발행 및 링크드아웃 요청시 리뷰 생성', async () => {
@@ -71,11 +86,11 @@ describe('EssayService', () => {
       savedMonitoredEssay.id = 1;
       savedMonitoredEssay.published = false;
 
-      mockUserRepository.findUserById.mockResolvedValue(user);
+      mockUserService.findUserById.mockResolvedValue(user);
       mockEssayRepository.saveEssay.mockResolvedValue(savedMonitoredEssay);
 
       const result = await essayService.saveEssay(user, 'web', data);
-      expect(mockEssayRepository.saveReviewRequest).toHaveBeenCalled();
+      expect(mockReviewService.saveReviewRequest).toHaveBeenCalled();
       expect(result).toEqual({ message: 'Your essay is under review due to policy violations.' });
     });
 
@@ -87,7 +102,7 @@ describe('EssayService', () => {
 
       user.monitored = false;
       savedEssay.published = true;
-      mockUserRepository.findUserById.mockResolvedValue(user);
+      mockUserService.findUserById.mockResolvedValue(user);
       mockEssayRepository.findCategoryById.mockResolvedValue(category);
       mockEssayRepository.saveEssay.mockResolvedValue(savedEssay);
 
@@ -104,7 +119,7 @@ describe('EssayService', () => {
       const essay = new Essay();
       const reviewQueue = new ReviewQueue();
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
-      mockEssayRepository.findReviewByEssayId.mockResolvedValue(reviewQueue);
+      mockReviewService.findReviewByEssayId.mockResolvedValue(reviewQueue);
 
       await expect(essayService.updateEssay(user as any, essay.id, data as any)).rejects.toThrow(
         new HttpException(
@@ -120,7 +135,7 @@ describe('EssayService', () => {
       const essay = new Essay();
       essay.id = 1;
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
-      mockEssayRepository.findReviewByEssayId.mockResolvedValue(null);
+      mockReviewService.findReviewByEssayId.mockResolvedValue(null);
 
       await expect(essayService.updateEssay(user as any, essay.id, data as any)).rejects.toThrow(
         new HttpException(

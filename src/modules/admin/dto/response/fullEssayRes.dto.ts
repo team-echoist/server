@@ -4,6 +4,8 @@ import {
   IsBoolean,
   IsDate,
   IsDateString,
+  IsLatitude,
+  IsLongitude,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -36,8 +38,22 @@ export class FullEssayResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsOptional()
-  linkedOutGauge?: number;
+  linkedOutGauge: number;
+
+  @ApiProperty()
+  @IsLatitude()
+  @Expose()
+  latitude: number;
+
+  @ApiProperty()
+  @IsLongitude()
+  @Expose()
+  longitude: number;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  location: string;
 
   @ApiProperty()
   @Expose()
@@ -52,8 +68,7 @@ export class FullEssayResDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  @IsOptional()
-  thumbnail?: string;
+  thumbnail: string;
 
   @ApiProperty()
   @Expose()
@@ -96,20 +111,17 @@ export class FullEssayResDto {
   @Type(() => CategoryInfoDto)
   @Expose()
   @IsNumber()
-  @IsOptional()
-  category?: CategoryInfoDto;
+  category: CategoryInfoDto;
 
   @ApiProperty({ type: () => [ReportDto] })
   @Type(() => ReportDto)
   @Expose()
   @IsNumber()
-  @IsOptional()
   reports: ReportDto[];
 
   @ApiProperty({ type: () => [ReviewDto] })
   @Type(() => ReviewDto)
   @Expose()
   @IsNumber()
-  @IsOptional()
   reviews: ReviewDto[];
 }

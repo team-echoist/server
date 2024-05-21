@@ -5,7 +5,7 @@
 <br />
 
 ## Branch Conventions
-깃플로우 ㅇㅇ..\
+깃플로우..\
 feature 브렌치 네이밍 : feature/{이름}/{기능} 
 
 <br />

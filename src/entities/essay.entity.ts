@@ -33,6 +33,15 @@ export class Essay {
   @Column({ name: 'linked_out_gauge', nullable: true })
   linkedOutGauge: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  latitude: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  longitude: number;
+
+  @Column({ nullable: true })
+  location: string;
+
   @CreateDateColumn({
     name: 'created_date',
     type: 'timestamptz',

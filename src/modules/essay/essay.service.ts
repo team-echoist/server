@@ -3,8 +3,11 @@ import { Transactional } from 'typeorm-transactional';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
+import { ReviewService } from '../review/review.service';
+import { CategoryService } from '../category/category.service';
+import { UserService } from '../user/user.service';
+import { TagService } from '../tag/tag.service';
 import { EssayRepository } from './essay.repository';
-import { UserRepository } from '../user/user.repository';
 import { Essay } from '../../entities/essay.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Category } from '../../entities/category.entity';
@@ -18,17 +21,20 @@ import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 export class EssayService {
   constructor(
     private readonly essayRepository: EssayRepository,
-    private readonly userRepository: UserRepository,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
+    private readonly userService: UserService,
+    private readonly reviewService: ReviewService,
+    private readonly tagService: TagService,
+    private readonly categoryService: CategoryService,
   ) {}
 
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
-    const user = await this.userRepository.findUserById(requester.id);
+    const user = await this.userService.findUserById(requester.id);
 
-    const category = await this.getCategory(user, data.categoryId);
-    const tags = await this.getTags(data.tags);
+    const category = await this.categoryService.getCategoryById(user, data.categoryId);
+    const tags = await this.tagService.getTags(data.tags);
 
     const essayData = {
       ...data,
@@ -59,10 +65,8 @@ export class EssayService {
 
     const monitoredEssay = this.utilsService.transformToDto(EssayResDto, essay);
 
-    const reviewType = data.published ? 'published' : data.linkedOut ? 'linkedOut' : null;
-
-    if (reviewType) {
-      await this.essayRepository.saveReviewRequest(user, essay, reviewType);
+    if (data.published || data.linkedOut) {
+      await this.reviewService.saveReviewRequest(user, essay, data);
       return {
         ...monitoredEssay,
         message: 'Your essay is under review due to policy violations.',
@@ -74,16 +78,17 @@ export class EssayService {
 
   @Transactional()
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
-    const user = await this.userRepository.findUserById(requester.id);
-    const category = await this.getCategory(user, data.categoryId);
-    const tags = await this.getTags(data.tags);
+    const user = await this.userService.findUserById(requester.id);
+
+    const category = await this.categoryService.getCategoryById(user, data.categoryId);
+    const tags = await this.tagService.getTags(data.tags);
 
     const essay = await this.essayRepository.findEssayById(essayId);
     this.checkIfEssayUnderReview(essayId, data);
 
     let message = '';
     if (requester.monitored && (data.published || data.linkedOut)) {
-      await this.createReviewRequest(user, essay, data);
+      await this.reviewService.saveReviewRequest(user, essay, data);
       message = 'Review request created due to policy violations.';
     }
 
@@ -94,45 +99,14 @@ export class EssayService {
     return { ...resultData, message: message };
   }
 
-  private async getCategory(user: User, categoryId?: number): Promise<Category> {
-    if (!categoryId) return null;
-    const category = await this.essayRepository.findCategoryById(user, categoryId);
-    if (!category) throw new HttpException('Category not found.', HttpStatus.BAD_REQUEST);
-    return category;
-  }
-
-  private async getTags(tagNames: string[]): Promise<Tag[]> {
-    if (!tagNames || tagNames.length === 0) return [];
-    return await this.processTags(tagNames);
-  }
-
-  private async processTags(tagNames: string[]): Promise<Tag[]> {
-    if (!tagNames || tagNames.length === 0) return [];
-
-    return await Promise.all(
-      tagNames.map(async (name) => {
-        let tag = await this.essayRepository.findTag(name);
-        if (!tag) {
-          tag = await this.essayRepository.saveTag(name);
-        }
-        return tag;
-      }),
-    );
-  }
-
   private checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
-    const isUnderReview = this.essayRepository.findReviewByEssayId(essayId);
+    const isUnderReview = this.reviewService.findReviewByEssayId(essayId);
     if ((isUnderReview && data.linkedOut) || (isUnderReview && data.published)) {
       throw new HttpException(
         'Update rejected: Essay is currently under review',
         HttpStatus.BAD_REQUEST,
       );
     }
-  }
-
-  private async createReviewRequest(user: User, essay: Essay, data: UpdateEssayReqDto) {
-    const reviewType = data.published ? 'published' : 'linkedOut';
-    await this.essayRepository.saveReviewRequest(user, essay, reviewType);
   }
 
   private async updateEssayData(

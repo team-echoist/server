@@ -1,11 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
-import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
-import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { Category } from '../../entities/category.entity';
-import { Tag } from '../../entities/tag.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 
@@ -13,12 +9,6 @@ export class EssayRepository {
   constructor(
     @InjectRepository(Essay)
     private readonly essayRepository: Repository<Essay>,
-    @InjectRepository(Tag)
-    private readonly tagRepository: Repository<Tag>,
-    @InjectRepository(ReviewQueue)
-    private readonly reviewRepository: Repository<ReviewQueue>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async findEssayById(essayId: number) {
@@ -28,25 +18,8 @@ export class EssayRepository {
     });
   }
 
-  async findCategoryById(user: User, categoryId: number) {
-    return this.categoryRepository.findOne({ where: { id: categoryId, user: user } });
-  }
-
   async saveEssay(data: SaveEssayDto) {
     return this.essayRepository.save(data);
-  }
-
-  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linkedOut') {
-    await this.reviewRepository.save({
-      user: user,
-      essay: essay,
-      type: type,
-    });
-    return;
-  }
-
-  async findReviewByEssayId(essayId: number) {
-    return this.reviewRepository.findOne({ where: { essay: { id: essayId }, processed: false } });
   }
 
   async updateEssay(essay: Essay, data: UpdateEssayDto) {
@@ -192,14 +165,5 @@ export class EssayRepository {
       .where('author_id = :userId', { userId })
       .execute();
     return;
-  }
-
-  async findTag(name: string) {
-    return this.tagRepository.findOne({ where: { name } });
-  }
-
-  async saveTag(name: string) {
-    const tag = this.tagRepository.create({ name });
-    return await this.tagRepository.save(tag);
   }
 }

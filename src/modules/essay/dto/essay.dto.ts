@@ -1,5 +1,13 @@
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsLatitude,
+  IsLongitude,
+  IsNumber,
+  IsString,
+  Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EssayDto {
@@ -47,6 +55,18 @@ export class EssayDto {
   @Expose()
   @IsBoolean()
   linkedOut: boolean;
+
+  @IsLatitude()
+  @Expose()
+  latitude: number;
+
+  @IsLongitude()
+  @Expose()
+  longitude: number;
+
+  @IsString()
+  @Expose()
+  location: string;
 
   @Expose()
   @IsString()

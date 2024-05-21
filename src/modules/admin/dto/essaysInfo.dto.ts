@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsLatitude,
+  IsLongitude,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class EssaysInfoDto {
   @ApiProperty()
@@ -24,8 +33,19 @@ export class EssaysInfoDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsOptional()
-  linkedOutGauge?: number;
+  linkedOutGauge: number;
+
+  @IsLatitude()
+  @Expose()
+  latitude: number;
+
+  @IsLongitude()
+  @Expose()
+  longitude: number;
+
+  @IsString()
+  @Expose()
+  location: string;
 
   @ApiProperty()
   @Expose()
@@ -40,8 +60,7 @@ export class EssaysInfoDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  @IsOptional()
-  thumbnail?: string;
+  thumbnail: string;
 
   @ApiProperty()
   @Expose()
@@ -82,18 +101,15 @@ export class EssaysInfoDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsOptional()
-  categoryId?: number;
+  categoryId: number;
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsOptional()
   reportCount: number;
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsOptional()
   reviewCount: number;
 }
