@@ -193,4 +193,9 @@ export class EssayService {
     const essay = await this.essayRepository.findEssayById(essayId);
     return essay?.thumbnail ? essay.thumbnail.split('/').pop() : this.utilsService.getUUID();
   }
+
+  async getRecommendEssays(limit: number) {
+    const essays = await this.essayRepository.getRecommendEssays(limit);
+    return this.utilsService.transformToDto(EssayResDto, essays);
+  }
 }

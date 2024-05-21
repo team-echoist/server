@@ -166,4 +166,13 @@ export class EssayRepository {
       .execute();
     return;
   }
+
+  async getRecommendEssays(limit: number) {
+    return this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.published = :published', { published: true })
+      .orderBy('RANDOM()')
+      .limit(limit)
+      .getMany();
+  }
 }
