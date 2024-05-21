@@ -5,6 +5,10 @@ import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
 import { UserModule } from '../user/user.module';
 import { UtilsModule } from '../utils/utils.module';
+import { ReportModule } from '../report/report.module';
+import { ReviewModule } from '../review/review.module';
+import { CategoryModule } from '../category/category.module';
+import { TagModule } from '../tag/tag.module';
 import { AwsModule } from '../aws/aws.module';
 import { EssayController } from './essay.controller';
 import { EssayService } from './essay.service';
@@ -28,6 +32,10 @@ dotenv.config();
     AuthModule,
     MailModule,
     UserModule,
+    TagModule,
+    CategoryModule,
+    ReportModule,
+    ReviewModule,
     UtilsModule,
     AwsModule,
   ],

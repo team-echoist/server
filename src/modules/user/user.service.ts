@@ -5,11 +5,11 @@ import { plainToInstance } from 'class-transformer';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { UserRepository } from './user.repository';
-import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
+import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
-import * as bcrypt from 'bcrypt';
 import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -19,6 +19,10 @@ export class UserService {
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
   ) {}
+
+  async findUserById(userId: number) {
+    return this.userRepository.findUserById(userId);
+  }
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
     const user = await this.userRepository.findUserById(userId);
