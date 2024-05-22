@@ -5,9 +5,10 @@ import { SeederService } from './seeder.service';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue])],
+  imports: [TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue]), UtilsModule],
   providers: [SeederService],
   exports: [SeederService],
 })

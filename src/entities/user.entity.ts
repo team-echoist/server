@@ -14,6 +14,12 @@ import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 
+export enum UserStatus {
+  ACTIVE = 'active',
+  MONITORED = 'monitored',
+  BANNED = 'banned',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -48,11 +54,12 @@ export class User {
   @Column({ default: 'client' })
   role: string;
 
-  @Column({ default: false })
-  monitored: boolean;
-
-  @Column({ default: false })
-  banned: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 
   @Column({
     name: 'subscription_end',

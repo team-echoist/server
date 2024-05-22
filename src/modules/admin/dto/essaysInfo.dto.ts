@@ -3,6 +3,7 @@ import { Expose } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
@@ -10,6 +11,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { EssayStatus } from '../../../entities/essay.entity';
 
 export class EssaysInfoDto {
   @ApiProperty()
@@ -74,17 +76,11 @@ export class EssaysInfoDto {
   @IsNotEmpty()
   views: number;
 
-  @ApiProperty()
-  @Expose()
-  @IsBoolean()
+  @ApiProperty({ type: 'enum' })
   @IsNotEmpty()
-  published: boolean;
-
-  @ApiProperty()
+  @IsEnum(EssayStatus)
   @Expose()
-  @IsBoolean()
-  @IsNotEmpty()
-  linkedOut: boolean;
+  status: EssayStatus;
 
   @ApiProperty()
   @Expose()

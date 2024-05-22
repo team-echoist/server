@@ -2,13 +2,15 @@ import { Expose } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNumber,
+  IsOptional,
   IsString,
-  Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { EssayStatus } from '../../../entities/essay.entity';
 
 export class EssayDto {
   @ApiProperty()
@@ -49,12 +51,9 @@ export class EssayDto {
   views: number;
 
   @Expose()
-  @IsBoolean()
-  published: boolean;
-
-  @Expose()
-  @IsBoolean()
-  linkedOut: boolean;
+  @IsEnum(EssayStatus)
+  @IsOptional()
+  status?: EssayStatus;
 
   @IsLatitude()
   @Expose()

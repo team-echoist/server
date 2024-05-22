@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../entities/user.entity';
+import { User, UserStatus } from '../../entities/user.entity';
 import { MoreThan, Repository } from 'typeorm';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 
@@ -52,7 +52,7 @@ export class UserRepository {
     switch (filter) {
       case 'monitored':
         [users, total] = await this.userRepository.findAndCount({
-          where: { monitored: true },
+          where: { status: UserStatus.MONITORED },
           skip: (page - 1) * limit,
           take: limit,
           order: { createdDate: 'DESC' },

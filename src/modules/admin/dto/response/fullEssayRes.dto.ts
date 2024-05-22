@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsDate,
   IsDateString,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
@@ -15,6 +16,7 @@ import { CategoryInfoDto } from '../../../essay/dto/categoryInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
 import { ReviewDto } from '../review.dto';
+import { EssayStatus } from '../../../../entities/essay.entity';
 
 export class FullEssayResDto {
   @ApiProperty()
@@ -82,17 +84,11 @@ export class FullEssayResDto {
   @IsNotEmpty()
   views: number;
 
-  @ApiProperty()
-  @Expose()
-  @IsBoolean()
+  @ApiProperty({ type: 'enum' })
   @IsNotEmpty()
-  published: boolean;
-
-  @ApiProperty()
+  @IsEnum(EssayStatus)
   @Expose()
-  @IsBoolean()
-  @IsNotEmpty()
-  linkedOut: boolean;
+  status: EssayStatus;
 
   @ApiProperty()
   @Expose()

@@ -1,5 +1,6 @@
-import { IsDate, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsDate, IsEnum, IsOptional, IsString, Length, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserStatus } from '../../../../entities/user.entity';
 
 export class UpdateUserReqDto {
   @ApiProperty({ description: '최소 2자, 최대 8자', required: false })
@@ -31,4 +32,9 @@ export class UpdateUserReqDto {
   @IsOptional()
   @IsDate()
   birthDate?: Date;
+
+  @ApiProperty({ description: 'active, monitored, banned' })
+  @IsEnum(UserStatus)
+  @IsOptional()
+  status?: UserStatus;
 }

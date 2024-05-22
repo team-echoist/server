@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Request as ExpressRequest } from 'express';
+import { UserStatus } from '../../entities/user.entity';
 
 declare global {
   namespace Express {
@@ -8,8 +9,7 @@ declare global {
       email: string;
       password?: string;
       gender?: string;
-      monitored?: boolean;
-      banned?: boolean;
+      status?: UserStatus;
       role?: string;
       oauthInfo?: object;
       birthDate?: Date;

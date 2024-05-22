@@ -11,13 +11,21 @@ import { Essay } from './essay.entity';
 import { User } from './user.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 
+export enum ReviewQueueType {
+  LINKEDOUT = 'linkedout',
+  PUBLISHED = 'published',
+}
+
 @Entity()
 export class ReviewQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  type: 'published' | 'linkedOut';
+  @Column({
+    type: 'enum',
+    enum: ReviewQueueType,
+  })
+  type: ReviewQueueType;
 
   @Column({ default: false })
   processed: boolean;
@@ -33,11 +41,11 @@ export class ReviewQueue {
   processedDate: Date;
 
   @JoinColumn({ name: 'essay_id' })
-  @ManyToOne(() => Essay, (essay) => essay.reviews)
+  @ManyToOne(() => Essay, (essay) => essay.reviews, { onDelete: 'CASCADE' })
   essay: Essay;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.reviews)
+  @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE' })
   user: User;
 
   @JoinColumn({ name: 'processed_histories' })

@@ -11,6 +11,20 @@ import { ReviewQueue } from './reviewQueue.entity';
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
 
+export enum ActionType {
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  PENDING = 'pending',
+  UPDATED = 'updated',
+  DELETED = 'deleted',
+  UNPUBLISHED = 'unpublished',
+  UNLINKEDOUT = 'unlinkedout',
+  PUBLISHED = 'published',
+  LINKEDOUT = 'linkedout',
+  BANNED = 'banned',
+  MONITORED = 'monitored',
+}
+
 @Entity()
 export class ProcessedHistory {
   @PrimaryGeneratedColumn()
@@ -22,8 +36,8 @@ export class ProcessedHistory {
   @Column()
   target: string;
 
-  @Column({ name: 'action_type' })
-  actionType: string;
+  @Column({ name: 'action_type', type: 'enum', enum: ActionType })
+  actionType: ActionType;
 
   @Column()
   processor: number;

@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
@@ -11,6 +12,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
+import { EssayStatus } from '../../../../entities/essay.entity';
 
 export class CreateEssayReqDto {
   @ApiProperty({ description: '30자 제한' })
@@ -40,15 +42,10 @@ export class CreateEssayReqDto {
   @IsOptional()
   thumbnail?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ type: 'enum', description: 'private, published, linked_out' })
+  @IsEnum(EssayStatus)
   @IsOptional()
-  @IsBoolean()
-  published: boolean;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsBoolean()
-  linkedOut: boolean;
+  status?: EssayStatus;
 
   @ApiProperty({
     description: '위도 좌표',

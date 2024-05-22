@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EssayService } from '../essay.service';
 import { EssayRepository } from '../essay.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { User } from '../../../entities/user.entity';
-import { Essay } from '../../../entities/essay.entity';
+import { User, UserStatus } from '../../../entities/user.entity';
+import { Essay, EssayStatus } from '../../../entities/essay.entity';
 import { Category } from '../../../entities/category.entity';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { ReviewQueue } from '../../../entities/reviewQueue.entity';
@@ -47,6 +47,10 @@ describe('EssayService', () => {
     findReviewByEssayId: jest.fn(),
   };
 
+  const mockUtilsService = {
+    transformToDto: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [UtilsModule],
@@ -79,12 +83,12 @@ describe('EssayService', () => {
       const savedMonitoredEssay = new Essay();
 
       user.id = 1;
-      user.monitored = true;
+      user.status = UserStatus.MONITORED;
       data.title = 'New Essay';
       data.content = 'New Essay content';
-      data.published = true;
+      data.status = EssayStatus.PUBLISHED;
       savedMonitoredEssay.id = 1;
-      savedMonitoredEssay.published = false;
+      savedMonitoredEssay.status = EssayStatus.PRIVATE;
 
       mockUserService.findUserById.mockResolvedValue(user);
       mockEssayRepository.saveEssay.mockResolvedValue(savedMonitoredEssay);
@@ -100,15 +104,15 @@ describe('EssayService', () => {
       const savedEssay = new Essay();
       const category = new Category();
 
-      user.monitored = false;
-      savedEssay.published = true;
+      user.status = UserStatus.ACTIVE;
+      savedEssay.status = EssayStatus.PUBLISHED;
       mockUserService.findUserById.mockResolvedValue(user);
       mockEssayRepository.findCategoryById.mockResolvedValue(category);
       mockEssayRepository.saveEssay.mockResolvedValue(savedEssay);
 
       const result: any = await essayService.saveEssay(user as any, 'web', data as any);
 
-      expect(result.published).toEqual(true);
+      expect(result.status).toEqual(EssayStatus.PUBLISHED);
     });
   });
 
@@ -130,19 +134,38 @@ describe('EssayService', () => {
     });
 
     it('밴 사용자가 발행 또는 링크드아웃으로 수정 요청시', async () => {
-      const user = { id: 1, monitored: true };
-      const data = { categoryId: 10, published: true };
-      const essay = new Essay();
-      essay.id = 1;
+      const user = { id: 1, status: UserStatus.MONITORED };
+      const data = { categoryId: 10, status: EssayStatus.PUBLISHED };
+      const essay = {
+        id: 1,
+        content: 'Sample content',
+        createdDate: new Date(),
+        latitude: 37.7749,
+        linkedOutGauge: 5,
+        location: 'Sample location',
+        longitude: -122.4194,
+        message: '',
+        status: EssayStatus.PRIVATE,
+        tags: ['tag1', 'tag2'],
+        thumbnail: 'sample-thumbnail.jpg',
+        title: 'Sample title',
+        updatedDate: new Date(),
+      };
+
+      const expectedEssay = {
+        id: 1,
+        status: EssayStatus.PRIVATE,
+        title: 'Sample title',
+        content: 'Sample content',
+      };
+
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
+      mockUtilsService.transformToDto.mockResolvedValue(expectedEssay);
       mockReviewService.findReviewByEssayId.mockResolvedValue(null);
 
-      await expect(essayService.updateEssay(user as any, essay.id, data as any)).rejects.toThrow(
-        new HttpException(
-          'Update rejected: Essay is currently under review',
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      const result = await essayService.updateEssay(user as any, essay.id, data as any);
+
+      expect(result).toMatchObject(expectedEssay);
     });
   });
 

@@ -1,7 +1,8 @@
 import { ReportDto } from '../report.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { EssayStatus } from '../../../../entities/essay.entity';
 
 export class ReportDetailResDto {
   @ApiProperty()
@@ -49,15 +50,11 @@ export class ReportDetailResDto {
   @Expose()
   views: number;
 
-  @ApiProperty()
-  @IsBoolean()
+  @ApiProperty({ type: 'enum' })
+  @IsNotEmpty()
+  @IsEnum(EssayStatus)
   @Expose()
-  published: boolean;
-
-  @ApiProperty()
-  @IsBoolean()
-  @Expose()
-  linkedOut: boolean;
+  status: EssayStatus;
 
   @ApiProperty()
   @IsString()
