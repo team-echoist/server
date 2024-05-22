@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ReportDto } from '../report.dto';
 import { ReviewDto } from '../review.dto';
 import { UserDto } from '../../../user/dto/user.dto';
 import { EssayDto } from '../../../essay/dto/essay.dto';
+import { ActionType } from '../../../../entities/processedHistory.entity';
 
 export class HistoriesResDto {
   @ApiProperty()
@@ -12,10 +13,10 @@ export class HistoriesResDto {
   @IsNumber()
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'enum' })
   @Expose()
-  @IsString()
-  actionType: string;
+  @IsEnum(ActionType)
+  actionType: ActionType;
 
   @ApiProperty()
   @Expose()

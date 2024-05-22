@@ -2,15 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   IsArray,
-  IsBoolean,
-  IsLatitude,
-  IsLongitude,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   Length,
 } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { EssayStatus } from '../../../../entities/essay.entity';
 
 export class UpdateEssayReqDto {
   @ApiProperty({ description: '30자 제한' })
@@ -43,17 +42,10 @@ export class UpdateEssayReqDto {
   @IsOptional()
   thumbnail?: string;
 
-  @ApiProperty({ required: false })
-  @Expose()
-  @IsBoolean()
+  @ApiProperty({ type: 'enum', description: 'private, published, linked_out' })
+  @IsEnum(EssayStatus)
   @IsOptional()
-  published?: boolean;
-
-  @ApiProperty({ required: false })
-  @Expose()
-  @IsBoolean()
-  @IsOptional()
-  linkedOut?: boolean;
+  status?: EssayStatus;
 
   @ApiProperty({
     description: '장소 이름',

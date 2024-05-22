@@ -1,5 +1,5 @@
 import {
-  IsBoolean,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
@@ -10,6 +10,7 @@ import {
 import { User } from '../../../entities/user.entity';
 import { Category } from '../../../entities/category.entity';
 import { Expose } from 'class-transformer';
+import { EssayStatus } from '../../../entities/essay.entity';
 
 export class SaveEssayDto {
   @IsNotEmpty()
@@ -36,15 +37,10 @@ export class SaveEssayDto {
   @Expose()
   thumbnail?: string;
 
-  @IsNotEmpty()
-  @IsBoolean()
+  @IsEnum(EssayStatus)
+  @IsOptional()
   @Expose()
-  published: boolean;
-
-  @IsNotEmpty()
-  @IsBoolean()
-  @Expose()
-  linkedOut: boolean;
+  status?: EssayStatus;
 
   @IsNotEmpty()
   @IsString()

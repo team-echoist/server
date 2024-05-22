@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsOptional, IsString, Length, Matches } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
+import { UserStatus } from '../../../../entities/user.entity';
 
 export class UpdateFullUserReqDto {
   @ApiProperty({ description: '최소 2자, 최대 8자', required: false })
@@ -46,13 +55,8 @@ export class UpdateFullUserReqDto {
   @IsString()
   role?: string;
 
-  @ApiProperty({ description: '사용자가 모니터링되는지 여부를 나타냅니다', required: false })
+  @ApiProperty({ enum: UserStatus, description: 'banned || monitored || active', required: false })
   @IsOptional()
-  @IsBoolean()
-  monitored?: boolean;
-
-  @ApiProperty({ description: '사용자가 금지되었는지 여부를 나타냅니다', required: false })
-  @IsOptional()
-  @IsBoolean()
-  banned?: boolean;
+  @IsEnum(UserStatus)
+  status?: UserStatus;
 }

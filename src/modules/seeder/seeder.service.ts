@@ -1,11 +1,12 @@
-import { User } from '../../entities/user.entity';
+import { User, UserStatus } from '../../entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Essay } from '../../entities/essay.entity';
-import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { ReviewQueue, ReviewQueueType } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { UtilsService } from '../utils/utils.service';
 
 @Injectable()
 export class SeederService {
@@ -18,6 +19,7 @@ export class SeederService {
     private readonly reviewQueueRepository: Repository<ReviewQueue>,
     @InjectRepository(ReportQueue)
     private readonly reportQueueRepository: Repository<ReportQueue>,
+    private readonly utilsService: UtilsService,
   ) {}
 
   async seedAll() {
@@ -49,14 +51,17 @@ export class SeederService {
     const userPromises = [];
     const hashedPassword = await bcrypt.hash('1234', 10);
 
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 200; i++) {
       const userEmail = `user${i}@linkedoutapp.com`;
       const isMonitored = Math.random() < 0.2;
+      const userStatus = isMonitored ? UserStatus.MONITORED : UserStatus.ACTIVE;
       const user = this.seederRepository.create({
         email: userEmail,
         password: hashedPassword,
         role: 'client',
-        monitored: isMonitored,
+        status: userStatus,
+        createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
+        updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
       });
 
       userPromises.push(this.seederRepository.save(user));
@@ -73,35 +78,57 @@ export class SeederService {
 
     users.forEach((user) => {
       for (let j = 0; j < Math.floor(Math.random() * 5) + 1; j++) {
+        const randomValue = Math.random();
+        const essayStatus = randomValue < 0.7 ? EssayStatus.PUBLISHED : EssayStatus.LINKEDOUT;
+
         const essay = this.essayRepository.create({
           title: `Sample Essay Title ${j}`,
           content: 'Sample content here...',
           linkedOutGauge: Math.floor(Math.random() * 6),
           author: user,
-          published: Math.random() < 0.5,
-          linkedOut: user.monitored,
+          status: essayStatus,
+          createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
+          updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
         });
 
-        const essayPromise = this.essayRepository.save(essay).then((savedEssay) => {
-          if (user.monitored) {
+        const essayPromise = this.essayRepository.save(essay).then(async (savedEssay) => {
+          if (
+            user.status === UserStatus.MONITORED &&
+            (savedEssay.status === EssayStatus.PUBLISHED ||
+              savedEssay.status === EssayStatus.LINKEDOUT)
+          ) {
+            const reviewType = this.mapEssayStatusToReviewQueueType(savedEssay.status);
             const reviewQueue = this.reviewQueueRepository.create({
               essay: savedEssay,
               user: user,
-              type: 'linkedOut',
-              createdDate: new Date(),
+              type: reviewType,
+              createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
             });
             reviewQueuePromises.push(this.reviewQueueRepository.save(reviewQueue));
+            savedEssay.status = EssayStatus.PRIVATE;
+            await this.essayRepository.save(savedEssay);
           }
           return savedEssay;
         });
-
         essayPromises.push(essayPromise);
       }
     });
 
     const essays = await Promise.all(essayPromises);
+    await Promise.all(reviewQueuePromises);
     console.log('Essays and review queues created successfully');
     return essays;
+  }
+
+  private mapEssayStatusToReviewQueueType(status: EssayStatus): ReviewQueueType | null {
+    switch (status) {
+      case EssayStatus.PUBLISHED:
+        return ReviewQueueType.PUBLISHED;
+      case EssayStatus.LINKEDOUT:
+        return ReviewQueueType.LINKEDOUT;
+      default:
+        return null;
+    }
   }
 
   async seedReports(users: User[], essays: Essay[]) {

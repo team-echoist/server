@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { ReviewQueue, ReviewQueueType } from '../../entities/reviewQueue.entity';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
@@ -10,7 +10,7 @@ export class ReviewRepository {
     private readonly reviewRepository: Repository<ReviewQueue>,
   ) {}
 
-  async saveReviewRequest(user: User, essay: Essay, type: 'published' | 'linkedOut') {
+  async saveReviewRequest(user: User, essay: Essay, type: ReviewQueueType) {
     await this.reviewRepository.save({
       user: user,
       essay: essay,

@@ -4,6 +4,11 @@ import * as request from 'supertest';
 import { AdminController } from '../admin.controller';
 import { AdminService } from '../admin.service';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
+import { ProcessReqDto } from '../dto/request/processReq.dto';
+import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
+import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
+import { ActionType } from '../../../entities/processedHistory.entity';
+import { EssayStatus } from '../../../entities/essay.entity';
 import { setTestUserMiddleware } from '../../../common/utils';
 
 jest.mock('@nestjs/passport', () => ({
@@ -62,7 +67,7 @@ describe('AdminController', () => {
 
   it('관리자 계정 생성', async () => {
     const createAdminDto: CreateAdminReqDto = { email: 'admin@test.com', password: 'password' };
-    const expectedResponse = { id: 1, username: 'admin' };
+    const expectedResponse = { id: 1, email: 'admin@test.com' };
 
     adminService.createAdmin.mockResolvedValue(expectedResponse);
 
@@ -106,7 +111,7 @@ describe('AdminController', () => {
       .expect(expectedResponse);
   });
 
-  it('월간 일변 유입자 카운트 조회', async () => {
+  it('월간 일별 유입자 카운트 조회', async () => {
     const expectedResponse = { '1': 126, '2': 89, '31': 150 };
     adminService.countDailyRegistrations.mockResolvedValue(expectedResponse);
 
@@ -139,7 +144,7 @@ describe('AdminController', () => {
       .expect(expectedResponse);
   });
 
-  it('년간 일별 구독 결제 카운트 조회', async () => {
+  it('년간 월별 구독 결제 카운트 조회', async () => {
     const expectedResponse = { '1': 542, '2': 753, '12': 347 };
     adminService.countYearlySubscriptionPayments.mockResolvedValue(expectedResponse);
 
@@ -169,7 +174,7 @@ describe('AdminController', () => {
   });
 
   it('리포트 처리', async () => {
-    const processReqDto = { action: 'approve' };
+    const processReqDto: ProcessReqDto = { actionType: ActionType.APPROVED };
     const expectedResponse = { message: 'Report processed' };
 
     adminService.processReports.mockResolvedValue(expectedResponse);
@@ -200,7 +205,7 @@ describe('AdminController', () => {
   });
 
   it('리뷰 처리', async () => {
-    const processReqDto = { action: 'approve' };
+    const processReqDto: ProcessReqDto = { actionType: ActionType.APPROVED };
     const expectedResponse = { message: 'Review processed' };
 
     adminService.processReview.mockResolvedValue(expectedResponse);
@@ -209,17 +214,6 @@ describe('AdminController', () => {
       .post('/admin/review/1')
       .send(processReqDto)
       .expect(201)
-      .expect(expectedResponse);
-  });
-
-  it('처리내역 리스트 조회', async () => {
-    const expectedResponse = { histories: [], total: 0 };
-    adminService.getHistories.mockResolvedValue(expectedResponse);
-
-    await request(app.getHttpServer())
-      .get('/admin/histories')
-      .query({ page: 1, limit: 10 })
-      .expect(200)
       .expect(expectedResponse);
   });
 
@@ -242,8 +236,8 @@ describe('AdminController', () => {
   });
 
   it('유저 정보 강제 수정', async () => {
-    const updateFullUserReqDto = { username: 'updatedUser' };
-    const expectedResponse = { id: 1, username: 'updatedUser' };
+    const updateFullUserReqDto: UpdateFullUserReqDto = { nickname: 'updatedUser' };
+    const expectedResponse = { id: 1, nickname: 'updatedUser' };
 
     adminService.updateUser.mockResolvedValue(expectedResponse);
 
@@ -266,20 +260,32 @@ describe('AdminController', () => {
   });
 
   it('에세이 상세 조회', async () => {
-    const expectedResponse = { id: 1 };
+    const expectedResponse = { id: 1, title: 'Sample Essay' };
     adminService.getFullEssay.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer()).get('/admin/essays/1').expect(200).expect(expectedResponse);
   });
 
   it('에세이 상태 수정', async () => {
-    const updatedEssayStatusReqDto = { published: false };
-    const expectedResponse = { id: 1, published: false };
+    const updateEssayStatusReqDto: UpdateEssayStatusReqDto = { status: EssayStatus.PRIVATE };
+    const expectedResponse = { id: 1, status: 'private' };
+
     adminService.updateEssayStatus.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer())
       .put('/admin/essays/1')
-      .send(updatedEssayStatusReqDto)
+      .send(updateEssayStatusReqDto)
+      .expect(200)
+      .expect(expectedResponse);
+  });
+
+  it('관리자 처리 기록 조회', async () => {
+    const expectedResponse = { histories: [], total: 0 };
+    adminService.getHistories.mockResolvedValue(expectedResponse);
+
+    await request(app.getHttpServer())
+      .get('/admin/histories')
+      .query({ page: 1, limit: 10, target: 'report', action: 'approved' })
       .expect(200)
       .expect(expectedResponse);
   });

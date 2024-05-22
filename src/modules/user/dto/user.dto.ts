@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsNumber, IsObject, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { UserStatus } from '../../../entities/user.entity';
 
 export class UserDto {
   @Expose()
@@ -40,12 +40,8 @@ export class UserDto {
   role: string;
 
   @Expose()
-  @IsBoolean()
-  monitored: boolean;
-
-  @Expose()
-  @IsBoolean()
-  banned: boolean;
+  @IsEnum(UserStatus)
+  status: UserStatus;
 
   @Expose()
   @IsDate()

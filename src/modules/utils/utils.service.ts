@@ -117,4 +117,8 @@ export class UtilsService {
     const transformedPlain = plainToInstance(cls, plain, { excludeExtraneousValues: true });
     return this.transformDatesToKST(transformedPlain);
   }
+
+  getRandomDate(start: Date, end: Date) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  }
 }

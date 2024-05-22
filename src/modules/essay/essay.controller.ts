@@ -27,6 +27,7 @@ import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
+import { RecommendEssaysResDto } from './dto/response/recommendEssaysRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -95,6 +96,8 @@ export class EssayController {
   }
 
   @Get('recommend')
+  @ApiOperation({ summary: '랜덤 추천 에세이' })
+  @ApiResponse({ status: 200, type: RecommendEssaysResDto })
   async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
     return this.essayService.getRecommendEssays(limit);
   }

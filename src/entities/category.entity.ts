@@ -29,7 +29,7 @@ export class Category {
   updatedDate: Date;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.category)
+  @ManyToOne(() => User, (user) => user.category, { onDelete: 'CASCADE' })
   user: User;
 
   @OneToMany(() => Essay, (essay) => essay.category)

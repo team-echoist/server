@@ -1,6 +1,7 @@
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Category } from '../../../entities/category.entity';
 import { Expose } from 'class-transformer';
+import { EssayStatus } from '../../../entities/essay.entity';
 
 export class UpdateEssayDto {
   @Expose()
@@ -27,15 +28,10 @@ export class UpdateEssayDto {
   @IsOptional()
   thumbnail: string;
 
-  @Expose()
-  @IsBoolean()
+  @IsEnum(EssayStatus)
   @IsOptional()
-  published: boolean;
-
   @Expose()
-  @IsBoolean()
-  @IsOptional()
-  linkedOut: boolean;
+  status: EssayStatus;
 
   @IsString()
   @IsOptional()

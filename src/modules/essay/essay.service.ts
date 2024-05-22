@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
-import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { ReviewService } from '../review/review.service';
@@ -8,14 +7,15 @@ import { CategoryService } from '../category/category.service';
 import { UserService } from '../user/user.service';
 import { TagService } from '../tag/tag.service';
 import { EssayRepository } from './essay.repository';
-import { Essay } from '../../entities/essay.entity';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Category } from '../../entities/category.entity';
-import { User } from '../../entities/user.entity';
+import { User, UserStatus } from '../../entities/user.entity';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
+import { RecommendEssaysResDto } from './dto/response/recommendEssaysRes.dto';
 
 @Injectable()
 export class EssayService {
@@ -44,7 +44,7 @@ export class EssayService {
       tags: tags,
     };
 
-    if (requester.monitored) {
+    if (requester.status === UserStatus.MONITORED) {
       return await this.handleMonitoredUser(user, essayData, data);
     }
 
@@ -56,8 +56,7 @@ export class EssayService {
   private async handleMonitoredUser(user: User, essayData: any, data: CreateEssayReqDto) {
     const adjustedData = {
       ...essayData,
-      published: false,
-      linkedOut: false,
+      status: EssayStatus.PRIVATE,
     };
 
     const savedMonitoredEssay = await this.essayRepository.saveEssay(adjustedData);
@@ -65,7 +64,7 @@ export class EssayService {
 
     const monitoredEssay = this.utilsService.transformToDto(EssayResDto, essay);
 
-    if (data.published || data.linkedOut) {
+    if (data.status !== EssayStatus.PRIVATE) {
       await this.reviewService.saveReviewRequest(user, essay, data);
       return {
         ...monitoredEssay,
@@ -84,10 +83,10 @@ export class EssayService {
     const tags = await this.tagService.getTags(data.tags);
 
     const essay = await this.essayRepository.findEssayById(essayId);
-    this.checkIfEssayUnderReview(essayId, data);
+    await this.checkIfEssayUnderReview(essayId, data);
 
     let message = '';
-    if (requester.monitored && (data.published || data.linkedOut)) {
+    if (requester.status === UserStatus.MONITORED && data.status !== EssayStatus.PRIVATE) {
       await this.reviewService.saveReviewRequest(user, essay, data);
       message = 'Review request created due to policy violations.';
     }
@@ -99,9 +98,9 @@ export class EssayService {
     return { ...resultData, message: message };
   }
 
-  private checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
-    const isUnderReview = this.reviewService.findReviewByEssayId(essayId);
-    if ((isUnderReview && data.linkedOut) || (isUnderReview && data.published)) {
+  private async checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
+    const isUnderReview = await this.reviewService.findReviewByEssayId(essayId);
+    if (isUnderReview && data.status !== EssayStatus.PRIVATE) {
       throw new HttpException(
         'Update rejected: Essay is currently under review',
         HttpStatus.BAD_REQUEST,
@@ -121,12 +120,12 @@ export class EssayService {
       ...data,
       category: category,
       tags: tags,
-      published: requester.monitored ? false : data.published,
-      linkedOut: requester.monitored ? false : data.linkedOut,
+      status: requester.status === UserStatus.MONITORED ? EssayStatus.PRIVATE : data.status,
     };
     return await this.essayRepository.updateEssay(essay, essayData);
   }
 
+  @Transactional()
   async getMyEssay(
     userId: number,
     published: boolean,
@@ -134,34 +133,18 @@ export class EssayService {
     page: number,
     limit: number,
   ) {
-    const query = this.buildEssayQuery(userId, published, categoryId);
-    const { essays, total } = await this.essayRepository.findEssays(query, page, limit);
+    const { essays, total } = await this.essayRepository.findEssays(
+      userId,
+      published,
+      categoryId,
+      page,
+      limit,
+    );
 
     const totalPage: number = Math.ceil(total / limit);
     const essayDtos = this.utilsService.transformToDto(EssayResDto, essays);
 
     return { essays: essayDtos, total, totalPage, page };
-  }
-
-  private buildEssayQuery(
-    userId: number,
-    published: boolean,
-    categoryId: number,
-  ): FindMyEssayQueryInterface {
-    const query: FindMyEssayQueryInterface = {
-      author: { id: userId },
-      linkedOut: false,
-    };
-
-    if (categoryId !== undefined) {
-      query.category = { id: categoryId };
-    }
-
-    if (published !== undefined) {
-      query.published = published;
-    }
-
-    return query;
   }
 
   async deleteEssay(userId: number, essayId: number) {
@@ -196,6 +179,6 @@ export class EssayService {
 
   async getRecommendEssays(limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
-    return this.utilsService.transformToDto(EssayResDto, essays);
+    return this.utilsService.transformToDto(RecommendEssaysResDto, essays);
   }
 }

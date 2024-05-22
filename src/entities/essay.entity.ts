@@ -19,6 +19,12 @@ import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Tag } from './tag.entity';
 
+export enum EssayStatus {
+  PRIVATE = 'private',
+  PUBLISHED = 'published',
+  LINKEDOUT = 'linkedout',
+}
+
 @Entity()
 export class Essay {
   @PrimaryGeneratedColumn()
@@ -70,11 +76,12 @@ export class Essay {
   views: number;
 
   @Index()
-  @Column({ default: false })
-  published: boolean;
-
-  @Column({ default: false, name: 'linked_out' })
-  linkedOut: boolean;
+  @Column({
+    type: 'enum',
+    enum: EssayStatus,
+    default: EssayStatus.PRIVATE,
+  })
+  status: EssayStatus;
 
   @Index()
   @Column({ nullable: true, name: 'device_info' })
@@ -96,7 +103,7 @@ export class Essay {
   @OneToMany(() => ReportQueue, (report) => report.essay)
   reports: ReportQueue[];
 
-  @OneToMany(() => ReviewQueue, (review) => review.essay, { onDelete: 'CASCADE' })
+  @OneToMany(() => ReviewQueue, (review) => review.essay)
   reviews: ReviewQueue[];
 
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.essay)

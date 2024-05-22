@@ -1,7 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { FindMyEssayQueryInterface } from '../../common/interfaces/essay/findMyEssayQuery.interface';
-import { Essay } from '../../entities/essay.entity';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 
@@ -27,16 +26,42 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findEssays(query: FindMyEssayQueryInterface, page: number, limit: number) {
-    const [essays, total] = await this.essayRepository.findAndCount({
-      where: query,
-      skip: (page - 1) * limit,
-      take: limit,
-      order: {
-        createdDate: 'DESC',
-      },
-      relations: ['author', 'category', 'tags'],
-    });
+  async findEssays(
+    userId: number,
+    published: boolean,
+    categoryId: number,
+    page: number,
+    limit: number,
+  ) {
+    const qb = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.category', 'category')
+      .leftJoinAndSelect('essay.tags', 'tags')
+      .where('essay.author.id = :userId', { userId })
+      .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT });
+
+    if (categoryId !== undefined) {
+      qb.andWhere('essay.category.id = :categoryId', { categoryId });
+    }
+
+    if (published !== undefined) {
+      if (published) {
+        qb.andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED });
+      } else {
+        qb.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
+      }
+    } else {
+      qb.andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PRIVATE, EssayStatus.PUBLISHED],
+      });
+    }
+
+    const [essays, total] = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('essay.createdDate', 'DESC')
+      .getManyAndCount();
 
     return { essays, total };
   }
@@ -44,6 +69,16 @@ export class EssayRepository {
   async deleteEssay(essay: Essay) {
     await this.essayRepository.update(essay.id, { deletedDate: new Date() });
     return;
+  }
+
+  async getRecommendEssays(limit: number) {
+    return this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .where('essay.status != :status', { status: EssayStatus.PRIVATE })
+      .orderBy('RANDOM()')
+      .limit(limit)
+      .getMany();
   }
 
   // ------------------------------------------------------admin api
@@ -58,11 +93,11 @@ export class EssayRepository {
   }
 
   async totalPublishedEssays() {
-    return this.essayRepository.count({ where: { published: true } });
+    return this.essayRepository.count({ where: { status: EssayStatus.PUBLISHED } });
   }
 
   async totalLinkedOutEssays() {
-    return this.essayRepository.count({ where: { linkedOut: true } });
+    return this.essayRepository.count({ where: { status: EssayStatus.LINKEDOUT } });
   }
 
   async countEssaysByDailyThisMonth(firstDayOfMonth: Date, lastDayOfMonth: Date) {
@@ -108,8 +143,7 @@ export class EssayRepository {
         'essay.thumbnail',
         'essay.bookmarks',
         'essay.views',
-        'essay.published',
-        'essay.linkedOut',
+        'essay.status',
         'essay.device',
         'author.id',
       ])
@@ -165,14 +199,5 @@ export class EssayRepository {
       .where('author_id = :userId', { userId })
       .execute();
     return;
-  }
-
-  async getRecommendEssays(limit: number) {
-    return this.essayRepository
-      .createQueryBuilder('essay')
-      .where('essay.published = :published', { published: true })
-      .orderBy('RANDOM()')
-      .limit(limit)
-      .getMany();
   }
 }

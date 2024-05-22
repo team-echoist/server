@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ActionType } from '../../../../entities/processedHistory.entity';
 
 export class ProcessReqDto {
   @ApiProperty({
-    description: '처리 중인 작업에 대한 선택적 설명',
+    description: '처리 중인 작업에 대한 코멘트',
     required: false,
   })
   @IsString()
   @IsOptional()
-  comment: string;
+  comment?: string;
 
   @ApiProperty({
-    description: '처리할 작업의 유형입니다. 승인됨, 거부됨, 보류 중 중 하나여야 합니다',
+    description: 'approved: 승인, rejected: 기각, pending: 보류',
   })
-  @IsString()
+  @IsEnum(ActionType)
   @IsNotEmpty()
-  @IsIn(['approved', 'rejected', 'pending'])
-  actionType: 'approved' | 'rejected' | 'pending';
+  actionType: ActionType;
 }

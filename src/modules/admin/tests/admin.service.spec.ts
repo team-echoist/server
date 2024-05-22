@@ -12,6 +12,10 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
 import { ProcessReqDto } from '../dto/request/processReq.dto';
 import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
+import { EssayStatus } from '../../../entities/essay.entity';
+import { UserStatus } from '../../../entities/user.entity';
+import { ActionType } from '../../../entities/processedHistory.entity';
+import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -21,7 +25,6 @@ jest.mock('typeorm-transactional', () => ({
 
 describe('AdminService', () => {
   let adminService: AdminService;
-  let mailService: any;
 
   const mockAdminRepository = {
     totalSubscriberCount: jest.fn(),
@@ -38,6 +41,8 @@ describe('AdminService', () => {
     getReviews: jest.fn(),
     saveReview: jest.fn(),
     getHistories: jest.fn(),
+    handleBannedReports: jest.fn(),
+    handleBannedReviews: jest.fn(),
   };
   const mockUserRepository = {
     usersCount: jest.fn(),
@@ -60,6 +65,7 @@ describe('AdminService', () => {
     findFullEssays: jest.fn(),
     findFullEssay: jest.fn(),
     updateEssay: jest.fn(),
+    deleteAllEssay: jest.fn(),
   };
   const mockAuthService = {
     checkEmail: jest.fn(),
@@ -80,8 +86,6 @@ describe('AdminService', () => {
   };
 
   beforeEach(async () => {
-    mailService = {};
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminService,
@@ -91,7 +95,7 @@ describe('AdminService', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },
         { provide: UtilsService, useValue: mockUtilsService },
-        { provide: MailService, useValue: mailService },
+        { provide: MailService, useValue: {} },
         { provide: AuthRepository, useValue: mockAuthRepository },
       ],
     }).compile();
@@ -100,14 +104,14 @@ describe('AdminService', () => {
   });
 
   describe('createAdmin', () => {
-    it('사용자가 인증되지 않은 경우 오류가 발생', async () => {
+    it('should throw an error if the user is not authorized', async () => {
       const createAdminDto: CreateAdminReqDto = { email: 'test@test.com', password: 'password' };
       await expect(adminService.createAdmin(2, createAdminDto)).rejects.toThrow(
         new HttpException('You are not authorized.', HttpStatus.FORBIDDEN),
       );
     });
 
-    it('관리자 생성 성공', async () => {
+    it('should create an admin successfully', async () => {
       const createAdminDto: CreateAdminReqDto = { email: 'test@test.com', password: 'password' };
       const savedAdmin = { id: 1, email: 'test@test.com', role: 'admin' };
 
@@ -123,7 +127,7 @@ describe('AdminService', () => {
   });
 
   describe('dashboard', () => {
-    it('대시보드 데이터 조회', async () => {
+    it('should return dashboard data', async () => {
       const today = new Date();
       const todayStart = new Date(today.setHours(0, 0, 0, 0));
       const todayEnd = new Date(today.setHours(23, 59, 59, 999));
@@ -180,7 +184,7 @@ describe('AdminService', () => {
   });
 
   describe('countEssaysByDailyThisMonth', () => {
-    it('이번 달 일일 에세이 작성 카운트 조회', async () => {
+    it('should return daily essay count for the current month', async () => {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -207,7 +211,7 @@ describe('AdminService', () => {
   });
 
   describe('countEssaysByMonthlyThisYear', () => {
-    it('현재 연도 월별 에세이 작성 카운트 조회', async () => {
+    it('should return monthly essay count for the current year', async () => {
       const year = new Date().getUTCFullYear();
 
       mockEssayRepository.countEssaysByMonthlyThisYear.mockResolvedValue([]);
@@ -222,7 +226,7 @@ describe('AdminService', () => {
   });
 
   describe('countDailyRegistrations', () => {
-    it('이번 달 일일 가입자 카운트 조회', async () => {
+    it('should return daily registrations count for the current month', async () => {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -249,7 +253,7 @@ describe('AdminService', () => {
   });
 
   describe('countMonthlyRegistrations', () => {
-    it('현재 연도의 월별 가입자 카운트 조회', async () => {
+    it('should return monthly registrations count for the current year', async () => {
       const year = new Date().getUTCFullYear();
 
       mockUserRepository.countMonthlyRegistrations.mockResolvedValue([]);
@@ -263,7 +267,7 @@ describe('AdminService', () => {
     });
   });
 
-  describe('월간 구독 결제 카운트 조회', () => {
+  describe('countMonthlySubscriptionPayments', () => {
     it('should return monthly subscription payments count for the current month', async () => {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -291,7 +295,7 @@ describe('AdminService', () => {
   });
 
   describe('countYearlySubscriptionPayments', () => {
-    it('연간 구독 결제 카운트 조회', async () => {
+    it('should return yearly subscription payments count for the current year', async () => {
       const year = new Date().getUTCFullYear();
 
       mockAdminRepository.countYearlySubscriptionPayments.mockResolvedValue([]);
@@ -306,7 +310,7 @@ describe('AdminService', () => {
   });
 
   describe('getReports', () => {
-    it('신고 내역 리스트 조회', async () => {
+    it('should return reports list', async () => {
       const sort = 'date';
       const page = 1;
       const limit = 10;
@@ -331,7 +335,7 @@ describe('AdminService', () => {
   });
 
   describe('getReportDetails', () => {
-    it('리포트 상세 조회', async () => {
+    it('should return report details', async () => {
       const essayId = 1;
       const essayWithReports = {
         author: { id: 1 },
@@ -382,11 +386,11 @@ describe('AdminService', () => {
   });
 
   describe('processReports', () => {
-    it('리포트 처리', async () => {
+    it('should process reports', async () => {
       const userId = 1;
       const essayId = 1;
-      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
-      const essay = { id: 1, published: true, linkedOut: true };
+      const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
+      const essay = { id: 1, status: EssayStatus.PUBLISHED };
 
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
       mockAdminRepository.findReportByEssayId.mockResolvedValue([{ id: 1 }]);
@@ -398,20 +402,17 @@ describe('AdminService', () => {
 
       expect(mockEssayRepository.findEssayById).toHaveBeenCalledWith(essayId);
       expect(mockEssayRepository.saveEssay).toHaveBeenCalledWith(
-        expect.objectContaining({
-          published: false,
-          linkedOut: false,
-        }),
+        expect.objectContaining({ status: EssayStatus.PRIVATE }),
       );
       expect(mockAdminRepository.findReportByEssayId).toHaveBeenCalledWith(essayId);
       expect(mockAdminRepository.saveReport).toHaveBeenCalled();
       expect(mockAdminRepository.saveHistory).toHaveBeenCalled();
     });
 
-    it('리포트 처리중 해당 에세이를 찾지 못한 경우 에러 발생', async () => {
+    it('should throw an error if the essay is not found', async () => {
       const userId = 1;
       const essayId = 1;
-      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
+      const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
 
       mockEssayRepository.findEssayById.mockResolvedValue(null);
 
@@ -422,10 +423,10 @@ describe('AdminService', () => {
   });
 
   describe('syncReportsProcessed', () => {
-    it('에세이에 할당된 모든 신고 동기화 처리', async () => {
+    it('should sync processed reports', async () => {
       const essayId = 1;
       const userId = 1;
-      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
+      const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
       const reports = [{ id: 1 }];
 
       mockAdminRepository.findReportByEssayId.mockResolvedValue(reports);
@@ -439,10 +440,10 @@ describe('AdminService', () => {
       expect(mockAdminRepository.saveHistory).toHaveBeenCalled();
     });
 
-    it('에세이에 할당된 신고 동기화 처리중 에세이를 찾지 못하면 에러 발생', async () => {
+    it('should throw an error if no reports are found', async () => {
       const essayId = 1;
       const userId = 1;
-      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
+      const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
 
       mockAdminRepository.findReportByEssayId.mockResolvedValue([]);
 
@@ -453,7 +454,7 @@ describe('AdminService', () => {
   });
 
   describe('getReviews', () => {
-    it('대기중인 리뷰 리스트 조회', async () => {
+    it('should return pending reviews', async () => {
       const page = 1;
       const limit = 10;
       const reviews = [];
@@ -475,7 +476,7 @@ describe('AdminService', () => {
   });
 
   describe('detailReview', () => {
-    it('리뷰 상세 조회', async () => {
+    it('should return review details', async () => {
       const reviewId = 1;
       const review = { id: reviewId, type: 'published', essay: { id: 1, title: 'Test Essay' } };
 
@@ -490,11 +491,15 @@ describe('AdminService', () => {
   });
 
   describe('processReview', () => {
-    it('리뷰 처리', async () => {
+    it('should process reviews', async () => {
       const userId = 1;
       const reviewId = 1;
-      const data: ProcessReqDto = { actionType: 'approved', comment: 'This is approved' };
-      const review = { id: reviewId, type: 'published', essay: { id: 1, published: false } };
+      const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
+      const review = {
+        id: reviewId,
+        type: 'published',
+        essay: { id: 1, status: EssayStatus.PRIVATE },
+      };
 
       mockAdminRepository.getReview.mockResolvedValue(review);
       mockEssayRepository.saveEssay.mockResolvedValue(review.essay);
@@ -505,17 +510,162 @@ describe('AdminService', () => {
 
       expect(mockAdminRepository.getReview).toHaveBeenCalledWith(reviewId);
       expect(mockEssayRepository.saveEssay).toHaveBeenCalledWith(
-        expect.objectContaining({
-          published: true,
-        }),
+        expect.objectContaining({ status: EssayStatus.PUBLISHED }),
       );
       expect(mockAdminRepository.saveReview).toHaveBeenCalled();
       expect(mockAdminRepository.saveHistory).toHaveBeenCalled();
     });
   });
 
+  describe('getUsers', () => {
+    it('should return user list', async () => {
+      const filter = 'all';
+      const page = 1;
+      const limit = 10;
+      const users = {};
+      const total = 0;
+
+      mockUserRepository.findUsers.mockResolvedValue({ users, total });
+      mockUtilsService.transformToDto.mockReturnValue({
+        users: [],
+      });
+
+      const result = await adminService.getUsers(filter, page, limit);
+
+      expect(mockUserRepository.findUsers).toHaveBeenCalledWith(
+        expect.any(Date),
+        filter,
+        page,
+        limit,
+      );
+    });
+  });
+
+  describe('getUser', () => {
+    it('should return user details', async () => {
+      const userId = 1;
+      const user = {
+        id: userId,
+        reports: [],
+        essays: [],
+        reviews: [],
+      };
+
+      mockUtilsService.transformToDto.mockReturnValue(user);
+      mockUserRepository.findUserDetailById.mockResolvedValue(user);
+
+      const result = await adminService.getUser(userId);
+
+      expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
+      expect(result).toEqual(expect.objectContaining({ id: userId }));
+    });
+  });
+
+  describe('updateUser', () => {
+    it('should update user details', async () => {
+      const adminId = 1;
+      const userId = 1;
+      const data: UpdateFullUserReqDto = { status: UserStatus.BANNED };
+      const updatedUser = { id: userId, ...data, reports: [], essays: [], reviews: [] };
+
+      mockUserService.updateUser.mockResolvedValue(updatedUser);
+      mockUserRepository.findUserById.mockResolvedValue(true);
+      mockUserRepository.findUserDetailById.mockResolvedValue(updatedUser);
+
+      const result = await adminService.updateUser(adminId, userId, data);
+
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(userId, data);
+      expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
+      expect(result).toEqual(
+        expect.objectContaining({ id: 1, reports: [], essays: [], reviews: [] }),
+      );
+    });
+  });
+
+  describe('getFullEssays', () => {
+    it('should return essay list', async () => {
+      const page = 1;
+      const limit = 10;
+      const essays = [];
+      const total = 0;
+
+      mockUtilsService.transformToDto.mockReturnValue(essays);
+      mockEssayRepository.findFullEssays.mockResolvedValue({ essays, total });
+
+      const result = await adminService.getFullEssays(page, limit);
+
+      expect(mockEssayRepository.findFullEssays).toHaveBeenCalledWith(page, limit);
+      expect(result).toEqual({
+        essays: [],
+        totalPage: 0,
+        page,
+        total,
+      });
+    });
+  });
+
+  describe('getFullEssay', () => {
+    it('should return essay details', async () => {
+      const essayId = 1;
+      const essay = { id: 1 };
+
+      mockUtilsService.transformToDto.mockReturnValue(essay);
+      mockEssayRepository.findFullEssay.mockResolvedValue(essay);
+
+      const result = await adminService.getFullEssay(essayId);
+      expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
+      expect(result).toEqual(expect.objectContaining({ id: 1 }));
+    });
+  });
+
+  describe('updateEssayStatus', () => {
+    it('should update essay status', async () => {
+      const adminId = 1;
+      const essayId = 1;
+      const data: UpdateEssayStatusReqDto = { status: EssayStatus.PUBLISHED };
+      const processData: ProcessReqDto = { actionType: ActionType.PENDING };
+
+      const existingEssay = {
+        id: essayId,
+        status: EssayStatus.PRIVATE,
+        reviews: [],
+        reports: [],
+      };
+
+      const updatedEssay = {
+        ...existingEssay,
+        status: EssayStatus.PUBLISHED,
+      };
+
+      const newHistory = {
+        id: 1,
+        actionType: 'update',
+        entityType: 'essay',
+        entityId: essayId,
+        processor: adminId,
+        processedDate: new Date(),
+      };
+
+      mockEssayRepository.findFullEssay.mockResolvedValue(existingEssay);
+      mockAdminRepository.saveHistory.mockResolvedValue(newHistory);
+      mockEssayRepository.updateEssay.mockResolvedValue(updatedEssay);
+      mockUtilsService.transformToDto.mockReturnValue(updatedEssay);
+
+      const result = await adminService.updateEssayStatus(adminId, essayId, data);
+
+      expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
+      expect(mockEssayRepository.updateEssay).toHaveBeenCalledWith(
+        existingEssay,
+        expect.objectContaining({
+          status: data.status,
+        }),
+      );
+      expect(result).toEqual(updatedEssay);
+    });
+  });
+
   describe('getHistories', () => {
-    it('처리 내역 리스트 조회', async () => {
+    it('should return histories list', async () => {
       const page = 1;
       const limit = 10;
       const histories = [];
@@ -543,155 +693,6 @@ describe('AdminService', () => {
         page,
         total,
       });
-    });
-  });
-
-  describe('getUsers', () => {
-    it('유저 리스트 조회', async () => {
-      const filter = 'all';
-      const page = 1;
-      const limit = 10;
-      const users = [];
-      const total = 0;
-
-      mockUserRepository.findUsers.mockResolvedValue({ users, total });
-
-      const result = await adminService.getUsers(filter, page, limit);
-
-      expect(mockUserRepository.findUsers).toHaveBeenCalledWith(
-        expect.any(Date),
-        filter,
-        page,
-        limit,
-      );
-      expect(result).toEqual({
-        users: [],
-        totalPage: 0,
-        page,
-        total,
-      });
-    });
-  });
-
-  describe('getUser', () => {
-    it('유저 상세정보 조회', async () => {
-      const userId = 1;
-      const user = {
-        id: userId,
-        reports: [],
-        essays: [],
-        reviews: [],
-      };
-
-      mockUtilsService.transformToDto.mockReturnValue(user);
-      mockUserRepository.findUserDetailById.mockResolvedValue(user);
-
-      const result = await adminService.getUser(userId);
-
-      expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(expect.objectContaining({ id: userId }));
-    });
-  });
-
-  describe('updateUser', () => {
-    it('유저 정보 강제 업데이트', async () => {
-      const adminId = 1;
-      const userId = 1;
-      const data: UpdateFullUserReqDto = { nickname: 'updatedUser' };
-      const updatedUser = { id: userId, ...data, reports: [], essays: [], reviews: [] };
-
-      mockUserService.updateUser.mockResolvedValue(updatedUser);
-      mockUserRepository.findUserById.mockResolvedValue(true);
-      mockUserRepository.findUserDetailById.mockResolvedValue(updatedUser);
-
-      const result = await adminService.updateUser(adminId, userId, data);
-
-      expect(mockUserService.updateUser).toHaveBeenCalledWith(userId, data);
-      expect(mockUserRepository.findUserDetailById).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(
-        expect.objectContaining({ id: 1, reports: [], essays: [], reviews: [] }),
-      );
-    });
-  });
-
-  describe('getFullEssays', () => {
-    it('에세이 리스트 조회', async () => {
-      const page = 1;
-      const limit = 10;
-      const essays = [];
-      const total = 0;
-
-      mockUtilsService.transformToDto.mockReturnValue(essays);
-      mockEssayRepository.findFullEssays.mockResolvedValue({ essays, total });
-
-      const result = await adminService.getFullEssays(page, limit);
-
-      expect(mockEssayRepository.findFullEssays).toHaveBeenCalledWith(page, limit);
-      expect(result).toEqual({
-        essays: [],
-        totalPage: 0,
-        page,
-        total,
-      });
-    });
-  });
-
-  describe('getFullEssay', () => {
-    it('에세이 조회(검색)', async () => {
-      const essayId = 1;
-      const essay = { id: 1 };
-
-      mockUtilsService.transformToDto.mockReturnValue(essay);
-      mockEssayRepository.findFullEssay.mockResolvedValue(essay);
-
-      const result = await adminService.getFullEssay(essayId);
-      expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
-      expect(result).toEqual(expect.objectContaining({ id: 1 }));
-    });
-  });
-
-  describe('updateEssayStatus', () => {
-    it('에세이 강제 업데이트', async () => {
-      const adminId = 1;
-      const essayId = 1;
-      const data = { published: false };
-      const processData = { actionType: 'pending' };
-
-      const existingEssay = {
-        id: essayId,
-        author: {},
-        published: true,
-        linkedOut: false,
-      };
-
-      const updatedEssay = {
-        ...existingEssay,
-        published: false,
-      };
-
-      const newHistory = {
-        id: 1,
-        actionType: 'update',
-        entityType: 'essay',
-        entityId: essayId,
-        adminId: adminId,
-      };
-
-      mockEssayRepository.findFullEssay.mockResolvedValue(existingEssay);
-      mockAdminRepository.saveHistory.mockResolvedValue(newHistory);
-      mockEssayRepository.updateEssay.mockResolvedValue(updatedEssay);
-      mockUtilsService.transformToDto.mockReturnValue(updatedEssay);
-
-      const result = await adminService.updateEssayStatus(adminId, essayId, data);
-
-      expect(mockEssayRepository.findFullEssay).toHaveBeenCalledWith(essayId);
-      expect(mockEssayRepository.updateEssay).toHaveBeenCalledWith(
-        existingEssay,
-        expect.objectContaining({
-          published: data.published,
-        }),
-      );
-      expect(result).toEqual(updatedEssay);
     });
   });
 });

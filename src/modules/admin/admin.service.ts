@@ -8,7 +8,7 @@ import { AuthService } from '../auth/auth.service';
 import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
-import { ProcessedHistory } from '../../entities/processedHistory.entity';
+import { ActionType, ProcessedHistory } from '../../entities/processedHistory.entity';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
 import { ReportsDto } from './dto/reports.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
@@ -27,10 +27,11 @@ import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { EssaysInfoDto } from './dto/essaysInfo.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
-import { Essay } from '../../entities/essay.entity';
-import * as bcrypt from 'bcrypt';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { UserStatus } from '../../entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -74,24 +75,37 @@ export class AdminService {
     });
   }
 
-  private determineUserActionType(data: UpdateFullUserReqDto): string {
-    if (data.banned) return 'banned';
-    if (data.monitored) return 'monitored';
-    return 'updated';
+  private determineUserActionType(data: UpdateFullUserReqDto) {
+    if (data.status === UserStatus.BANNED) return ActionType.BANNED;
+    if (data.status === UserStatus.MONITORED) return ActionType.MONITORED;
+    return ActionType.UPDATED;
   }
 
-  private determineEssayActionType(data: UpdateEssayStatusReqDto): string {
-    if (data.published !== undefined) return 'unpublished';
-    if (data.linkedOut !== undefined) return 'unlinkedout';
-    return 'updated';
-  }
-
-  private async handleUserBanStatus(userId: number, banned: boolean) {
-    if (banned) {
-      await this.handleBannedUser(userId);
-    } else {
-      await this.essayRepository.restoreAllEssay(userId);
+  private determineEssayActionType(essay: Essay, data: UpdateEssayStatusReqDto) {
+    if (data.status !== undefined) {
+      switch (data.status) {
+        case EssayStatus.PRIVATE:
+          return essay.status === EssayStatus.PUBLISHED
+            ? ActionType.UNPUBLISHED
+            : essay.status === EssayStatus.LINKEDOUT
+              ? ActionType.UNLINKEDOUT
+              : ActionType.UPDATED;
+        case EssayStatus.PUBLISHED:
+          return essay.status === EssayStatus.LINKEDOUT
+            ? ActionType.UNLINKEDOUT
+            : ActionType.PUBLISHED;
+        case EssayStatus.LINKEDOUT:
+          return ActionType.LINKEDOUT;
+        default:
+          return ActionType.UPDATED;
+      }
     }
+    return ActionType.UPDATED;
+  }
+
+  private async handleUserBanStatus(userId: number, status: UserStatus) {
+    if (status === UserStatus.BANNED) await this.handleBannedUser(userId);
+    if (status === UserStatus.ACTIVE) await this.essayRepository.restoreAllEssay(userId);
   }
 
   private async handleBannedUser(userId: number) {
@@ -112,10 +126,10 @@ export class AdminService {
   }
 
   private async handleEssayDependencies(essay: Essay, adminId: number, processData: ProcessReqDto) {
-    if (essay.reviews) {
+    if (essay.reviews && essay.reviews.length > 0) {
       await this.processReview(adminId, essay.reviews[0].id, processData);
     }
-    if (essay.reports) {
+    if (essay.reports && essay.reports.length > 0) {
       await this.syncReportsProcessed(essay.id, adminId, processData);
     }
   }
@@ -249,8 +263,7 @@ export class AdminService {
   }
 
   private async handleApprovedAction(essay: Essay) {
-    essay.published = false;
-    essay.linkedOut = false;
+    essay.status = EssayStatus.PRIVATE;
     await this.essayRepository.saveEssay(essay);
     // TODO: 여기에 앱 푸쉬 알림 및 메일링 추가
   }
@@ -283,7 +296,7 @@ export class AdminService {
   }
 
   private createProcessedHistory(
-    actionType: string,
+    actionType: ActionType,
     targetName: string,
     target: any,
     adminId: number,
@@ -374,9 +387,9 @@ export class AdminService {
   private handleReviewAction(review: ReviewQueue, actionType: string) {
     if (actionType === 'approved') {
       if (review.type === 'published') {
-        review.essay.published = true;
+        review.essay.status = EssayStatus.PUBLISHED;
       } else {
-        review.essay.linkedOut = true;
+        review.essay.status = EssayStatus.LINKEDOUT;
       }
     }
   }
@@ -416,8 +429,8 @@ export class AdminService {
 
     await this.adminRepository.saveHistory(newHistory);
 
-    if (data.banned !== undefined) {
-      await this.handleUserBanStatus(userId, data.banned);
+    if (data.status !== undefined) {
+      await this.handleUserBanStatus(userId, data.status);
     }
 
     return await this.getUser(userId);
@@ -450,28 +463,21 @@ export class AdminService {
       throw new NotFoundException(`Essay with ID ${essayId} not found`);
     }
 
-    const actionType = this.determineEssayActionType(data);
+    const actionType = this.determineEssayActionType(essay, data);
     const newHistory = this.createProcessedHistory(actionType, 'essay', essay, adminId);
 
     const updateData = {
       ...essay,
+      status: data.status,
     };
 
-    if (data.published !== undefined) {
-      updateData.published = data.published;
-    }
-    if (data.linkedOut !== undefined) {
-      updateData.linkedOut = data.linkedOut;
-    }
-
     const processData = new ProcessReqDto();
-    processData.actionType = 'pending';
+    processData.actionType = ActionType.PENDING;
 
     await this.handleEssayDependencies(essay, adminId, processData);
 
     await this.adminRepository.saveHistory(newHistory);
     await this.essayRepository.updateEssay(essay, updateData);
-
     return await this.getFullEssay(essayId);
   }
 
