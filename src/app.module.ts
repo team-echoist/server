@@ -21,6 +21,7 @@ import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeOrmOptions } from '../typeorm.options';
+import { FollowModule } from './modules/follow/follow.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TypeOrmOptions } from '../typeorm.options';
     ReportModule,
     ReviewModule,
     TagModule,
+    FollowModule,
     CategoryModule,
     MailModule,
     RedisModule,

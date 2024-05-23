@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import * as strategies from '../../common/guards/strategies';
+import { FollowModule } from '../follow/follow.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import * as strategies from '../../common/guards/strategies';
     }),
     TypeOrmModule.forFeature([User, Essay]),
     AuthModule,
+    FollowModule,
     MailModule,
     AwsModule,
     UtilsModule,

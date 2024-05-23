@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -50,5 +51,19 @@ export class UserController {
   @ApiResponse({ status: 200, type: UserInfoResDto })
   async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
     return this.userService.getUserInfo(userId);
+  }
+
+  @Post('follows/:userId')
+  @ApiOperation({ summary: '팔로우' })
+  @ApiResponse({ status: 201 })
+  async follow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.follow(req.user.id, userId);
+  }
+
+  @Delete('follows/:userId')
+  @ApiOperation({ summary: '팔로우 취소' })
+  @ApiResponse({ status: 204 })
+  async upFollow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.unFollow(req.user.id, userId);
   }
 }

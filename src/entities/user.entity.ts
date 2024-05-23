@@ -13,6 +13,7 @@ import { ReportQueue } from './reportQueue.entity';
 import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
+import { Follow } from './follow.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -86,6 +87,12 @@ export class User {
 
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];
+
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  following: Follow[];
+
+  @OneToMany(() => Follow, (follow) => follow.following)
+  followers: Follow[];
 
   @OneToMany(() => Subscription, (subscription) => subscription.user)
   subscriptions: Subscription[];
