@@ -40,6 +40,6 @@ import * as strategies from '../../common/guards/strategies';
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminRepository, strategies.JwtStrategy],
-  exports: [],
+  exports: [AdminService],
 })
 export class AdminModule {}

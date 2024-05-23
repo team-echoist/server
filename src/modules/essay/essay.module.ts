@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
@@ -31,13 +31,13 @@ dotenv.config();
     TypeOrmModule.forFeature([User, Essay, Category, ReviewQueue, Tag]),
     AuthModule,
     MailModule,
-    UserModule,
     TagModule,
     CategoryModule,
     ReportModule,
     ReviewModule,
     UtilsModule,
     AwsModule,
+    forwardRef(() => UserModule),
   ],
   controllers: [EssayController],
   providers: [EssayService, EssayRepository, strategies.JwtStrategy],

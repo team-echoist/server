@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
@@ -16,6 +16,7 @@ import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { RecommendEssaysResDto } from './dto/response/recommendEssaysRes.dto';
+import { EssayStatsDto } from './dto/essayStats.dto';
 
 @Injectable()
 export class EssayService {
@@ -23,15 +24,15 @@ export class EssayService {
     private readonly essayRepository: EssayRepository,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
-    private readonly userService: UserService,
     private readonly reviewService: ReviewService,
     private readonly tagService: TagService,
     private readonly categoryService: CategoryService,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
-    const user = await this.userService.findUserById(requester.id);
+    const user = await this.userService.fetchUserEntityById(requester.id);
 
     const category = await this.categoryService.getCategoryById(user, data.categoryId);
     const tags = await this.tagService.getTags(data.tags);
@@ -77,7 +78,7 @@ export class EssayService {
 
   @Transactional()
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
-    const user = await this.userService.findUserById(requester.id);
+    const user = await this.userService.fetchUserEntityById(requester.id);
 
     const category = await this.categoryService.getCategoryById(user, data.categoryId);
     const tags = await this.tagService.getTags(data.tags);
@@ -180,5 +181,10 @@ export class EssayService {
   async getRecommendEssays(limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
     return this.utilsService.transformToDto(RecommendEssaysResDto, essays);
+  }
+
+  async essayStatsByUserId(userId: number) {
+    const essayStats = await this.essayRepository.essayStatsByUserId(userId);
+    return this.utilsService.transformToDto(EssayStatsDto, essayStats);
   }
 }

@@ -33,7 +33,7 @@ describe('EssayService', () => {
     deleteEssay: jest.fn(),
   };
   const mockUserService = {
-    findUserById: jest.fn(),
+    fetchUserEntityById: jest.fn(),
   };
 
   const mockCategoryService = {
@@ -90,7 +90,7 @@ describe('EssayService', () => {
       savedMonitoredEssay.id = 1;
       savedMonitoredEssay.status = EssayStatus.PRIVATE;
 
-      mockUserService.findUserById.mockResolvedValue(user);
+      mockUserService.fetchUserEntityById.mockResolvedValue(user);
       mockEssayRepository.saveEssay.mockResolvedValue(savedMonitoredEssay);
 
       const result = await essayService.saveEssay(user, 'web', data);
@@ -106,7 +106,7 @@ describe('EssayService', () => {
 
       user.status = UserStatus.ACTIVE;
       savedEssay.status = EssayStatus.PUBLISHED;
-      mockUserService.findUserById.mockResolvedValue(user);
+      mockUserService.fetchUserEntityById.mockResolvedValue(user);
       mockEssayRepository.findCategoryById.mockResolvedValue(category);
       mockEssayRepository.saveEssay.mockResolvedValue(savedEssay);
 

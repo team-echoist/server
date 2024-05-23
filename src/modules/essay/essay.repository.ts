@@ -200,4 +200,23 @@ export class EssayRepository {
       .execute();
     return;
   }
+
+  async essayStatsByUserId(userId: number) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .select('author.id', 'authorId')
+      .addSelect('COUNT(*)', 'totalEssays')
+      .addSelect(
+        `COUNT(CASE WHEN essay.status = '${EssayStatus.PUBLISHED}' THEN 1 END)`,
+        'publishedEssays',
+      )
+      .addSelect(
+        `COUNT(CASE WHEN essay.status = '${EssayStatus.LINKEDOUT}' THEN 1 END)`,
+        'linkedOutEssays',
+      )
+      .innerJoin('essay.author', 'author')
+      .where('author.id = :userId', { userId })
+      .groupBy('author.id')
+      .getRawOne();
+  }
 }

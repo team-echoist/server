@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { plainToInstance } from 'class-transformer';
 import { UtilsService } from '../utils/utils.service';
+import { EssayService } from '../essay/essay.service';
 import { AwsService } from '../aws/aws.service';
 import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
 import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
+import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import * as bcrypt from 'bcrypt';
+import { UserSummaryDto } from './dto/userSummary.dto';
 
 @Injectable()
 export class UserService {
@@ -18,9 +20,10 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
+    @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
   ) {}
 
-  async findUserById(userId: number) {
+  async fetchUserEntityById(userId: number) {
     return this.userRepository.findUserById(userId);
   }
 
@@ -41,7 +44,7 @@ export class UserService {
     user.profileImage = imageUrl;
     await this.userRepository.saveUser(user);
 
-    return plainToInstance(ProfileImageResDto, imageUrl, { excludeExtraneousValues: true });
+    return this.utilsService.transformToDto(ProfileImageResDto, imageUrl);
   }
 
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
@@ -50,6 +53,24 @@ export class UserService {
       data.password = await bcrypt.hash(data.password, 10);
     }
     const updatedUser = await this.userRepository.updateUser(user, data);
-    return plainToInstance(UserResDto, updatedUser, { excludeExtraneousValues: true });
+
+    return this.utilsService.transformToDto(UserResDto, updatedUser);
+  }
+
+  async findUserById(userId: number) {
+    const user = await this.userRepository.findUserById(userId);
+    return this.utilsService.transformToDto(UserResDto, user);
+  }
+
+  async getUserSummaryById(userId: number) {
+    const user = await this.userRepository.findUserById(userId);
+    return this.utilsService.transformToDto(UserSummaryDto, user);
+  }
+
+  async getUserInfo(userId: number) {
+    const user = await this.getUserSummaryById(userId);
+    const essayStats = await this.essayService.essayStatsByUserId(userId);
+
+    return this.utilsService.transformToDto(UserInfoResDto, { user, essayStats });
   }
 }

@@ -104,14 +104,14 @@ describe('AdminService', () => {
   });
 
   describe('createAdmin', () => {
-    it('should throw an error if the user is not authorized', async () => {
+    it('루트관리자가 아닌 경우 에러', async () => {
       const createAdminDto: CreateAdminReqDto = { email: 'test@test.com', password: 'password' };
       await expect(adminService.createAdmin(2, createAdminDto)).rejects.toThrow(
         new HttpException('You are not authorized.', HttpStatus.FORBIDDEN),
       );
     });
 
-    it('should create an admin successfully', async () => {
+    it('관리자 계정 생성 성공', async () => {
       const createAdminDto: CreateAdminReqDto = { email: 'test@test.com', password: 'password' };
       const savedAdmin = { id: 1, email: 'test@test.com', role: 'admin' };
 
@@ -127,7 +127,7 @@ describe('AdminService', () => {
   });
 
   describe('dashboard', () => {
-    it('should return dashboard data', async () => {
+    it('대시보드 데이터', async () => {
       const today = new Date();
       const todayStart = new Date(today.setHours(0, 0, 0, 0));
       const todayEnd = new Date(today.setHours(23, 59, 59, 999));
@@ -310,7 +310,7 @@ describe('AdminService', () => {
   });
 
   describe('getReports', () => {
-    it('should return reports list', async () => {
+    it('리포트 리스트', async () => {
       const sort = 'date';
       const page = 1;
       const limit = 10;
@@ -335,7 +335,7 @@ describe('AdminService', () => {
   });
 
   describe('getReportDetails', () => {
-    it('should return report details', async () => {
+    it('리포트 디테일', async () => {
       const essayId = 1;
       const essayWithReports = {
         author: { id: 1 },
@@ -386,7 +386,7 @@ describe('AdminService', () => {
   });
 
   describe('processReports', () => {
-    it('should process reports', async () => {
+    it('리포트 처리', async () => {
       const userId = 1;
       const essayId = 1;
       const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
@@ -409,7 +409,7 @@ describe('AdminService', () => {
       expect(mockAdminRepository.saveHistory).toHaveBeenCalled();
     });
 
-    it('should throw an error if the essay is not found', async () => {
+    it('리포트를 처리중 타겟 에세이를 찾을 수 없는 경우', async () => {
       const userId = 1;
       const essayId = 1;
       const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
@@ -423,7 +423,7 @@ describe('AdminService', () => {
   });
 
   describe('syncReportsProcessed', () => {
-    it('should sync processed reports', async () => {
+    it('타겟 에세이에 대한 모든 리포트 동기화 처리', async () => {
       const essayId = 1;
       const userId = 1;
       const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
@@ -440,7 +440,7 @@ describe('AdminService', () => {
       expect(mockAdminRepository.saveHistory).toHaveBeenCalled();
     });
 
-    it('should throw an error if no reports are found', async () => {
+    it('동기화 처리중 리포트가 없는 경우', async () => {
       const essayId = 1;
       const userId = 1;
       const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
@@ -454,7 +454,7 @@ describe('AdminService', () => {
   });
 
   describe('getReviews', () => {
-    it('should return pending reviews', async () => {
+    it('대기중인 리뷰 조회', async () => {
       const page = 1;
       const limit = 10;
       const reviews = [];
@@ -476,7 +476,7 @@ describe('AdminService', () => {
   });
 
   describe('detailReview', () => {
-    it('should return review details', async () => {
+    it('리뷰 상세 조회', async () => {
       const reviewId = 1;
       const review = { id: reviewId, type: 'published', essay: { id: 1, title: 'Test Essay' } };
 
@@ -491,7 +491,7 @@ describe('AdminService', () => {
   });
 
   describe('processReview', () => {
-    it('should process reviews', async () => {
+    it('리뷰 처리', async () => {
       const userId = 1;
       const reviewId = 1;
       const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
@@ -518,7 +518,7 @@ describe('AdminService', () => {
   });
 
   describe('getUsers', () => {
-    it('should return user list', async () => {
+    it('관리자용 유저 리스트', async () => {
       const filter = 'all';
       const page = 1;
       const limit = 10;
@@ -542,7 +542,7 @@ describe('AdminService', () => {
   });
 
   describe('getUser', () => {
-    it('should return user details', async () => {
+    it('관리자용 유저 디테일', async () => {
       const userId = 1;
       const user = {
         id: userId,
@@ -562,7 +562,7 @@ describe('AdminService', () => {
   });
 
   describe('updateUser', () => {
-    it('should update user details', async () => {
+    it('관리자용 유저 수정', async () => {
       const adminId = 1;
       const userId = 1;
       const data: UpdateFullUserReqDto = { status: UserStatus.BANNED };
@@ -583,7 +583,7 @@ describe('AdminService', () => {
   });
 
   describe('getFullEssays', () => {
-    it('should return essay list', async () => {
+    it('관리자용 에세이 리스트 조회', async () => {
       const page = 1;
       const limit = 10;
       const essays = [];
@@ -605,7 +605,7 @@ describe('AdminService', () => {
   });
 
   describe('getFullEssay', () => {
-    it('should return essay details', async () => {
+    it('관리자용 에세이 상세 조회', async () => {
       const essayId = 1;
       const essay = { id: 1 };
 
@@ -619,7 +619,7 @@ describe('AdminService', () => {
   });
 
   describe('updateEssayStatus', () => {
-    it('should update essay status', async () => {
+    it('관리자용 에세이 상태 수정', async () => {
       const adminId = 1;
       const essayId = 1;
       const data: UpdateEssayStatusReqDto = { status: EssayStatus.PUBLISHED };
@@ -665,7 +665,7 @@ describe('AdminService', () => {
   });
 
   describe('getHistories', () => {
-    it('should return histories list', async () => {
+    it('관리자용 처리내역 리스트', async () => {
       const page = 1;
       const limit = 10;
       const histories = [];
