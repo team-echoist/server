@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -19,6 +21,7 @@ import { UserImageReqDto } from './dto/request/userImageReq.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
+import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -41,5 +44,26 @@ export class UserController {
   @ApiBody({ type: UpdateUserReqDto })
   async updateUser(@Req() req: ExpressRequest, @Body() data: UpdateUserReqDto) {
     return this.userService.updateUser(req.user.id, data);
+  }
+
+  @Get(':userId')
+  @ApiOperation({ summary: '유저 프로필' })
+  @ApiResponse({ status: 200, type: UserInfoResDto })
+  async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.getUserInfo(userId);
+  }
+
+  @Post('follows/:userId')
+  @ApiOperation({ summary: '팔로우' })
+  @ApiResponse({ status: 201 })
+  async follow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.follow(req.user.id, userId);
+  }
+
+  @Delete('follows/:userId')
+  @ApiOperation({ summary: '팔로우 취소' })
+  @ApiResponse({ status: 204 })
+  async upFollow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.unFollow(req.user.id, userId);
   }
 }

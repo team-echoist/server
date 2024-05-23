@@ -7,6 +7,7 @@ import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { ReviewQueue, ReviewQueueType } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { UtilsService } from '../utils/utils.service';
+import { Tag } from '../../entities/tag.entity';
 
 @Injectable()
 export class SeederService {
@@ -19,6 +20,8 @@ export class SeederService {
     private readonly reviewQueueRepository: Repository<ReviewQueue>,
     @InjectRepository(ReportQueue)
     private readonly reportQueueRepository: Repository<ReportQueue>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
     private readonly utilsService: UtilsService,
   ) {}
 
@@ -75,6 +78,26 @@ export class SeederService {
   async seedEssays(users: User[]) {
     const essayPromises = [];
     const reviewQueuePromises = [];
+    const tagPromises = [];
+
+    const tags = [
+      'tag1',
+      'tag2',
+      'tag3',
+      'tag4',
+      'tag5',
+      'tag6',
+      'tag7',
+      'tag8',
+      'tag9',
+      'tag10',
+    ].map((tagName) => {
+      const tag = this.tagRepository.create({ name: tagName, createdDate: new Date() });
+      tagPromises.push(this.tagRepository.save(tag));
+      return tag;
+    });
+
+    await Promise.all(tagPromises);
 
     users.forEach((user) => {
       for (let j = 0; j < Math.floor(Math.random() * 5) + 1; j++) {
@@ -92,6 +115,11 @@ export class SeederService {
         });
 
         const essayPromise = this.essayRepository.save(essay).then(async (savedEssay) => {
+          savedEssay.tags = tags
+            .sort(() => 0.5 - Math.random())
+            .slice(0, Math.floor(Math.random() * 4) + 1);
+          await this.essayRepository.save(savedEssay);
+
           if (
             user.status === UserStatus.MONITORED &&
             (savedEssay.status === EssayStatus.PUBLISHED ||
