@@ -180,7 +180,8 @@ export class EssayService {
 
   async getRecommendEssays(limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
-    return this.utilsService.transformToDto(RecommendEssaysResDto, essays);
+    const essaysDto = this.utilsService.transformToDto(RecommendEssaysResDto, essays);
+    return { essays: essaysDto };
   }
 
   async essayStatsByUserId(userId: number) {
