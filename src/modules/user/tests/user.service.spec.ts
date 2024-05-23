@@ -6,6 +6,7 @@ import { AwsService } from '../../aws/aws.service';
 import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 import { UserResDto } from '../dto/response/userRes.dto';
 import { EssayService } from '../../essay/essay.service';
+import { FollowService } from '../../follow/follow.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -28,6 +29,7 @@ describe('UserService', () => {
     imageUploadToS3: jest.fn(),
   };
   const mockEssayService = {};
+  const mockFollowService = {};
   const mockRedis = {
     get: jest.fn(),
     set: jest.fn(),
@@ -44,6 +46,7 @@ describe('UserService', () => {
         { provide: UtilsService, useValue: mockUtilsService },
         { provide: AwsService, useValue: mockAwsService },
         { provide: EssayService, useValue: mockEssayService },
+        { provide: FollowService, useValue: mockFollowService },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
