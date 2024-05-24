@@ -27,7 +27,6 @@ import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { PublicEssaysDto } from './dto/publicEssays.dto';
 import { CategoriesResDto } from '../category/dto/response/categoriesRes.dto';
 import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 import { CategoryNameDto } from '../category/dto/repuest/categoryName.dto';
