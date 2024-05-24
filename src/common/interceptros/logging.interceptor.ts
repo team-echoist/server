@@ -12,7 +12,9 @@ export class LoggingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         const duration = Date.now() - start;
-        console.log(`${request.method} ${request.url} ${response.statusCode} ${duration}ms`);
+        console.log(
+          `${request.method} ${request.url} ${JSON.stringify(request.params)} ${JSON.stringify(request.query)} ${response.statusCode} ${request.headers['user-agent']} ${request.ip} ${duration}ms`,
+        );
       }),
     );
   }

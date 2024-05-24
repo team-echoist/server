@@ -10,12 +10,4 @@ export class EssaysResDto {
   @ApiProperty()
   @Expose()
   total: number;
-
-  @ApiProperty()
-  @Expose()
-  totalPage: number;
-
-  @ApiProperty()
-  @Expose()
-  page: number;
 }

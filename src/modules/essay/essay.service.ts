@@ -6,6 +6,7 @@ import { ReviewService } from '../review/review.service';
 import { CategoryService } from '../category/category.service';
 import { UserService } from '../user/user.service';
 import { TagService } from '../tag/tag.service';
+import { FollowService } from '../follow/follow.service';
 import { EssayRepository } from './essay.repository';
 import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { Tag } from '../../entities/tag.entity';
@@ -15,7 +16,7 @@ import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { RecommendEssaysResDto } from './dto/response/recommendEssaysRes.dto';
+import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
 
 @Injectable()
@@ -27,6 +28,7 @@ export class EssayService {
     private readonly reviewService: ReviewService,
     private readonly tagService: TagService,
     private readonly categoryService: CategoryService,
+    private readonly followService: FollowService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
@@ -127,25 +129,17 @@ export class EssayService {
   }
 
   @Transactional()
-  async getMyEssay(
-    userId: number,
-    published: boolean,
-    categoryId: number,
-    page: number,
-    limit: number,
-  ) {
+  async getMyEssay(userId: number, published: boolean, categoryId: number, limit: number) {
     const { essays, total } = await this.essayRepository.findEssays(
       userId,
       published,
       categoryId,
-      page,
       limit,
     );
 
-    const totalPage: number = Math.ceil(total / limit);
     const essayDtos = this.utilsService.transformToDto(EssayResDto, essays);
 
-    return { essays: essayDtos, total, totalPage, page };
+    return { essays: essayDtos, total };
   }
 
   async deleteEssay(userId: number, essayId: number) {
@@ -180,12 +174,25 @@ export class EssayService {
 
   async getRecommendEssays(limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
-    const essaysDto = this.utilsService.transformToDto(RecommendEssaysResDto, essays);
+    const essaysDto = this.utilsService.transformToDto(PublicEssaysResDto, essays);
     return { essays: essaysDto };
   }
 
   async essayStatsByUserId(userId: number) {
     const essayStats = await this.essayRepository.essayStatsByUserId(userId);
     return this.utilsService.transformToDto(EssayStatsDto, essayStats);
+  }
+
+  async getFollowingsEssays(userId: number, limit: number) {
+    const followings = await this.followService.getFollowings(userId);
+    const followingIds = followings.map((follow) => follow.following.id);
+
+    if (followingIds.length === 0) {
+      return [];
+    }
+
+    const essays = await this.essayRepository.getFollowingsEssays(followingIds, limit);
+    const essaysDto = this.utilsService.transformToDto(PublicEssaysResDto, essays);
+    return { essays: essaysDto };
   }
 }

@@ -106,6 +106,10 @@ export class UserService {
   }
 
   async getFollowings(userId: number) {
-    return await this.followService.getFollowings(userId);
+    const followings = await this.followService.getFollowings(userId);
+    const followingsDto = followings.map((follow) => {
+      return this.utilsService.transformToDto(UserSummaryDto, follow.following);
+    });
+    return { followings: followingsDto };
   }
 }

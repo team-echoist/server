@@ -13,7 +13,7 @@ import { TagDto } from '../tag.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
 import { LimitedUserDto } from '../../../user/dto/limitedUser.dto';
 
-export class RecommendEssaysResDto {
+export class PublicEssaysResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()
