@@ -1,4 +1,11 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { UtilsService } from '../utils/utils.service';
@@ -78,8 +85,13 @@ export class UserService {
 
   async follow(followerId: number, followingId: number) {
     if (followerId === followingId) {
-      throw new Error('You cannot follow yourself');
+      throw new HttpException('You cannot follow yourself', HttpStatus.CONFLICT);
     }
+    const followerRelation = await this.followService.findFollowerRelation(followerId, followingId);
+    if (followerRelation) {
+      throw new HttpException('You are already following', HttpStatus.CONFLICT);
+    }
+
     const follower = await this.userRepository.findUserById(followerId);
     const following = await this.userRepository.findUserById(followingId);
 
@@ -91,5 +103,9 @@ export class UserService {
 
   async unFollow(followerId: number, followingId: number) {
     await this.followService.unFollow(followerId, followingId);
+  }
+
+  async getFollowings(userId: number) {
+    return await this.followService.getFollowings(userId);
   }
 }

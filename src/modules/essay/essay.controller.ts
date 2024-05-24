@@ -97,7 +97,7 @@ export class EssayController {
 
   @Get('recommend')
   @ApiOperation({ summary: '랜덤 추천 에세이' })
-  @ApiResponse({ status: 200, type: RecommendEssaysResDto })
+  @ApiResponse({ status: 200, type: [RecommendEssaysResDto] })
   @ApiQuery({ name: 'limit', required: false })
   async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
     return this.essayService.getRecommendEssays(limit);
