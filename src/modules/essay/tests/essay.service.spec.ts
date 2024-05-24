@@ -13,6 +13,7 @@ import { CategoryService } from '../../category/category.service';
 import { UserService } from '../../user/user.service';
 import { TagService } from '../../tag/tag.service';
 import { ReviewService } from '../../review/review.service';
+import { FollowService } from '../../follow/follow.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -51,6 +52,8 @@ describe('EssayService', () => {
     transformToDto: jest.fn(),
   };
 
+  const mockFollowService = {};
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [UtilsModule],
@@ -62,6 +65,7 @@ describe('EssayService', () => {
         { provide: CategoryService, useValue: mockCategoryService },
         { provide: TagService, useValue: mockTagService },
         { provide: ReviewService, useValue: mockReviewService },
+        { provide: FollowService, useValue: mockFollowService },
       ],
     }).compile();
 
@@ -175,10 +179,10 @@ describe('EssayService', () => {
       essay.id = 1;
       essay.title = 'Test Essay';
       const mockEssays = [essay];
-      const response = { essays: mockEssays, total: 1, totalPage: 1, page: 1 };
+      const response = { essays: mockEssays, total: 1 };
       mockEssayRepository.findEssays.mockResolvedValue(response);
 
-      const result: any = await essayService.getMyEssay(1, true, 10, 1, 10);
+      const result: any = await essayService.getMyEssay(1, true, 10, 1);
 
       expect(result.essays.length).toBe(1);
       expect(result.total).toEqual(1);
