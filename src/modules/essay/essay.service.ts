@@ -16,7 +16,7 @@ import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
+import { PublicEssaysDto } from './dto/publicEssays.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
 
 @Injectable()
@@ -174,7 +174,7 @@ export class EssayService {
 
   async getRecommendEssays(limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
-    const essaysDto = this.utilsService.transformToDto(PublicEssaysResDto, essays);
+    const essaysDto = this.utilsService.transformToDto(PublicEssaysDto, essays);
     return { essays: essaysDto };
   }
 
@@ -192,7 +192,24 @@ export class EssayService {
     }
 
     const essays = await this.essayRepository.getFollowingsEssays(followingIds, limit);
-    const essaysDto = this.utilsService.transformToDto(PublicEssaysResDto, essays);
+    const essaysDto = this.utilsService.transformToDto(PublicEssaysDto, essays);
     return { essays: essaysDto };
+  }
+
+  async categories(userId: number) {
+    const categories = await this.categoryService.getCategoriesByUserId(userId);
+    return { categories: categories };
+  }
+
+  async saveCategory(userId: number, categoryName: string) {
+    await this.categoryService.saveCategory(userId, categoryName);
+  }
+
+  async updateCategory(userId: number, categoryId: number, categoryName: string) {
+    await this.categoryService.updateCategory(userId, categoryId, categoryName);
+  }
+
+  async deleteCategory(userId: number, categoryId: number) {
+    await this.categoryService.deleteCategory(userId, categoryId);
   }
 }
