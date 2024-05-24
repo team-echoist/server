@@ -20,6 +20,7 @@ import { Category } from '../../entities/category.entity';
 import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { FollowModule } from '../follow/follow.module';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ dotenv.config();
     ReviewModule,
     UtilsModule,
     AwsModule,
+    FollowModule,
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],

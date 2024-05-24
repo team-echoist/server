@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FollowRepository } from './follow.repository';
 import { User } from '../../entities/user.entity';
 import { UtilsService } from '../utils/utils.service';
-import { UserSummaryDto } from '../user/dto/userSummary.dto';
 
 @Injectable()
 export class FollowService {
@@ -28,10 +27,6 @@ export class FollowService {
   }
 
   async getFollowings(userId: number) {
-    const followings = await this.followRepository.findFollowings(userId);
-    const followingsDto = followings.map((follow) => {
-      return this.utilsService.transformToDto(UserSummaryDto, follow.following);
-    });
-    return { followings: followingsDto };
+    return await this.followRepository.findFollowings(userId);
   }
 }

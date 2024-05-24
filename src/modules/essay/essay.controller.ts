@@ -27,7 +27,7 @@ import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { RecommendEssaysResDto } from './dto/response/recommendEssaysRes.dto';
+import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -61,19 +61,17 @@ export class EssayController {
   @Get()
   @ApiOperation({ summary: '본인 에세이 조회' })
   @ApiResponse({ status: 200, type: EssaysResDto })
-  @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
   async getMyEssay(
     @Req() req: ExpressRequest,
-    @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
     @Query('published', OptionalBoolPipe) published: boolean,
     @Query('categoryId', OptionalParseIntPipe) categoryId: number,
   ) {
     // todo 일반, 프리미엄 구독자 구별 기능
-    return this.essayService.getMyEssay(req.user.id, published, categoryId, page, limit);
+    return this.essayService.getMyEssay(req.user.id, published, categoryId, limit);
   }
 
   @Delete(':essayId')
@@ -97,9 +95,20 @@ export class EssayController {
 
   @Get('recommend')
   @ApiOperation({ summary: '랜덤 추천 에세이' })
-  @ApiResponse({ status: 200, type: [RecommendEssaysResDto] })
+  @ApiResponse({ status: 200, type: [PublicEssaysResDto] })
   @ApiQuery({ name: 'limit', required: false })
   async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
     return this.essayService.getRecommendEssays(limit);
+  }
+
+  @Get('followings')
+  @ApiOperation({ summary: '팔로우 중인 유저들의 최신 에세이 리스트' })
+  @ApiResponse({ status: 200, type: '' })
+  @ApiQuery({ name: 'limit', required: false })
+  async getFollowingsEssays(
+    @Req() req: ExpressRequest,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.essayService.getFollowingsEssays(req.user.id, limit);
   }
 }

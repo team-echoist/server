@@ -26,13 +26,7 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findEssays(
-    userId: number,
-    published: boolean,
-    categoryId: number,
-    page: number,
-    limit: number,
-  ) {
+  async findEssays(userId: number, published: boolean, categoryId: number, limit: number) {
     const qb = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
@@ -58,7 +52,6 @@ export class EssayRepository {
     }
 
     const [essays, total] = await qb
-      .skip((page - 1) * limit)
       .take(limit)
       .orderBy('essay.createdDate', 'DESC')
       .getManyAndCount();
@@ -99,6 +92,26 @@ export class EssayRepository {
       .where('author.id = :userId', { userId })
       .groupBy('author.id')
       .getRawOne();
+  }
+
+  async getFollowingsEssays(followingIds: number[], limit: number) {
+    const subQuery = this.essayRepository
+      .createQueryBuilder('essay')
+      .select('essay.id')
+      .leftJoin('essay.author', 'author')
+      .where('essay.author.id IN (:...followingIds)', { followingIds })
+      .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .orderBy('essay.createdDate', 'DESC')
+      .limit(limit);
+
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.tags', 'tags')
+      .where(`essay.id IN (${subQuery.getQuery()})`)
+      .setParameters(subQuery.getParameters())
+      .orderBy('essay.createdDate', 'DESC')
+      .getMany();
   }
 
   // ------------------------------------------------------admin api
