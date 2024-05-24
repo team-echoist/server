@@ -61,7 +61,6 @@ export class EssayRepository {
 
   async deleteEssay(essay: Essay) {
     await this.essayRepository.update(essay.id, { deletedDate: new Date() });
-    return;
   }
 
   async getRecommendEssays(limit: number) {

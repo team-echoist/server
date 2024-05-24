@@ -9,7 +9,19 @@ export class CategoryRepository {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async findCategoryById(user: User, categoryId: number) {
-    return this.categoryRepository.findOne({ where: { id: categoryId, user: user } });
+  async findCategoryById(userId: number, categoryId: number) {
+    return this.categoryRepository.findOne({ where: { id: categoryId, user: { id: userId } } });
+  }
+
+  async getCategoriesById(userId: number) {
+    return this.categoryRepository.find({ where: { user: { id: userId } } });
+  }
+
+  async saveCategory(category: Category) {
+    return this.categoryRepository.save(category);
+  }
+
+  async deleteCategory(category: Category) {
+    return this.categoryRepository.remove(category);
   }
 }

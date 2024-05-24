@@ -27,7 +27,10 @@ import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
+import { PublicEssaysDto } from './dto/publicEssays.dto';
+import { CategoriesResDto } from '../category/dto/response/categoriesRes.dto';
 import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
+import { CategoryNameDto } from '../category/dto/repuest/categoryName.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -95,7 +98,7 @@ export class EssayController {
 
   @Get('recommend')
   @ApiOperation({ summary: '랜덤 추천 에세이' })
-  @ApiResponse({ status: 200, type: [PublicEssaysResDto] })
+  @ApiResponse({ status: 200, type: PublicEssaysResDto })
   @ApiQuery({ name: 'limit', required: false })
   async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
     return this.essayService.getRecommendEssays(limit);
@@ -103,12 +106,49 @@ export class EssayController {
 
   @Get('followings')
   @ApiOperation({ summary: '팔로우 중인 유저들의 최신 에세이 리스트' })
-  @ApiResponse({ status: 200, type: '' })
+  @ApiResponse({ status: 200, type: PublicEssaysResDto })
   @ApiQuery({ name: 'limit', required: false })
   async getFollowingsEssays(
     @Req() req: ExpressRequest,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     return this.essayService.getFollowingsEssays(req.user.id, limit);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: '카테고리 리스트' })
+  @ApiResponse({ status: 200, type: CategoriesResDto })
+  async getCategories(@Req() req: ExpressRequest) {
+    return this.essayService.categories(req.user.id);
+  }
+
+  @Post('categories')
+  @ApiOperation({ summary: '카테고리 생성' })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: CategoryNameDto })
+  async saveCategory(@Req() req: ExpressRequest, @Body() data: CategoryNameDto) {
+    return this.essayService.saveCategory(req.user.id, data.name);
+  }
+
+  @Put('categories/:categoryId')
+  @ApiOperation({ summary: '카테고리 이름 변경' })
+  @ApiResponse({ status: 200 })
+  @ApiBody({ type: CategoryNameDto })
+  async updateCategory(
+    @Req() req: ExpressRequest,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+    @Body() data: CategoryNameDto,
+  ) {
+    return this.essayService.updateCategory(req.user.id, categoryId, data.name);
+  }
+
+  @Delete('categories/:categoryId')
+  @ApiOperation({ summary: '카테고리 삭제' })
+  @ApiResponse({ status: 204 })
+  async deleteCategory(
+    @Req() req: ExpressRequest,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ) {
+    return this.essayService.deleteCategory(req.user.id, categoryId);
   }
 }
