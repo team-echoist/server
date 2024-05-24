@@ -22,6 +22,7 @@ import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
+import { UserSummaryDto } from './dto/userSummary.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -44,6 +45,13 @@ export class UserController {
   @ApiBody({ type: UpdateUserReqDto })
   async updateUser(@Req() req: ExpressRequest, @Body() data: UpdateUserReqDto) {
     return this.userService.updateUser(req.user.id, data);
+  }
+
+  @Get('follows')
+  @ApiOperation({ summary: '팔로우 리스트' })
+  @ApiResponse({ status: 200, type: [UserSummaryDto] })
+  async getFollowings(@Req() req: ExpressRequest) {
+    return this.userService.getFollowings(req.user.id);
   }
 
   @Get(':userId')

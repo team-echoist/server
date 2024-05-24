@@ -26,4 +26,11 @@ export class FollowRepository {
   async unFollow(followData: Follow) {
     await this.followRepository.remove(followData);
   }
+
+  async findFollowings(userId: number) {
+    return await this.followRepository.find({
+      where: { follower: { id: userId } },
+      relations: ['following'],
+    });
+  }
 }
