@@ -188,11 +188,12 @@ export class EssayService {
     const followingIds = followings.map((follow) => follow.following.id);
 
     if (followingIds.length === 0) {
-      return [];
+      return { essays: [] };
     }
 
     const essays = await this.essayRepository.getFollowingsEssays(followingIds, limit);
     const essaysDto = this.utilsService.transformToDto(PublicEssaysDto, essays);
+
     return { essays: essaysDto };
   }
 
