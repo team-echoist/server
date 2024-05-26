@@ -3,7 +3,7 @@ import { EssayService } from '../essay.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { INestApplication } from '@nestjs/common';
-import { setTestUserMiddleware } from '../../../common/utils/test.utils';
+import { setTestUserMiddleware } from '../../../common/utils';
 import * as request from 'supertest';
 
 jest.mock('@nestjs/passport', () => ({
@@ -20,7 +20,7 @@ describe('EssayController', () => {
   const mockEssayService = {
     saveEssay: jest.fn(),
     updateEssay: jest.fn(),
-    getMyEssay: jest.fn(),
+    getMyEssays: jest.fn(),
     deleteEssay: jest.fn(),
   };
 
@@ -72,7 +72,7 @@ describe('EssayController', () => {
 
   it('쿼리 매개변수로 에세이 조회', async () => {
     const mockResponse = [{ id: 1, title: 'Sample Essay' }];
-    mockEssayService.getMyEssay.mockResolvedValue(mockResponse);
+    mockEssayService.getMyEssays.mockResolvedValue(mockResponse);
 
     await request(app.getHttpServer())
       .get('/essays')

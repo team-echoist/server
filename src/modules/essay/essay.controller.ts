@@ -2,6 +2,7 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/s
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -24,12 +25,13 @@ import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
-import { EssaysResDto } from './dto/response/essaysRes.dto';
+import { EssaysSchemaDto } from './dto/schema/essaysSchema.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { CategoriesResDto } from '../category/dto/response/categoriesRes.dto';
-import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
+import { PublicEssaysSchemaDto } from './dto/schema/publicEssaysSchema.dto';
 import { CategoryNameDto } from '../category/dto/repuest/categoryName.dto';
+import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -62,7 +64,7 @@ export class EssayController {
 
   @Get()
   @ApiOperation({ summary: '본인 에세이 조회' })
-  @ApiResponse({ status: 200, type: EssaysResDto })
+  @ApiResponse({ status: 200, type: EssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
@@ -73,7 +75,7 @@ export class EssayController {
     @Query('categoryId', OptionalParseIntPipe) categoryId: number,
   ) {
     // todo 일반, 프리미엄 구독자 구별 기능
-    return this.essayService.getMyEssay(req.user.id, published, categoryId, limit);
+    return this.essayService.getMyEssays(req.user.id, published, categoryId, limit);
   }
 
   @Delete(':essayId')
@@ -96,8 +98,8 @@ export class EssayController {
   }
 
   @Get('recommend')
-  @ApiOperation({ summary: '랜덤 추천 에세이' })
-  @ApiResponse({ status: 200, type: PublicEssaysResDto })
+  @ApiOperation({ summary: '랜덤 추천 에세이 리스트' })
+  @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
     return this.essayService.getRecommendEssays(limit);
@@ -105,7 +107,7 @@ export class EssayController {
 
   @Get('followings')
   @ApiOperation({ summary: '팔로우 중인 유저들의 최신 에세이 리스트' })
-  @ApiResponse({ status: 200, type: PublicEssaysResDto })
+  @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   async getFollowingsEssays(
     @Req() req: ExpressRequest,
@@ -115,10 +117,17 @@ export class EssayController {
   }
 
   @Get('categories')
-  @ApiOperation({ summary: '카테고리 리스트' })
+  @ApiOperation({ summary: '본인 카테고리 리스트' })
   @ApiResponse({ status: 200, type: CategoriesResDto })
-  async getCategories(@Req() req: ExpressRequest) {
+  async getMyCategories(@Req() req: ExpressRequest) {
     return this.essayService.categories(req.user.id);
+  }
+
+  @Get('categories/:userId')
+  @ApiOperation({ summary: '타겟 유저 카테고리 리스트' })
+  @ApiResponse({ status: 200, type: CategoriesResDto })
+  async getUserCategories(@Param('userId', ParseIntPipe) userId: number) {
+    return this.essayService.categories(userId);
   }
 
   @Post('categories')
@@ -149,5 +158,24 @@ export class EssayController {
     @Param('categoryId', ParseIntPipe) categoryId: number,
   ) {
     return this.essayService.deleteCategory(req.user.id, categoryId);
+  }
+
+  @Get('sentence')
+  @ApiOperation({ summary: '한 문장 에세이 조회' })
+  @ApiResponse({ status: 200, type: SentenceEssaySchemaDto })
+  @ApiQuery({ name: 'type', required: true })
+  @ApiQuery({ name: 'limit', required: false })
+  async oneSentenceEssays(
+    @Query('type', new DefaultValuePipe('first')) type: 'first' | 'last' = 'first',
+    @Query('limit', new PagingParseIntPipe(6)) limit: number,
+  ) {
+    return await this.essayService.getSentenceEssays(type, limit);
+  }
+
+  @Get(':essayId')
+  @ApiOperation({ summary: '에세이 상세조회' })
+  @ApiResponse({ status: 200, type: EssayResDto })
+  async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
+    return this.essayService.getEssay(req.user.id, essayId);
   }
 }

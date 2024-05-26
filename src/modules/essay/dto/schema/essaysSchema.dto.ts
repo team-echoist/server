@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EssayResDto } from './essayRes.dto';
+import { EssayResDto } from '../response/essayRes.dto';
 import { Expose } from 'class-transformer';
 
-export class EssaysResDto {
+export class EssaysSchemaDto {
   @ApiProperty({ type: [EssayResDto] })
   @Expose()
   essays: EssayResDto[];
