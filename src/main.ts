@@ -35,14 +35,14 @@ async function bootstrap() {
     res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     next();
   });
-
-  const server = app.getHttpAdapter().getInstance();
-  server.get('/', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../../src/common/images', 'seedimage.jpeg'));
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.url === '/favicon.ico') {
+      res.status(204).end();
+    } else {
+      next();
+    }
   });
-
   app.setGlobalPrefix('/api');
-  app.use(helmet.default());
   app.useGlobalFilters(new HttpExceptionFilter(utilsService));
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
@@ -56,6 +56,32 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: false },
     }),
   );
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"],
+        // scriptSrc: ["'self'", 'trusted-cdn.com'],
+        // styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", 'api.trusted.com'],
+        // fontSrc: ["'self'", 'fonts.gstatic.com'],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    }),
+  );
+  app.use(
+    helmet.hsts({
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    }),
+  );
+
+  const server = app.getHttpAdapter().getInstance();
+  server.get('/', (req: Request, res: Response) => {
+    res.sendFile(join(__dirname, '../../src/common/images', 'seedimage.jpeg'));
+  });
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
