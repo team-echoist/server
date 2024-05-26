@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Request as ExpressRequest } from 'express';
 import { UserStatus } from '../../entities/user.entity';
 
