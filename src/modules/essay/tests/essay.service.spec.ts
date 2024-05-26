@@ -178,11 +178,12 @@ describe('EssayService', () => {
       const essay = new Essay();
       essay.id = 1;
       essay.title = 'Test Essay';
+      essay.content = 'Test Content';
       const mockEssays = [essay];
       const response = { essays: mockEssays, total: 1 };
       mockEssayRepository.findEssays.mockResolvedValue(response);
 
-      const result: any = await essayService.getMyEssay(1, true, 10, 1);
+      const result: any = await essayService.getMyEssays(1, true, 10, 1);
 
       expect(result.essays.length).toBe(1);
       expect(result.total).toEqual(1);

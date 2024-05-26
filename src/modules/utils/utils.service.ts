@@ -121,4 +121,36 @@ export class UtilsService {
   getRandomDate(start: Date, end: Date) {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   }
+
+  extractFirstSentences(text: string, minLength: number, maxLength: number) {
+    const sentences = this.sentences(text, minLength, maxLength);
+    if (sentences.length === 0) {
+      return text.trim().slice(0, 30);
+    }
+
+    return sentences[0];
+  }
+  extractEndSentences(text: string, minLength: number, maxLength: number) {
+    const sentences = this.sentences(text, minLength, maxLength);
+    if (sentences.length === 0) {
+      const trimmedText = text.trim();
+      return trimmedText.slice(-30);
+    }
+
+    return sentences[sentences.length - 1];
+  }
+
+  sentences(text: string, minLength: number, maxLength: number) {
+    const sentenceEndings = /([.?!]+)/;
+    return text
+      .split(sentenceEndings)
+      .reduce((acc, current, index, array) => {
+        if (index % 2 === 0) {
+          const sentence = current + (array[index + 1] || '');
+          acc.push(sentence.trim());
+        }
+        return acc;
+      }, [])
+      .filter((s) => s.length >= minLength && s.length <= maxLength);
+  }
 }

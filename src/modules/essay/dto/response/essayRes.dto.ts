@@ -11,6 +11,7 @@ import {
 import { Exclude, Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
+import { UserSummaryDto } from '../../../user/dto/userSummary.dto';
 
 export class EssayResDto {
   @ApiProperty()
@@ -78,4 +79,9 @@ export class EssayResDto {
   @IsArray()
   @Expose()
   tags: TagDto[];
+
+  @ApiProperty({ type: UserSummaryDto })
+  @Type(() => UserSummaryDto)
+  @Expose()
+  author: UserSummaryDto;
 }

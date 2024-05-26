@@ -12,7 +12,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { CategoryInfoDto } from '../../../essay/dto/categoryInfo.dto';
+import { CategoryInfoDto } from '../../../category/dto/categoryInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
 import { ReviewDto } from '../review.dto';

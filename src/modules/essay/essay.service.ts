@@ -16,8 +16,9 @@ import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { PublicEssaysDto } from './dto/publicEssays.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
+import { EssayListResDto } from './dto/response/essayListRes.dto';
+import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 
 @Injectable()
 export class EssayService {
@@ -31,6 +32,11 @@ export class EssayService {
     private readonly followService: FollowService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
+
+  private async incrementViews(essay: Essay) {
+    essay.views = (essay.views || 0) + 1;
+    await this.essayRepository.saveEssay(essay);
+  }
 
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
@@ -129,7 +135,7 @@ export class EssayService {
   }
 
   @Transactional()
-  async getMyEssay(userId: number, published: boolean, categoryId: number, limit: number) {
+  async getMyEssays(userId: number, published: boolean, categoryId: number, limit: number) {
     const { essays, total } = await this.essayRepository.findEssays(
       userId,
       published,
@@ -137,9 +143,22 @@ export class EssayService {
       limit,
     );
 
-    const essayDtos = this.utilsService.transformToDto(EssayResDto, essays);
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+    });
+    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
 
     return { essays: essayDtos, total };
+  }
+
+  async getEssay(userId: number, essayId: number) {
+    const essay = await this.essayRepository.findEssayById(essayId);
+
+    if (userId !== essay.author.id) {
+      await this.incrementViews(essay);
+    }
+
+    return this.utilsService.transformToDto(EssayResDto, essay);
   }
 
   async deleteEssay(userId: number, essayId: number) {
@@ -174,8 +193,13 @@ export class EssayService {
 
   async getRecommendEssays(limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
-    const essaysDto = this.utilsService.transformToDto(PublicEssaysDto, essays);
-    return { essays: essaysDto };
+
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+    });
+    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+
+    return { essays: essayDtos };
   }
 
   async essayStatsByUserId(userId: number) {
@@ -188,12 +212,16 @@ export class EssayService {
     const followingIds = followings.map((follow) => follow.following.id);
 
     if (followingIds.length === 0) {
-      return [];
+      return { essays: [] };
     }
 
     const essays = await this.essayRepository.getFollowingsEssays(followingIds, limit);
-    const essaysDto = this.utilsService.transformToDto(PublicEssaysDto, essays);
-    return { essays: essaysDto };
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+    });
+    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+
+    return { essays: essayDtos };
   }
 
   async categories(userId: number) {
@@ -211,5 +239,15 @@ export class EssayService {
 
   async deleteCategory(userId: number, categoryId: number) {
     await this.categoryService.deleteCategory(userId, categoryId);
+  }
+
+  async getSentenceEssays(type: string, limit: number) {
+    const essays = await this.essayRepository.getRecommendEssays(limit);
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+    });
+    const essayDtos = this.utilsService.transformToDto(SentenceEssaysResDto, essays);
+
+    return { essays: essayDtos };
   }
 }
