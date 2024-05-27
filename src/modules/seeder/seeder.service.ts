@@ -80,18 +80,7 @@ export class SeederService {
     const reviewQueuePromises = [];
     const tagPromises = [];
 
-    const tags = [
-      '성찰',
-      '성장',
-      '발견',
-      '이해',
-      '삶',
-      '자아',
-      '내면',
-      '탐구',
-      '발전',
-      '자기계발',
-    ].map((tagName) => {
+    const tags = this.utilsService.generateRandomTags().map((tagName) => {
       const tag = this.tagRepository.create({ name: tagName, createdDate: new Date() });
       tagPromises.push(this.tagRepository.save(tag));
       return tag;
