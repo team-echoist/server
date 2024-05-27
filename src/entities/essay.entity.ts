@@ -36,7 +36,7 @@ export class Essay {
   @Column()
   content: string;
 
-  @Column({ name: 'linked_out_gauge', nullable: true })
+  @Column({ name: 'linked_out_gauge', nullable: false, default: 0 })
   linkedOutGauge: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
