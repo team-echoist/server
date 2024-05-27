@@ -287,7 +287,9 @@ export class EssayService {
   async getSentenceEssays(type: string, limit: number) {
     const essays = await this.essayRepository.getRecommendEssays(limit);
     essays.forEach((essay) => {
-      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+      type === 'first'
+        ? (essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50))
+        : (essay.content = this.utilsService.extractEndSentences(essay.content, 10, 50));
     });
     const essayDtos = this.utilsService.transformToDto(SentenceEssaysResDto, essays);
 

@@ -81,16 +81,16 @@ export class SeederService {
     const tagPromises = [];
 
     const tags = [
-      'tag1',
-      'tag2',
-      'tag3',
-      'tag4',
-      'tag5',
-      'tag6',
-      'tag7',
-      'tag8',
-      'tag9',
-      'tag10',
+      '성찰',
+      '성장',
+      '발견',
+      '이해',
+      '삶',
+      '자아',
+      '내면',
+      '탐구',
+      '발전',
+      '자기계발',
     ].map((tagName) => {
       const tag = this.tagRepository.create({ name: tagName, createdDate: new Date() });
       tagPromises.push(this.tagRepository.save(tag));
@@ -105,8 +105,8 @@ export class SeederService {
         const essayStatus = randomValue < 0.7 ? EssayStatus.PUBLISHED : EssayStatus.LINKEDOUT;
 
         const essay = this.essayRepository.create({
-          title: `Sample Essay Title ${j}`,
-          content: 'Sample content here...',
+          title: this.utilsService.generateRandomTitle(),
+          content: this.utilsService.generateCustomKoreanContent(),
           linkedOutGauge: Math.floor(Math.random() * 6),
           author: user,
           status: essayStatus,
