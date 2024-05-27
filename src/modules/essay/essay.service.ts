@@ -33,11 +33,6 @@ export class EssayService {
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
-  private async incrementViews(essay: Essay) {
-    essay.views = (essay.views || 0) + 1;
-    await this.essayRepository.saveEssay(essay);
-  }
-
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
@@ -151,16 +146,39 @@ export class EssayService {
     return { essays: essayDtos, total };
   }
 
+  @Transactional()
   async getEssay(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
 
     if (userId !== essay.author.id) {
-      await this.incrementViews(essay);
+      if (essay.status === EssayStatus.PRIVATE) {
+        throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
+      } else {
+        await this.essayRepository.incrementViews(essay);
+      }
     }
 
-    return this.utilsService.transformToDto(EssayResDto, essay);
+    const previousEssay = await this.previousEssay(essay.author.id, essay);
+    const essayDto = this.utilsService.transformToDto(EssayResDto, essay);
+
+    return { essay: essayDto, previousEssays: previousEssay };
   }
 
+  private async previousEssay(userId: number, essay: Essay) {
+    let previousEssay: Essay[];
+
+    userId === essay.author.id
+      ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
+      : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
+
+    previousEssay.forEach((essay) => {
+      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+    });
+
+    return this.utilsService.transformToDto(EssayListResDto, previousEssay);
+  }
+
+  @Transactional()
   async deleteEssay(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
     if (essay.author.id !== userId)
@@ -173,6 +191,7 @@ export class EssayService {
     return;
   }
 
+  @Transactional()
   async saveThumbnailImage(file: Express.Multer.File, essayId?: number) {
     const fileName = await this.getFileName(essayId);
     const newExt = file.originalname.split('.').pop();
