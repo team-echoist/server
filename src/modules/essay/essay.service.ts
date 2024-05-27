@@ -1,4 +1,11 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
@@ -192,13 +199,30 @@ export class EssayService {
   }
 
   @Transactional()
-  async saveThumbnailImage(file: Express.Multer.File, essayId?: number) {
+  async saveThumbnail(file: Express.Multer.File, essayId?: number) {
     const fileName = await this.getFileName(essayId);
     const newExt = file.originalname.split('.').pop();
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
 
-    return this.utilsService.transformToDto(ThumbnailResDto, imageUrl);
+    return this.utilsService.transformToDto(ThumbnailResDto, { imageUrl });
+  }
+
+  async deleteThumbnail(essayId: number) {
+    const essay = await this.essayRepository.findEssayById(essayId);
+    console.log(essayId, essay);
+    if (!essay.thumbnail) {
+      throw new NotFoundException('No thumbnail to delete');
+    }
+
+    const urlParts = essay.thumbnail.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+
+    await this.awsService.deleteImageFromS3(fileName);
+    essay.thumbnail = null;
+    await this.essayRepository.saveEssay(essay);
+
+    return { message: 'Thumbnail deleted successfully' };
   }
 
   private async getFileName(essayId?: number): Promise<string> {
@@ -207,7 +231,7 @@ export class EssayService {
     }
 
     const essay = await this.essayRepository.findEssayById(essayId);
-    return essay?.thumbnail ? essay.thumbnail.split('/').pop() : this.utilsService.getUUID();
+    return essay.thumbnail ? essay.thumbnail.split('/').pop() : this.utilsService.getUUID();
   }
 
   async getRecommendEssays(limit: number) {

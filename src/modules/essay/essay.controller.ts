@@ -94,7 +94,14 @@ export class EssayController {
     @UploadedFile() file: Express.Multer.File,
     @Body('essayId', OptionalParseIntPipe) essayId?: number,
   ) {
-    return this.essayService.saveThumbnailImage(file, essayId);
+    return this.essayService.saveThumbnail(file, essayId);
+  }
+
+  @Delete('images/:essayId')
+  @ApiOperation({ summary: '썸네일 삭제' })
+  @ApiResponse({ status: 204 })
+  async deleteThumbnail(@Param('essayId', ParseIntPipe) essayId: number) {
+    return this.essayService.deleteThumbnail(essayId);
   }
 
   @Get('recommend')
