@@ -21,6 +21,10 @@ export class EssayRepository {
     return this.essayRepository.save(data);
   }
 
+  async incrementViews(essay: Essay) {
+    await this.essayRepository.update(essay.id, { views: (essay.views || 0) + 1 });
+  }
+
   async updateEssay(essay: Essay, data: UpdateEssayDto) {
     const essayData = this.essayRepository.create({ ...essay, ...data });
     return await this.essayRepository.save(essayData);
@@ -110,6 +114,28 @@ export class EssayRepository {
       .where(`essay.id IN (${subQuery.getQuery()})`)
       .setParameters(subQuery.getParameters())
       .orderBy('essay.createdDate', 'DESC')
+      .getMany();
+  }
+
+  async findPreviousMyEssay(authorId: number, createdDate: Date) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.author.id = :authorId', { authorId })
+      .andWhere('essay.status != :status', { status: EssayStatus.LINKEDOUT })
+      .andWhere('essay.created_date < :createdDate', { createdDate })
+      .orderBy('essay.created_date', 'DESC')
+      .limit(6)
+      .getMany();
+  }
+
+  async findPreviousEssay(authorId: number, createdDate: Date) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.author.id = :authorId', { authorId })
+      .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('essay.created_date < :createdDate', { createdDate })
+      .orderBy('essay.created_date', 'DESC')
+      .limit(6)
       .getMany();
   }
 
