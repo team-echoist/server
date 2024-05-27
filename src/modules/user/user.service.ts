@@ -53,7 +53,24 @@ export class UserService {
     user.profileImage = imageUrl;
     await this.userRepository.saveUser(user);
 
-    return this.utilsService.transformToDto(ProfileImageResDto, imageUrl);
+    return this.utilsService.transformToDto(ProfileImageResDto, { imageUrl });
+  }
+
+  async deleteProfileImage(userId: number) {
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user.profileImage) {
+      throw new NotFoundException('No profile image to delete');
+    }
+
+    const urlParts = user.profileImage.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+
+    await this.awsService.deleteImageFromS3(fileName);
+    user.profileImage = null;
+    await this.userRepository.saveUser(user);
+
+    return { message: 'Profile image deleted successfully' };
   }
 
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {

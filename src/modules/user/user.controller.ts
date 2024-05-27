@@ -39,6 +39,13 @@ export class UserController {
     return this.userService.saveProfileImage(req.user.id, file);
   }
 
+  @Delete('images')
+  @ApiOperation({ summary: '프로필 이미지 삭제' })
+  @ApiResponse({ status: 200 })
+  async deleteProfileImage(@Req() req: ExpressRequest) {
+    return this.userService.deleteProfileImage(req.user.id);
+  }
+
   @Put()
   @ApiOperation({ summary: '유저 업데이트' })
   @ApiResponse({ status: 200, type: UserResDto })
