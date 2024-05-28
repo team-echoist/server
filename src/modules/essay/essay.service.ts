@@ -146,7 +146,7 @@ export class EssayService {
     );
 
     essays.forEach((essay) => {
-      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+      essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
 
@@ -179,7 +179,7 @@ export class EssayService {
       : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
 
     previousEssay.forEach((essay) => {
-      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+      essay.content = this.utilsService.extractPartContent(essay.content);
     });
 
     return this.utilsService.transformToDto(EssayListResDto, previousEssay);
@@ -238,7 +238,7 @@ export class EssayService {
     const essays = await this.essayRepository.getRecommendEssays(limit);
 
     essays.forEach((essay) => {
-      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+      essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
 
@@ -260,7 +260,7 @@ export class EssayService {
 
     const essays = await this.essayRepository.getFollowingsEssays(followingIds, limit);
     essays.forEach((essay) => {
-      essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50);
+      essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
 

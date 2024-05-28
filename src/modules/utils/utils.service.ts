@@ -124,6 +124,11 @@ export class UtilsService {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   }
 
+  extractPartContent(text: string) {
+    const cleanedText = text.replace(/[\n\r]/g, '');
+    return cleanedText.slice(0, 100);
+  }
+
   extractFirstSentences(text: string, minLength: number, maxLength: number) {
     const sentences = this.sentences(text, minLength, maxLength);
     if (sentences.length === 0) {
