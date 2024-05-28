@@ -27,7 +27,7 @@ async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ['https://linkedoutapp.com', 'http://localhost:3000'],
+    origin: ['https://linkedoutapp.com', 'http://localhost:3000', 'http://localhost:5173'],
     allowedHeaders: 'Content-Type, Authorization',
     exposedHeaders: 'Authorization',
   });
