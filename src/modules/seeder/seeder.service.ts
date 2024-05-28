@@ -56,7 +56,7 @@ export class SeederService {
 
     for (let i = 1; i <= 200; i++) {
       const userEmail = `user${i}@linkedoutapp.com`;
-      const isMonitored = Math.random() < 0.2;
+      const isMonitored = Math.random() < 0.1;
       const userStatus = isMonitored ? UserStatus.MONITORED : UserStatus.ACTIVE;
       const user = this.seederRepository.create({
         email: userEmail,
@@ -89,7 +89,7 @@ export class SeederService {
     await Promise.all(tagPromises);
 
     users.forEach((user) => {
-      for (let j = 0; j < Math.floor(Math.random() * 5) + 1; j++) {
+      for (let j = 0; j < 30; j++) {
         const randomValue = Math.random();
         const essayStatus = randomValue < 0.7 ? EssayStatus.PUBLISHED : EssayStatus.LINKEDOUT;
 
