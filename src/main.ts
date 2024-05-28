@@ -60,16 +60,17 @@ async function bootstrap() {
     helmet.contentSecurityPolicy({
       directives: {
         defaultSrc: ["'self'"],
-        // scriptSrc: ["'self'", 'trusted-cdn.com'],
-        // styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'", 'api.trusted.com'],
-        // fontSrc: ["'self'", 'fonts.gstatic.com'],
+        scriptSrc: ["'self'", 'http://localhost:3000', 'http://localhost:5173'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'http://localhost:3000', 'http://localhost:5173'],
+        imgSrc: ["'self'", 'data:', 'http://localhost:3000', 'http://localhost:5173'],
+        connectSrc: ["'self'", 'api.trusted.com', 'http://localhost:3000', 'http://localhost:5173'],
+        fontSrc: ["'self'", 'fonts.gstatic.com', 'http://localhost:3000', 'http://localhost:5173'],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       },
     }),
   );
+
   app.use(
     helmet.hsts({
       maxAge: 31536000,
