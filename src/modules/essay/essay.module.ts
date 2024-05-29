@@ -10,6 +10,8 @@ import { ReviewModule } from '../review/review.module';
 import { CategoryModule } from '../category/category.module';
 import { TagModule } from '../tag/tag.module';
 import { AwsModule } from '../aws/aws.module';
+import { FollowModule } from '../follow/follow.module';
+import { BadgeModule } from '../badge/badge.module';
 import { EssayController } from './essay.controller';
 import { EssayService } from './essay.service';
 import { EssayRepository } from './essay.repository';
@@ -20,7 +22,6 @@ import { Category } from '../../entities/category.entity';
 import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
-import { FollowModule } from '../follow/follow.module';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ dotenv.config();
     UtilsModule,
     AwsModule,
     FollowModule,
+    BadgeModule,
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],

@@ -26,6 +26,7 @@ import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
 import { EssayListResDto } from './dto/response/essayListRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
+import { BadgeService } from '../badge/badge.service';
 
 @Injectable()
 export class EssayService {
@@ -37,6 +38,7 @@ export class EssayService {
     private readonly tagService: TagService,
     private readonly categoryService: CategoryService,
     private readonly followService: FollowService,
+    private readonly badgeService: BadgeService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
@@ -60,6 +62,7 @@ export class EssayService {
     }
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
+    void this.badgeService.addExperience(user, tags);
 
     return this.utilsService.transformToDto(EssayResDto, savedEssay);
   }

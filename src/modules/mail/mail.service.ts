@@ -52,9 +52,10 @@ export class MailService {
       html: htmlContent,
       attachments: [
         {
-          filename: 'img.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/img.png'),
+          filename: 'logo.png',
+          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
           cid: 'logo',
+          contentDisposition: 'inline',
         },
       ],
     });

@@ -12,6 +12,8 @@ import { UtilsModule } from './modules/utils/utils.module';
 import { TagModule } from './modules/tag/tag.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { FollowModule } from './modules/follow/follow.module';
+import { BadgeModule } from './modules/badge/badge.module';
 import { AwsModule } from './modules/aws/aws.module';
 import { ReviewModule } from './modules/review/review.module';
 import { UserModule } from './modules/user/user.module';
@@ -21,7 +23,6 @@ import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeOrmOptions } from '../typeorm.options';
-import { FollowModule } from './modules/follow/follow.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { FollowModule } from './modules/follow/follow.module';
     RedisModule,
     UtilsModule,
     AwsModule,
+    BadgeModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },

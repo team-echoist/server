@@ -1,5 +1,13 @@
-import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Essay } from './essay.entity';
+import { TagExp } from './tagExp.entity';
 
 @Entity()
 export class Tag {
@@ -14,4 +22,7 @@ export class Tag {
 
   @ManyToMany(() => Essay, (essay) => essay.tags)
   essays: Essay[];
+
+  @OneToMany(() => TagExp, (tagExp) => tagExp.tag)
+  tagExps: TagExp[];
 }

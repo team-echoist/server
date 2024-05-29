@@ -14,6 +14,8 @@ import { Category } from './category.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Follow } from './follow.entity';
+import { Badge } from './badge.entity';
+import { TagExp } from './tagExp.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -105,4 +107,10 @@ export class User {
 
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.user)
   processedHistories: ProcessedHistory[];
+
+  @OneToMany(() => Badge, (Badge) => Badge.user)
+  badges: Badge[];
+
+  @OneToMany(() => TagExp, (tagExp) => tagExp.user)
+  tagExps: TagExp[];
 }

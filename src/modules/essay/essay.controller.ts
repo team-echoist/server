@@ -86,7 +86,11 @@ export class EssayController {
   }
 
   @Post('images')
-  @ApiOperation({ summary: '썸네일 업로드' })
+  @ApiOperation({
+    summary: '썸네일 업로드',
+    description:
+      '작성 도중에 이미 이미지를 한 번 업로드 했다면, 기존 이미지에 대한 삭제요청이 필요합니다.',
+  })
   @ApiResponse({ status: 201, type: ThumbnailResDto })
   @UseInterceptors(FileInterceptor('image'))
   @ApiBody({ type: ThumbnailReqDto })
