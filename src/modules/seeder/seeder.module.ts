@@ -7,9 +7,13 @@ import { Tag } from '../../entities/tag.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { UtilsModule } from '../utils/utils.module';
+import { Admin } from '../../entities/admin.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue, Tag]), UtilsModule],
+  imports: [
+    TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue, Tag, Admin]),
+    UtilsModule,
+  ],
   providers: [SeederService],
   exports: [SeederService],
 })

@@ -4,7 +4,6 @@ import { Transactional } from 'typeorm-transactional';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
 import { UtilsService } from '../utils/utils.service';
-import { AuthService } from '../auth/auth.service';
 import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
@@ -21,7 +20,6 @@ import { FullUserResDto } from './dto/response/fullUserRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
-import { AuthRepository } from '../auth/auth.repository';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { EssaysInfoDto } from './dto/essaysInfo.dto';
@@ -32,6 +30,13 @@ import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { UserStatus } from '../../entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { AdminsResDto } from './dto/response/adminsRes.dto';
+import { AdminResDto } from './dto/response/adminRes.dto';
+import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
+import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlResDto';
+import { AwsService } from '../aws/aws.service';
 
 @Injectable()
 export class AdminService {
@@ -39,11 +44,11 @@ export class AdminService {
     private readonly adminRepository: AdminRepository,
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
-    private readonly authRepository: AuthRepository,
     private readonly userService: UserService,
-    private readonly authService: AuthService,
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
+    private readonly awsService: AwsService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @Transactional()
@@ -134,15 +139,15 @@ export class AdminService {
     }
   }
 
-  async createAdmin(userId: number, data: CreateAdminReqDto) {
-    if (userId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
-    await this.authService.checkEmail(data.email);
+  async createAdmin(adminId: number, data: CreateAdminReqDto) {
+    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+
     data.password = await bcrypt.hash(data.password, 10);
     const newAdmin: CreateAdminDto = {
       ...data,
-      role: 'admin',
+      active: true,
     };
-    const savedAdmin = await this.authRepository.createUser(newAdmin);
+    const savedAdmin = await this.adminRepository.saveAdmin(newAdmin);
 
     return this.utilsService.transformToDto(SavedAdminResDto, savedAdmin);
   }
@@ -498,5 +503,92 @@ export class AdminService {
     const historiesDto = this.utilsService.transformToDto(HistoriesResDto, histories);
 
     return { histories: historiesDto, totalPage, page, total };
+  }
+
+  async validateAdmin(email: string, password: string) {
+    const admin = await this.adminRepository.findByEmail(email);
+    if (admin && (await bcrypt.compare(password, admin.password))) {
+      return admin;
+    }
+    return null;
+  }
+
+  async validatePayload(email: string) {
+    const cacheKey = `admin_${email}`;
+    const cachedAdmin = await this.redis.get(cacheKey);
+    let admin = cachedAdmin ? JSON.parse(cachedAdmin) : null;
+    if (!admin) {
+      admin = await this.adminRepository.findByEmail(email);
+      if (admin) {
+        await this.redis.set(cacheKey, JSON.stringify(admin), 'EX', 600);
+        return admin;
+      }
+    }
+    return !admin ? null : admin;
+  }
+
+  async getAdmins(active?: boolean) {
+    const admins = await this.adminRepository.findAdmins(active);
+    const adminsDto = this.utilsService.transformToDto(AdminsResDto, admins);
+
+    return { admins: adminsDto };
+  }
+
+  async getAdmin(adminId: number) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+    return this.utilsService.transformToDto(AdminResDto, admin);
+  }
+
+  async updateAdmin(adminId: number, data: AdminUpdateReqDto) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    const updatedAdmin = await this.adminRepository.updateAdmin(admin, data);
+    return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
+  }
+
+  async saveProfileImage(adminId: number, file: Express.Multer.File) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+    const newExt = file.originalname.split('.').pop();
+
+    let fileName: any;
+    if (admin.profileImage) {
+      const urlParts = admin.profileImage.split('/');
+      fileName = urlParts[urlParts.length - 1];
+    } else {
+      const imageName = this.utilsService.getUUID();
+      fileName = `${imageName}`;
+    }
+
+    const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
+    admin.profileImage = imageUrl;
+    await this.adminRepository.saveAdmin(admin);
+
+    return this.utilsService.transformToDto(ProfileImageUrlResDto, { imageUrl });
+  }
+
+  async deleteProfileImage(adminId: number) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+
+    if (!admin.profileImage) {
+      throw new NotFoundException('No profile image to delete');
+    }
+
+    const urlParts = admin.profileImage.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+
+    await this.awsService.deleteImageFromS3(fileName);
+    admin.profileImage = null;
+    await this.adminRepository.saveAdmin(admin);
+
+    return { message: 'Profile image deleted successfully' };
+  }
+
+  async activationSettings(adminId: number, active: boolean) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+    admin.active = active;
+    const updatedAdmin = await this.adminRepository.saveAdmin(admin);
+    return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
   }
 }

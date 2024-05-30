@@ -14,6 +14,7 @@ import { UserService } from '../../user/user.service';
 import { TagService } from '../../tag/tag.service';
 import { ReviewService } from '../../review/review.service';
 import { FollowService } from '../../follow/follow.service';
+import { BadgeService } from '../../badge/badge.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -53,6 +54,9 @@ describe('EssayService', () => {
   };
 
   const mockFollowService = {};
+  const mockBadgeService = {
+    addExperience: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -66,6 +70,7 @@ describe('EssayService', () => {
         { provide: TagService, useValue: mockTagService },
         { provide: ReviewService, useValue: mockReviewService },
         { provide: FollowService, useValue: mockFollowService },
+        { provide: BadgeService, useValue: mockBadgeService },
       ],
     }).compile();
 

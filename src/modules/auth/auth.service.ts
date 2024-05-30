@@ -56,7 +56,7 @@ export class AuthService {
     return await this.authRepository.createUser(JSON.parse(user));
   }
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;

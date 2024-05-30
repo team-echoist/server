@@ -1,8 +1,8 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class AdminGuard extends AuthGuard('jwt') {
+export class AdminGuard extends AuthGuard('admin-jwt') {
   canActivate(context: ExecutionContext) {
     const canActivate = super.canActivate(context);
     if (!canActivate) {
@@ -14,6 +14,10 @@ export class AdminGuard extends AuthGuard('jwt') {
   }
 
   validate(request: any) {
-    return request.user && request.user.role === 'admin';
+    const user = request.user;
+    if (user && user.active) {
+      return true;
+    }
+    throw new UnauthorizedException('Admin access only');
   }
 }

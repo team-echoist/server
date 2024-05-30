@@ -8,12 +8,13 @@ import { ReviewQueue, ReviewQueueType } from '../../entities/reviewQueue.entity'
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { UtilsService } from '../utils/utils.service';
 import { Tag } from '../../entities/tag.entity';
+import { Admin } from '../../entities/admin.entity';
 
 @Injectable()
 export class SeederService {
   constructor(
     @InjectRepository(User)
-    private readonly seederRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Essay)
     private readonly essayRepository: Repository<Essay>,
     @InjectRepository(ReviewQueue)
@@ -22,6 +23,8 @@ export class SeederService {
     private readonly reportQueueRepository: Repository<ReportQueue>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
+    @InjectRepository(Admin)
+    private readonly adminRepository: Repository<Admin>,
     private readonly utilsService: UtilsService,
   ) {}
 
@@ -37,13 +40,13 @@ export class SeederService {
 
     for (let i = 1; i <= 10; i++) {
       const adminEmail = `admin${i}@linkedoutapp.com`;
-      const adminUser = this.seederRepository.create({
+      const adminUser = this.adminRepository.create({
         email: adminEmail,
         password: hashedPassword,
-        role: 'admin',
+        active: true,
       });
 
-      createAdminPromises.push(this.seederRepository.save(adminUser));
+      createAdminPromises.push(this.adminRepository.save(adminUser));
     }
 
     await Promise.all(createAdminPromises);
@@ -58,7 +61,7 @@ export class SeederService {
       const userEmail = `user${i}@linkedoutapp.com`;
       const isMonitored = Math.random() < 0.1;
       const userStatus = isMonitored ? UserStatus.MONITORED : UserStatus.ACTIVE;
-      const user = this.seederRepository.create({
+      const user = this.userRepository.create({
         email: userEmail,
         password: hashedPassword,
         role: 'client',
@@ -67,7 +70,7 @@ export class SeederService {
         updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
       });
 
-      userPromises.push(this.seederRepository.save(user));
+      userPromises.push(this.userRepository.save(user));
     }
 
     const users = await Promise.all(userPromises);

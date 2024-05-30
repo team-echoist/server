@@ -4,11 +4,15 @@ import { Subscription } from '../../entities/subscription.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
+import { Admin } from '../../entities/admin.entity';
+import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
+import { CreateAdminDto } from './dto/createAdmin.dto';
 
 export class AdminRepository {
   @InjectRepository(Subscription) private readonly subscriptionRepository: Repository<Subscription>;
   @InjectRepository(ReportQueue) private readonly reportRepository: Repository<ReportQueue>;
   @InjectRepository(ReviewQueue) private readonly reviewRepository: Repository<ReviewQueue>;
+  @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>;
   @InjectRepository(ProcessedHistory)
   private readonly processedRepository: Repository<ProcessedHistory>;
 
@@ -163,5 +167,29 @@ export class AdminRepository {
       .set({ processed: true, processedDate: () => 'CURRENT_TIMESTAMP' })
       .where('user_id = :userId', { userId })
       .execute();
+  }
+
+  async findByEmail(email: string) {
+    return this.adminRepository.findOne({ where: { email: email } });
+  }
+
+  async findAdmins(active: boolean) {
+    if (active !== undefined) {
+      return this.adminRepository.find({ where: { active: active } });
+    }
+    return this.adminRepository.find();
+  }
+
+  async findAdmin(adminId: number) {
+    return this.adminRepository.findOne({ where: { id: adminId } });
+  }
+
+  async updateAdmin(admin: Admin, data: AdminUpdateReqDto) {
+    const updateData = this.adminRepository.create({ ...admin, ...data });
+    return await this.adminRepository.save(updateData);
+  }
+
+  async saveAdmin(admin: Admin | CreateAdminDto) {
+    return this.adminRepository.save(admin);
   }
 }
