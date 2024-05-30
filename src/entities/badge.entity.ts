@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
+import { TagExp } from './tagExp.entity';
 
 @Entity()
 export class Badge {
@@ -18,4 +19,8 @@ export class Badge {
   @ManyToOne(() => User, (user) => user.badges)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => TagExp, (tagExp) => tagExp.badge)
+  @JoinColumn({ name: 'tag_exp_id' })
+  tagExps: TagExp[];
 }

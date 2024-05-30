@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Badge } from '../../entities/badge.entity';
 import { TagExp } from '../../entities/tagExp.entity';
-import { Repository } from 'typeorm';
 import { Tag } from '../../entities/tag.entity';
 
 export class BadgeRepository {
@@ -16,10 +16,11 @@ export class BadgeRepository {
     return this.tagExpRepository.findOne({ where: { user: { id: userId }, tag: { id: tag.id } } });
   }
 
-  async saveUsedTag(userId: number, tag: Tag) {
+  async saveUsedTag(userId: number, tag: Tag, badge: Badge) {
     const tagExp = this.tagExpRepository.create({
       user: { id: userId },
       tag: { id: tag.id },
+      badge: badge,
       used: true,
     });
 
@@ -28,6 +29,10 @@ export class BadgeRepository {
 
   async findBadge(userId: number, badgeName: string) {
     return this.badgeRepository.findOne({ where: { user: { id: userId }, name: badgeName } });
+  }
+
+  async findBadges(userId: number) {
+    return this.badgeRepository.find({ where: { user: { id: userId } } });
   }
 
   async createBadge(userId: number, badgeName: string) {
@@ -41,5 +46,12 @@ export class BadgeRepository {
 
   async saveBadge(badge: Badge) {
     return this.badgeRepository.save(badge);
+  }
+
+  async findBadgesWithTags(userId: number) {
+    return this.badgeRepository.find({
+      where: { user: { id: userId } },
+      relations: ['tagExps', 'tagExps.tag'],
+    });
   }
 }

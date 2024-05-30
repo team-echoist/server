@@ -23,6 +23,9 @@ import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryDto } from './dto/userSummary.dto';
+import { LevelUpBadgeReqDto } from '../badge/dto/request/levelUpBadgeReq.dto';
+import { BadgesSchemaDto } from '../badge/dto/schema/badgesSchema.dto';
+import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchema.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -61,13 +64,6 @@ export class UserController {
     return this.userService.getFollowings(req.user.id);
   }
 
-  @Get(':userId')
-  @ApiOperation({ summary: '유저 프로필' })
-  @ApiResponse({ status: 200, type: UserInfoResDto })
-  async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
-    return this.userService.getUserInfo(userId);
-  }
-
   @Post('follows/:userId')
   @ApiOperation({ summary: '팔로우' })
   @ApiResponse({ status: 201 })
@@ -80,5 +76,34 @@ export class UserController {
   @ApiResponse({ status: 204 })
   async upFollow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.userService.unFollow(req.user.id, userId);
+  }
+
+  @Post('badges/level')
+  @ApiOperation({ summary: '뱃지 레벨업' })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: LevelUpBadgeReqDto })
+  async levelUpBadge(@Req() req: ExpressRequest, @Body() data: LevelUpBadgeReqDto) {
+    return this.userService.levelUpBadge(req.user.id, data.badgeName);
+  }
+
+  @Get('badges')
+  @ApiOperation({ summary: '획득한 뱃지 리스트' })
+  @ApiResponse({ status: 200, type: BadgesSchemaDto })
+  async userBadges(@Req() req: ExpressRequest) {
+    return this.userService.getBadges(req.user.id);
+  }
+
+  @Get('badges/detail')
+  @ApiOperation({ summary: '획득한 뱃지 상세 리스트' })
+  @ApiResponse({ status: 200, type: BadgesWithTagsSchemaDto })
+  async userBadgesWithTags(@Req() req: ExpressRequest) {
+    return this.userService.getBadgeWithTags(req.user.id);
+  }
+
+  @Get(':userId')
+  @ApiOperation({ summary: '유저 프로필' })
+  @ApiResponse({ status: 200, type: UserInfoResDto })
+  async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.getUserInfo(userId);
   }
 }

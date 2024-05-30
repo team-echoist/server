@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Tag } from '../../entities/tag.entity';
-import { BadgeRepository } from './badge.repository';
-import { User } from '../../entities/user.entity';
 import { Transactional } from 'typeorm-transactional';
+import { UtilsService } from '../utils/utils.service';
+import { BadgeRepository } from './badge.repository';
+import { Tag } from '../../entities/tag.entity';
+import { User } from '../../entities/user.entity';
+import { Badge } from '../../entities/badge.entity';
+import { BadgeResDto } from './dto/response/badgeRes.dto';
+import { BadgeWithTagResDto } from './dto/response/badgeWithTagRes.dto';
 
 @Injectable()
 export class BadgeService {
-  constructor(private readonly badgeRepository: BadgeRepository) {}
+  constructor(
+    private readonly badgeRepository: BadgeRepository,
+    private readonly utilsService: UtilsService,
+  ) {}
 
   private badgeTagMap = {
     분노: [
@@ -177,23 +184,34 @@ export class BadgeService {
       const badgeName = this.findBadgeByTag(tag.name);
       if (!badgeName) continue;
 
-      const tagExp = await this.badgeRepository.findUsedTag(user.id, tag);
-      if (tagExp || tagExp?.used) continue;
-      await this.badgeRepository.saveUsedTag(user.id, tag);
+      if (await this.hasUserUsedTag(user.id, tag)) continue;
 
-      let userBadge = await this.badgeRepository.findBadge(user.id, badgeName);
-      if (!userBadge) {
-        userBadge = await this.badgeRepository.createBadge(user.id, badgeName);
-      }
+      const badge = await this.incrementBadgeExperience(user.id, badgeName);
 
-      userBadge.exp += 1;
-      if (userBadge.exp >= 10) {
-        userBadge.exp = 0;
-        userBadge.level += 1;
-      }
+      await this.markTagAsUsed(user.id, tag, badge);
 
-      await this.badgeRepository.saveBadge(userBadge);
+      // todo 경험치가 가득 찼을 때? 알림을 보내줘야할듯
     }
+  }
+
+  private async hasUserUsedTag(userId: number, tag: Tag): Promise<boolean> {
+    const tagExp = await this.badgeRepository.findUsedTag(userId, tag);
+    return tagExp && tagExp.used;
+  }
+
+  private async markTagAsUsed(userId: number, tag: Tag, badge: Badge): Promise<void> {
+    await this.badgeRepository.saveUsedTag(userId, tag, badge);
+  }
+
+  private async incrementBadgeExperience(userId: number, badgeName: string) {
+    let userBadge = await this.badgeRepository.findBadge(userId, badgeName);
+    if (!userBadge) {
+      userBadge = await this.badgeRepository.createBadge(userId, badgeName);
+    }
+
+    userBadge.exp += 1;
+
+    return await this.badgeRepository.saveBadge(userBadge);
   }
 
   private findBadgeByTag(tagName: string): string | null {
@@ -203,5 +221,39 @@ export class BadgeService {
       }
     }
     return null;
+  }
+
+  async levelUpBadge(userId: number, badgeName: string): Promise<void> {
+    const userBadge = await this.badgeRepository.findBadge(userId, badgeName);
+    if (!userBadge) {
+      throw new Error('Badge not found for user.');
+    }
+
+    if (userBadge.exp < 10) {
+      throw new Error('Not enough experience to level up.');
+    }
+
+    userBadge.exp -= 10;
+    userBadge.level += 1;
+
+    await this.badgeRepository.saveBadge(userBadge);
+  }
+
+  async getBadges(userId: number) {
+    const userBadges = await this.badgeRepository.findBadges(userId);
+    return this.utilsService.transformToDto(BadgeResDto, userBadges);
+  }
+
+  async getBadgeWithTags(userId: number) {
+    const badges = await this.badgeRepository.findBadgesWithTags(userId);
+    const badgesWithTags = badges.map((badge) => ({
+      id: badge.id,
+      name: badge.name,
+      level: badge.level,
+      exp: badge.exp,
+      tags: badge.tagExps.map((tagExp) => tagExp.tag.name),
+    }));
+
+    return this.utilsService.transformToDto(BadgeWithTagResDto, badgesWithTags);
   }
 }
