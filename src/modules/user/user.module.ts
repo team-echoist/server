@@ -6,13 +6,14 @@ import { MailModule } from '../mail/mail.module';
 import { AwsModule } from '../aws/aws.module';
 import { EssayModule } from '../essay/essay.module';
 import { UtilsModule } from '../utils/utils.module';
+import { FollowModule } from '../follow/follow.module';
+import { BadgeModule } from '../badge/badge.module';
 import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import * as strategies from '../../common/guards/strategies';
-import { FollowModule } from '../follow/follow.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { FollowModule } from '../follow/follow.module';
     MailModule,
     AwsModule,
     UtilsModule,
+    BadgeModule,
     forwardRef(() => EssayModule),
   ],
   controllers: [UserController],

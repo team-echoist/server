@@ -12,6 +12,7 @@ import { UtilsService } from '../utils/utils.service';
 import { EssayService } from '../essay/essay.service';
 import { AwsService } from '../aws/aws.service';
 import { FollowService } from '../follow/follow.service';
+import { BadgeService } from '../badge/badge.service';
 import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
@@ -29,6 +30,7 @@ export class UserService {
     private readonly followService: FollowService,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
+    private readonly badgeService: BadgeService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
   ) {}
 
@@ -128,5 +130,19 @@ export class UserService {
       return this.utilsService.transformToDto(UserSummaryDto, follow.following);
     });
     return { followings: followingsDto };
+  }
+
+  async levelUpBadge(userId: number, badgeName: string) {
+    return this.badgeService.levelUpBadge(userId, badgeName);
+  }
+
+  async getBadges(userId: number) {
+    const badges = await this.badgeService.getBadges(userId);
+    return { badges: badges };
+  }
+
+  async getBadgeWithTags(userId: number) {
+    const badgesWithTags = await this.badgeService.getBadgeWithTags(userId);
+    return { badges: badgesWithTags };
   }
 }
