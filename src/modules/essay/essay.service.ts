@@ -106,6 +106,8 @@ export class EssayService {
     }
 
     await this.updateEssayData(essay, data, category, tags, requester);
+    void this.badgeService.addExperience(user, tags);
+
     const updatedEssay = await this.essayRepository.findEssayById(essayId);
     const resultData = this.utilsService.transformToDto(EssayResDto, updatedEssay);
 

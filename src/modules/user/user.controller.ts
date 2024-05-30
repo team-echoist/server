@@ -17,10 +17,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request as ExpressRequest } from 'express';
 import { UserService } from './user.service';
-import { UserImageReqDto } from './dto/request/userImageReq.dto';
+import { ProfileImageReqDto } from './dto/request/profileImageReqDto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
-import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
+import { ProfileImageUrlResDto } from './dto/response/profileImageUrlResDto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryDto } from './dto/userSummary.dto';
 import { LevelUpBadgeReqDto } from '../badge/dto/request/levelUpBadgeReq.dto';
@@ -35,8 +35,8 @@ export class UserController {
 
   @Post('images')
   @ApiOperation({ summary: '프로필 이미지 업로드' })
-  @ApiResponse({ type: ProfileImageResDto })
-  @ApiBody({ type: UserImageReqDto })
+  @ApiResponse({ type: ProfileImageUrlResDto })
+  @ApiBody({ type: ProfileImageReqDto })
   @UseInterceptors(FileInterceptor('image'))
   async saveProfileImage(@Req() req: ExpressRequest, @UploadedFile() file: Express.Multer.File) {
     return this.userService.saveProfileImage(req.user.id, file);

@@ -17,7 +17,7 @@ import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
-import { ProfileImageResDto } from './dto/response/profileImageRes.dto';
+import { ProfileImageUrlResDto } from './dto/response/profileImageUrlResDto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryDto } from './dto/userSummary.dto';
 import * as bcrypt from 'bcrypt';
@@ -55,7 +55,7 @@ export class UserService {
     user.profileImage = imageUrl;
     await this.userRepository.saveUser(user);
 
-    return this.utilsService.transformToDto(ProfileImageResDto, { imageUrl });
+    return this.utilsService.transformToDto(ProfileImageUrlResDto, { imageUrl });
   }
 
   async deleteProfileImage(userId: number) {

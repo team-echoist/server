@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAdminDto {
   @IsNotEmpty()
@@ -10,6 +10,6 @@ export class CreateAdminDto {
   password: string;
 
   @IsNotEmpty()
-  @IsString()
-  role: string;
+  @IsBoolean()
+  active: boolean;
 }
