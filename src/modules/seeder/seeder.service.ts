@@ -155,17 +155,23 @@ export class SeederService {
     const reportPromises = [];
 
     essays.forEach((essay) => {
-      const potentialReporters = users.filter((u) => u.id !== essay.author.id);
-      const reporter = potentialReporters[Math.floor(Math.random() * potentialReporters.length)];
+      if (essay.status === EssayStatus.PRIVATE) {
+        return;
+      }
 
-      const report = this.reportQueueRepository.create({
-        essay: essay,
-        reporter: reporter,
-        reason: 'Inappropriate content',
-        processed: false,
-      });
+      if (Math.random() > 0.8) {
+        const potentialReporters = users.filter((u) => u.id !== essay.author.id);
+        const reporter = potentialReporters[Math.floor(Math.random() * potentialReporters.length)];
 
-      reportPromises.push(this.reportQueueRepository.save(report));
+        const report = this.reportQueueRepository.create({
+          essay: essay,
+          reporter: reporter,
+          reason: 'Inappropriate content',
+          processed: false,
+        });
+
+        reportPromises.push(this.reportQueueRepository.save(report));
+      }
     });
 
     await Promise.all(reportPromises);

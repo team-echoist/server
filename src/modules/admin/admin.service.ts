@@ -9,11 +9,11 @@ import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
 import { ActionType, ProcessedHistory } from '../../entities/processedHistory.entity';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
-import { ReportsDto } from './dto/reports.dto';
+import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ReviewDto } from './dto/review.dto';
-import { ReportsResDto } from './dto/response/reportsRes.dto';
+import { ReviewResDto } from './dto/response/reviewRes.dto';
+import { ReportsSchemaDto } from './dto/schema/reportsSchema.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { FullUserResDto } from './dto/response/fullUserRes.dto';
@@ -22,7 +22,7 @@ import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
-import { EssaysInfoDto } from './dto/essaysInfo.dto';
+import { EssaysInfoResDto } from './dto/response/essaysInfoRes.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
 import { ReportQueue } from '../../entities/reportQueue.entity';
@@ -37,6 +37,7 @@ import { AdminResDto } from './dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlResDto';
 import { AwsService } from '../aws/aws.service';
+import { Admin } from '../../entities/admin.entity';
 
 @Injectable()
 export class AdminService {
@@ -224,14 +225,14 @@ export class AdminService {
   }
 
   @Transactional()
-  async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {
+  async getReports(sort: string, page: number, limit: number): Promise<ReportsSchemaDto> {
     const { reports, totalReports, totalEssay } = await this.adminRepository.getReports(
       sort,
       page,
       limit,
     );
     const totalPage: number = Math.ceil(totalEssay / limit);
-    const reportDtos = this.utilsService.transformToDto(ReportsDto, reports) as ReportsDto[];
+    const reportDtos = this.utilsService.transformToDto(ReportsResDto, reports) as ReportsResDto[];
 
     return { reports: reportDtos, totalReports, totalEssay, totalPage, page };
   }
@@ -275,6 +276,7 @@ export class AdminService {
 
   @Transactional()
   async syncReportsProcessed(essayId: number, adminId: number, data: ProcessReqDto) {
+    const admin = await this.adminRepository.findAdmin(adminId);
     const reports = await this.adminRepository.findReportByEssayId(essayId);
     if (!reports.length)
       throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
@@ -286,7 +288,7 @@ export class AdminService {
           data.actionType,
           'report',
           report,
-          adminId,
+          admin,
           data.comment,
         );
         await this.adminRepository.saveHistory(newHistory);
@@ -304,13 +306,13 @@ export class AdminService {
     actionType: ActionType,
     targetName: string,
     target: any,
-    adminId: number,
+    admin: Admin,
     comment?: string,
   ): ProcessedHistory {
     const newHistory = new ProcessedHistory();
     newHistory.actionType = actionType;
     newHistory.target = targetName;
-    newHistory.processor = adminId;
+    newHistory.processor = admin;
     newHistory.processedDate = new Date();
 
     this.assignTargetToHistory(newHistory, targetName, target);
@@ -346,7 +348,7 @@ export class AdminService {
     const totalPage: number = Math.ceil(total / limit);
 
     const reviewsDto = this.utilsService.transformToDto(
-      ReviewDto,
+      ReviewResDto,
       reviews.map((review) => ({
         id: review.id,
         type: review.type,
@@ -357,7 +359,7 @@ export class AdminService {
         essayId: review.essay.id,
         essayTitle: review.essay.title,
       })),
-    ) as ReviewDto[];
+    ) as ReviewResDto[];
 
     return { reviews: reviewsDto, totalPage, page, total };
   }
@@ -369,6 +371,7 @@ export class AdminService {
 
   @Transactional()
   async processReview(adminId: number, reviewId: number, data: ProcessReqDto) {
+    const admin = await this.adminRepository.findAdmin(adminId);
     const review = await this.adminRepository.getReview(reviewId);
     review.processed = true;
 
@@ -381,7 +384,7 @@ export class AdminService {
       data.actionType,
       'review',
       review,
-      adminId,
+      admin,
       data.comment,
     );
     await this.adminRepository.saveHistory(newHistory);
@@ -422,6 +425,7 @@ export class AdminService {
 
   @Transactional()
   async updateUser(adminId: number, userId: number, data: UpdateFullUserReqDto) {
+    const admin = await this.adminRepository.findAdmin(adminId);
     const user = await this.userRepository.findUserById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -430,7 +434,7 @@ export class AdminService {
     await this.userService.updateUser(userId, data);
 
     const actionType = this.determineUserActionType(data);
-    const newHistory = this.createProcessedHistory(actionType, 'user', user, adminId);
+    const newHistory = this.createProcessedHistory(actionType, 'user', user, admin);
 
     await this.adminRepository.saveHistory(newHistory);
 
@@ -452,7 +456,7 @@ export class AdminService {
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
 
-    const essaysDto = this.utilsService.transformToDto(EssaysInfoDto, data);
+    const essaysDto = this.utilsService.transformToDto(EssaysInfoResDto, data);
     return { essays: essaysDto, total, page, totalPage };
   }
 
@@ -463,13 +467,14 @@ export class AdminService {
 
   @Transactional()
   async updateEssayStatus(adminId: number, essayId: number, data: UpdateEssayStatusReqDto) {
+    const admin = await this.adminRepository.findAdmin(adminId);
     const essay = await this.essayRepository.findFullEssay(essayId);
     if (!essay) {
       throw new NotFoundException(`Essay with ID ${essayId} not found`);
     }
 
     const actionType = this.determineEssayActionType(essay, data);
-    const newHistory = this.createProcessedHistory(actionType, 'essay', essay, adminId);
+    const newHistory = this.createProcessedHistory(actionType, 'essay', essay, admin);
 
     const updateData = {
       ...essay,
@@ -494,7 +499,7 @@ export class AdminService {
       skip: (page - 1) * limit,
       take: limit,
       order: { processedDate: 'DESC' },
-      relations: ['report', 'review', 'user', 'essay'],
+      relations: ['report', 'review', 'user', 'essay', 'processor'],
       where: whereConditions,
     };
 

@@ -2,10 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ReportDto } from '../report.dto';
-import { ReviewDto } from '../review.dto';
+import { ReviewResDto } from './reviewRes.dto';
 import { UserDto } from '../../../user/dto/user.dto';
 import { EssayDto } from '../../../essay/dto/essay.dto';
 import { ActionType } from '../../../../entities/processedHistory.entity';
+import { AdminResDto } from './adminRes.dto';
 
 export class HistoriesResDto {
   @ApiProperty()
@@ -33,10 +34,10 @@ export class HistoriesResDto {
   @IsString()
   result: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => AdminResDto })
   @Expose()
-  @IsNumber()
-  processor: number;
+  @Type(() => AdminResDto)
+  processor: AdminResDto;
 
   @ApiProperty()
   @Expose()
@@ -48,10 +49,10 @@ export class HistoriesResDto {
   @Expose()
   report: ReportDto;
 
-  @ApiProperty({ type: () => ReviewDto })
-  @Type(() => ReviewDto)
+  @ApiProperty({ type: () => ReviewResDto })
+  @Type(() => ReviewResDto)
   @Expose()
-  review: ReviewDto;
+  review: ReviewResDto;
 
   @ApiProperty({ type: () => UserDto })
   @Type(() => UserDto)

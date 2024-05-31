@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ProcessedHistory } from './processedHistory.entity';
 
 @Entity()
 export class Admin {
@@ -34,4 +37,8 @@ export class Admin {
 
   @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
+
+  @JoinColumn({ name: 'processed_histories' })
+  @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.processor)
+  processedHistories: ProcessedHistory;
 }

@@ -3,11 +3,9 @@ import { AdminService } from '../admin.service';
 import { AdminRepository } from '../admin.repository';
 import { UserRepository } from '../../user/user.repository';
 import { EssayRepository } from '../../essay/essay.repository';
-import { AuthService } from '../../auth/auth.service';
 import { UserService } from '../../user/user.service';
 import { UtilsService } from '../../utils/utils.service';
 import { MailService } from '../../mail/mail.service';
-import { AuthRepository } from '../../auth/auth.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
 import { ProcessReqDto } from '../dto/request/processReq.dto';
@@ -16,6 +14,7 @@ import { EssayStatus } from '../../../entities/essay.entity';
 import { UserStatus } from '../../../entities/user.entity';
 import { ActionType } from '../../../entities/processedHistory.entity';
 import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
+import { AwsService } from '../../aws/aws.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -43,6 +42,8 @@ describe('AdminService', () => {
     getHistories: jest.fn(),
     handleBannedReports: jest.fn(),
     handleBannedReviews: jest.fn(),
+    saveAdmin: jest.fn(),
+    findAdmin: jest.fn(),
   };
   const mockUserRepository = {
     usersCount: jest.fn(),
@@ -67,9 +68,6 @@ describe('AdminService', () => {
     updateEssay: jest.fn(),
     deleteAllEssay: jest.fn(),
   };
-  const mockAuthService = {
-    checkEmail: jest.fn(),
-  };
   const mockUserService = {
     updateUser: jest.fn(),
   };
@@ -81,22 +79,27 @@ describe('AdminService', () => {
     newDate: jest.fn(),
     transformToDto: jest.fn(),
   };
-  const mockAuthRepository = {
-    createUser: jest.fn(),
+  const mockAwsService = {};
+  const mockRedis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
   };
 
   beforeEach(async () => {
+    const RedisInstance = jest.fn(() => mockRedis);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminService,
         { provide: AdminRepository, useValue: mockAdminRepository },
         { provide: UserRepository, useValue: mockUserRepository },
         { provide: EssayRepository, useValue: mockEssayRepository },
-        { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },
         { provide: UtilsService, useValue: mockUtilsService },
+        { provide: AwsService, useValue: mockAwsService },
         { provide: MailService, useValue: {} },
-        { provide: AuthRepository, useValue: mockAuthRepository },
+        { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
 
@@ -115,13 +118,11 @@ describe('AdminService', () => {
       const createAdminDto: CreateAdminReqDto = { email: 'test@test.com', password: 'password' };
       const savedAdmin = { id: 1, email: 'test@test.com', role: 'admin' };
 
-      mockAuthService.checkEmail.mockResolvedValue(true);
-      mockAuthRepository.createUser.mockResolvedValue(savedAdmin);
+      mockAdminRepository.saveAdmin.mockResolvedValue(savedAdmin);
       mockUtilsService.transformToDto.mockResolvedValue(savedAdmin);
 
       const result = await adminService.createAdmin(1, createAdminDto);
 
-      expect(mockAuthService.checkEmail).toHaveBeenCalledWith(createAdminDto.email);
       expect(result).toEqual(expect.objectContaining({ email: 'test@test.com' }));
     });
   });
@@ -530,7 +531,7 @@ describe('AdminService', () => {
         users: [],
       });
 
-      const result = await adminService.getUsers(filter, page, limit);
+      await adminService.getUsers(filter, page, limit);
 
       expect(mockUserRepository.findUsers).toHaveBeenCalledWith(
         expect.any(Date),
@@ -623,7 +624,6 @@ describe('AdminService', () => {
       const adminId = 1;
       const essayId = 1;
       const data: UpdateEssayStatusReqDto = { status: EssayStatus.PUBLISHED };
-      const processData: ProcessReqDto = { actionType: ActionType.PENDING };
 
       const existingEssay = {
         id: essayId,
@@ -675,7 +675,7 @@ describe('AdminService', () => {
 
       const expectedArgs = {
         order: { processedDate: 'DESC' },
-        relations: ['report', 'review', 'user', 'essay'],
+        relations: ['report', 'review', 'user', 'essay', 'processor'],
         skip: 0,
         take: limit,
         where: {},

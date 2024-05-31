@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EssaysInfoDto } from '../essaysInfo.dto';
+import { EssaysInfoResDto } from '../response/essaysInfoRes.dto';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
 
-export class EssaysResDto {
-  @ApiProperty({ type: [EssaysInfoDto] })
+export class EssaysSchemaDto {
+  @ApiProperty({ type: [EssaysInfoResDto] })
   @Expose()
-  essays: EssaysInfoDto[];
+  essays: EssaysInfoResDto[];
 
   @ApiProperty()
   @Expose()

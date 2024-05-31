@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ReviewDto } from '../review.dto';
+import { ReviewResDto } from '../response/reviewRes.dto';
 
-export class ReviewsResDto {
-  @ApiProperty({ type: [ReviewDto] })
+export class ReviewsSchemaDto {
+  @ApiProperty({ type: [ReviewResDto] })
   @Expose()
-  reviews: ReviewDto[];
+  reviews: ReviewResDto[];
 
   @ApiProperty()
   @Expose()
