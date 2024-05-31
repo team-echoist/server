@@ -23,7 +23,7 @@ export class BadgeWithTagResDto {
   @Expose()
   exp: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })
   @Expose()

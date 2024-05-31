@@ -15,7 +15,7 @@ import {
 import { CategoryInfoDto } from '../../../category/dto/categoryInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
-import { ReviewDto } from '../review.dto';
+import { ReviewResDto } from './reviewRes.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
 
 export class FullEssayResDto {
@@ -115,9 +115,9 @@ export class FullEssayResDto {
   @IsNumber()
   reports: ReportDto[];
 
-  @ApiProperty({ type: () => [ReviewDto] })
-  @Type(() => ReviewDto)
+  @ApiProperty({ type: () => [ReviewResDto] })
+  @Type(() => ReviewResDto)
   @Expose()
   @IsNumber()
-  reviews: ReviewDto[];
+  reviews: ReviewResDto[];
 }

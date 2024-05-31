@@ -11,9 +11,9 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { EssayStatus } from '../../../entities/essay.entity';
+import { EssayStatus } from '../../../../entities/essay.entity';
 
-export class EssaysInfoDto {
+export class EssaysInfoResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()

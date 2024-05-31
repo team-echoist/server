@@ -21,16 +21,16 @@ import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
-import { ReportsResDto } from './dto/response/reportsRes.dto';
+import { ReportsSchemaDto } from './dto/schema/reportsSchema.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ReviewsResDto } from './dto/response/reviewsRes.dto';
+import { ReviewsSchemaDto } from './dto/schema/reviewsSchema.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 import { UsersResDto } from './dto/response/usersRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
-import { EssaysResDto } from './dto/response/essaysRes.dto';
+import { EssaysSchemaDto } from './dto/schema/essaysSchema.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
 import { AdminLoginReqDto } from './dto/request/adminLoginReq.dto';
@@ -231,7 +231,7 @@ export class AdminController {
     summary: '[관리자용] 리포트 리스트',
     description: '확인되지 않은 신고 중 신고 수가 많은 순으로 정렬',
   })
-  @ApiResponse({ status: 200, type: ReportsResDto })
+  @ApiResponse({ status: 200, type: ReportsSchemaDto })
   @ApiQuery({ name: 'sort', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -267,7 +267,7 @@ export class AdminController {
   @Get('reviews')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '[관리자용] 리뷰 리스트' })
-  @ApiResponse({ status: 200, type: ReviewsResDto })
+  @ApiResponse({ status: 200, type: ReviewsSchemaDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getReviews(
@@ -340,7 +340,7 @@ export class AdminController {
   @Get('essays')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '[관리자용] 에세이 리스트 조회' })
-  @ApiResponse({ status: 200, type: EssaysResDto })
+  @ApiResponse({ status: 200, type: EssaysSchemaDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getEssays(

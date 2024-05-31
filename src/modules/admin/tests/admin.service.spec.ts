@@ -3,11 +3,9 @@ import { AdminService } from '../admin.service';
 import { AdminRepository } from '../admin.repository';
 import { UserRepository } from '../../user/user.repository';
 import { EssayRepository } from '../../essay/essay.repository';
-import { AuthService } from '../../auth/auth.service';
 import { UserService } from '../../user/user.service';
 import { UtilsService } from '../../utils/utils.service';
 import { MailService } from '../../mail/mail.service';
-import { AuthRepository } from '../../auth/auth.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
 import { ProcessReqDto } from '../dto/request/processReq.dto';
@@ -532,8 +530,6 @@ describe('AdminService', () => {
         users: [],
       });
 
-      const result = await adminService.getUsers(filter, page, limit);
-
       expect(mockUserRepository.findUsers).toHaveBeenCalledWith(
         expect.any(Date),
         filter,
@@ -625,7 +621,6 @@ describe('AdminService', () => {
       const adminId = 1;
       const essayId = 1;
       const data: UpdateEssayStatusReqDto = { status: EssayStatus.PUBLISHED };
-      const processData: ProcessReqDto = { actionType: ActionType.PENDING };
 
       const existingEssay = {
         id: essayId,

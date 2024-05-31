@@ -15,8 +15,10 @@ export class BadgeService {
     private readonly utilsService: UtilsService,
   ) {}
 
+  private allBadges = ['angry', 'sad', 'complicated', 'surprised', 'loving'];
+
   private badgeTagMap = {
-    분노: [
+    angry: [
       '얄미운',
       '지겨운',
       '불쾌한',
@@ -48,7 +50,7 @@ export class BadgeService {
       '짜증스러운',
       '까칠한',
     ],
-    슬픔: [
+    sad: [
       '무거운',
       '겁나는',
       '섬뜩한',
@@ -99,7 +101,7 @@ export class BadgeService {
       '적적한',
       '허전한',
     ],
-    복잡: [
+    complicated: [
       '멍한',
       '애매한',
       '묘한',
@@ -115,7 +117,7 @@ export class BadgeService {
       '무관심한',
       '혼란스러운',
     ],
-    놀람: [
+    surprised: [
       '부끄러운',
       '창피한',
       '이상한',
@@ -135,7 +137,7 @@ export class BadgeService {
       '짜릿한',
       '반가운',
     ],
-    사랑: [
+    loving: [
       '기쁜',
       '감격스러운',
       '고마운',
@@ -241,19 +243,48 @@ export class BadgeService {
 
   async getBadges(userId: number) {
     const userBadges = await this.badgeRepository.findBadges(userId);
-    return this.utilsService.transformToDto(BadgeResDto, userBadges);
+
+    const userBadgesMap = new Map(userBadges.map((badge) => [badge.name, badge]));
+    const allBadgesWithDefaults = this.allBadges.map((badgeName) => {
+      const userBadge = userBadgesMap.get(badgeName);
+      if (userBadge) {
+        return userBadge;
+      }
+      return {
+        id: null,
+        name: badgeName,
+        level: 0,
+        exp: 0,
+      };
+    });
+
+    return this.utilsService.transformToDto(BadgeResDto, allBadgesWithDefaults);
   }
 
   async getBadgeWithTags(userId: number) {
     const badges = await this.badgeRepository.findBadgesWithTags(userId);
-    const badgesWithTags = badges.map((badge) => ({
-      id: badge.id,
-      name: badge.name,
-      level: badge.level,
-      exp: badge.exp,
-      tags: badge.tagExps.map((tagExp) => tagExp.tag.name),
-    }));
+    const userBadgesMap = new Map(badges.map((badge) => [badge.name, badge]));
 
-    return this.utilsService.transformToDto(BadgeWithTagResDto, badgesWithTags);
+    const allBadgesWithDefaults = this.allBadges.map((badgeName) => {
+      const userBadge = userBadgesMap.get(badgeName);
+      if (userBadge) {
+        return {
+          id: userBadge.id,
+          name: userBadge.name,
+          level: userBadge.level,
+          exp: userBadge.exp,
+          tags: userBadge.tagExps.map((tagExp) => tagExp.tag.name),
+        };
+      }
+      return {
+        id: null,
+        name: badgeName,
+        level: 0,
+        exp: 0,
+        tags: [],
+      };
+    });
+
+    return this.utilsService.transformToDto(BadgeWithTagResDto, allBadgesWithDefaults);
   }
 }

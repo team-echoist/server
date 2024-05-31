@@ -9,11 +9,11 @@ import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
 import { ActionType, ProcessedHistory } from '../../entities/processedHistory.entity';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
-import { ReportsDto } from './dto/reports.dto';
+import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ReviewDto } from './dto/review.dto';
-import { ReportsResDto } from './dto/response/reportsRes.dto';
+import { ReviewResDto } from './dto/response/reviewRes.dto';
+import { ReportsSchemaDto } from './dto/schema/reportsSchema.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { FullUserResDto } from './dto/response/fullUserRes.dto';
@@ -22,7 +22,7 @@ import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
-import { EssaysInfoDto } from './dto/essaysInfo.dto';
+import { EssaysInfoResDto } from './dto/response/essaysInfoRes.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
 import { ReportQueue } from '../../entities/reportQueue.entity';
@@ -224,14 +224,14 @@ export class AdminService {
   }
 
   @Transactional()
-  async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {
+  async getReports(sort: string, page: number, limit: number): Promise<ReportsSchemaDto> {
     const { reports, totalReports, totalEssay } = await this.adminRepository.getReports(
       sort,
       page,
       limit,
     );
     const totalPage: number = Math.ceil(totalEssay / limit);
-    const reportDtos = this.utilsService.transformToDto(ReportsDto, reports) as ReportsDto[];
+    const reportDtos = this.utilsService.transformToDto(ReportsResDto, reports) as ReportsResDto[];
 
     return { reports: reportDtos, totalReports, totalEssay, totalPage, page };
   }
@@ -346,7 +346,7 @@ export class AdminService {
     const totalPage: number = Math.ceil(total / limit);
 
     const reviewsDto = this.utilsService.transformToDto(
-      ReviewDto,
+      ReviewResDto,
       reviews.map((review) => ({
         id: review.id,
         type: review.type,
@@ -357,7 +357,7 @@ export class AdminService {
         essayId: review.essay.id,
         essayTitle: review.essay.title,
       })),
-    ) as ReviewDto[];
+    ) as ReviewResDto[];
 
     return { reviews: reviewsDto, totalPage, page, total };
   }
@@ -452,7 +452,7 @@ export class AdminService {
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
 
-    const essaysDto = this.utilsService.transformToDto(EssaysInfoDto, data);
+    const essaysDto = this.utilsService.transformToDto(EssaysInfoResDto, data);
     return { essays: essaysDto, total, page, totalPage };
   }
 

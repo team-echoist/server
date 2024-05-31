@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
-export class ReviewDto {
+export class ReviewResDto {
   @Expose()
   @IsNumber()
   id: number;
