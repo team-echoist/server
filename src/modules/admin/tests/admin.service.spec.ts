@@ -43,6 +43,7 @@ describe('AdminService', () => {
     handleBannedReports: jest.fn(),
     handleBannedReviews: jest.fn(),
     saveAdmin: jest.fn(),
+    findAdmin: jest.fn(),
   };
   const mockUserRepository = {
     usersCount: jest.fn(),
@@ -530,6 +531,8 @@ describe('AdminService', () => {
         users: [],
       });
 
+      await adminService.getUsers(filter, page, limit);
+
       expect(mockUserRepository.findUsers).toHaveBeenCalledWith(
         expect.any(Date),
         filter,
@@ -672,7 +675,7 @@ describe('AdminService', () => {
 
       const expectedArgs = {
         order: { processedDate: 'DESC' },
-        relations: ['report', 'review', 'user', 'essay'],
+        relations: ['report', 'review', 'user', 'essay', 'processor'],
         skip: 0,
         take: limit,
         where: {},
