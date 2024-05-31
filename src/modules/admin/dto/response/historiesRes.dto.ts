@@ -6,6 +6,7 @@ import { ReviewResDto } from './reviewRes.dto';
 import { UserDto } from '../../../user/dto/user.dto';
 import { EssayDto } from '../../../essay/dto/essay.dto';
 import { ActionType } from '../../../../entities/processedHistory.entity';
+import { AdminResDto } from './adminRes.dto';
 
 export class HistoriesResDto {
   @ApiProperty()
@@ -33,10 +34,10 @@ export class HistoriesResDto {
   @IsString()
   result: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => AdminResDto })
   @Expose()
-  @IsNumber()
-  processor: number;
+  @Type(() => AdminResDto)
+  processor: AdminResDto;
 
   @ApiProperty()
   @Expose()

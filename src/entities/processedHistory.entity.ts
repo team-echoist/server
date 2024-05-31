@@ -10,6 +10,7 @@ import { ReportQueue } from './reportQueue.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 export enum ActionType {
   APPROVED = 'approved',
@@ -39,11 +40,12 @@ export class ProcessedHistory {
   @Column({ name: 'action_type', type: 'enum', enum: ActionType })
   actionType: ActionType;
 
-  @Column()
-  processor: number;
-
   @CreateDateColumn({ name: 'processed_date', type: 'timestamptz' })
   processedDate: Date;
+
+  @JoinColumn({ name: 'admin_id' })
+  @ManyToOne(() => Admin, (admin) => admin.processedHistories)
+  processor: Admin;
 
   @JoinColumn({ name: 'report_id' })
   @ManyToOne(() => ReportQueue, (report) => report.processedHistories)
