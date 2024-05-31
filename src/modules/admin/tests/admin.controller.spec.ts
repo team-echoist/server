@@ -72,7 +72,7 @@ describe('AdminController', () => {
     adminService.createAdmin.mockResolvedValue(expectedResponse);
 
     await request(app.getHttpServer())
-      .post('/admin')
+      .post('/admin/produce')
       .send(createAdminDto)
       .expect(201)
       .expect(expectedResponse);
@@ -86,7 +86,7 @@ describe('AdminController', () => {
 
     adminService.dashboard.mockResolvedValue(expectedResponse);
 
-    await request(app.getHttpServer()).get('/admin').expect(200).expect(expectedResponse);
+    await request(app.getHttpServer()).get('/admin/dashboard').expect(200).expect(expectedResponse);
   });
 
   it('월간 일별 에세이 카운트 조회', async () => {

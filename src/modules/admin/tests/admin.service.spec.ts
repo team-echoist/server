@@ -16,6 +16,7 @@ import { EssayStatus } from '../../../entities/essay.entity';
 import { UserStatus } from '../../../entities/user.entity';
 import { ActionType } from '../../../entities/processedHistory.entity';
 import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
+import { AwsService } from '../../aws/aws.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -43,6 +44,7 @@ describe('AdminService', () => {
     getHistories: jest.fn(),
     handleBannedReports: jest.fn(),
     handleBannedReviews: jest.fn(),
+    saveAdmin: jest.fn(),
   };
   const mockUserRepository = {
     usersCount: jest.fn(),
@@ -67,9 +69,6 @@ describe('AdminService', () => {
     updateEssay: jest.fn(),
     deleteAllEssay: jest.fn(),
   };
-  const mockAuthService = {
-    checkEmail: jest.fn(),
-  };
   const mockUserService = {
     updateUser: jest.fn(),
   };
@@ -81,22 +80,27 @@ describe('AdminService', () => {
     newDate: jest.fn(),
     transformToDto: jest.fn(),
   };
-  const mockAuthRepository = {
-    createUser: jest.fn(),
+  const mockAwsService = {};
+  const mockRedis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
   };
 
   beforeEach(async () => {
+    const RedisInstance = jest.fn(() => mockRedis);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminService,
         { provide: AdminRepository, useValue: mockAdminRepository },
         { provide: UserRepository, useValue: mockUserRepository },
         { provide: EssayRepository, useValue: mockEssayRepository },
-        { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },
         { provide: UtilsService, useValue: mockUtilsService },
+        { provide: AwsService, useValue: mockAwsService },
         { provide: MailService, useValue: {} },
-        { provide: AuthRepository, useValue: mockAuthRepository },
+        { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
 
@@ -115,13 +119,11 @@ describe('AdminService', () => {
       const createAdminDto: CreateAdminReqDto = { email: 'test@test.com', password: 'password' };
       const savedAdmin = { id: 1, email: 'test@test.com', role: 'admin' };
 
-      mockAuthService.checkEmail.mockResolvedValue(true);
-      mockAuthRepository.createUser.mockResolvedValue(savedAdmin);
+      mockAdminRepository.saveAdmin.mockResolvedValue(savedAdmin);
       mockUtilsService.transformToDto.mockResolvedValue(savedAdmin);
 
       const result = await adminService.createAdmin(1, createAdminDto);
 
-      expect(mockAuthService.checkEmail).toHaveBeenCalledWith(createAdminDto.email);
       expect(result).toEqual(expect.objectContaining({ email: 'test@test.com' }));
     });
   });
