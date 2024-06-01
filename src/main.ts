@@ -56,20 +56,20 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: false },
     }),
   );
-  app.use(
-    helmet.contentSecurityPolicy({
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'http://localhost:3000', 'http://localhost:5173'],
-        styleSrc: ["'self'", "'unsafe-inline'", 'http://localhost:3000', 'http://localhost:5173'],
-        imgSrc: ["'self'", 'data:', 'http://localhost:3000', 'http://localhost:5173'],
-        connectSrc: ["'self'", 'api.trusted.com', 'http://localhost:3000', 'http://localhost:5173'],
-        fontSrc: ["'self'", 'fonts.gstatic.com', 'http://localhost:3000', 'http://localhost:5173'],
-        objectSrc: ["'none'"],
-        upgradeInsecureRequests: [],
-      },
-    }),
-  );
+  // app.use(
+  //   helmet.contentSecurityPolicy({
+  //     directives: {
+  //       defaultSrc: ["'self'"],
+  //       scriptSrc: ["'self'", 'http://localhost:3000', 'http://localhost:5173'],
+  //       styleSrc: ["'self'", "'unsafe-inline'", 'http://localhost:3000', 'http://localhost:5173'],
+  //       imgSrc: ["'self'", 'data:', 'http://localhost:3000', 'http://localhost:5173'],
+  //       connectSrc: ["'self'", 'api.trusted.com', 'http://localhost:3000', 'http://localhost:5173'],
+  //       fontSrc: ["'self'", 'fonts.gstatic.com', 'http://localhost:3000', 'http://localhost:5173'],
+  //       objectSrc: ["'none'"],
+  //       upgradeInsecureRequests: [],
+  //     },
+  //   }),
+  // );
 
   app.use(
     helmet.hsts({
