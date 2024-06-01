@@ -309,6 +309,20 @@ export class UtilsService {
       '내면의발견',
       '자기성장',
     ];
-    return tags.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 4) + 1);
+    const shuffledTags = tags.sort(() => 0.5 - Math.random());
+    const selectedTagsCount = Math.floor(Math.random() * (tags.length - 1)) + 1;
+    return shuffledTags.slice(0, selectedTagsCount);
+  }
+
+  async batchProcess<T>(
+    items: T[],
+    batchSize: number,
+    processBatch: (bach: T[]) => Promise<void>,
+  ): Promise<void> {
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+      await processBatch(batch);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
   }
 }

@@ -35,107 +35,88 @@ export class SeederService {
   }
 
   async seedAdmin() {
-    const createAdminPromises = [];
     const hashedPassword = await bcrypt.hash(process.env.SEED_PASSWORD, 10);
-
-    for (let i = 1; i <= 10; i++) {
-      const adminEmail = `admin${i}@linkedoutapp.com`;
-      const adminUser = this.adminRepository.create({
-        email: adminEmail,
-        password: hashedPassword,
-        active: true,
-      });
-
-      createAdminPromises.push(this.adminRepository.save(adminUser));
-    }
-
-    await Promise.all(createAdminPromises);
+    const admins = Array.from({ length: 10 }, (_, i) => ({
+      email: `admin${i + 1}@linkedoutapp.com`,
+      password: hashedPassword,
+      active: true,
+    }));
+    await this.utilsService.batchProcess(admins, 2, async (batch) => {
+      const adminEntities = batch.map((admin) => this.adminRepository.create(admin));
+      await this.adminRepository.save(adminEntities);
+    });
     console.log('Admin users created successfully');
   }
 
   async seedUsers() {
-    const userPromises = [];
     const hashedPassword = await bcrypt.hash('1234', 10);
+    const users = Array.from({ length: 200 }, (_, i) => ({
+      email: `user${i + 1}@linkedoutapp.com`,
+      password: hashedPassword,
+      role: 'client',
+      status: Math.random() < 0.1 ? UserStatus.MONITORED : UserStatus.ACTIVE,
+      createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
+      updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
+    }));
 
-    for (let i = 1; i <= 200; i++) {
-      const userEmail = `user${i}@linkedoutapp.com`;
-      const isMonitored = Math.random() < 0.1;
-      const userStatus = isMonitored ? UserStatus.MONITORED : UserStatus.ACTIVE;
-      const user = this.userRepository.create({
-        email: userEmail,
-        password: hashedPassword,
-        role: 'client',
-        status: userStatus,
-        createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
-        updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
-      });
-
-      userPromises.push(this.userRepository.save(user));
-    }
-
-    const users = await Promise.all(userPromises);
+    const userEntities: User[] = [];
+    await this.utilsService.batchProcess(users, 20, async (batch) => {
+      const entities = batch.map((user) => this.userRepository.create(user));
+      const savedUsers = await this.userRepository.save(entities);
+      userEntities.push(...savedUsers);
+    });
     console.log('Client users created successfully');
-    return users;
+    return userEntities;
   }
 
   async seedEssays(users: User[]) {
-    const essayPromises = [];
-    const reviewQueuePromises = [];
-    const tagPromises = [];
+    const tags = this.utilsService
+      .generateRandomTags()
+      .map((tagName) => this.tagRepository.create({ name: tagName, createdDate: new Date() }));
+    await this.tagRepository.save(tags);
 
-    const tags = this.utilsService.generateRandomTags().map((tagName) => {
-      const tag = this.tagRepository.create({ name: tagName, createdDate: new Date() });
-      tagPromises.push(this.tagRepository.save(tag));
-      return tag;
-    });
-
-    await Promise.all(tagPromises);
-
-    users.forEach((user) => {
-      for (let j = 0; j < 30; j++) {
-        const randomValue = Math.random();
-        const essayStatus = randomValue < 0.7 ? EssayStatus.PUBLISHED : EssayStatus.LINKEDOUT;
-
-        const essay = this.essayRepository.create({
+    const essays: Essay[] = [];
+    await this.utilsService.batchProcess(users, 10, async (batchUsers) => {
+      const batchEssays = batchUsers.flatMap((user) =>
+        Array.from({ length: 30 }, () => ({
           title: this.utilsService.generateRandomTitle(),
           content: this.utilsService.generateCustomKoreanContent(),
           linkedOutGauge: Math.floor(Math.random() * 6),
           author: user,
-          status: essayStatus,
+          status: Math.random() < 0.7 ? EssayStatus.PUBLISHED : EssayStatus.LINKEDOUT,
           createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
           updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
-        });
+        })),
+      );
 
-        const essayPromise = this.essayRepository.save(essay).then(async (savedEssay) => {
-          savedEssay.tags = tags
-            .sort(() => 0.5 - Math.random())
-            .slice(0, Math.floor(Math.random() * 4) + 1);
+      const essayEntities = batchEssays.map((essay) => this.essayRepository.create(essay));
+      const savedEssays = await this.essayRepository.save(essayEntities);
+
+      for (const savedEssay of savedEssays) {
+        savedEssay.tags = tags
+          .sort(() => 0.5 - Math.random())
+          .slice(0, Math.floor(Math.random() * 4) + 1);
+        await this.essayRepository.save(savedEssay);
+
+        if (
+          savedEssay.author.status === UserStatus.MONITORED &&
+          (savedEssay.status === EssayStatus.PUBLISHED ||
+            savedEssay.status === EssayStatus.LINKEDOUT)
+        ) {
+          const reviewType = this.mapEssayStatusToReviewQueueType(savedEssay.status);
+          const reviewQueue = this.reviewQueueRepository.create({
+            essay: savedEssay,
+            user: savedEssay.author,
+            type: reviewType,
+            createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
+          });
+          await this.reviewQueueRepository.save(reviewQueue);
+          savedEssay.status = EssayStatus.PRIVATE;
           await this.essayRepository.save(savedEssay);
-
-          if (
-            user.status === UserStatus.MONITORED &&
-            (savedEssay.status === EssayStatus.PUBLISHED ||
-              savedEssay.status === EssayStatus.LINKEDOUT)
-          ) {
-            const reviewType = this.mapEssayStatusToReviewQueueType(savedEssay.status);
-            const reviewQueue = this.reviewQueueRepository.create({
-              essay: savedEssay,
-              user: user,
-              type: reviewType,
-              createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
-            });
-            reviewQueuePromises.push(this.reviewQueueRepository.save(reviewQueue));
-            savedEssay.status = EssayStatus.PRIVATE;
-            await this.essayRepository.save(savedEssay);
-          }
-          return savedEssay;
-        });
-        essayPromises.push(essayPromise);
+        }
       }
+      essays.push(...savedEssays);
     });
-
-    const essays = await Promise.all(essayPromises);
-    await Promise.all(reviewQueuePromises);
     console.log('Essays and review queues created successfully');
     return essays;
   }
@@ -152,29 +133,24 @@ export class SeederService {
   }
 
   async seedReports(users: User[], essays: Essay[]) {
-    const reportPromises = [];
-
-    essays.forEach((essay) => {
-      if (essay.status === EssayStatus.PRIVATE) {
-        return;
-      }
-
-      if (Math.random() > 0.8) {
-        const potentialReporters = users.filter((u) => u.id !== essay.author.id);
-        const reporter = potentialReporters[Math.floor(Math.random() * potentialReporters.length)];
-
-        const report = this.reportQueueRepository.create({
-          essay: essay,
-          reporter: reporter,
+    const reports = essays.flatMap((essay) => {
+      if (essay.status === EssayStatus.PRIVATE || Math.random() <= 0.8) return [];
+      const potentialReporters = users.filter((u) => u.id !== essay.author.id);
+      const reporter = potentialReporters[Math.floor(Math.random() * potentialReporters.length)];
+      return [
+        {
+          essay,
+          reporter,
           reason: 'Inappropriate content',
           processed: false,
-        });
-
-        reportPromises.push(this.reportQueueRepository.save(report));
-      }
+        },
+      ];
     });
 
-    await Promise.all(reportPromises);
+    await this.utilsService.batchProcess(reports, 10, async (batch) => {
+      const reportEntities = batch.map((report) => this.reportQueueRepository.create(report));
+      await this.reportQueueRepository.save(reportEntities);
+    });
     console.log('Report queues created successfully');
   }
 }
