@@ -29,23 +29,23 @@ export class SeederService {
   ) {}
 
   async seedAll() {
-    const users = await this.seedUsers();
-    const essays = await this.seedEssays(users);
-    await this.seedReports(users, essays);
+    // const users = await this.seedUsers();
+    // const essays = await this.seedEssays(users);
+    // await this.seedReports(users, essays);
   }
 
   async seedAdmin() {
-    const hashedPassword = await bcrypt.hash(process.env.SEED_PASSWORD, 10);
-    const admins = Array.from({ length: 10 }, (_, i) => ({
-      email: `admin${i + 1}@linkedoutapp.com`,
-      password: hashedPassword,
-      active: true,
-    }));
-    await this.utilsService.batchProcess(admins, 2, async (batch) => {
-      const adminEntities = batch.map((admin) => this.adminRepository.create(admin));
-      await this.adminRepository.save(adminEntities);
-    });
-    console.log('Admin users created successfully');
+    // const hashedPassword = await bcrypt.hash(process.env.SEED_PASSWORD, 10);
+    // const admins = Array.from({ length: 10 }, (_, i) => ({
+    //   email: `admin${i + 1}@linkedoutapp.com`,
+    //   password: hashedPassword,
+    //   active: true,
+    // }));
+    // await this.utilsService.batchProcess(admins, 2, async (batch) => {
+    //   const adminEntities = batch.map((admin) => this.adminRepository.create(admin));
+    //   await this.adminRepository.save(adminEntities);
+    // });
+    // console.log('Admin users created successfully');
   }
 
   async seedUsers() {
