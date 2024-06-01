@@ -8,7 +8,7 @@ import { ResponseTransformInterceptor } from './common/interceptros/responseTran
 import { LoggingInterceptor } from './common/interceptros/logging.interceptor';
 import { AppModule } from './app.module';
 import { swaggerConfig } from '../swagger.config';
-// import * as helmet from 'helmet';
+import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
 import { join } from 'path';
@@ -35,13 +35,13 @@ async function bootstrap() {
     res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     next();
   });
-  // app.use((req: Request, res: Response, next: NextFunction) => {
-  //   if (req.url === '/favicon.ico') {
-  //     res.status(204).end();
-  //   } else {
-  //     next();
-  //   }
-  // });
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.url === '/favicon.ico') {
+      res.status(204).end();
+    } else {
+      next();
+    }
+  });
   app.setGlobalPrefix('/api');
   app.useGlobalFilters(new HttpExceptionFilter(utilsService));
   app.useGlobalInterceptors(
@@ -56,28 +56,28 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: false },
     }),
   );
-  // app.use(
-  //   helmet.contentSecurityPolicy({
-  //     directives: {
-  //       defaultSrc: ["'self'"],
-  //       scriptSrc: ["'self'", 'http://localhost:3000', 'http://localhost:5173'],
-  //       styleSrc: ["'self'", "'unsafe-inline'", 'http://localhost:3000', 'http://localhost:5173'],
-  //       imgSrc: ["'self'", 'data:', 'http://localhost:3000', 'http://localhost:5173'],
-  //       connectSrc: ["'self'", 'api.trusted.com', 'http://localhost:3000', 'http://localhost:5173'],
-  //       fontSrc: ["'self'", 'fonts.gstatic.com', 'http://localhost:3000', 'http://localhost:5173'],
-  //       objectSrc: ["'none'"],
-  //       upgradeInsecureRequests: [],
-  //     },
-  //   }),
-  // );
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", 'http://localhost:3000', 'http://localhost:5173'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'http://localhost:3000', 'http://localhost:5173'],
+        imgSrc: ["'self'", 'data:', 'http://localhost:3000', 'http://localhost:5173'],
+        connectSrc: ["'self'", 'api.trusted.com', 'http://localhost:3000', 'http://localhost:5173'],
+        fontSrc: ["'self'", 'fonts.gstatic.com', 'http://localhost:3000', 'http://localhost:5173'],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    }),
+  );
 
-  // app.use(
-  //   helmet.hsts({
-  //     maxAge: 31536000,
-  //     includeSubDomains: true,
-  //     preload: true,
-  //   }),
-  // );
+  app.use(
+    helmet.hsts({
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    }),
+  );
 
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req: Request, res: Response) => {

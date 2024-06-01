@@ -50,7 +50,7 @@ export class SeederService {
 
   async seedUsers() {
     const hashedPassword = await bcrypt.hash('1234', 10);
-    const users = Array.from({ length: 200 }, (_, i) => ({
+    const users = Array.from({ length: 70 }, (_, i) => ({
       email: `user${i + 1}@linkedoutapp.com`,
       password: hashedPassword,
       role: 'client',
@@ -60,7 +60,7 @@ export class SeederService {
     }));
 
     const userEntities: User[] = [];
-    await this.utilsService.batchProcess(users, 20, async (batch) => {
+    await this.utilsService.batchProcess(users, 10, async (batch) => {
       const entities = batch.map((user) => this.userRepository.create(user));
       const savedUsers = await this.userRepository.save(entities);
       userEntities.push(...savedUsers);
