@@ -309,7 +309,9 @@ export class UtilsService {
       '내면의발견',
       '자기성장',
     ];
-    return tags.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 4) + 1);
+    const shuffledTags = tags.sort(() => 0.5 - Math.random());
+    const selectedTagsCount = Math.floor(Math.random() * (tags.length - 1)) + 1;
+    return shuffledTags.slice(0, selectedTagsCount);
   }
 
   async batchProcess<T>(
