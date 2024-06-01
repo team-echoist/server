@@ -71,13 +71,13 @@ async function bootstrap() {
   //   }),
   // );
 
-  app.use(
-    helmet.hsts({
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true,
-    }),
-  );
+  // app.use(
+  //   helmet.hsts({
+  //     maxAge: 31536000,
+  //     includeSubDomains: true,
+  //     preload: true,
+  //   }),
+  // );
 
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req: Request, res: Response) => {
