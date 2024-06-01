@@ -311,4 +311,16 @@ export class UtilsService {
     ];
     return tags.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 4) + 1);
   }
+
+  async batchProcess<T>(
+    items: T[],
+    batchSize: number,
+    processBatch: (bach: T[]) => Promise<void>,
+  ): Promise<void> {
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+      await processBatch(batch);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
 }
