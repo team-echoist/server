@@ -206,7 +206,7 @@ export class BadgeService {
   }
 
   private async incrementBadgeExperience(userId: number, badgeName: string) {
-    let userBadge = await this.badgeRepository.findBadge(userId, badgeName);
+    let userBadge = await this.badgeRepository.findByBadgeName(userId, badgeName);
     if (!userBadge) {
       userBadge = await this.badgeRepository.createBadge(userId, badgeName);
     }
@@ -225,8 +225,8 @@ export class BadgeService {
     return null;
   }
 
-  async levelUpBadge(userId: number, badgeName: string): Promise<void> {
-    const userBadge = await this.badgeRepository.findBadge(userId, badgeName);
+  async levelUpBadge(userId: number, badgeId: number) {
+    const userBadge = await this.badgeRepository.findBadge(userId, badgeId);
     if (!userBadge) {
       throw new Error('Badge not found for user.');
     }

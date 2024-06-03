@@ -2,8 +2,8 @@
 name: Bug report
 about: Create a report to help us improve
 title: "[BUG]"
-labels: 'Priority: Medium, Type: Bug'
-assignees: ''
+labels: 'Domain: Back, Priority: Medium, Type: Bug'
+assignees: 'daechan-jo'
 
 ---
 

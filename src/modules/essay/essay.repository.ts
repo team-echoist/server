@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
@@ -19,6 +19,10 @@ export class EssayRepository {
 
   async saveEssay(data: SaveEssayDto) {
     return this.essayRepository.save(data);
+  }
+
+  async saveEssays(essays: Essay[]) {
+    return this.essayRepository.save(essays);
   }
 
   async incrementViews(essay: Essay) {
@@ -257,5 +261,14 @@ export class EssayRepository {
       .where('author_id = :userId', { userId })
       .execute();
     return;
+  }
+
+  async findByIds(userId: number, essayIds: number[]) {
+    return this.essayRepository.find({
+      where: {
+        id: In(essayIds),
+        author: { id: userId },
+      },
+    });
   }
 }

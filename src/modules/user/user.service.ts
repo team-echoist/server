@@ -17,7 +17,7 @@ import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
-import { ProfileImageUrlResDto } from './dto/response/profileImageUrlResDto';
+import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryDto } from './dto/userSummary.dto';
 import * as bcrypt from 'bcrypt';
@@ -132,8 +132,8 @@ export class UserService {
     return { followings: followingsDto };
   }
 
-  async levelUpBadge(userId: number, badgeName: string) {
-    return this.badgeService.levelUpBadge(userId, badgeName);
+  async levelUpBadge(userId: number, badgeId: number) {
+    return this.badgeService.levelUpBadge(userId, badgeId);
   }
 
   async getBadges(userId: number) {

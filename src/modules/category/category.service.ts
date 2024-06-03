@@ -5,6 +5,7 @@ import { Category } from '../../entities/category.entity';
 import { CategoriesDto } from './dto/categories.dto';
 import { UtilsService } from '../utils/utils.service';
 import { UserService } from '../user/user.service';
+import { Essay } from '../../entities/essay.entity';
 
 @Injectable()
 export class CategoryService {
@@ -26,9 +27,9 @@ export class CategoryService {
     return this.utilsService.transformToDto(CategoriesDto, categories);
   }
 
-  async saveCategory(userId: number, categoryName: string) {
+  async saveCategory(userId: number, name: string) {
     const user = await this.userService.fetchUserEntityById(userId);
-    await this.saveCategoryWithUser(user, categoryName);
+    return await this.saveCategoryWithUser(user, name);
   }
 
   async updateCategory(userId: number, categoryId: number, categoryName: string) {
@@ -41,7 +42,7 @@ export class CategoryService {
     const category = new Category();
     category.name = categoryName;
     category.user = user;
-    await this.categoryRepository.saveCategory(category);
+    return await this.categoryRepository.saveCategory(category);
   }
 
   async deleteCategory(userId: number, categoryId: number) {

@@ -33,11 +33,6 @@ export class CreateEssayReqDto {
   linkedOutGauge?: number;
 
   @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  categoryId?: number;
-
-  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   thumbnail?: string;

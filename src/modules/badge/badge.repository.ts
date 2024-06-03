@@ -27,7 +27,11 @@ export class BadgeRepository {
     await this.tagExpRepository.save(tagExp);
   }
 
-  async findBadge(userId: number, badgeName: string) {
+  async findBadge(userId: number, badgeId: number) {
+    return this.badgeRepository.findOne({ where: { user: { id: userId }, id: badgeId } });
+  }
+
+  async findByBadgeName(userId: number, badgeName: string) {
     return this.badgeRepository.findOne({ where: { user: { id: userId }, name: badgeName } });
   }
 

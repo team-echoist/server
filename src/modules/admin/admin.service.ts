@@ -35,7 +35,7 @@ import Redis from 'ioredis';
 import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
-import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlResDto';
+import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
 import { AwsService } from '../aws/aws.service';
 import { Admin } from '../../entities/admin.entity';
 

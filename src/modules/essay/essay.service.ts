@@ -27,6 +27,7 @@ import { EssayStatsDto } from './dto/essayStats.dto';
 import { EssayListResDto } from './dto/response/essayListRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { BadgeService } from '../badge/badge.service';
+import { CreateCategoryReqDto } from '../category/dto/repuest/createCategoryReq.dto';
 
 @Injectable()
 export class EssayService {
@@ -45,15 +46,12 @@ export class EssayService {
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
-
-    const category = await this.categoryService.getCategoryById(user, data.categoryId);
     const tags = await this.tagService.getTags(data.tags);
 
     const essayData = {
       ...data,
       device: device,
       author: user,
-      category: category,
       tags: tags,
     };
 
@@ -215,7 +213,6 @@ export class EssayService {
 
   async deleteThumbnail(essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    console.log(essayId, essay);
     if (!essay.thumbnail) {
       throw new NotFoundException('No thumbnail to delete');
     }
@@ -277,8 +274,16 @@ export class EssayService {
     return { categories: categories };
   }
 
-  async saveCategory(userId: number, categoryName: string) {
-    await this.categoryService.saveCategory(userId, categoryName);
+  async saveCategory(userId: number, data: CreateCategoryReqDto) {
+    const savedCategory = await this.categoryService.saveCategory(userId, data.name);
+
+    if (data.essayIds && data.essayIds.length > 0) {
+      const essays = await this.essayRepository.findByIds(userId, data.essayIds);
+      essays.forEach((essay) => {
+        essay.category = savedCategory;
+      });
+      await this.essayRepository.saveEssays(essays);
+    }
   }
 
   async updateCategory(userId: number, categoryId: number, categoryName: string) {
