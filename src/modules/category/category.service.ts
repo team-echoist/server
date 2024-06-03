@@ -5,7 +5,6 @@ import { Category } from '../../entities/category.entity';
 import { CategoriesDto } from './dto/categories.dto';
 import { UtilsService } from '../utils/utils.service';
 import { UserService } from '../user/user.service';
-import { Essay } from '../../entities/essay.entity';
 
 @Injectable()
 export class CategoryService {

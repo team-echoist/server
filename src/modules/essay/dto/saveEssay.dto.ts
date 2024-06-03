@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 import { User } from '../../../entities/user.entity';
 import { Category } from '../../../entities/category.entity';
-import { Expose } from 'class-transformer';
 import { EssayStatus } from '../../../entities/essay.entity';
 
 export class SaveEssayDto {
