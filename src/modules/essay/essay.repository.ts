@@ -13,7 +13,7 @@ export class EssayRepository {
   async findEssayById(essayId: number) {
     return await this.essayRepository.findOne({
       where: { id: essayId },
-      relations: ['author', 'story', 'tags', 'story'],
+      relations: ['author', 'story', 'tags'],
     });
   }
 
