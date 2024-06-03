@@ -9,7 +9,6 @@ import {
   IsLongitude,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
 } from 'class-validator';
 import { CategoryInfoDto } from '../../../story/dto/categoryInfo.dto';
