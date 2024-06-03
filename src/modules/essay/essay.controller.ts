@@ -42,7 +42,22 @@ export class EssayController {
   @Post()
   @ApiOperation({
     summary: '에세이 작성',
-    description: '모니터링 유저의 경우 발행 및 링크드아웃시 리뷰 대기',
+    description: `
+    사용자가 새로운 에세이를 작성하는 데 사용됩니다. 에세이는 다양한 상태를 가질 수 있으며, 모니터링 상태의 사용자는 특정 조건을 만족해야 합니다.
+    
+    **추가 정보:**
+    - 에세이 작성 후, 사용된 태그에 따라 사용자 경험치가 증가합니다.
+      - 각 태그는 특정 뱃지와 연관되어 있습니다.
+      - 태그가 이미 사용된 경우 경험치가 증가하지 않습니다.
+      - 태그가 처음 사용된 경우 경험치가 증가하며, 경험치가 10에 도달하면 레벨업이 가능합니다.
+
+    **모니터링 유저의 경우:**
+    - 에세이가 발행(Published)되거나 링크드아웃(LinkedOut) 상태일 때 리뷰 대기 상태로 전환됩니다.
+    - 리뷰 대기 상태에서는 관리자가 에세이를 검토한 후에만 발행됩니다.
+
+    **주의 사항:**
+    - 요청 바디의 모든 필드 키는 필수이지만 특정 필드는 값이 비어있어도 됩니다(스키마 참고).
+    `,
   })
   @ApiResponse({ status: 201, type: EssayResDto })
   @ApiBody({ type: CreateEssayReqDto })
@@ -63,7 +78,25 @@ export class EssayController {
   }
 
   @Get()
-  @ApiOperation({ summary: '본인 에세이 조회' })
+  @ApiOperation({
+    summary: '본인 에세이 조회',
+    description: `
+    사용자 본인이 작성한 에세이 목록을 조회하는 데 사용됩니다. 다양한 쿼리 파라미터를 사용하여 에세이 목록을 필터링할 수 있습니다.
+
+    **쿼리 파라미터:**
+    - \`limit\`: 조회할 에세이 수 (기본값: 10)
+    - \`published\`: 발행 여부 (true 또는 false)
+    - \`storyId\`: 특정 스토리에 속한 에세이만 조회
+
+    **동작 과정:**
+    1. 사용자가 작성한 에세이를 조회합니다.
+    2. 각 에세이의 내용을 일부만 추출하여 반환합니다.
+    3. 조회된 에세이 목록과 전체 에세이 수를 반환합니다.
+    
+    **주의 사항:**
+    - 쿼리 파라미터 키는 필수이지만 값이 비어있어도 됩니다.
+    `,
+  })
   @ApiResponse({ status: 200, type: EssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
@@ -81,7 +114,7 @@ export class EssayController {
   @ApiOperation({ summary: '에세이 삭제' })
   @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
-    return this.essayService.deleteEssay(req.user.id, essayId);
+    await this.essayService.deleteEssay(req.user.id, essayId);
   }
 
   @Post('images')
@@ -141,10 +174,14 @@ export class EssayController {
   }
 
   @Post('stories')
-  @ApiOperation({ summary: '스토리 생성' })
+  @ApiOperation({
+    summary: '스토리 생성',
+    description:
+      '에세이를 미포함해서 스토리를 생성하는 경우에도 body에 essayIds 필드를 빈 배열로 보내주세요.',
+  })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateStoryReqDto })
-  async saveStory(@Req() req: ExpressRequest, @Body() data: CreateStoryReqDto) {
+  async saveStory(@Req() req: ExpressRequest, @Body() data?: CreateStoryReqDto) {
     return this.essayService.saveStory(req.user.id, data);
   }
 

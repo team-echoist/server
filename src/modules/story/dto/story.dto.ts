@@ -17,4 +17,9 @@ export class StoryDto {
   @Expose()
   @IsDateString()
   createdDate: Date;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  essaysCount: number;
 }

@@ -13,7 +13,12 @@ export class StoryRepository {
   }
 
   async getStoriesById(userId: number) {
-    return this.storyRepository.find({ where: { user: { id: userId } } });
+    return this.storyRepository
+      .createQueryBuilder('story')
+      .leftJoinAndSelect('story.essays', 'essay')
+      .loadRelationCountAndMap('story.essaysCount', 'story.essays')
+      .where('story.user.id = :userId', { userId })
+      .getMany();
   }
 
   async saveStory(story: Story) {
