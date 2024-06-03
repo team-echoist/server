@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Category } from '../../../entities/category.entity';
+import { Story } from '../../../entities/story.entity';
 import { Expose } from 'class-transformer';
 import { EssayStatus } from '../../../entities/essay.entity';
 
@@ -21,7 +21,7 @@ export class UpdateEssayDto {
 
   @Expose()
   @IsOptional()
-  category: Category;
+  story: Story;
 
   @Expose()
   @IsString()

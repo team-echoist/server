@@ -76,7 +76,7 @@ describe('EssayController', () => {
 
     await request(app.getHttpServer())
       .get('/essays')
-      .query({ page: 1, limit: 10, published: true, categoryId: 5 })
+      .query({ page: 1, limit: 10, published: true, storyId: 5 })
       .expect(200)
       .expect(mockResponse);
   });

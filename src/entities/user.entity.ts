@@ -10,7 +10,7 @@ import {
 import { Essay } from './essay.entity';
 import { Subscription } from './subscription.entity';
 import { ReportQueue } from './reportQueue.entity';
-import { Category } from './category.entity';
+import { Story } from './story.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Follow } from './follow.entity';
@@ -84,8 +84,8 @@ export class User {
   })
   deletedDate?: Date;
 
-  @OneToMany(() => Category, (category) => category.user)
-  category: Category[];
+  @OneToMany(() => Story, (story) => story.user)
+  stories: Story[];
 
   @OneToMany(() => Essay, (essay) => essay.author)
   essays: Essay[];

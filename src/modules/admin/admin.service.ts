@@ -35,7 +35,7 @@ import Redis from 'ioredis';
 import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
-import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlResDto';
+import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
 import { AwsService } from '../aws/aws.service';
 import { Admin } from '../../entities/admin.entity';
 
@@ -451,7 +451,7 @@ export class AdminService {
     const data = essays.map((essay) => ({
       ...essay,
       authorId: essay.author.id,
-      categoryId: essay.category?.id ?? null,
+      storiesId: essay.story?.id ?? null,
       reportCount: essay?.reports ? essay.reports.length : null,
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));

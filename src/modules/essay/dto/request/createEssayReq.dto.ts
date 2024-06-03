@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   IsArray,
-  IsBoolean,
   IsEnum,
   IsLatitude,
   IsLongitude,
@@ -31,11 +30,6 @@ export class CreateEssayReqDto {
   @IsNumber()
   @IsOptional()
   linkedOutGauge?: number;
-
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  categoryId?: number;
 
   @ApiProperty({ required: false })
   @IsString()

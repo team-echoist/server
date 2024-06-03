@@ -2,8 +2,8 @@
 name: BACKLOG
 about: backlog default template
 title: "[Backlog]"
-labels: 'Priority: Medium, Type: Enhancement'
-assignees: ''
+labels: 'Domain: Back, Priority: Medium, Type: Enhancement'
+assignees: 'daechan-jo'
 
 ---
 

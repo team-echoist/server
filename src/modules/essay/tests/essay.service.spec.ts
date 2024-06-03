@@ -4,12 +4,12 @@ import { EssayRepository } from '../essay.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { User, UserStatus } from '../../../entities/user.entity';
 import { Essay, EssayStatus } from '../../../entities/essay.entity';
-import { Category } from '../../../entities/category.entity';
+import { Story } from '../../../entities/story.entity';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { ReviewQueue } from '../../../entities/reviewQueue.entity';
 import { UtilsModule } from '../../utils/utils.module';
 import { AwsService } from '../../aws/aws.service';
-import { CategoryService } from '../../category/category.service';
+import { StoryService } from '../../story/story.service';
 import { UserService } from '../../user/user.service';
 import { TagService } from '../../tag/tag.service';
 import { ReviewService } from '../../review/review.service';
@@ -38,8 +38,8 @@ describe('EssayService', () => {
     fetchUserEntityById: jest.fn(),
   };
 
-  const mockCategoryService = {
-    getCategoryById: jest.fn(),
+  const mockStoryService = {
+    getStoryById: jest.fn(),
   };
   const mockTagService = {
     getTags: jest.fn(),
@@ -66,7 +66,7 @@ describe('EssayService', () => {
         { provide: EssayRepository, useValue: mockEssayRepository },
         { provide: UserService, useValue: mockUserService },
         { provide: AwsService, useValue: {} },
-        { provide: CategoryService, useValue: mockCategoryService },
+        { provide: StoryService, useValue: mockStoryService },
         { provide: TagService, useValue: mockTagService },
         { provide: ReviewService, useValue: mockReviewService },
         { provide: FollowService, useValue: mockFollowService },
@@ -81,7 +81,7 @@ describe('EssayService', () => {
     it('요청 데이터에 카테고리 아이디가 있지만 찾을 수 없다면', async () => {
       const user = { id: 1, monitored: false };
       const data = { id: 1, title: 'New Essay', categoryId: 10 };
-      mockCategoryService.getCategoryById.mockReturnValue(null);
+      mockStoryService.getStoryById.mockReturnValue(null);
 
       expect(await essayService.saveEssay(user as any, 'web', data as any)).toEqual({});
     });
@@ -111,7 +111,7 @@ describe('EssayService', () => {
       const user = new User();
       const data = { id: 1, title: 'New Essay', categoryId: 10, published: true };
       const savedEssay = new Essay();
-      const category = new Category();
+      const category = new Story();
 
       user.status = UserStatus.ACTIVE;
       savedEssay.status = EssayStatus.PUBLISHED;

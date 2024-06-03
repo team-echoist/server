@@ -17,13 +17,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request as ExpressRequest } from 'express';
 import { UserService } from './user.service';
-import { ProfileImageReqDto } from './dto/request/profileImageReqDto';
+import { ProfileImageReqDto } from './dto/request/profileImageReq.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
-import { ProfileImageUrlResDto } from './dto/response/profileImageUrlResDto';
+import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryDto } from './dto/userSummary.dto';
-import { LevelUpBadgeReqDto } from '../badge/dto/request/levelUpBadgeReq.dto';
 import { BadgesSchemaDto } from '../badge/dto/schema/badgesSchema.dto';
 import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchema.dto';
 
@@ -78,12 +77,11 @@ export class UserController {
     return this.userService.unFollow(req.user.id, userId);
   }
 
-  @Post('badges/level')
+  @Post('badges/level/:badgeId')
   @ApiOperation({ summary: '뱃지 레벨업' })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: LevelUpBadgeReqDto })
-  async levelUpBadge(@Req() req: ExpressRequest, @Body() data: LevelUpBadgeReqDto) {
-    return this.userService.levelUpBadge(req.user.id, data.badgeName);
+  async levelUpBadge(@Req() req: ExpressRequest, @Param('badgeId', ParseIntPipe) badgeId: number) {
+    return this.userService.levelUpBadge(req.user.id, badgeId);
   }
 
   @Get('badges')
