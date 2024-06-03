@@ -16,7 +16,7 @@ export class Badge {
   @Column({ default: 0 })
   exp: number;
 
-  @ManyToOne(() => User, (user) => user.badges)
+  @ManyToOne(() => User, (user) => user.badges, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

@@ -12,6 +12,7 @@ import { Exclude, Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
 import { UserSummaryDto } from '../../../user/dto/userSummary.dto';
+import { StoryDto } from '../../../story/dto/story.dto';
 
 export class EssayResDto {
   @ApiProperty()
@@ -84,4 +85,9 @@ export class EssayResDto {
   @Type(() => UserSummaryDto)
   @Expose()
   author: UserSummaryDto;
+
+  @ApiProperty({ type: StoryDto })
+  @Type(() => StoryDto)
+  @Expose()
+  story: StoryDto;
 }

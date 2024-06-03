@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Tag } from './tag.entity';
 import { Badge } from './badge.entity';
@@ -8,6 +8,7 @@ export class TagExp {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column({ default: false })
   used: boolean;
 

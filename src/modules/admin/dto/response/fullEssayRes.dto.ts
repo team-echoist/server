@@ -11,7 +11,7 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { CategoryInfoDto } from '../../../story/dto/categoryInfo.dto';
+import { StoryInfoDto } from '../../../story/dto/storyInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
 import { ReviewResDto } from './reviewRes.dto';
@@ -102,11 +102,11 @@ export class FullEssayResDto {
   @IsNotEmpty()
   author: FullUserResDto;
 
-  @ApiProperty({ type: () => CategoryInfoDto })
-  @Type(() => CategoryInfoDto)
+  @ApiProperty({ type: () => StoryInfoDto })
+  @Type(() => StoryInfoDto)
   @Expose()
   @IsNumber()
-  category: CategoryInfoDto;
+  category: StoryInfoDto;
 
   @ApiProperty({ type: () => [ReportDto] })
   @Type(() => ReportDto)

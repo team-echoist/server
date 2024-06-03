@@ -2,7 +2,7 @@ import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nest
 import { StoryRepository } from './story.repository';
 import { User } from '../../entities/user.entity';
 import { Story } from '../../entities/story.entity';
-import { StoriesDto } from './dto/stories.dto';
+import { StoryDto } from './dto/story.dto';
 import { UtilsService } from '../utils/utils.service';
 import { UserService } from '../user/user.service';
 
@@ -23,7 +23,7 @@ export class StoryService {
 
   async getStoriesByUserId(userId: number) {
     const stories = await this.storyRepository.getStoriesById(userId);
-    return this.utilsService.transformToDto(StoriesDto, stories);
+    return this.utilsService.transformToDto(StoryDto, stories);
   }
 
   async saveStory(userId: number, name: string) {
