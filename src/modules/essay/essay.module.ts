@@ -7,7 +7,7 @@ import { UserModule } from '../user/user.module';
 import { UtilsModule } from '../utils/utils.module';
 import { ReportModule } from '../report/report.module';
 import { ReviewModule } from '../review/review.module';
-import { CategoryModule } from '../category/category.module';
+import { StoryModule } from '../story/story.module';
 import { TagModule } from '../tag/tag.module';
 import { AwsModule } from '../aws/aws.module';
 import { FollowModule } from '../follow/follow.module';
@@ -18,7 +18,7 @@ import { EssayRepository } from './essay.repository';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { Category } from '../../entities/category.entity';
+import { Story } from '../../entities/story.entity';
 import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
@@ -30,11 +30,11 @@ dotenv.config();
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Essay, Category, ReviewQueue, Tag]),
+    TypeOrmModule.forFeature([User, Essay, Story, ReviewQueue, Tag]),
     AuthModule,
     MailModule,
     TagModule,
-    CategoryModule,
+    StoryModule,
     ReportModule,
     ReviewModule,
     UtilsModule,

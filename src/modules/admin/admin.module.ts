@@ -14,7 +14,7 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
 import { Essay } from '../../entities/essay.entity';
 import { Subscription } from '../../entities/subscription.entity';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
-import { Category } from '../../entities/category.entity';
+import { Story } from '../../entities/story.entity';
 import * as strategies from '../../common/guards/strategies';
 import { Admin } from '../../entities/admin.entity';
 import { AwsModule } from '../aws/aws.module';
@@ -27,7 +27,7 @@ import { AwsModule } from '../aws/aws.module';
     TypeOrmModule.forFeature([
       User,
       Essay,
-      Category,
+      Story,
       ReviewQueue,
       ReportQueue,
       Subscription,

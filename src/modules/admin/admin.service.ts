@@ -451,7 +451,7 @@ export class AdminService {
     const data = essays.map((essay) => ({
       ...essay,
       authorId: essay.author.id,
-      categoryId: essay.category?.id ?? null,
+      storiesId: essay.story?.id ?? null,
       reportCount: essay?.reports ? essay.reports.length : null,
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));

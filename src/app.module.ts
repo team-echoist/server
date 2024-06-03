@@ -10,7 +10,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { MailModule } from './modules/mail/mail.module';
 import { UtilsModule } from './modules/utils/utils.module';
 import { TagModule } from './modules/tag/tag.module';
-import { CategoryModule } from './modules/category/category.module';
+import { StoryModule } from './modules/story/story.module';
 import { SeederModule } from './modules/seeder/seeder.module';
 import { FollowModule } from './modules/follow/follow.module';
 import { BadgeModule } from './modules/badge/badge.module';
@@ -43,7 +43,7 @@ import { TypeOrmOptions } from '../typeorm.options';
     ReviewModule,
     TagModule,
     FollowModule,
-    CategoryModule,
+    StoryModule,
     MailModule,
     RedisModule,
     UtilsModule,

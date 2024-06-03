@@ -14,7 +14,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { ReportQueue } from './reportQueue.entity';
-import { Category } from './category.entity';
+import { Story } from './story.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Tag } from './tag.entity';
@@ -92,8 +92,8 @@ export class Essay {
   tags: Tag[];
 
   @JoinColumn({ name: 'category_id' })
-  @ManyToOne(() => Category, (category) => category.essays)
-  category: Category;
+  @ManyToOne(() => Story, (category) => category.essays)
+  story: Story;
 
   @Index()
   @JoinColumn({ name: 'author_id' })

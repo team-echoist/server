@@ -10,14 +10,14 @@ import { Transactional } from 'typeorm-transactional';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { ReviewService } from '../review/review.service';
-import { CategoryService } from '../category/category.service';
+import { StoryService } from '../story/story.service';
 import { UserService } from '../user/user.service';
 import { TagService } from '../tag/tag.service';
 import { FollowService } from '../follow/follow.service';
 import { EssayRepository } from './essay.repository';
 import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { Tag } from '../../entities/tag.entity';
-import { Category } from '../../entities/category.entity';
+import { Story } from '../../entities/story.entity';
 import { User, UserStatus } from '../../entities/user.entity';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
@@ -27,7 +27,7 @@ import { EssayStatsDto } from './dto/essayStats.dto';
 import { EssayListResDto } from './dto/response/essayListRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { BadgeService } from '../badge/badge.service';
-import { CreateCategoryReqDto } from '../category/dto/repuest/createCategoryReq.dto';
+import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 
 @Injectable()
 export class EssayService {
@@ -37,7 +37,7 @@ export class EssayService {
     private readonly awsService: AwsService,
     private readonly reviewService: ReviewService,
     private readonly tagService: TagService,
-    private readonly categoryService: CategoryService,
+    private readonly storyService: StoryService,
     private readonly followService: FollowService,
     private readonly badgeService: BadgeService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
@@ -91,7 +91,7 @@ export class EssayService {
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
 
-    const category = await this.categoryService.getCategoryById(user, data.categoryId);
+    const story = await this.storyService.getStoryById(user, data.storyId);
     const tags = await this.tagService.getTags(data.tags);
 
     const essay = await this.essayRepository.findEssayById(essayId);
@@ -103,7 +103,7 @@ export class EssayService {
       message = 'Review request created due to policy violations.';
     }
 
-    await this.updateEssayData(essay, data, category, tags, requester);
+    await this.updateEssayData(essay, data, story, tags, requester);
     void this.badgeService.addExperience(user, tags);
 
     const updatedEssay = await this.essayRepository.findEssayById(essayId);
@@ -125,14 +125,14 @@ export class EssayService {
   private async updateEssayData(
     essay: Essay,
     data: UpdateEssayReqDto,
-    category: Category,
+    story: Story,
     tags: Tag[],
     requester: Express.User,
   ) {
     const essayData = {
       ...essay,
       ...data,
-      category: category,
+      story: story,
       tags: tags,
       status: requester.status === UserStatus.MONITORED ? EssayStatus.PRIVATE : data.status,
     };
@@ -140,11 +140,11 @@ export class EssayService {
   }
 
   @Transactional()
-  async getMyEssays(userId: number, published: boolean, categoryId: number, limit: number) {
+  async getMyEssays(userId: number, published: boolean, storyId: number, limit: number) {
     const { essays, total } = await this.essayRepository.findEssays(
       userId,
       published,
-      categoryId,
+      storyId,
       limit,
     );
 
@@ -269,29 +269,29 @@ export class EssayService {
     return { essays: essayDtos };
   }
 
-  async categories(userId: number) {
-    const categories = await this.categoryService.getCategoriesByUserId(userId);
-    return { categories: categories };
+  async getStories(userId: number) {
+    const stories = await this.storyService.getStoriesByUserId(userId);
+    return { stories: stories };
   }
 
-  async saveCategory(userId: number, data: CreateCategoryReqDto) {
-    const savedCategory = await this.categoryService.saveCategory(userId, data.name);
+  async saveStory(userId: number, data: CreateStoryReqDto) {
+    const savedStory = await this.storyService.saveStory(userId, data.name);
 
     if (data.essayIds && data.essayIds.length > 0) {
       const essays = await this.essayRepository.findByIds(userId, data.essayIds);
       essays.forEach((essay) => {
-        essay.category = savedCategory;
+        essay.story = savedStory;
       });
       await this.essayRepository.saveEssays(essays);
     }
   }
 
-  async updateCategory(userId: number, categoryId: number, categoryName: string) {
-    await this.categoryService.updateCategory(userId, categoryId, categoryName);
+  async updateStory(userId: number, StoryId: number, storyName: string) {
+    await this.storyService.updateStory(userId, StoryId, storyName);
   }
 
-  async deleteCategory(userId: number, categoryId: number) {
-    await this.categoryService.deleteCategory(userId, categoryId);
+  async deleteStory(userId: number, storyId: number) {
+    await this.storyService.deleteStory(userId, storyId);
   }
 
   async getSentenceEssays(type: string, limit: number) {

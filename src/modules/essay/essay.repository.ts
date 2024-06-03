@@ -13,7 +13,7 @@ export class EssayRepository {
   async findEssayById(essayId: number) {
     return await this.essayRepository.findOne({
       where: { id: essayId },
-      relations: ['author', 'category', 'tags'],
+      relations: ['author', 'story', 'tags'],
     });
   }
 
@@ -34,17 +34,17 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findEssays(userId: number, published: boolean, categoryId: number, limit: number) {
+  async findEssays(userId: number, published: boolean, storyId: number, limit: number) {
     const qb = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
-      .leftJoinAndSelect('essay.category', 'category')
+      .leftJoinAndSelect('essay.story', 'story')
       .leftJoinAndSelect('essay.tags', 'tags')
       .where('essay.author.id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT });
 
-    if (categoryId !== undefined) {
-      qb.andWhere('essay.category.id = :categoryId', { categoryId });
+    if (storyId !== undefined) {
+      qb.andWhere('essay.story.id = :storyId', { storyId });
     }
 
     if (published !== undefined) {
@@ -228,7 +228,7 @@ export class EssayRepository {
       order: {
         createdDate: 'DESC',
       },
-      relations: ['author', 'category', 'reports', 'reviews'],
+      relations: ['author', 'story', 'reports', 'reviews'],
     });
 
     return { essays, total };
@@ -237,7 +237,7 @@ export class EssayRepository {
   async findFullEssay(essayId: number) {
     return this.essayRepository.findOne({
       where: { id: essayId },
-      relations: ['author', 'category', 'reports', 'reviews'],
+      relations: ['author', 'story', 'reports', 'reviews'],
     });
   }
 

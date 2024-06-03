@@ -12,7 +12,7 @@ import { User } from './user.entity';
 import { Essay } from './essay.entity';
 
 @Entity()
-export class Category {
+export class Story {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -29,9 +29,9 @@ export class Category {
   updatedDate: Date;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.category, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.stories, { onDelete: 'CASCADE' })
   user: User;
 
-  @OneToMany(() => Essay, (essay) => essay.category)
+  @OneToMany(() => Essay, (essay) => essay.story)
   essays: Essay[];
 }

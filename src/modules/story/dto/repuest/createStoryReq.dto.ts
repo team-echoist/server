@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
 
-export class CreateCategoryReqDto {
+export class CreateStoryReqDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

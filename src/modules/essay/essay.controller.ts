@@ -28,9 +28,9 @@ import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysSchemaDto } from './dto/schema/essaysSchema.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { CategoriesResDto } from '../category/dto/response/categoriesRes.dto';
+import { StoriesResDto } from '../story/dto/response/storiesRes.dto';
 import { PublicEssaysSchemaDto } from './dto/schema/publicEssaysSchema.dto';
-import { CreateCategoryReqDto } from '../category/dto/repuest/createCategoryReq.dto';
+import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
 
 @ApiTags('Essay')
@@ -67,14 +67,14 @@ export class EssayController {
   @ApiResponse({ status: 200, type: EssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
-  @ApiQuery({ name: 'categoryId', required: false })
+  @ApiQuery({ name: 'storyId', required: false })
   async getMyEssay(
     @Req() req: ExpressRequest,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
     @Query('published', OptionalBoolPipe) published: boolean,
-    @Query('categoryId', OptionalParseIntPipe) categoryId: number,
+    @Query('storyId', OptionalParseIntPipe) storyId: number,
   ) {
-    return this.essayService.getMyEssays(req.user.id, published, categoryId, limit);
+    return this.essayService.getMyEssays(req.user.id, published, storyId, limit);
   }
 
   @Delete(':essayId')
@@ -126,48 +126,45 @@ export class EssayController {
     return this.essayService.getFollowingsEssays(req.user.id, limit);
   }
 
-  @Get('categories')
-  @ApiOperation({ summary: '본인 카테고리 리스트' })
-  @ApiResponse({ status: 200, type: CategoriesResDto })
-  async getMyCategories(@Req() req: ExpressRequest) {
-    return this.essayService.categories(req.user.id);
+  @Get('stories')
+  @ApiOperation({ summary: '본인 스토리 리스트' })
+  @ApiResponse({ status: 200, type: StoriesResDto })
+  async getMyStories(@Req() req: ExpressRequest) {
+    return this.essayService.getStories(req.user.id);
   }
 
-  @Get('categories/:userId')
-  @ApiOperation({ summary: '타겟 유저 카테고리 리스트' })
-  @ApiResponse({ status: 200, type: CategoriesResDto })
-  async getUserCategories(@Param('userId', ParseIntPipe) userId: number) {
-    return this.essayService.categories(userId);
+  @Get('stories/:userId')
+  @ApiOperation({ summary: '타겟 유저 스토리 리스트' })
+  @ApiResponse({ status: 200, type: StoriesResDto })
+  async getUserStories(@Param('userId', ParseIntPipe) userId: number) {
+    return this.essayService.getStories(userId);
   }
 
-  @Post('categories')
-  @ApiOperation({ summary: '카테고리 생성' })
+  @Post('stories')
+  @ApiOperation({ summary: '스토리 생성' })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: CreateCategoryReqDto })
-  async saveCategory(@Req() req: ExpressRequest, @Body() data: CreateCategoryReqDto) {
-    return this.essayService.saveCategory(req.user.id, data);
+  @ApiBody({ type: CreateStoryReqDto })
+  async saveStory(@Req() req: ExpressRequest, @Body() data: CreateStoryReqDto) {
+    return this.essayService.saveStory(req.user.id, data);
   }
 
-  @Put('categories/:categoryId')
-  @ApiOperation({ summary: '카테고리 이름 변경' })
+  @Put('stories/:storyId')
+  @ApiOperation({ summary: '스토리 이름 변경' })
   @ApiResponse({ status: 200 })
-  @ApiBody({ type: CreateCategoryReqDto })
-  async updateCategory(
+  @ApiBody({ type: CreateStoryReqDto })
+  async updateStory(
     @Req() req: ExpressRequest,
-    @Param('categoryId', ParseIntPipe) categoryId: number,
-    @Body() data: CreateCategoryReqDto,
+    @Param('storyId', ParseIntPipe) storyId: number,
+    @Body() data: CreateStoryReqDto,
   ) {
-    return this.essayService.updateCategory(req.user.id, categoryId, data.name);
+    return this.essayService.updateStory(req.user.id, storyId, data.name);
   }
 
-  @Delete('categories/:categoryId')
-  @ApiOperation({ summary: '카테고리 삭제' })
+  @Delete('stories/:storyId')
+  @ApiOperation({ summary: '스토리 삭제' })
   @ApiResponse({ status: 204 })
-  async deleteCategory(
-    @Req() req: ExpressRequest,
-    @Param('categoryId', ParseIntPipe) categoryId: number,
-  ) {
-    return this.essayService.deleteCategory(req.user.id, categoryId);
+  async deleteStory(@Req() req: ExpressRequest, @Param('storyId', ParseIntPipe) storyId: number) {
+    return this.essayService.deleteStory(req.user.id, storyId);
   }
 
   @Get('sentence')

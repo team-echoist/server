@@ -34,7 +34,7 @@ export class UpdateEssayReqDto {
   @Expose()
   @IsNumber()
   @IsOptional()
-  categoryId?: number;
+  storyId?: number;
 
   @ApiProperty({ required: false })
   @Expose()

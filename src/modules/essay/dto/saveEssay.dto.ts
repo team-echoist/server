@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { User } from '../../../entities/user.entity';
-import { Category } from '../../../entities/category.entity';
+import { Story } from '../../../entities/story.entity';
 import { EssayStatus } from '../../../entities/essay.entity';
 
 export class SaveEssayDto {
@@ -25,7 +25,7 @@ export class SaveEssayDto {
   linkedOutGauge?: number;
 
   @IsOptional()
-  category?: Category;
+  category?: Story;
 
   @IsOptional()
   @IsString()

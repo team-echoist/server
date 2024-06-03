@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 import { User } from './src/entities/user.entity';
 import { Essay } from './src/entities/essay.entity';
 import { Subscription } from './src/entities/subscription.entity';
-import { Category } from './src/entities/category.entity';
+import { Story } from './src/entities/story.entity';
 import { ReportQueue } from './src/entities/reportQueue.entity';
 import { ReviewQueue } from './src/entities/reviewQueue.entity';
 import { Tag } from './src/entities/tag.entity';
@@ -27,7 +27,7 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
       User,
       Essay,
       Subscription,
-      Category,
+      Story,
       ReportQueue,
       ReviewQueue,
       Tag,
