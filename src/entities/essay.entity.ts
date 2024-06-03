@@ -88,16 +88,16 @@ export class Essay {
   device: string;
 
   @JoinTable({ name: 'essay_tags' })
-  @ManyToMany(() => Tag, (tag) => tag.essays)
+  @ManyToMany(() => Tag, (tag) => tag.essays, { onDelete: 'CASCADE' })
   tags: Tag[];
 
-  @JoinColumn({ name: 'category_id' })
-  @ManyToOne(() => Story, (category) => category.essays)
+  @JoinColumn({ name: 'story_id' })
+  @ManyToOne(() => Story, (category) => category.essays, { onDelete: 'CASCADE' })
   story: Story;
 
   @Index()
   @JoinColumn({ name: 'author_id' })
-  @ManyToOne(() => User, (user) => user.essays)
+  @ManyToOne(() => User, (user) => user.essays, { onDelete: 'CASCADE' })
   author: User;
 
   @OneToMany(() => ReportQueue, (report) => report.essay)

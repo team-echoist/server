@@ -54,9 +54,6 @@ export class User {
     apple: string;
   };
 
-  @Column({ default: 'client' })
-  role: string;
-
   @Column({
     type: 'enum',
     enum: UserStatus,

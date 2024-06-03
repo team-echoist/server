@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -19,6 +20,7 @@ export class ReportQueue {
   @Column()
   reason: string;
 
+  @Index()
   @Column({ default: false })
   processed: boolean;
 

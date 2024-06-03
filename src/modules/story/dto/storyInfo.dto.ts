@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class CategoryInfoDto {
+export class StoryInfoDto {
   @ApiProperty()
   @IsNotEmpty()
   @Expose()

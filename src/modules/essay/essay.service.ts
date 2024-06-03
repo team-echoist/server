@@ -191,14 +191,13 @@ export class EssayService {
   @Transactional()
   async deleteEssay(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    if (essay.author.id !== userId)
+    if (!essay || essay.author.id !== userId)
       throw new HttpException(
         'Essay not found or you do not have permission to delete this essay.',
         HttpStatus.BAD_REQUEST,
       );
 
     await this.essayRepository.deleteEssay(essay);
-    return;
   }
 
   @Transactional()
@@ -274,7 +273,7 @@ export class EssayService {
     return { stories: stories };
   }
 
-  async saveStory(userId: number, data: CreateStoryReqDto) {
+  async saveStory(userId: number, data?: CreateStoryReqDto) {
     const savedStory = await this.storyService.saveStory(userId, data.name);
 
     if (data.essayIds && data.essayIds.length > 0) {

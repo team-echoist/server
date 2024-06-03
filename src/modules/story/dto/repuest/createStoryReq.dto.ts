@@ -11,5 +11,5 @@ export class CreateStoryReqDto {
   @ApiProperty({ type: [Number] })
   @IsArray()
   @IsNumber({}, { each: true })
-  essayIds: number[];
+  essayIds?: number[];
 }
