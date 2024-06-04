@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -32,6 +33,7 @@ export class User {
   nickname: string;
 
   @Column({ unique: true })
+  @Index()
   email: string;
 
   @Column({ nullable: true })

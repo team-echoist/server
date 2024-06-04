@@ -38,6 +38,7 @@ import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
 import { AwsService } from '../aws/aws.service';
 import { Admin } from '../../entities/admin.entity';
+import { AdminRegisterReqDto } from './dto/request/adminRegisterReq.dto';
 
 @Injectable()
 export class AdminService {
@@ -142,6 +143,8 @@ export class AdminService {
 
   async createAdmin(adminId: number, data: CreateAdminReqDto) {
     if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+
+    await this.adminCheckDuplicates(data.email);
 
     data.password = await bcrypt.hash(data.password, 10);
     const newAdmin: CreateAdminDto = {
@@ -599,5 +602,26 @@ export class AdminService {
     admin.active = active;
     const updatedAdmin = await this.adminRepository.saveAdmin(admin);
     return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
+  }
+
+  @Transactional()
+  async register(data: AdminRegisterReqDto) {
+    await this.adminCheckDuplicates(data.email);
+
+    const adminData: CreateAdminDto = {
+      ...data,
+      active: false,
+    };
+    await this.adminRepository.saveAdmin(adminData);
+
+    return { message: 'Wait for the root administrator to confirm.' };
+  }
+
+  private async adminCheckDuplicates(email: string) {
+    const result = await this.adminRepository.findByEmail(email);
+    if (result) {
+      throw new HttpException('Email already in use.', HttpStatus.CONFLICT);
+    }
+    return;
   }
 }
