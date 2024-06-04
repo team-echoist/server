@@ -43,11 +43,39 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
+import { AdminRegisterReqDto } from './dto/request/adminRegisterReq.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  @Post('register')
+  @ApiOperation({
+    summary: '어드민 회원가입',
+    description: `
+  새로운 어드민 계정을 생성합니다. 회원가입 요청이 성공하면, 루트 관리자 확인 대기 상태가 됩니다.
+
+  **요청 본문:**
+  - \`email\`: 어드민 이메일 주소 (필수)
+  - \`password\`: 어드민 비밀번호 (필수)
+  - \`name\`: 어드민 이름 (필수)
+
+  **동작 과정:**
+  1. 요청된 이메일이 이미 사용 중인지 확인합니다.
+  2. 중복된 이메일이 없으면, 새로운 어드민 데이터를 생성하고 비활성화 상태로 저장합니다.
+  3. 저장 후 루트 관리자의 승인을 기다리는 메시지를 반환합니다.
+
+  **주의 사항:**
+  - 요청된 이메일이 이미 존재하는 경우, \`409 Conflict\` 오류가 발생합니다.
+  - 새로운 어드민은 기본적으로 비활성화 상태로 생성됩니다.
+  `,
+  })
+  @ApiResponse({ type: '' })
+  @ApiBody({ type: AdminRegisterReqDto })
+  async register(data: AdminRegisterReqDto) {
+    return this.adminService.register(data);
+  }
 
   @Post('login')
   @UseGuards(AuthGuard('admin-local'))
