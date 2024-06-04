@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateStoryReqDto {
   @ApiProperty()
