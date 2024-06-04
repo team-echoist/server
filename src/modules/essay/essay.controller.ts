@@ -111,7 +111,24 @@ export class EssayController {
   }
 
   @Delete(':essayId')
-  @ApiOperation({ summary: '에세이 삭제' })
+  @ApiOperation({
+    summary: '에세이 삭제',
+    description: `
+  지정된 ID를 가진 에세이를 삭제합니다. 에세이는 논리적으로 삭제되며, 실제 데이터는 유지되지만 삭제된 것으로 표시됩니다.
+
+  **경로 파라미터:**
+  - \`essayId\`: 삭제할 에세이의 ID (필수)
+
+  **동작 과정:**
+  1. 에세이 ID와 사용자 ID를 기반으로 에세이를 조회합니다.
+  2. 에세이가 존재하지 않거나 사용자가 에세이의 작성자가 아닌 경우 오류를 반환합니다.
+  3. 에세이를 논리적으로 삭제합니다 (deletedDate 필드를 현재 날짜로 설정).
+
+  **주의 사항:**
+  - 사용자는 본인이 작성한 에세이만 삭제할 수 있습니다.
+  - 논리 삭제를 통해 실제 데이터는 유지되며, 이후 복구가 가능합니다.
+  `,
+  })
   @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     await this.essayService.deleteEssay(req.user.id, essayId);
@@ -120,8 +137,22 @@ export class EssayController {
   @Post('images')
   @ApiOperation({
     summary: '썸네일 업로드',
-    description:
-      '작성 도중에 이미 이미지를 한 번 업로드 했다면, 기존 이미지에 대한 삭제요청이 필요합니다.',
+    description: `
+  에세이 작성 도중 썸네일 이미지를 업로드합니다. 
+  작성 도중에 이미 이미지를 한 번 업로드 했다면, 기존 이미지에 대한 삭제요청이 필요합니다(@Delete('images/:essayId')).
+
+  **쿼리 파라미터:**
+  - \`essayId\` (선택): 썸네일을 업로드할 에세이의 ID. 이 값이 주어지지 않으면 새로운 이미지를 업로드합니다.
+
+  **동작 과정:**
+  1. \`essayId\`가 제공되면 해당 에세이의 썸네일을 업데이트합니다.
+  2. 새로운 이미지 파일을 S3에 업로드합니다.
+  3. 업로드된 이미지의 URL을 반환합니다.
+
+  **주의 사항:**
+  - 에세이 ID가 제공되지 않으면 새로운 UUID를 생성하여 이미지를 저장합니다.
+  - 기존 썸네일이 있는 경우, 새로운 썸네일 업로드 전에 기존 썸네일을 삭제해야 합니다.
+  `,
   })
   @ApiResponse({ status: 201, type: ThumbnailResDto })
   @UseInterceptors(FileInterceptor('image'))
@@ -134,14 +165,47 @@ export class EssayController {
   }
 
   @Delete('images/:essayId')
-  @ApiOperation({ summary: '썸네일 삭제' })
+  @ApiOperation({
+    summary: '썸네일 삭제',
+    description: `
+  지정된 에세이의 썸네일 이미지를 삭제합니다.
+
+  **경로 파라미터:**
+  - \`essayId\`: 썸네일을 삭제할 에세이의 ID.
+
+  **동작 과정:**
+  1. 에세이를 ID로 조회하여 썸네일이 있는지 확인합니다.
+  2. 썸네일이 존재하면 S3에서 이미지를 삭제합니다.
+  3. 에세이의 썸네일 필드를 null로 업데이트합니다.
+  4. 썸네일 삭제 성공 메시지를 반환합니다.
+
+  **주의 사항:**
+  - 썸네일이 없는 에세이에 대해 삭제 요청을 하면, 404 Not Found 에러를 반환합니다.
+  `,
+  })
   @ApiResponse({ status: 204 })
   async deleteThumbnail(@Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.deleteThumbnail(essayId);
   }
 
   @Get('recommend')
-  @ApiOperation({ summary: '랜덤 추천 에세이 리스트' })
+  @ApiOperation({
+    summary: '랜덤 추천 에세이 리스트',
+    description: `
+  랜덤으로 추천된 에세이 목록을 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`limit\`: 조회할 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 공개 상태의 에세이를 랜덤으로 조회합니다.
+  2. 각 에세이의 내용을 일부만 추출하여 반환합니다.
+  3. 에세이 목록을 반환합니다.
+
+  **주의 사항:**
+  - 에세이의 상태가 'PRIVATE'인 경우 조회되지 않습니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
@@ -149,7 +213,25 @@ export class EssayController {
   }
 
   @Get('followings')
-  @ApiOperation({ summary: '팔로우 중인 유저들의 최신 에세이 리스트' })
+  @ApiOperation({
+    summary: '팔로우 중인 유저들의 최신 에세이 리스트',
+    description: `
+  사용자가 팔로우하고 있는 유저들이 작성한 최신 에세이 목록을 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`limit\`: 조회할 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 사용자가 팔로우하고 있는 유저 목록을 조회합니다.
+  2. 팔로우 중인 유저들이 작성한 최신 에세이 목록을 조회합니다.
+  3. 각 에세이의 내용을 일부만 추출하여 반환합니다.
+  4. 에세이 목록을 반환합니다.
+
+  **주의 사항:**
+  - 팔로우 중인 유저가 없을 경우 빈 배열을 반환합니다.
+  - 에세이의 상태가 'PRIVATE' 또는 'LINKEDOUT' 인 경우 조회되지 않습니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
   async getFollowingsEssays(
@@ -160,14 +242,39 @@ export class EssayController {
   }
 
   @Get('stories')
-  @ApiOperation({ summary: '본인 스토리 리스트' })
+  @ApiOperation({
+    summary: '본인 스토리 리스트',
+    description: `
+  사용자가 작성한 스토리 목록을 조회합니다.
+
+  **동작 과정:**
+  1. 사용자의 ID를 이용하여 해당 사용자가 작성한 모든 스토리를 조회합니다.
+  2. 조회된 스토리 목록을 반환합니다.
+
+  **주의 사항:**
+  - 반환된 스토리에는 각 스토리에 포함된 에세이의 카운트가 포함됩니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: StoriesResDto })
   async getMyStories(@Req() req: ExpressRequest) {
     return this.essayService.getStories(req.user.id);
   }
 
   @Get('stories/:userId')
-  @ApiOperation({ summary: '타겟 유저 스토리 리스트' })
+  @ApiOperation({
+    summary: '타겟 유저 스토리 리스트',
+    description: `
+  특정 사용자가 작성한 스토리 목록을 조회합니다.
+
+  **동작 과정:**
+  1. 요청된 사용자 ID를 이용하여 해당 사용자가 작성한 모든 스토리를 조회합니다.
+  2. 조회된 스토리 목록을 반환합니다.
+
+  **주의 사항:**
+  - 반환된 스토리에는 각 스토리에 포함된 에세이의 카운트가 포함됩니다.
+  - 올바른 사용자 ID를 전달해야 합니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: StoriesResDto })
   async getUserStories(@Param('userId', ParseIntPipe) userId: number) {
     return this.essayService.getStories(userId);
@@ -176,17 +283,47 @@ export class EssayController {
   @Post('stories')
   @ApiOperation({
     summary: '스토리 생성',
-    description:
-      '에세이를 미포함해서 스토리를 생성하는 경우에도 body에 essayIds 필드를 빈 배열로 보내주세요.',
+    description: `
+  새로운 스토리를 생성하고, 선택적으로 해당 스토리에 에세이를 추가합니다.
+
+  **요청 바디:**
+  - \`name\` (string): 생성할 스토리의 이름.
+  - \`essayIds\` (number[]): 선택 사항으로, 스토리에 포함시킬 에세이의 ID 목록입니다. 에세이를 미포함할 경우 빈 배열(또는 값)을 전송해야 합니다.
+
+  **동작 과정:**
+  1. 사용자가 입력한 이름으로 새로운 스토리를 생성합니다.
+  2. 선택적으로 전달된 에세이 ID 목록을 사용하여 해당 에세이들을 생성된 스토리에 추가합니다.
+  3. 모든 작업이 완료되면 생성된 스토리를 반환합니다.
+
+  **주의 사항:**
+  - 에세이 ID 목록은 선택 사항이지만, 제공된 경우 유효한 에세이 ID여야 합니다.
+  - 에세이 ID 목록이 빈 배열일 경우, 에세이 없이 스토리가 생성됩니다.
+  `,
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateStoryReqDto })
-  async saveStory(@Req() req: ExpressRequest, @Body() data?: CreateStoryReqDto) {
+  async saveStory(@Req() req: ExpressRequest, @Body() data: CreateStoryReqDto) {
     return this.essayService.saveStory(req.user.id, data);
   }
 
   @Put('stories/:storyId')
-  @ApiOperation({ summary: '스토리 이름 변경' })
+  @ApiOperation({
+    summary: '스토리 이름 변경',
+    description: `
+  스토리의 이름을 변경합니다.
+
+  **요청 바디:**
+  - \`name\` (string): 변경할 스토리의 새로운 이름.
+
+  **동작 과정:**
+  1. 스토리 ID와 새로운 이름을 입력받아 해당 스토리의 이름을 변경합니다.
+  2. 변경된 스토리를 반환합니다.
+
+  **주의 사항:**
+  - 유효한 스토리 ID를 전달해야 합니다.
+  - 새로운 이름은 빈 문자열이 될 수 없습니다.
+  `,
+  })
   @ApiResponse({ status: 200 })
   @ApiBody({ type: CreateStoryReqDto })
   async updateStory(
@@ -198,14 +335,44 @@ export class EssayController {
   }
 
   @Delete('stories/:storyId')
-  @ApiOperation({ summary: '스토리 삭제' })
+  @ApiOperation({
+    summary: '스토리 삭제',
+    description: `
+  특정 스토리를 삭제합니다.
+
+  **동작 과정:**
+  1. 스토리 ID를 입력받아 해당 스토리를 삭제합니다.
+  2. 삭제 성공 시 상태 코드 204를 반환합니다.
+
+  **주의 사항:**
+  - 유효한 스토리 ID를 전달해야 합니다.
+  `,
+  })
   @ApiResponse({ status: 204 })
   async deleteStory(@Req() req: ExpressRequest, @Param('storyId', ParseIntPipe) storyId: number) {
     return this.essayService.deleteStory(req.user.id, storyId);
   }
 
   @Get('sentence')
-  @ApiOperation({ summary: '한 문장 에세이 조회' })
+  @ApiOperation({
+    summary: '한 문장 에세이 조회',
+    description: `
+  한 문장 에세이를 조회합니다. 'type' 파라미터를 통해 에세이의 첫 문장 또는 마지막 문장을 선택할 수 있습니다.
+
+  **쿼리 파라미터:**
+  - \`type\` (string, required): 'first' 또는 'last' 값을 사용하여 에세이의 첫 문장 또는 마지막 문장을 선택합니다. 기본값은 'first'입니다.
+  - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 6입니다.
+
+  **동작 과정:**
+  1. 지정된 'type' 파라미터에 따라 에세이의 첫 문장 또는 마지막 문장을 추출합니다.
+  2. 지정된 'limit' 파라미터에 따라 에세이 목록을 제한합니다.
+  3. 조회된 에세이 목록을 반환합니다.
+
+  **주의 사항:**
+  - 'type' 파라미터는 'first' 또는 'last' 값만 허용됩니다.
+  - 'limit' 파라미터는 선택 사항이며 기본값은 6입니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: SentenceEssaySchemaDto })
   @ApiQuery({ name: 'type', required: true })
   @ApiQuery({ name: 'limit', required: false })
@@ -217,7 +384,25 @@ export class EssayController {
   }
 
   @Get(':essayId')
-  @ApiOperation({ summary: '에세이 상세조회' })
+  @ApiOperation({
+    summary: '에세이 상세조회',
+    description: `
+  특정 에세이의 상세 정보를 조회합니다. 요청한 사용자가 해당 에세이의 작성자가 아니고 에세이 상태가 PRIVATE일 경우, 조회가 거부됩니다.
+
+  **경로 파라미터:**
+  - \`essayId\` (number, required): 조회할 에세이의 ID
+
+  **동작 과정:**
+  1. 요청된 에세이 ID로 에세이를 조회합니다.
+  2. 요청한 사용자가 에세이의 작성자가 아닌 경우, 에세이 상태가 PRIVATE일 때 조회가 거부됩니다.
+  3. 조회에 성공한 경우 조회수를 증가시킵니다.
+  4. 이전에 작성된 에세이를 함께 조회합니다.
+  5. 조회된 에세이와 이전 에세이를 반환합니다.
+
+  **주의 사항:**
+  - 에세이 ID는 유효한 숫자여야 합니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: EssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);

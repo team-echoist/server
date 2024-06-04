@@ -273,7 +273,7 @@ export class EssayService {
     return { stories: stories };
   }
 
-  async saveStory(userId: number, data?: CreateStoryReqDto) {
+  async saveStory(userId: number, data: CreateStoryReqDto) {
     const savedStory = await this.storyService.saveStory(userId, data.name);
 
     if (data.essayIds && data.essayIds.length > 0) {
