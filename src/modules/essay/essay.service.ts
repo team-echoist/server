@@ -43,6 +43,11 @@ export class EssayService {
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
+  private async checkEssayPermissions(essay: Essay, userId: number) {
+    if (essay.author.id !== userId)
+      throw new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN);
+  }
+
   @Transactional()
   async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
@@ -95,6 +100,7 @@ export class EssayService {
     const tags = await this.tagService.getTags(data.tags);
 
     const essay = await this.essayRepository.findEssayById(essayId);
+    await this.checkEssayPermissions(essay, requester.id);
     await this.checkIfEssayUnderReview(essayId, data);
 
     let message = '';
@@ -191,11 +197,7 @@ export class EssayService {
   @Transactional()
   async deleteEssay(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    if (!essay || essay.author.id !== userId)
-      throw new HttpException(
-        'Essay not found or you do not have permission to delete this essay.',
-        HttpStatus.BAD_REQUEST,
-      );
+    await this.checkEssayPermissions(essay, userId);
 
     await this.essayRepository.deleteEssay(essay);
   }
@@ -273,6 +275,7 @@ export class EssayService {
     return { stories: stories };
   }
 
+  @Transactional()
   async saveStory(userId: number, data: CreateStoryReqDto) {
     const savedStory = await this.storyService.saveStory(userId, data.name);
 
@@ -285,8 +288,47 @@ export class EssayService {
     }
   }
 
-  async updateStory(userId: number, StoryId: number, storyName: string) {
-    await this.storyService.updateStory(userId, StoryId, storyName);
+  @Transactional()
+  async updateStory(userId: number, StoryId: number, data: CreateStoryReqDto) {
+    let story: Story;
+    if (data.name && data.name !== '') {
+      story = await this.storyService.updateStory(userId, StoryId, data);
+    }
+
+    if (data.essayIds && data.essayIds.length > 0) {
+      await this.updatedEssaysOfStory(userId, story, data.essayIds);
+    }
+  }
+
+  async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
+    const exEssayIds = story.essays.map((essay) => essay.id);
+
+    const addedEssayIds = reqEssayIds.filter((essayId) => !exEssayIds.includes(essayId));
+    const removedEssayIds = exEssayIds.filter((essayId) => !reqEssayIds.includes(essayId));
+
+    if (addedEssayIds.length > 0) {
+      await this.addEssaysStory(userId, addedEssayIds, story);
+    }
+
+    if (removedEssayIds.length > 0) {
+      await this.deleteEssaysStory(userId, removedEssayIds);
+    }
+  }
+
+  private async addEssaysStory(userId: number, essayIds: number[], story: Story) {
+    const essays = await this.essayRepository.findByIds(userId, essayIds);
+    essays.forEach((essay) => {
+      essay.story = story;
+    });
+    await this.essayRepository.saveEssays(essays);
+  }
+
+  private async deleteEssaysStory(userId: number, essayIds: number[]) {
+    const essays = await this.essayRepository.findByIds(userId, essayIds);
+    essays.forEach((essay) => {
+      essay.story = null;
+    });
+    await this.essayRepository.saveEssays(essays);
   }
 
   async deleteStory(userId: number, storyId: number) {
@@ -303,5 +345,24 @@ export class EssayService {
     const essayDtos = this.utilsService.transformToDto(SentenceEssaysResDto, essays);
 
     return { essays: essayDtos };
+  }
+
+  async updateEssayStory(userId: number, essayId: number, storyId: number) {
+    const user = await this.userService.fetchUserEntityById(userId);
+    const essay = await this.essayRepository.findEssayById(essayId);
+
+    await this.checkEssayPermissions(essay, userId);
+
+    essay.story = await this.storyService.getStoryById(user, storyId);
+    await this.essayRepository.saveEssay(essay);
+  }
+
+  async deleteEssayStory(userId: number, essayId: number) {
+    const essay = await this.essayRepository.findEssayById(essayId);
+
+    await this.checkEssayPermissions(essay, userId);
+
+    essay.story = null;
+    await this.essayRepository.saveEssay(essay);
   }
 }

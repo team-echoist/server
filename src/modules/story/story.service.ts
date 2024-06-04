@@ -1,10 +1,18 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { StoryRepository } from './story.repository';
 import { User } from '../../entities/user.entity';
 import { Story } from '../../entities/story.entity';
 import { StoryDto } from './dto/story.dto';
 import { UtilsService } from '../utils/utils.service';
 import { UserService } from '../user/user.service';
+import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
 
 @Injectable()
 export class StoryService {
@@ -31,10 +39,11 @@ export class StoryService {
     return await this.saveStoryWithUser(user, name);
   }
 
-  async updateStory(userId: number, storyId: number, categoryName: string) {
-    const story: Story = await this.storyRepository.findStoryById(userId, storyId);
-    story.name = categoryName;
-    await this.storyRepository.saveStory(story);
+  async updateStory(userId: number, storyId: number, data: CreateStoryReqDto) {
+    const story = await this.storyRepository.findStoryWithEssayById(userId, storyId);
+    if (!story) throw new NotFoundException('Story not found');
+    story.name = data.name;
+    return await this.storyRepository.saveStory(story);
   }
 
   async saveStoryWithUser(user: User, storyName: string) {

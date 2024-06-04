@@ -32,6 +32,7 @@ import { StoriesResDto } from '../story/dto/response/storiesRes.dto';
 import { PublicEssaysSchemaDto } from './dto/schema/publicEssaysSchema.dto';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
+import { UpdateStoryReqDto } from '../story/dto/repuest/updateStoryReq.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -339,33 +340,35 @@ export class EssayController {
 
   @Put('stories/:storyId')
   @ApiOperation({
-    summary: '스토리 이름 변경',
+    summary: '스토리 업데이트',
     description: `
-  스토리의 이름을 변경합니다.
-
+  특정 스토리를 업데이트합니다. 요청 본문에 스토리 이름과 에세이 ID 목록을 포함할 수 있습니다.
+  
   **경로 파라미터:**
-  - \`storyId\`: 변경할 스토리의 ID.
+  - \`storyId\`: 업데이트할 스토리의 ID
 
-  **요청 바디:**
-  - \`name\` (string): 변경할 스토리의 새로운 이름.
-
+  **요청 본문:**
+  - \`name\`: 새로운 스토리 이름 (선택 사항)
+  - \`essayIds\`: 스토리에 포함시킬 에세이 ID 목록 (선택 사항)
+  
   **동작 과정:**
-  1. 스토리 ID와 새로운 이름을 입력받아 해당 스토리의 이름을 변경합니다.
-  2. 변경된 스토리를 반환합니다.
-
+  1. 사용자가 제공한 스토리 이름과 에세이 ID 목록을 기반으로 스토리를 업데이트합니다.
+  2. 스토리 이름이 제공된 경우 스토리 이름을 업데이트합니다.
+  3. 에세이 ID 목록이 제공된 경우, 기존 에세이와 새로운 에세이를 비교하여 추가 및 삭제 작업을 수행합니다.
+  
   **주의 사항:**
-  - 유효한 스토리 ID를 전달해야 합니다.
-  - 새로운 이름은 빈 문자열이 될 수 없습니다.
+  - 요청 본문에 스토리 이름과 에세이 ID 목록 둘 다 또는 하나만 포함할 수 있습니다.
+  - 스토리 ID는 필수 경로 파라미터입니다.
   `,
   })
   @ApiResponse({ status: 200 })
-  @ApiBody({ type: CreateStoryReqDto })
+  @ApiBody({ type: UpdateStoryReqDto })
   async updateStory(
     @Req() req: ExpressRequest,
     @Param('storyId', ParseIntPipe) storyId: number,
     @Body() data: CreateStoryReqDto,
   ) {
-    return this.essayService.updateStory(req.user.id, storyId, data.name);
+    return this.essayService.updateStory(req.user.id, storyId, data);
   }
 
   @Delete('stories/:storyId')
@@ -443,5 +446,65 @@ export class EssayController {
   @ApiResponse({ status: 200, type: EssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
+  }
+
+  @Put(':essayId/stories/:storyId')
+  @ApiOperation({
+    summary: '에세이의 스토리 변경',
+    description: `
+  특정 에세이의 소속 스토리를 변경합니다.
+  
+  **경로 파라미터:**
+  - \`essayId\`: 변경할 에세이의 ID
+  - \`storyId\`: 새로운 스토리의 ID
+  
+  **동작 과정:**
+  1. 요청한 사용자의 ID를 기반으로 사용자를 조회합니다.
+  2. 에세이 ID를 기반으로 에세이를 조회합니다.
+  3. 사용자가 에세이에 대한 권한이 있는지 확인합니다.
+  4. 에세이의 스토리를 새로운 스토리로 변경합니다.
+  5. 변경된 에세이를 저장합니다.
+  
+  **주의 사항:**
+  - 요청한 사용자가 해당 에세이에 대한 권한이 있어야 합니다.
+  - 유효한 에세이 ID와 스토리 ID를 제공해야 합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, description: '에세이의 스토리가 성공적으로 변경.' })
+  @ApiResponse({ status: 404, description: '에세이 또는 스토리를 찾을 수 없음.' })
+  @ApiResponse({ status: 403, description: '에세이에 대한 권한이 없음.' })
+  async updateEssayStory(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+    @Param('storyId', ParseIntPipe) storyId: number,
+  ) {
+    return this.essayService.updateEssayStory(req.user.id, essayId, storyId);
+  }
+
+  @Delete(':essayId/stories')
+  @ApiOperation({
+    summary: '에세이 스토리 제거',
+    description: `
+  특정 에세이에서 스토리를 제거합니다. 에세이 ID를 경로 파라미터로 받아 해당 에세이와 연결된 스토리를 해제합니다.
+  
+  **경로 파라미터:**
+  - \`essayId\`: 스토리를 제거할 에세이의 ID
+  
+  **동작 과정:**
+  1. 요청된 에세이 ID를 기반으로 에세이를 조회합니다.
+  2. 에세이와 연결된 스토리를 해제합니다.
+  3. 변경된 에세이 정보를 저장합니다.
+  
+  **주의 사항:**
+  - 유효한 에세이 ID를 제공해야 합니다.
+  - 에세이를 작성한 사용자만 해당 에세이의 스토리를 제거할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  async deleteEssayStory(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+  ) {
+    return this.essayService.deleteEssayStory(req.user.id, essayId);
   }
 }

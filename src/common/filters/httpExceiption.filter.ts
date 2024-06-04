@@ -34,7 +34,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       success: false,
       timestamp: this.utilsService.newDate(),
       path: request.url,
-      error,
+      error: exception.message,
+      statusCode: status,
     });
   }
 }
