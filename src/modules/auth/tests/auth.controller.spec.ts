@@ -35,7 +35,7 @@ describe('AuthController', () => {
     it('건강하니?', async () => {
       const result = await controller.healthCheck();
 
-      expect(result).toBe('살아있느니라');
+      expect(result).toBe('up');
     });
   });
 
