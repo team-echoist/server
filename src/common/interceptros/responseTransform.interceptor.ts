@@ -13,12 +13,17 @@ export class ResponseTransformInterceptor implements NestInterceptor {
     const timestamp = this.utilsService.newDate();
 
     return next.handle().pipe(
-      map((data) => ({
-        success: true,
-        timestamp,
-        path,
-        data,
-      })),
+      map((data) => {
+        const response = context.switchToHttp().getResponse();
+
+        return {
+          success: true,
+          timestamp,
+          path,
+          statusCode: response.statusCode,
+          data,
+        };
+      }),
     );
   }
 }

@@ -129,7 +129,7 @@ describe('EssayService', () => {
     it('에세이가 검토 중인 경우 에러 발생', async () => {
       const user = { id: 1, monitored: false };
       const data = { categoryId: 10, linkedOut: true };
-      const essay = new Essay();
+      const essay = { id: 1, author: { id: 1 } };
       const reviewQueue = new ReviewQueue();
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
       mockReviewService.findReviewByEssayId.mockResolvedValue(reviewQueue);
@@ -159,6 +159,7 @@ describe('EssayService', () => {
         thumbnail: 'sample-thumbnail.jpg',
         title: 'Sample title',
         updatedDate: new Date(),
+        author: { id: 1 },
       };
 
       const expectedEssay = {
@@ -205,10 +206,7 @@ describe('EssayService', () => {
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
 
       await expect(essayService.deleteEssay(1, 1)).rejects.toThrow(
-        new HttpException(
-          'Essay not found or you do not have permission to delete this essay.',
-          HttpStatus.BAD_REQUEST,
-        ),
+        new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN),
       );
     });
 

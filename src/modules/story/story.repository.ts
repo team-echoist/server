@@ -12,6 +12,13 @@ export class StoryRepository {
     return this.storyRepository.findOne({ where: { id: storyId, user: { id: userId } } });
   }
 
+  async findStoryWithEssayById(userId: number, storyId: number) {
+    return this.storyRepository.findOne({
+      where: { id: storyId, user: { id: userId } },
+      relations: ['essays'],
+    });
+  }
+
   async getStoriesById(userId: number) {
     return this.storyRepository
       .createQueryBuilder('story')

@@ -44,6 +44,7 @@ describe('AdminService', () => {
     handleBannedReviews: jest.fn(),
     saveAdmin: jest.fn(),
     findAdmin: jest.fn(),
+    findByEmail: jest.fn(),
   };
   const mockUserRepository = {
     usersCount: jest.fn(),
