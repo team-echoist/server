@@ -590,7 +590,11 @@ export class AdminService {
     return { message: 'Profile image deleted successfully' };
   }
 
-  async activationSettings(adminId: number, active: boolean) {
+  async activationSettings(rootAdminId: number, adminId: number, active: boolean) {
+    const rootAdmin = await this.adminRepository.findAdmin(rootAdminId);
+    if (rootAdmin.id !== 1) {
+      throw new HttpException('Root administrator only', HttpStatus.FORBIDDEN);
+    }
     const admin = await this.adminRepository.findAdmin(adminId);
     admin.active = active;
     const updatedAdmin = await this.adminRepository.saveAdmin(admin);

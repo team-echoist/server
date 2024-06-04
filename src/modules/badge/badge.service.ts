@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import { UtilsService } from '../utils/utils.service';
 import { BadgeRepository } from './badge.repository';
@@ -228,11 +228,11 @@ export class BadgeService {
   async levelUpBadge(userId: number, badgeId: number) {
     const userBadge = await this.badgeRepository.findBadge(userId, badgeId);
     if (!userBadge) {
-      throw new Error('Badge not found for user.');
+      throw new HttpException('Badge not found for user.', HttpStatus.NOT_FOUND);
     }
 
     if (userBadge.exp < 10) {
-      throw new Error('Not enough experience to level up.');
+      throw new HttpException('Not enough experience to level up.', HttpStatus.BAD_REQUEST);
     }
 
     userBadge.exp -= 10;

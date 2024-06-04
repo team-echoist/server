@@ -27,7 +27,6 @@ export class AuthService {
   async checkEmail(email: string) {
     const user = await this.authRepository.findByEmail(email);
     if (user) throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
-
     return;
   }
 
