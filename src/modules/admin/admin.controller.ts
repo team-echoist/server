@@ -42,6 +42,7 @@ import { ProfileImageReqDto } from '../user/dto/request/profileImageReq.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
+import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -558,7 +559,7 @@ export class AdminController {
   - 유효하지 않은 리뷰 ID를 요청할 경우 오류가 발생할 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: DetailReviewResDto })
   async getReview(@Param('reviewId', ParseIntPipe) reviewId: number) {
     return this.adminService.detailReview(reviewId);
   }
@@ -574,7 +575,7 @@ export class AdminController {
   - \`reviewId\`: 처리할 리뷰의 ID
 
   **요청 바디:**
-  - \`actionType\`: 리뷰에 대한 처리 유형 (예: 'approved')
+  - \`actionType\`: 리뷰에 대한 처리 유형 (예: 'approved', 'rejected', 'pending')
   - \`comment\`: 처리에 대한 추가 설명 (선택 사항)
 
   **동작 과정:**

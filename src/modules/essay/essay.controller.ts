@@ -79,7 +79,7 @@ export class EssayController {
   - \`content\` (string): 에세이 내용
   - \`tags\` (string[]): 태그 목록
   - \`storyId\` (number): 스토리 ID
-  - \`status\` (string): 에세이 상태 (예: PUBLISHED, PRIVATE, LINKEDOUT)
+  - \`status\` (string): 에세이 상태 (예: published, private, linkedout)
 
   **동작 과정:**
   1. 요청자의 ID로 사용자 엔티티를 조회합니다.
