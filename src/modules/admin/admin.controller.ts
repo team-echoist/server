@@ -250,7 +250,22 @@ export class AdminController {
   @Get('statistics/essays/monthly')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '[관리자용] 년간 월별 에세이 작성 카운트',
+    summary: '년간 월별 에세이 작성 카운트',
+    description: `
+    년간 월별 에세이 작성 통계를 조회합니다.
+    
+    **쿼리 파라미터:**
+    - \`year\`: 조회할 연도 (기본값: 현재 연도)
+    
+    **동작 과정:**
+    1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
+    2. 해당 기간 동안의 월별 유저 유입 수를 조회합니다.
+    3. 월별 데이터를 반환합니다.
+    
+    **주의 사항:**
+    - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
+    - 응답 예시는 월의 각 월에 해당하는 유저 유입 수를 포함합니다.
+    `,
   })
   @ApiQuery({ name: 'year', required: false })
   @ApiResponse({
@@ -267,12 +282,8 @@ export class AdminController {
 
   @Get('statistics/users/daily')
   @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '월간 일별 유저 유입 통계' })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({
-    status: 200,
-
+  @ApiOperation({
+    summary: '월간 일별 유저 유입 통계',
     description: `
     월간 일별 유저 유입 통계를 조회합니다.
     
@@ -289,6 +300,11 @@ export class AdminController {
     - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
     - 응답 예시는 월의 각 일자에 해당하는 유저 유입 수를 포함합니다.
     `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({
+    status: 200,
     schema: {
       type: 'object',
       example: { '1': 126, '2': 89, '31': 150 },
@@ -303,10 +319,8 @@ export class AdminController {
 
   @Get('statistics/users/monthly')
   @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '년간 월별 유저 유입 통계' })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({
+    summary: '년간 월별 유저 유입 통계',
     description: `
     년간 월별 유저 유입 통계를 조회합니다.
     
@@ -322,6 +336,10 @@ export class AdminController {
     - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
     - 응답 예시는 월의 각 월에 해당하는 유저 유입 수를 포함합니다.
     `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({
+    status: 200,
     schema: {
       type: 'object',
       example: { '1': 542, '2': 753, '12': '347' },
@@ -333,11 +351,8 @@ export class AdminController {
 
   @Get('statistics/payments/daily')
   @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '[관리자용] 월간 일별 구독 가입 통계' })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({
+    summary: '월간 일별 구독 가입 통계',
     description: `
     월간 일별 구독 가입 통계를 조회합니다.
     
@@ -354,6 +369,11 @@ export class AdminController {
     - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
     - 응답 예시는 일별 구독 가입 수를 포함합니다.
     `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({
+    status: 200,
     schema: {
       type: 'object',
       example: { '1': 126, '2': 89, '31': 150 },
@@ -368,10 +388,8 @@ export class AdminController {
 
   @Get('statistics/payments/monthly')
   @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '[관리자용] 년간 월별 구독 가입 통계' })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({
+    summary: '년간 월별 구독 가입 통계',
     description: `
     년간 월별 구독 가입 통계를 조회합니다.
     
@@ -387,6 +405,10 @@ export class AdminController {
     - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
     - 응답 예시는 월별 구독 가입 수를 포함합니다.
     `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({
+    status: 200,
     schema: {
       type: 'object',
       example: { '1': 542, '2': 753, '12': '347' },
@@ -634,7 +656,7 @@ export class AdminController {
   @Put('users/:userId')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '[관리자용] 유저 정보 수정',
+    summary: '유저 정보 수정',
     description: `
     관리자가 특정 유저의 정보를 수정합니다.
     
