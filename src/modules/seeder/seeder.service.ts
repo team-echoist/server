@@ -29,9 +29,11 @@ export class SeederService {
   ) {}
 
   async seedAll() {
-    const users = await this.seedUsers();
-    const essays = await this.seedEssays(users);
-    await this.seedReports(users, essays);
+    setTimeout(async () => {
+      const users = await this.seedUsers();
+      const essays = await this.seedEssays(users);
+      await this.seedReports(users, essays);
+    }, 10000);
   }
 
   async seedAdmin() {
