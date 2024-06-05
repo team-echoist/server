@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Brackets, In, Repository } from 'typeorm';
 import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
@@ -34,8 +34,14 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findEssays(userId: number, published: boolean, storyId: number, limit: number) {
-    const qb = this.essayRepository
+  async findEssays(
+    userId: number,
+    published: boolean,
+    storyId: number,
+    page: number,
+    limit: number,
+  ) {
+    const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
       .leftJoinAndSelect('essay.story', 'story')
@@ -44,23 +50,47 @@ export class EssayRepository {
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT });
 
     if (storyId !== undefined) {
-      qb.andWhere('essay.story.id = :storyId', { storyId });
+      queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
     }
 
     if (published !== undefined) {
       if (published) {
-        qb.andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED });
+        queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED });
       } else {
-        qb.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
+        queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
       }
     } else {
-      qb.andWhere('essay.status IN (:...statuses)', {
+      queryBuilder.andWhere('essay.status IN (:...statuses)', {
         statuses: [EssayStatus.PRIVATE, EssayStatus.PUBLISHED],
       });
     }
 
-    const [essays, total] = await qb
-      .take(limit)
+    queryBuilder.offset((page - 1) * limit).limit(limit);
+
+    const [essays, total] = await queryBuilder
+      .orderBy('essay.createdDate', 'DESC')
+      .getManyAndCount();
+
+    return { essays, total };
+  }
+
+  async findTargetUserEssays(userId: number, storyId: number, page: number, limit: number) {
+    const queryBuilder = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.story', 'story')
+      .leftJoinAndSelect('essay.tags', 'tags')
+      .where('essay.author.id = :userId', { userId })
+      .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
+      .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE });
+
+    if (storyId !== undefined) {
+      queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
+    }
+
+    queryBuilder.offset((page - 1) * limit).limit(limit);
+
+    const [essays, total] = await queryBuilder
       .orderBy('essay.createdDate', 'DESC')
       .getManyAndCount();
 
@@ -101,24 +131,36 @@ export class EssayRepository {
       .getRawOne();
   }
 
-  async getFollowingsEssays(followingIds: number[], limit: number) {
-    const subQuery = this.essayRepository
+  async getFollowingsEssays(followingIds: number[], page: number, limit: number) {
+    const total = await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoin('essay.author', 'author')
+      .where('essay.author.id IN (:...followingIds)', { followingIds })
+      .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .getCount();
+
+    const subQueryBuilder = this.essayRepository
       .createQueryBuilder('essay')
       .select('essay.id')
       .leftJoin('essay.author', 'author')
       .where('essay.author.id IN (:...followingIds)', { followingIds })
       .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
       .orderBy('essay.createdDate', 'DESC')
+      .offset((page - 1) * limit)
       .limit(limit);
 
-    return await this.essayRepository
+    const subQuery = subQueryBuilder.getQuery();
+
+    const essays = await this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
       .leftJoinAndSelect('essay.tags', 'tags')
-      .where(`essay.id IN (${subQuery.getQuery()})`)
-      .setParameters(subQuery.getParameters())
+      .where(`essay.id IN (${subQuery})`)
+      .setParameters(subQueryBuilder.getParameters())
       .orderBy('essay.createdDate', 'DESC')
       .getMany();
+
+    return { essays, total };
   }
 
   async findPreviousMyEssay(authorId: number, createdDate: Date) {
@@ -270,5 +312,26 @@ export class EssayRepository {
         author: { id: userId },
       },
     });
+  }
+
+  async findToUpdateStory(userId: number, storyId: number, page: number, limit: number) {
+    const queryBuilder = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.story', 'story')
+      .where('essay.author = :userId', { userId })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('essay.story = :storyId', { storyId }).orWhere('essay.story IS NULL');
+        }),
+      )
+      .select(['essay.id', 'essay.title', 'essay.createdDate', 'story.id']);
+
+    queryBuilder.offset((page - 1) * limit).limit(limit);
+
+    const [essays, total] = await queryBuilder
+      .orderBy('essay.createdDate', 'DESC')
+      .getManyAndCount();
+
+    return { essays: essays, total };
   }
 }

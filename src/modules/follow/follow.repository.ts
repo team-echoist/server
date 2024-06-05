@@ -27,7 +27,19 @@ export class FollowRepository {
     await this.followRepository.remove(followData);
   }
 
-  async findFollowings(userId: number) {
+  async findFollowings(userId: number, page: number, limit: number) {
+    const queryBuilder = this.followRepository
+      .createQueryBuilder('follow')
+      .leftJoinAndSelect('follow.following', 'following')
+      .where('follow.follower.id = :userId', { userId })
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [followings, total] = await queryBuilder.getManyAndCount();
+    return { followings: followings, total };
+  }
+
+  async findAllFollowings(userId: number) {
     return await this.followRepository.find({
       where: { follower: { id: userId } },
       relations: ['following'],

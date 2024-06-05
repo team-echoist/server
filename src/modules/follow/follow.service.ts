@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FollowRepository } from './follow.repository';
 import { User } from '../../entities/user.entity';
 import { UtilsService } from '../utils/utils.service';
+import { UserSummaryResSchemaDto } from '../user/dto/schema/userSummaryResSchema.dto';
 
 @Injectable()
 export class FollowService {
@@ -26,7 +27,12 @@ export class FollowService {
     return await this.followRepository.findFollowerRelation(followerId, followingId);
   }
 
-  async getFollowings(userId: number) {
-    return await this.followRepository.findFollowings(userId);
+  async getFollowings(userId: number, page: number, limit: number) {
+    const { followings, total } = await this.followRepository.findFollowings(userId, page, limit);
+    return { followings: followings, total };
+  }
+
+  async getAllFollowings(userId: number) {
+    return this.followRepository.findAllFollowings(userId);
   }
 }

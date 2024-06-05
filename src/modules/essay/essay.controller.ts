@@ -33,6 +33,7 @@ import { PublicEssaysSchemaDto } from './dto/schema/publicEssaysSchema.dto';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
 import { UpdateStoryReqDto } from '../story/dto/repuest/updateStoryReq.dto';
+import { EssaysSummarySchemaDto } from './dto/schema/essaysSummarySchema.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -113,7 +114,8 @@ export class EssayController {
   사용자 본인이 작성한 에세이 목록을 조회하는 데 사용됩니다. 다양한 쿼리 파라미터를 사용하여 에세이 목록을 필터링할 수 있습니다.
 
   **쿼리 파라미터:**
-  - \`limit\`: 조회할 에세이 수 (기본값: 10)
+  - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
+  - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 10입니다.
   - \`published\`: 발행 여부 (true 또는 false)
   - \`storyId\`: 특정 스토리에 속한 에세이만 조회
 
@@ -127,16 +129,54 @@ export class EssayController {
   `,
   })
   @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
   @ApiQuery({ name: 'storyId', required: false })
   async getMyEssay(
     @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
     @Query('published', OptionalBoolPipe) published: boolean,
     @Query('storyId', OptionalParseIntPipe) storyId: number,
   ) {
-    return this.essayService.getMyEssays(req.user.id, published, storyId, limit);
+    return this.essayService.getMyEssays(req.user.id, published, storyId, page, limit);
+  }
+
+  @Get('author/:userId')
+  @ApiOperation({
+    summary: '타겟 유저의 에세이 리스트 조회',
+    description: `
+  특정 사용자가 작성한 에세이 목록을 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`storyId\`: 특정 스토리에 속한 에세이만 조회 (선택 사항)
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 조회할 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 주어진 사용자 ID를 기반으로 해당 사용자가 작성한 에세이를 조회합니다.
+  2. 조회된 에세이에서 상태가 'LINKEDOUT' 또는 'PRIVATE'인 에세이는 제외합니다.
+  3. 스토리 ID가 제공된 경우, 해당 스토리에 속한 에세이만 필터링합니다.
+  4. 스토리 ID가 제공되지 않은 경우, 모든 스토리와 상관없이 퍼블릭 에세이를 조회합니다.
+  5. 페이지네이션을 적용하여 에세이 목록을 반환합니다.
+
+  **주의 사항:**
+  - 유효한 사용자 ID가 필요합니다.
+  - 스토리 ID가 제공되지 않으면 모든 퍼블릭 에세이를 조회합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'storyId', required: false })
+  async getTargetUserEssays(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('storyId', OptionalParseIntPipe) storyId: number,
+  ) {
+    return this.essayService.getTargetUserEssays(userId, storyId, page, limit);
   }
 
   @Delete(':essayId')
@@ -224,7 +264,7 @@ export class EssayController {
   랜덤으로 추천된 에세이 목록을 조회합니다.
 
   **쿼리 파라미터:**
-  - \`limit\`: 조회할 에세이 수 (기본값: 10)
+  - \`limit\` (number, optional): 조회할 에세이 수 (기본값: 10)
 
   **동작 과정:**
   1. 공개 상태의 에세이를 랜덤으로 조회합니다.
@@ -248,7 +288,8 @@ export class EssayController {
   사용자가 팔로우하고 있는 유저들이 작성한 최신 에세이 목록을 조회합니다.
 
   **쿼리 파라미터:**
-  - \`limit\`: 조회할 에세이 수 (기본값: 10)
+  - \`page\` (number, optional): 조회할 페이지 (기본값: 1)
+  - \`limit\` (number, optional): 조회할 에세이 수 (기본값: 10)
 
   **동작 과정:**
   1. 사용자가 팔로우하고 있는 유저 목록을 조회합니다.
@@ -262,12 +303,14 @@ export class EssayController {
   `,
   })
   @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
+  @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getFollowingsEssays(
     @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.essayService.getFollowingsEssays(req.user.id, limit);
+    return this.essayService.getFollowingsEssays(req.user.id, page, limit);
   }
 
   @Get('stories')
@@ -506,5 +549,39 @@ export class EssayController {
     @Param('essayId', ParseIntPipe) essayId: number,
   ) {
     return this.essayService.deleteEssayStory(req.user.id, essayId);
+  }
+
+  @Get('stories/:storyId/mine')
+  @ApiOperation({
+    summary: '본인이 작성한 특정 스토리 또는 스토리가 없는 에세이 목록 조회',
+    description: `
+  본인이 작성한 에세이 중 특정 스토리에 속하거나 스토리가 없는 에세이 목록을 조회합니다.
+    
+  **경로 파라미터:**
+  - \`storyId\`: 조회할 스토리의 고유 ID
+  
+  **쿼리 파라미터:**
+  - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
+  - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 20입니다.
+    
+  **동작 과정:**
+  1. 요청된 사용자 ID와 경로 매개변수 \`storyId\`를 이용하여 에세이를 조회합니다.
+  2. 조회된 에세이 목록을 반환합니다.
+    
+  **주의 사항:**
+  - 요청된 사용자 본인이 작성한 에세이만 조회됩니다.
+  - \`storyId\`와 일치하는 스토리 또는 스토리가 없는 에세이만 조회됩니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: EssaysSummarySchemaDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getEssayToUpdateStory(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(20)) limit: number,
+    @Param('storyId', ParseIntPipe) storyId: number,
+  ) {
+    return this.essayService.getEssayToUpdateStory(req.user.id, storyId, page, limit);
   }
 }

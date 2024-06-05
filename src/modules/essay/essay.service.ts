@@ -28,6 +28,7 @@ import { EssayListResDto } from './dto/response/essayListRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { BadgeService } from '../badge/badge.service';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
+import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 
 @Injectable()
 export class EssayService {
@@ -146,20 +147,45 @@ export class EssayService {
   }
 
   @Transactional()
-  async getMyEssays(userId: number, published: boolean, storyId: number, limit: number) {
+  async getMyEssays(
+    userId: number,
+    published: boolean,
+    storyId: number,
+    page: number,
+    limit: number,
+  ) {
     const { essays, total } = await this.essayRepository.findEssays(
       userId,
       published,
       storyId,
+      page,
       limit,
     );
+    const totalPage: number = Math.ceil(total / limit);
 
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
 
-    return { essays: essayDtos, total };
+    return { essays: essayDtos, total, totalPage, page };
+  }
+
+  async getTargetUserEssays(userId: number, storyId: number, page: number, limit: number) {
+    const { essays, total } = await this.essayRepository.findTargetUserEssays(
+      userId,
+      storyId,
+      page,
+      limit,
+    );
+    const totalPage: number = Math.ceil(total / limit);
+
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractPartContent(essay.content);
+    });
+    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+
+    return { essays: essayDtos, total, totalPage, page };
   }
 
   @Transactional()
@@ -253,21 +279,27 @@ export class EssayService {
     return this.utilsService.transformToDto(EssayStatsDto, essayStats);
   }
 
-  async getFollowingsEssays(userId: number, limit: number) {
-    const followings = await this.followService.getFollowings(userId);
+  async getFollowingsEssays(userId: number, page: number, limit: number) {
+    const followings = await this.followService.getAllFollowings(userId);
     const followingIds = followings.map((follow) => follow.following.id);
 
     if (followingIds.length === 0) {
       return { essays: [] };
     }
 
-    const essays = await this.essayRepository.getFollowingsEssays(followingIds, limit);
+    const { essays, total } = await this.essayRepository.getFollowingsEssays(
+      followingIds,
+      page,
+      limit,
+    );
+    const totalPage: number = Math.ceil(total / limit);
+
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
 
-    return { essays: essayDtos };
+    return { essays: essayDtos, total, totalPage, page };
   }
 
   async getStories(userId: number) {
@@ -364,5 +396,26 @@ export class EssayService {
 
     essay.story = null;
     await this.essayRepository.saveEssay(essay);
+  }
+
+  async getEssayToUpdateStory(userId: number, storyId: number, page: number, limit: number) {
+    const { essays, total } = await this.essayRepository.findToUpdateStory(
+      userId,
+      storyId,
+      page,
+      limit,
+    );
+    const totalPage: number = Math.ceil(total / limit);
+
+    const transformedEssays = essays.map((essay) => ({
+      id: essay.id,
+      title: essay.title,
+      createdDate: essay.createdDate,
+      story: essay.story ? essay.story.id : null,
+    }));
+
+    const essaysDto = this.utilsService.transformToDto(EssaySummaryResDto, transformedEssays);
+
+    return { essays: essaysDto, totalPage, page, total };
   }
 }
