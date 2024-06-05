@@ -108,7 +108,7 @@ export class EssayController {
 
   @Get()
   @ApiOperation({
-    summary: '본인 에세이 조회',
+    summary: '본인 에세이 리스트 조회',
     description: `
   사용자 본인이 작성한 에세이 목록을 조회하는 데 사용됩니다. 다양한 쿼리 파라미터를 사용하여 에세이 목록을 필터링할 수 있습니다.
 

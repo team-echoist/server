@@ -73,7 +73,7 @@ export class AdminController {
   })
   @ApiResponse({ type: '' })
   @ApiBody({ type: AdminRegisterReqDto })
-  async register(data: AdminRegisterReqDto) {
+  async register(@Body() data: AdminRegisterReqDto) {
     return this.adminService.register(data);
   }
 
