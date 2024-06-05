@@ -2,7 +2,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UserSummaryDto {
+export class UserSummaryResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()

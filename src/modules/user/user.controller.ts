@@ -7,12 +7,13 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request as ExpressRequest } from 'express';
@@ -22,9 +23,11 @@ import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
-import { UserSummaryDto } from './dto/userSummary.dto';
+import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import { BadgesSchemaDto } from '../badge/dto/schema/badgesSchema.dto';
 import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchema.dto';
+import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
+import { UserSummaryResSchemaDto } from './dto/schema/userSummaryResSchema.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -113,6 +116,10 @@ export class UserController {
     summary: '팔로우 리스트',
     description: `
   현재 사용자가 팔로우하고 있는 사용자 목록을 조회합니다.
+  
+  **쿼리 파라미터:**
+  - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
+  - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 20입니다.
 
   **동작 과정:**
   1. 사용자 ID를 기반으로 팔로우하고 있는 사용자 목록을 조회합니다.
@@ -123,9 +130,15 @@ export class UserController {
   - 팔로우 정보는 간략한 사용자 정보로 변환되어 반환됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: [UserSummaryDto] })
-  async getFollowings(@Req() req: ExpressRequest) {
-    return this.userService.getFollowings(req.user.id);
+  @ApiResponse({ status: 200, type: UserSummaryResSchemaDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getFollowings(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(20)) limit: number,
+  ) {
+    return this.userService.getFollowings(req.user.id, page, limit);
   }
 
   @Post('follows/:userId')

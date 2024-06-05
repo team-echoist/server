@@ -19,7 +19,7 @@ import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
-import { UserSummaryDto } from './dto/userSummary.dto';
+import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -92,7 +92,7 @@ export class UserService {
 
   async getUserSummaryById(userId: number) {
     const user = await this.userRepository.findUserById(userId);
-    return this.utilsService.transformToDto(UserSummaryDto, user);
+    return this.utilsService.transformToDto(UserSummaryResDto, user);
   }
 
   async getUserInfo(userId: number) {
@@ -124,12 +124,14 @@ export class UserService {
     await this.followService.unFollow(followerId, followingId);
   }
 
-  async getFollowings(userId: number) {
-    const followings = await this.followService.getFollowings(userId);
+  async getFollowings(userId: number, page: number, limit: number) {
+    const { followings, total } = await this.followService.getFollowings(userId, page, limit);
+    const totalPage: number = Math.ceil(total / limit);
+
     const followingsDto = followings.map((follow) => {
-      return this.utilsService.transformToDto(UserSummaryDto, follow.following);
+      return this.utilsService.transformToDto(UserSummaryResDto, follow.following);
     });
-    return { followings: followingsDto };
+    return { followings: followingsDto, total, totalPage, page };
   }
 
   async levelUpBadge(userId: number, badgeId: number) {

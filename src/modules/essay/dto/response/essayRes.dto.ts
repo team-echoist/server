@@ -11,7 +11,7 @@ import {
 import { Exclude, Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
-import { UserSummaryDto } from '../../../user/dto/userSummary.dto';
+import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 import { StoryDto } from '../../../story/dto/story.dto';
 
 export class EssayResDto {
@@ -81,10 +81,10 @@ export class EssayResDto {
   @Expose()
   tags: TagDto[];
 
-  @ApiProperty({ type: UserSummaryDto })
-  @Type(() => UserSummaryDto)
+  @ApiProperty({ type: UserSummaryResDto })
+  @Type(() => UserSummaryResDto)
   @Expose()
-  author: UserSummaryDto;
+  author: UserSummaryResDto;
 
   @ApiProperty({ type: StoryDto })
   @Type(() => StoryDto)
