@@ -51,6 +51,12 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
   async dataSourceFactory(option) {
     if (!option) throw new Error('Invalid options passed');
 
-    return addTransactionalDataSource(new DataSource(option));
+    if (!global.dataSource) {
+      global.dataSource = new DataSource(option);
+      await global.dataSource.initialize();
+      addTransactionalDataSource(global.dataSource);
+    }
+
+    return global.dataSource;
   },
 };
