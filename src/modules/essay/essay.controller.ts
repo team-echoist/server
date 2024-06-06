@@ -553,7 +553,7 @@ export class EssayController {
 
   @Get('stories/:storyId/mine')
   @ApiOperation({
-    summary: '본인이 작성한 특정 스토리 또는 스토리가 없는 에세이 목록 조회',
+    summary: '스토리 생성 또는 수정시 사용될 에세이 리스트',
     description: `
   본인이 작성한 에세이 중 특정 스토리에 속하거나 스토리가 없는 에세이 목록을 조회합니다.
     
