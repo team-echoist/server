@@ -16,6 +16,8 @@ export class ResponseTransformInterceptor implements NestInterceptor {
       map((data) => {
         const response = context.switchToHttp().getResponse();
 
+        if (path === '/api/auth/health-check') return data;
+
         return {
           success: true,
           timestamp,

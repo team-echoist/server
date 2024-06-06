@@ -28,13 +28,31 @@ async function bootstrap() {
 
   app.enableCors({
     origin: ['https://linkedoutapp.com', 'http://localhost:3000', 'http://localhost:5173'],
-    allowedHeaders: 'Content-Type, Authorization',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders:
+      "Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Observe'",
     exposedHeaders: 'Authorization',
   });
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader(
+      'Access-Control-Allow-Origin',
+      'https://linkedoutapp.com, http://localhost:3000, http://localhost:5173',
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Observe',
+    );
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    next();
+  });
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     next();
   });
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.url === '/favicon.ico') {
       res.status(204).end();
@@ -42,6 +60,7 @@ async function bootstrap() {
       next();
     }
   });
+
   app.setGlobalPrefix('/api');
   app.useGlobalFilters(new HttpExceptionFilter(utilsService));
   app.useGlobalInterceptors(
@@ -49,6 +68,7 @@ async function bootstrap() {
     new ResponseTransformInterceptor(utilsService),
     new LoggingInterceptor(),
   );
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -56,6 +76,7 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: false },
     }),
   );
+
   app.use(
     helmet.contentSecurityPolicy({
       directives: {
