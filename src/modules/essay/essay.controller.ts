@@ -332,29 +332,6 @@ export class EssayController {
     return this.essayService.getStories(req.user.id);
   }
 
-  @Get('stories/:userId')
-  @ApiOperation({
-    summary: '타겟 유저 스토리 리스트',
-    description: `
-  특정 사용자가 작성한 스토리 목록을 조회합니다.
-
-  **경로 파라미터:**
-  - \`userId\`: 조회할 스토리 리스트의 작성자 ID.
-
-  **동작 과정:**
-  1. 요청된 사용자 ID를 이용하여 해당 사용자가 작성한 모든 스토리를 조회합니다.
-  2. 조회된 스토리 목록을 반환합니다.
-
-  **주의 사항:**
-  - 반환된 스토리에는 각 스토리에 포함된 에세이의 카운트가 포함됩니다.
-  - 올바른 사용자 ID를 전달해야 합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: StoriesResDto })
-  async getUserStories(@Param('userId', ParseIntPipe) userId: number) {
-    return this.essayService.getStories(userId);
-  }
-
   @Post('stories')
   @ApiOperation({
     summary: '스토리 생성',
@@ -489,6 +466,7 @@ export class EssayController {
   @ApiResponse({ status: 200, type: EssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
+    // todo 마지막 작업
   }
 
   @Put(':essayId/stories/:storyId')
@@ -551,16 +529,14 @@ export class EssayController {
     return this.essayService.deleteEssayStory(req.user.id, essayId);
   }
 
-  @Get('stories/:storyId/mine')
+  @Get('stories/related')
   @ApiOperation({
     summary: '스토리 생성 또는 수정시 사용될 에세이 리스트',
     description: `
   본인이 작성한 에세이 중 특정 스토리에 속하거나 스토리가 없는 에세이 목록을 조회합니다.
-    
-  **경로 파라미터:**
-  - \`storyId\`: 조회할 스토리의 고유 ID
   
   **쿼리 파라미터:**
+  - \`storyId\` (number, optional): 조회할 스토리의 고유 ID
   - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
   - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 20입니다.
     
@@ -574,14 +550,38 @@ export class EssayController {
   `,
   })
   @ApiResponse({ status: 200, type: EssaysSummarySchemaDto })
+  @ApiQuery({ name: 'storyId', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getEssayToUpdateStory(
     @Req() req: ExpressRequest,
+    @Query('storyId', OptionalParseIntPipe) storyId: number,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(20)) limit: number,
-    @Param('storyId', ParseIntPipe) storyId: number,
   ) {
     return this.essayService.getEssayToUpdateStory(req.user.id, storyId, page, limit);
+  }
+
+  @Get('stories/:userId')
+  @ApiOperation({
+    summary: '타겟 유저 스토리 리스트',
+    description: `
+  특정 사용자가 작성한 스토리 목록을 조회합니다.
+
+  **경로 파라미터:**
+  - \`userId\`: 조회할 스토리 리스트의 작성자 ID.
+
+  **동작 과정:**
+  1. 요청된 사용자 ID를 이용하여 해당 사용자가 작성한 모든 스토리를 조회합니다.
+  2. 조회된 스토리 목록을 반환합니다.
+
+  **주의 사항:**
+  - 반환된 스토리에는 각 스토리에 포함된 에세이의 카운트가 포함됩니다.
+  - 올바른 사용자 ID를 전달해야 합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: StoriesResDto })
+  async getUserStories(@Param('userId', ParseIntPipe) userId: number) {
+    return this.essayService.getStories(userId);
   }
 }

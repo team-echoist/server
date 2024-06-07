@@ -23,6 +23,7 @@ import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeOrmOptions } from '../typeorm.options';
+import { ViewModule } from './modules/view/view.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { TypeOrmOptions } from '../typeorm.options';
     UtilsModule,
     AwsModule,
     BadgeModule,
+    ViewModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },

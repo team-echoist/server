@@ -22,6 +22,7 @@ import { Story } from '../../entities/story.entity';
 import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
+import { ViewModule } from '../view/view.module';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ dotenv.config();
     AwsModule,
     FollowModule,
     BadgeModule,
+    ViewModule,
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],

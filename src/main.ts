@@ -26,19 +26,32 @@ async function bootstrap() {
 
   const app: INestApplication = await NestFactory.create(AppModule);
 
+  const allowedOrigins = [
+    'https://linkedoutapp.com',
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ];
+
   app.enableCors({
-    origin: ['https://linkedoutapp.com', 'http://localhost:3000', 'http://localhost:5173'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, origin);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     allowedHeaders:
-      "Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Observe'",
-    exposedHeaders: 'Authorization',
+      'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Observe',
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    credentials: true,
   });
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      'https://linkedoutapp.com, http://localhost:3000, http://localhost:5173',
-    );
+    const origin = req.headers.origin as string;
+
+    if (allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader(
       'Access-Control-Allow-Headers',
       'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Observe',

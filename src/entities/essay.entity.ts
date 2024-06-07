@@ -18,6 +18,7 @@ import { Story } from './story.entity';
 import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Tag } from './tag.entity';
+import { ViewRecord } from './viewRecord.entity';
 
 export enum EssayStatus {
   PRIVATE = 'private',
@@ -108,4 +109,7 @@ export class Essay {
 
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.essay)
   processedHistories: ProcessedHistory[];
+
+  @OneToMany(() => ViewRecord, (essayView) => essayView.essay)
+  viewRecords: ViewRecord[];
 }

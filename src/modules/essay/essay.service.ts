@@ -29,6 +29,7 @@ import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { BadgeService } from '../badge/badge.service';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
+import { ViewService } from '../view/view.service';
 
 @Injectable()
 export class EssayService {
@@ -41,6 +42,7 @@ export class EssayService {
     private readonly storyService: StoryService,
     private readonly followService: FollowService,
     private readonly badgeService: BadgeService,
+    private readonly viewService: ViewService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
@@ -196,7 +198,10 @@ export class EssayService {
       if (essay.status === EssayStatus.PRIVATE) {
         throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
       } else {
+        const user = await this.userService.fetchUserEntityById(userId);
+
         await this.essayRepository.incrementViews(essay);
+        await this.viewService.addViewRecord(user, essay);
       }
     }
 
