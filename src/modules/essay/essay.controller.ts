@@ -466,7 +466,6 @@ export class EssayController {
   @ApiResponse({ status: 200, type: EssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
-    // todo 마지막 작업
   }
 
   @Put(':essayId/stories/:storyId')

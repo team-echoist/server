@@ -103,7 +103,6 @@ export class AuthService {
       }
     }
     return user;
-    // todo oauth 로그인 후 닉네임 등록과정이 필요함
   }
 
   async validateGoogleUser(data: GoogleUserReqDto) {
