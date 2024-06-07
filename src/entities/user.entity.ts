@@ -17,6 +17,7 @@ import { ProcessedHistory } from './processedHistory.entity';
 import { Follow } from './follow.entity';
 import { Badge } from './badge.entity';
 import { TagExp } from './tagExp.entity';
+import { ViewRecord } from './viewRecord.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -112,4 +113,7 @@ export class User {
 
   @OneToMany(() => TagExp, (tagExp) => tagExp.user)
   tagExps: TagExp[];
+
+  @OneToMany(() => ViewRecord, (essayView) => essayView.user)
+  essayViewRecords: ViewRecord[];
 }

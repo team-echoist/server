@@ -12,6 +12,7 @@ import { Tag } from './src/entities/tag.entity';
 import { Follow } from './src/entities/follow.entity';
 import { Badge } from './src/entities/badge.entity';
 import { TagExp } from './src/entities/tagExp.entity';
+import { ViewRecord } from './src/entities/viewRecord.entity';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
       Follow,
       Badge,
       TagExp,
+      ViewRecord,
     ],
     dropSchema: process.env.ENV === 'prod',
     timezone: 'Asia/Seoul',

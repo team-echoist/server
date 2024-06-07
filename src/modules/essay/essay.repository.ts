@@ -318,20 +318,26 @@ export class EssayRepository {
     const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.story', 'story')
-      .where('essay.author = :userId', { userId })
-      .andWhere(
+      .where('essay.author = :userId', { userId });
+
+    if (storyId) {
+      queryBuilder.andWhere(
         new Brackets((qb) => {
           qb.where('essay.story = :storyId', { storyId }).orWhere('essay.story IS NULL');
         }),
-      )
-      .select(['essay.id', 'essay.title', 'essay.createdDate', 'story.id']);
+      );
+    } else {
+      queryBuilder.andWhere('essay.story IS NULL');
+    }
 
-    queryBuilder.offset((page - 1) * limit).limit(limit);
+    queryBuilder
+      .select(['essay.id', 'essay.title', 'essay.createdDate', 'story.id'])
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .orderBy('essay.createdDate', 'DESC');
 
-    const [essays, total] = await queryBuilder
-      .orderBy('essay.createdDate', 'DESC')
-      .getManyAndCount();
+    const [essays, total] = await queryBuilder.getManyAndCount();
 
-    return { essays: essays, total };
+    return { essays, total };
   }
 }
