@@ -30,11 +30,12 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column({ nullable: true, unique: true, default: null })
   nickname: string;
 
-  @Column({ unique: true })
   @Index()
+  @Column({ unique: true })
   email: string;
 
   @Column({ nullable: true })

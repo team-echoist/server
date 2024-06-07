@@ -26,16 +26,24 @@ export class AuthService {
 
   async checkEmail(email: string) {
     const user = await this.authRepository.findByEmail(email);
-    if (user) throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+    if (user) throw new HttpException('Email already exists', HttpStatus.CONFLICT);
+    return;
+  }
+
+  async checkNickname(nickname: string) {
+    const user = await this.authRepository.findByNickname(nickname);
+    if (user) throw new HttpException('Nickname already exists', HttpStatus.CONFLICT);
     return;
   }
 
   async isEmailOwned(createUserDto: CreateUserReqDto) {
     const email = createUserDto.email;
-    const userExists = await this.authRepository.findByEmail(email);
+    const nickname = createUserDto.nickname;
+    const emailExists = await this.authRepository.findByEmail(email);
+    const nicknameExists = await this.authRepository.findByNickname(nickname);
 
-    if (userExists) {
-      throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+    if (emailExists || nicknameExists) {
+      throw new HttpException('Email or nickname is already exists.', HttpStatus.BAD_REQUEST);
     }
 
     const token = await this.utilsService.generateVerifyToken();
@@ -85,6 +93,7 @@ export class AuthService {
       user = await this.authRepository.createUser({
         email: oauthUser.email,
         oauthInfo: { [`${oauthUser.platform}Id`]: oauthUser.platformId },
+        nickname: null,
       });
     } else {
       if (!user.oauthInfo || !user.oauthInfo[`${oauthUser.platform}Id`]) {
@@ -94,6 +103,7 @@ export class AuthService {
       }
     }
     return user;
+    // todo oauth 로그인 후 닉네임 등록과정이 필요함
   }
 
   async validateGoogleUser(data: GoogleUserReqDto) {
