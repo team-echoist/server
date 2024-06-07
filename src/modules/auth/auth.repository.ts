@@ -10,8 +10,12 @@ export class AuthRepository {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findByEmail(email: string): Promise<User | undefined> {
+  async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findByNickname(nickname: string) {
+    return this.userRepository.findOne({ where: { nickname } });
   }
 
   async createUser(createUserDto: CreateUserReqDto | CreateAdminDto) {

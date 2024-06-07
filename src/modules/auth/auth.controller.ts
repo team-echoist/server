@@ -6,6 +6,8 @@ import { AuthService } from './auth.service';
 import { LoginReqDto } from './dto/request/loginReq.dto';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
+import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
+import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,29 +21,75 @@ export class AuthController {
     return 'up';
   }
 
-  @Get('check')
+  @Post('check/email')
   @ApiOperation({
-    summary: '이메일중복검사',
+    summary: '이메일 중복 검사',
     description: `
-  회원가입 페이지에서 이메일 입력칸에 이메일 형식의 문자열이 완성되었을 때 사용합니다.
-
-  **쿼리 파라미터:**
-  - \`email\`: 중복 검사를 할 이메일 주소 (필수)
+  회원가입 페이지에서 이메일 주소의 중복 여부를 검사합니다.
 
   **동작 과정:**
-  1. 입력된 이메일 주소를 기반으로 중복 검사를 수행합니다.
-  2. 해당 이메일이 이미 존재하면 에러를 반환합니다.
-  3. 중복되지 않은 경우, 성공 상태를 반환합니다.
+  1. 클라이언트에서 이메일 주소를 요청 본문으로 전달합니다.
+  2. 서버에서 해당 이메일이 이미 사용 중인지 확인합니다.
+  3. 중복된 이메일이 존재하면 예외를 발생시킵니다.
+  4. 이메일이 사용 가능한 경우, 성공 응답을 반환합니다.
 
   **주의 사항:**
   - 올바른 이메일 형식이 입력되어야 합니다.
-  - 이미 존재하는 이메일인 경우, \`400 Bad Request\` 에러가 발생합니다.
+  - 이미 존재하는 이메일인 경우, HTTP 409 상태 코드와 함께 "Email already exists" 메시지가 반환됩니다.
+  - 중복된 이메일이 없으면 HTTP 200 상태 코드와 함께 이메일이 사용 가능하다는 응답을 받습니다.
   `,
   })
-  @ApiQuery({ name: 'email', required: true })
-  @ApiResponse({ status: 200, type: 'success: boolean' })
-  async checkEmail(@Query('email') email: string) {
-    return this.authService.checkEmail(email);
+  @ApiResponse({
+    status: 200,
+    description: '이메일이 사용 가능한 경우',
+    schema: { type: 'boolean', example: true },
+  })
+  @ApiResponse({
+    status: 409,
+    description: '이메일이 이미 존재하는 경우',
+    schema: { type: 'boolean', example: false },
+  })
+  @ApiBody({
+    description: '이메일 중복 검사 요청 데이터',
+    type: CheckEmailReqDto,
+  })
+  async checkEmail(@Body() data: CheckEmailReqDto) {
+    return this.authService.checkEmail(data.email);
+  }
+
+  @Get('check/nickname')
+  @ApiOperation({
+    summary: '닉네임 중복 검사',
+    description: `
+  사용자 닉네임의 중복 여부를 검사합니다.
+
+  **동작 과정:**
+  1. 클라이언트에서 닉네임을 요청 본문으로 전달합니다.
+  2. 서버에서 해당 닉네임이 이미 사용 중인지 확인합니다.
+  3. 중복된 닉네임이 존재하면 예외를 발생시킵니다.
+  4. 닉네임이 사용 가능한 경우, 성공 응답을 반환합니다.
+
+  **주의 사항:**
+  - 닉네임은 한글, 영문자, 숫자, 밑줄(_) 등으로 구성될 수 있습니다.
+  - 닉네임은 최소 3자에서 최대 20자까지 허용됩니다.
+  - 중복된 닉네임이 발견되면 HTTP 409 상태 코드와 함께 "Nickname already exists" 메시지가 반환됩니다.
+  - 중복된 닉네임이 없으면 HTTP 200 상태 코드와 함께 닉네임이 사용 가능하다는 응답을 받습니다.
+  `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '닉네임이 사용 가능한 경우',
+  })
+  @ApiResponse({
+    status: 409,
+    description: '닉네임이 이미 존재하는 경우',
+  })
+  @ApiBody({
+    description: '닉네임 중복 검사 요청 데이터',
+    type: CheckNicknameReqDto,
+  })
+  async checkNick(@Body() data: CheckNicknameReqDto) {
+    return this.authService.checkNickname(data.nickname);
   }
 
   @Post('verify')

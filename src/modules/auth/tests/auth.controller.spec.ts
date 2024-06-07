@@ -14,6 +14,7 @@ describe('AuthController', () => {
     register: jest.fn(),
     validateUser: jest.fn(),
     validatePayload: jest.fn(),
+    checkNickname: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -41,7 +42,7 @@ describe('AuthController', () => {
 
   describe('check-email', () => {
     it('이메일 중복 검사 후 불린값 반환', async () => {
-      const email = 'test@email.com';
+      const email = { email: 'test@email.com' };
       mockAuthService.checkEmail.mockResolvedValue(true);
 
       const result = await controller.checkEmail(email);

@@ -4,10 +4,16 @@ import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
+  private readonly excludedUrls = ['/api/auth/health-check'];
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
     const start = Date.now();
+
+    if (this.isExcludedUrl(request.url)) {
+      return next.handle();
+    }
 
     return next.handle().pipe(
       tap(() => {
@@ -17,5 +23,9 @@ export class LoggingInterceptor implements NestInterceptor {
         );
       }),
     );
+  }
+
+  private isExcludedUrl(url: string): boolean {
+    return this.excludedUrls.includes(url);
   }
 }
