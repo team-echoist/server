@@ -2,7 +2,7 @@ import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
-import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
+// import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { User } from '../../../entities/user.entity';
 import { MailService } from '../../mail/mail.service';
 import * as bcrypt from 'bcrypt';

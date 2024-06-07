@@ -1,20 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsDateString,
-  IsEnum,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-} from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString, Length, Matches } from 'class-validator';
 import { UserStatus } from '../../../../entities/user.entity';
 
 export class UpdateFullUserReqDto {
-  @ApiProperty({ description: '최소 2자, 최대 8자', required: false })
-  @IsOptional()
+  @ApiProperty({})
   @IsString()
-  @Length(2, 15)
+  @IsOptional()
+  @Length(1, 20, {
+    message: '닉네임은 최소 1자 이상, 최대 20자 이하이어야 합니다.',
+  })
+  @Matches(/^[a-zA-Z0-9가-힣_]+$/, {
+    message: '닉네임은 영문자, 숫자, 밑줄(_)만 포함할 수 있습니다.',
+  })
   nickname?: string;
 
   @ApiProperty({
@@ -49,11 +46,6 @@ export class UpdateFullUserReqDto {
   @IsOptional()
   @IsDateString()
   birthDate?: Date;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  role?: string;
 
   @ApiProperty({ enum: UserStatus, description: 'banned || monitored || active', required: false })
   @IsOptional()
