@@ -7,7 +7,7 @@ import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
 import { ResponseTransformInterceptor } from './common/interceptros/responseTransform.interceptor';
 import { LoggingInterceptor } from './common/interceptros/logging.interceptor';
 import { AppModule } from './app.module';
-import { swaggerConfig } from '../swagger.config';
+import { swaggerConfig } from './config/swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 

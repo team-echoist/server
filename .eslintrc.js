@@ -17,7 +17,7 @@ module.exports = {
     'ormconfig.js',
     'redis.config.ts',
     'redisSingle.config.ts',
-    'typeorm.options.ts',
+    'typeormOptions.config.ts',
     'webpack-hmr.config.js',
     'typeorm-transactional.ts',
     'jest.config.js',
