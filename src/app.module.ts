@@ -22,7 +22,7 @@ import { SeederService } from './modules/seeder/seeder.service';
 import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
 import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
-import { TypeormOptionsConfig } from './config/typeormOptions.config';
+import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
 
 @Module({
@@ -31,7 +31,7 @@ import { ViewModule } from './modules/view/view.module';
       isGlobal: true,
       envFilePath: '../.env',
     }),
-    TypeOrmModule.forRootAsync(TypeormOptionsConfig),
+    TypeOrmModule.forRootAsync(TypeormConfig),
     RedisModule.forRootAsync({
       useFactory: () => redisConfig,
     }),
