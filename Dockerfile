@@ -1,4 +1,4 @@
-FROM node:21.7.1
+FROM node:20.12.0
 LABEL authors="daechanjo"
 
 WORKDIR /app

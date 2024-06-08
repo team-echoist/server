@@ -27,7 +27,7 @@ async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule);
 
   const allowedOrigins = [
-    'https://linkedoutapp.com',
+    'https://www.linkedoutapp.com',
     'http://localhost:3000',
     'http://localhost:5173',
   ];
