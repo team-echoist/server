@@ -39,10 +39,11 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
     ],
     dropSchema: process.env.ENV === 'prod',
     timezone: 'Asia/Seoul',
-    synchronize: true,
+    synchronize: false,
     autoLoadEntities: true,
     migrations: ['dist/migration/*.js'],
     migrationsTableName: 'migrations',
+    migrationsRun: true,
     logging: false,
     extra: {
       max: 9,
