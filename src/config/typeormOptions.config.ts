@@ -2,21 +2,21 @@ import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { User } from './src/entities/user.entity';
-import { Essay } from './src/entities/essay.entity';
-import { Subscription } from './src/entities/subscription.entity';
-import { Story } from './src/entities/story.entity';
-import { ReportQueue } from './src/entities/reportQueue.entity';
-import { ReviewQueue } from './src/entities/reviewQueue.entity';
-import { Tag } from './src/entities/tag.entity';
-import { Follow } from './src/entities/follow.entity';
-import { Badge } from './src/entities/badge.entity';
-import { TagExp } from './src/entities/tagExp.entity';
-import { ViewRecord } from './src/entities/viewRecord.entity';
+import { User } from '../entities/user.entity';
+import { Essay } from '../entities/essay.entity';
+import { Subscription } from '../entities/subscription.entity';
+import { Story } from '../entities/story.entity';
+import { ReportQueue } from '../entities/reportQueue.entity';
+import { ReviewQueue } from '../entities/reviewQueue.entity';
+import { Tag } from '../entities/tag.entity';
+import { Follow } from '../entities/follow.entity';
+import { Badge } from '../entities/badge.entity';
+import { TagExp } from '../entities/tagExp.entity';
+import { ViewRecord } from '../entities/viewRecord.entity';
 
 dotenv.config();
 
-export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
+export const TypeormOptionsConfig: TypeOrmModuleAsyncOptions = {
   useFactory: () => ({
     type: 'postgres',
     host: process.env.DB_HOST,
@@ -38,9 +38,9 @@ export const TypeOrmOptions: TypeOrmModuleAsyncOptions = {
       ViewRecord,
     ],
     dropSchema: process.env.ENV === 'prod',
-    timezone: 'Asia/Seoul',
     synchronize: true,
     autoLoadEntities: true,
+    timezone: 'Asia/Seoul',
     migrations: ['dist/migration/*.js'],
     migrationsTableName: 'migrations',
     logging: false,
