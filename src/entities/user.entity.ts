@@ -18,6 +18,7 @@ import { Follow } from './follow.entity';
 import { Badge } from './badge.entity';
 import { TagExp } from './tagExp.entity';
 import { ViewRecord } from './viewRecord.entity';
+import { Bookmark } from './bookmark.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -117,4 +118,7 @@ export class User {
 
   @OneToMany(() => ViewRecord, (essayView) => essayView.user)
   essayViewRecords: ViewRecord[];
+
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  bookmarks: Bookmark[];
 }

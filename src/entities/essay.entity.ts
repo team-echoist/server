@@ -19,6 +19,7 @@ import { ReviewQueue } from './reviewQueue.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Tag } from './tag.entity';
 import { ViewRecord } from './viewRecord.entity';
+import { Bookmark } from './bookmark.entity';
 
 export enum EssayStatus {
   PRIVATE = 'private',
@@ -70,9 +71,6 @@ export class Essay {
   @Column({ name: 'thumbnail', nullable: true })
   thumbnail: string;
 
-  @Column({ default: false })
-  bookmarks: boolean;
-
   @Column({ default: 0 })
   views: number;
 
@@ -112,4 +110,7 @@ export class Essay {
 
   @OneToMany(() => ViewRecord, (essayView) => essayView.essay)
   viewRecords: ViewRecord[];
+
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  bookmarks: Bookmark[];
 }
