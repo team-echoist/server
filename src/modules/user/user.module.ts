@@ -14,6 +14,7 @@ import { UserService } from './user.service';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import * as strategies from '../../common/guards/strategies';
+import { NicknameModule } from '../nickname/nickname.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import * as strategies from '../../common/guards/strategies';
     AwsModule,
     UtilsModule,
     BadgeModule,
+    NicknameModule,
     forwardRef(() => EssayModule),
   ],
   controllers: [UserController],

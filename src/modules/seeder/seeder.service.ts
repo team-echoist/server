@@ -9,6 +9,7 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
 import { UtilsService } from '../utils/utils.service';
 import { Tag } from '../../entities/tag.entity';
 import { Admin } from '../../entities/admin.entity';
+import { BasicNickname } from '../../entities/basicNickname.entity';
 
 @Injectable()
 export class SeederService {
@@ -25,10 +26,12 @@ export class SeederService {
     private readonly tagRepository: Repository<Tag>,
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
+    @InjectRepository(BasicNickname)
+    private readonly basicNicknameRepository: Repository<BasicNickname>,
     private readonly utilsService: UtilsService,
   ) {}
 
-  async seedAll() {
+  async initializeAll() {
     setTimeout(async () => {
       const users = await this.seedUsers();
       const essays = await this.seedEssays(users);
@@ -36,8 +39,39 @@ export class SeederService {
     }, 10000);
   }
 
-  async seedAdmin() {
-    const hashedPassword = await bcrypt.hash(process.env.SEED_PASSWORD, 10);
+  async initializeNicknames(): Promise<void> {
+    console.log('Basic nickname created started');
+    const nicknames: any = [];
+    const maxDigits = 6;
+
+    for (let digits = 3; digits <= maxDigits; digits++) {
+      const maxNumber = Math.pow(10, digits) - 1;
+      for (let i = 1; i <= maxNumber; i++) {
+        const nickname = this.utilsService.numberToKoreanString(i);
+        nicknames.push({ nickname, isUsed: false });
+      }
+    }
+
+    await this.utilsService.batchProcess(nicknames, 1000, async (batch) => {
+      try {
+        await this.basicNicknameRepository
+          .createQueryBuilder()
+          .insert()
+          .into(BasicNickname)
+          .values(batch)
+          .orIgnore()
+          .execute();
+      } catch (error) {
+        console.error('Error inserting batch:', error);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    });
+
+    console.log('Basic nickname created successfully');
+  }
+
+  async initializeAdmin() {
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     const admins = Array.from({ length: 10 }, (_, i) => ({
       email: `admin${i + 1}@linkedoutapp.com`,
       password: hashedPassword,

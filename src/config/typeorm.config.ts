@@ -15,15 +15,15 @@ export const TypeormConfig: TypeOrmModuleAsyncOptions = {
     database: process.env.DB_NAME,
     autoLoadEntities: true,
     timezone: 'Asia/Seoul',
-    dropSchema: process.env.ENV === 'prod',
-    synchronize: true,
+    dropSchema: process.env.INITIALIZE === 'true',
+    synchronize: process.env.INITIALIZE === 'true',
     migrationsRun: true,
     entities: [path.join(__dirname + '/../entities/*.entity.ts')],
     migrations: [path.join(__dirname + '/../migrations/*.{js,ts}')],
     cli: {
       migrationsDir: 'src/migrations',
     },
-    logging: true,
+    logging: false,
     extra: {
       max: 9,
       connectionTimeoutMillis: 5000,
