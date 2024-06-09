@@ -8,12 +8,14 @@ import { MailService } from '../../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import { UtilsService } from '../../utils/utils.service';
 import { ConfigService } from '@nestjs/config';
+import { NicknameService } from '../../nickname/nickname.service';
 
 describe('AuthService', () => {
   let authService: AuthService;
   let mockAuthRepository: jest.Mocked<AuthRepository>;
   let mockMailService: jest.Mocked<MailService>;
   let mockUtilsService: jest.Mocked<UtilsService>;
+  let mockNicknameService: jest.Mocked<NicknameService>;
   const mockRedis = {
     get: jest.fn(),
     set: jest.fn(),
@@ -33,6 +35,7 @@ describe('AuthService', () => {
           provide: UtilsService,
           useValue: { generateJWT: jest.fn(), generateVerifyToken: jest.fn(() => 'verify token') },
         },
+        { provide: NicknameService, useValue: {} },
         ConfigService,
       ],
     }).compile();

@@ -583,4 +583,33 @@ export class EssayController {
   async getUserStories(@Param('userId', ParseIntPipe) userId: number) {
     return this.essayService.getStories(userId);
   }
+
+  @Get('recent')
+  @ApiOperation({
+    summary: '최근 조회한 에세이 목록',
+    description: `
+  사용자가 최근에 조회한 에세이 목록을 가져옵니다.
+    
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 보여줄 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 사용자의 ID를 기반으로 최근에 조회한 에세이 목록을 조회합니다.
+  2. 조회된 에세이 목록과 총 개수를 반환합니다.
+    
+  **주의 사항:**
+  - 로그인한 사용자의 최근 조회 기록을 가져옵니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getRecentViewedEssays(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.essayService.getRecentViewedEssays(req.user.id, page, limit);
+  }
 }

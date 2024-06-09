@@ -17,4 +17,19 @@ export class ViewRepository {
   async saveViewRecord(viewRecord: ViewRecord) {
     await this.viewRepository.save(viewRecord);
   }
+
+  async findRecentViewedEssays(userId: number, page: number, limit: number) {
+    const queryBuilder = this.viewRepository
+      .createQueryBuilder('viewRecord')
+      .leftJoinAndSelect('viewRecord.essay', 'essay')
+      .where('viewRecord.user.id = :userId', { userId })
+      .orderBy('viewRecord.viewedAt', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit);
+
+    const [viewRecords, total] = await queryBuilder.getManyAndCount();
+
+    const essays = viewRecords.map((viewRecord) => viewRecord.essay);
+    return { essays, total };
+  }
 }
