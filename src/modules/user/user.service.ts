@@ -21,6 +21,7 @@ import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import * as bcrypt from 'bcrypt';
+import { NicknameService } from '../nickname/nickname.service';
 
 @Injectable()
 export class UserService {
@@ -31,6 +32,7 @@ export class UserService {
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
     private readonly badgeService: BadgeService,
+    private readonly nicknameService: NicknameService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
   ) {}
 
@@ -77,6 +79,12 @@ export class UserService {
 
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
     const user = await this.userRepository.findUserById(userId);
+
+    if (data.nickname && data.nickname !== user.nickname) {
+      await this.nicknameService.setNicknameUsage(user.nickname, false);
+      await this.nicknameService.setNicknameUsage(data.nickname, true);
+    }
+
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }

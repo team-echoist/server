@@ -101,8 +101,6 @@ export class AuthController {
   **요청 본문:**
   - \`email\`: 회원가입할 이메일 주소
   - \`password\`: 회원가입할 비밀번호
-  - \`username\`: 사용자 이름 (선택적)
-  - \`phoneNumber\`: 전화번호 (선택적)
 
   **동작 과정:**
   1. 입력된 이메일 주소가 이미 존재하는지 확인합니다.
@@ -136,10 +134,12 @@ export class AuthController {
   1. 제공된 인증 토큰을 Redis에서 조회합니다.
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
-  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
-  5. 그 외의 경우, 웹사이트로 리디렉션합니다.
+  4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
+  5. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
+  6. 그 외의 경우, 웹사이트로 리디렉션합니다.
 
   **주의 사항:**
+  - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
   - 모바일 기기에서는 딥링크로 리디렉션되며, 웹에서는 웹사이트로 리디렉션됩니다.
   `,
@@ -253,23 +253,23 @@ export class AuthController {
     return req.user;
   }
 
-  @Post('kakao')
-  @ApiOperation({
-    summary: 'OAuth-카카오 로그인',
-  })
-  @ApiResponse({ status: 200 })
-  @UseGuards(AuthGuard('google'))
-  async kakaoAuthRedirect() {
-    return;
-  }
-
-  @Post('naver')
-  @ApiOperation({
-    summary: 'OAuth-네이버 로그인',
-  })
-  @ApiResponse({ status: 200 })
-  @UseGuards(AuthGuard('google'))
-  async naverAuthRedirect() {
-    return;
-  }
+  // @Post('kakao')
+  // @ApiOperation({
+  //   summary: 'OAuth-카카오 로그인',
+  // })
+  // @ApiResponse({ status: 200 })
+  // @UseGuards(AuthGuard('google'))
+  // async kakaoAuthRedirect() {
+  //   return;
+  // }
+  //
+  // @Post('naver')
+  // @ApiOperation({
+  //   summary: 'OAuth-네이버 로그인',
+  // })
+  // @ApiResponse({ status: 200 })
+  // @UseGuards(AuthGuard('google'))
+  // async naverAuthRedirect() {
+  //   return;
+  // }
 }

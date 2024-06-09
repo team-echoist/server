@@ -8,10 +8,11 @@ import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { UtilsModule } from '../utils/utils.module';
 import { Admin } from '../../entities/admin.entity';
+import { BasicNickname } from '../../entities/basicNickname.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue, Tag, Admin]),
+    TypeOrmModule.forFeature([User, Essay, ReviewQueue, ReportQueue, Tag, Admin, BasicNickname]),
     UtilsModule,
   ],
   providers: [SeederService],

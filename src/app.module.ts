@@ -61,9 +61,10 @@ export class AppModule implements OnModuleInit, NestModule {
   constructor(private readonly seederService: SeederService) {}
 
   async onModuleInit() {
-    if (process.env.SEED_DB === 'true' && process.env.ENV === 'prod') {
-      await this.seederService.seedAdmin();
-      await this.seederService.seedAll();
+    if (process.env.INITIALIZE === 'true') {
+      await this.seederService.initializeAdmin();
+      await this.seederService.initializeNicknames();
+      await this.seederService.initializeAll();
     }
   }
 

@@ -325,4 +325,14 @@ export class UtilsService {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
+
+  numberToKoreanString(number: number): string {
+    const koreanDigits = ['공', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+    const numberStr = number.toString();
+    const paddedStr = numberStr.padStart(3, '0');
+    return paddedStr
+      .split('')
+      .map((digit) => koreanDigits[parseInt(digit)])
+      .join('');
+  }
 }

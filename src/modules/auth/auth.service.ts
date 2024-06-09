@@ -10,6 +10,7 @@ import { OAuth2Client } from 'google-auth-library';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { NicknameService } from '../nickname/nickname.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
+    private readonly nicknameService: NicknameService,
     private configService: ConfigService,
   ) {}
   private readonly oauthClient = new OAuth2Client(
@@ -38,11 +40,9 @@ export class AuthService {
 
   async isEmailOwned(createUserDto: CreateUserReqDto) {
     const email = createUserDto.email;
-    const nickname = createUserDto.nickname;
     const emailExists = await this.authRepository.findByEmail(email);
-    const nicknameExists = await this.authRepository.findByNickname(nickname);
 
-    if (emailExists || nicknameExists) {
+    if (emailExists) {
       throw new HttpException('Email or nickname is already exists.', HttpStatus.BAD_REQUEST);
     }
 
@@ -60,7 +60,10 @@ export class AuthService {
     const user = await this.redis.get(token);
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-    return await this.authRepository.createUser(JSON.parse(user));
+    const userData = JSON.parse(user);
+    userData.nickname = await this.nicknameService.generateUniqueNickname();
+
+    return await this.authRepository.createUser(userData);
   }
 
   async validateUser(email: string, password: string) {
@@ -93,7 +96,6 @@ export class AuthService {
       user = await this.authRepository.createUser({
         email: oauthUser.email,
         oauthInfo: { [`${oauthUser.platform}Id`]: oauthUser.platformId },
-        nickname: null,
       });
     } else {
       if (!user.oauthInfo || !user.oauthInfo[`${oauthUser.platform}Id`]) {

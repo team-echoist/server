@@ -115,7 +115,7 @@ async function bootstrap() {
 
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../../src/common/images', 'seedimage.jpeg'));
+    res.sendFile(join(__dirname, '../src/common/images', 'seedimage.jpeg'));
   });
 
   if (process.env.SWAGGER === 'true') {
