@@ -24,7 +24,7 @@ import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
-import { EssayListResDto } from './dto/response/essayListRes.dto';
+import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { BadgeService } from '../badge/badge.service';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
@@ -168,7 +168,7 @@ export class EssayService {
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
-    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+    const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
 
     return { essays: essayDtos, total, totalPage, page };
   }
@@ -185,7 +185,7 @@ export class EssayService {
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
-    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+    const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
 
     return { essays: essayDtos, total, totalPage, page };
   }
@@ -222,7 +222,7 @@ export class EssayService {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
 
-    return this.utilsService.transformToDto(EssayListResDto, previousEssay);
+    return this.utilsService.transformToDto(EssaysResDto, previousEssay);
   }
 
   @Transactional()
@@ -274,7 +274,7 @@ export class EssayService {
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
-    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+    const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
 
     return { essays: essayDtos };
   }
@@ -302,7 +302,7 @@ export class EssayService {
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
-    const essayDtos = this.utilsService.transformToDto(EssayListResDto, essays);
+    const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
 
     return { essays: essayDtos, total, totalPage, page };
   }
@@ -422,5 +422,9 @@ export class EssayService {
     const essaysDto = this.utilsService.transformToDto(EssaySummaryResDto, transformedEssays);
 
     return { essays: essaysDto, totalPage, page, total };
+  }
+
+  async getRecentViewedEssays(userId: number, page: number, limit: number) {
+    return await this.viewService.findRecentViewedEssays(userId, page, limit);
   }
 }

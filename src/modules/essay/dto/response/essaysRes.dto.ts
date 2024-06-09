@@ -3,7 +3,7 @@ import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 import { EssayStatus } from '../../../../entities/essay.entity';
 
-export class EssayListResDto {
+export class EssaysResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()

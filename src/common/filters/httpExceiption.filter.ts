@@ -19,7 +19,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     const { ip, method, originalUrl: url } = request;
-    const userAgent = request.get('UserEntity-Agent') || '';
+    const userAgent = request.get('User-Agent') || request.headers['user-agent'];
+    const params = request.params;
+    const query = request.query;
+
     const message = `${method} ${url} ${status} - ${userAgent} ${ip}`;
 
     const originalError = exception.getResponse();
@@ -36,11 +39,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(
-        `${message}\nRequest: ${JSON.stringify(request.body)}\nResponse: ${JSON.stringify(originalError)}\nStack Trace: ${JSON.stringify(errorStack)}`,
+        `${message}\nRequest Body: ${JSON.stringify(request.body)} Params: ${JSON.stringify(params)} Query: ${JSON.stringify(query)}\nResponse: ${JSON.stringify(originalError)}\nStack Trace: ${JSON.stringify(errorStack)}`,
       );
     } else if (status >= 400) {
       this.logger.warn(
-        `${message}\nRequest: ${JSON.stringify(request.body)}\nResponse: ${JSON.stringify(originalError)}\nStack Trace: ${JSON.stringify(errorStack)}`,
+        `${message}\nRequest Body: ${JSON.stringify(request.body)} Params: ${JSON.stringify(params)} Query: ${JSON.stringify(query)}\nResponse: ${JSON.stringify(originalError)}\nStack Trace: ${JSON.stringify(errorStack)}`,
       );
     }
 
