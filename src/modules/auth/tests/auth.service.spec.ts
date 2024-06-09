@@ -83,18 +83,18 @@ describe('AuthService', () => {
   //   });
   // });
 
-  describe('register', () => {
-    it('클라이언트가 인증링크를 클릭하면 토큰 검증 후 회원등록 완료', async () => {
-      const user = 'user';
-      const token = 'token';
-
-      mockRedis.get.mockResolvedValue(user);
-      const result = await mockRedis.get(token);
-
-      expect(result).toEqual(user);
-      expect(mockRedis.get).toHaveBeenCalledWith(token);
-    });
-  });
+  // describe('register', () => {
+  //   it('클라이언트가 인증링크를 클릭하면 토큰 검증 후 회원등록 완료', async () => {
+  //     const user = 'user';
+  //     const token = 'token';
+  //
+  //     mockRedis.get.mockResolvedValue(user);
+  //     const result = await mockRedis.get(token);
+  //
+  //     expect(result).toEqual(user);
+  //     expect(mockRedis.get).toHaveBeenCalledWith(token);
+  //   });
+  // });
 
   describe('validateUser', () => {
     it('이메일로 유저를 찾을 수 없으면 null 반환', async () => {

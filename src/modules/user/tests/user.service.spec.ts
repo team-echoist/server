@@ -8,6 +8,7 @@ import { UserResDto } from '../dto/response/userRes.dto';
 import { EssayService } from '../../essay/essay.service';
 import { FollowService } from '../../follow/follow.service';
 import { BadgeService } from '../../badge/badge.service';
+import { NicknameService } from '../../nickname/nickname.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -37,6 +38,9 @@ describe('UserService', () => {
     set: jest.fn(),
     del: jest.fn(),
   };
+  const mockNicknameService = {
+    setNicknameUsage: jest.fn(),
+  };
 
   beforeEach(async () => {
     const RedisInstance = jest.fn(() => mockRedis);
@@ -50,6 +54,7 @@ describe('UserService', () => {
         { provide: EssayService, useValue: mockEssayService },
         { provide: FollowService, useValue: mockFollowService },
         { provide: BadgeService, useValue: mockBadgeService },
+        { provide: NicknameService, useValue: mockNicknameService },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();

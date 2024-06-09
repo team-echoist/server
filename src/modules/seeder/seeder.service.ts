@@ -42,7 +42,7 @@ export class SeederService {
   async initializeNicknames(): Promise<void> {
     console.log('Basic nickname created started');
     const nicknames: any = [];
-    const maxDigits = 6;
+    const maxDigits = 5;
 
     for (let digits = 3; digits <= maxDigits; digits++) {
       const maxNumber = Math.pow(10, digits) - 1;
@@ -52,7 +52,7 @@ export class SeederService {
       }
     }
 
-    await this.utilsService.batchProcess(nicknames, 1000, async (batch) => {
+    await this.utilsService.batchProcess(nicknames, 5000, async (batch) => {
       try {
         await this.basicNicknameRepository
           .createQueryBuilder()

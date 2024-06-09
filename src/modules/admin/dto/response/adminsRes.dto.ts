@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsNumber, IsString } from 'class-validator';
 
 export class AdminsResDto {
   @ApiProperty()
@@ -12,6 +12,11 @@ export class AdminsResDto {
   @Expose()
   @IsString()
   name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsEmail()
+  email: string;
 
   @ApiProperty()
   @Expose()
