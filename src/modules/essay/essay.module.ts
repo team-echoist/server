@@ -23,6 +23,7 @@ import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
 import { ViewModule } from '../view/view.module';
+import { BookmarkModule } from '../bookmark/bookmark.module';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ dotenv.config();
     FollowModule,
     BadgeModule,
     ViewModule,
+    BookmarkModule,
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],

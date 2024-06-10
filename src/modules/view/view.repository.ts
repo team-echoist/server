@@ -29,7 +29,6 @@ export class ViewRepository {
 
     const [viewRecords, total] = await queryBuilder.getManyAndCount();
 
-    const essays = viewRecords.map((viewRecord) => viewRecord.essay);
-    return { essays, total };
+    return { viewRecords, total };
   }
 }

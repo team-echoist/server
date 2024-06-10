@@ -612,4 +612,76 @@ export class EssayController {
   ) {
     return this.essayService.getRecentViewedEssays(req.user.id, page, limit);
   }
+
+  @Get('bookmark')
+  @ApiOperation({
+    summary: '북마크한 에세이 목록',
+    description: `
+  사용자가 북마크한 에세이 목록을 가져옵니다.
+    
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 보여줄 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 사용자의 ID를 기반으로 북마크한 에세이 목록을 조회합니다.
+  2. 조회된 에세이 목록과 총 개수를 반환합니다.
+    
+  `,
+  })
+  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getUserBookmarks(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.essayService.getUserBookmarks(req.user.id, page, limit);
+  }
+
+  @Post('bookmarks/:essayId')
+  @ApiOperation({
+    summary: '에세이 북마크 추가',
+    description: `
+  특정 에세이를 북마크합니다.
+
+  **경로 파라미터:**
+  - \`essayId\`: 북마크할 에세이의 ID
+    
+  **동작 과정:**
+  1. 사용자의 ID와 에세이의 ID를 기반으로 북마크를 추가합니다.
+  2. 성공 상태를 반환합니다.
+    
+  **주의 사항:**
+  - 로그인한 사용자가 접근할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  async addBookmark(@Req() req: ExpressRequest, @Param('essayId') essayId: number) {
+    return this.essayService.addBookmark(req.user.id, essayId);
+  }
+
+  @Delete('bookmarks/:essayId')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({
+    summary: '에세이 북마크 삭제',
+    description: `
+  특정 에세이의 북마크를 삭제합니다.
+
+  **경로 파라미터:**
+  - \`essayId\`: 북마크를 삭제할 에세이의 ID
+   
+  **동작 과정:**
+  1. 사용자의 ID와 에세이의 ID를 기반으로 북마크를 삭제합니다.
+  2. 성공 상태를 반환합니다.
+    
+  **주의 사항:**
+  - 로그인한 사용자가 접근할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  async removeBookmark(@Req() req: ExpressRequest, @Param('essayId') essayId: number) {
+    return this.essayService.removeBookmark(req.user.id, essayId);
+  }
 }

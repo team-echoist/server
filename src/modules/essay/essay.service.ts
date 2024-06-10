@@ -30,6 +30,7 @@ import { BadgeService } from '../badge/badge.service';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 import { ViewService } from '../view/view.service';
+import { BookmarkService } from '../bookmark/bookmark.service';
 
 @Injectable()
 export class EssayService {
@@ -43,6 +44,7 @@ export class EssayService {
     private readonly followService: FollowService,
     private readonly badgeService: BadgeService,
     private readonly viewService: ViewService,
+    private readonly bookmarkService: BookmarkService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
@@ -425,6 +427,41 @@ export class EssayService {
   }
 
   async getRecentViewedEssays(userId: number, page: number, limit: number) {
-    return await this.viewService.findRecentViewedEssays(userId, page, limit);
+    const { viewRecords, total } = await this.viewService.findRecentViewedEssays(
+      userId,
+      page,
+      limit,
+    );
+    const essays = viewRecords.map((viewRecord) => viewRecord.essay);
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractPartContent(essay.content);
+    });
+
+    const totalPage: number = Math.ceil(total / limit);
+
+    const essaysDto = this.utilsService.transformToDto(EssaysResDto, essays);
+
+    return { essays: essaysDto, totalPage, page, total };
+  }
+
+  async getUserBookmarks(userId: number, page: number, limit: number) {
+    const { bookmarks, total } = await this.bookmarkService.getUserBookmarks(userId, page, limit);
+    const essays = bookmarks.map((bookmark) => bookmark.essay);
+    const totalPage: number = Math.ceil(total / limit);
+
+    const essaysDto = this.utilsService.transformToDto(EssaysResDto, essays);
+
+    return { essays: essaysDto, totalPage, page, total };
+  }
+
+  async addBookmark(userId: number, essayId: number) {
+    const user = await this.userService.fetchUserEntityById(userId);
+    const essay = await this.essayRepository.findEssayById(essayId);
+
+    return this.bookmarkService.addBookmark(user, essay);
+  }
+
+  async removeBookmark(userId: number, essayId: number) {
+    return this.bookmarkService.removeBookmark(userId, essayId);
   }
 }
