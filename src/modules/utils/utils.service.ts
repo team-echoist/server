@@ -161,6 +161,27 @@ export class UtilsService {
       .filter((s) => s.length >= minLength && s.length <= maxLength);
   }
 
+  highlightKeywordSnippet(text: string, keyword: string) {
+    const snippetLength = 100;
+    const keywordIndex = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+    if (keywordIndex === -1) {
+      return text.slice(0, snippetLength);
+    }
+
+    const start = text.lastIndexOf(' ', keywordIndex - 1);
+    const end = keywordIndex + snippetLength;
+
+    let snippet = text.slice(start, end).trim();
+
+    const lastSpaceIndex = snippet.lastIndexOf(' ');
+    if (lastSpaceIndex !== -1 && snippet.length > snippetLength) {
+      snippet = snippet.slice(0, lastSpaceIndex).trim();
+    }
+
+    return snippet;
+  }
+
   private lorem = new LoremIpsum({
     sentencesPerParagraph: {
       max: 8,

@@ -340,4 +340,28 @@ export class EssayRepository {
 
     return { essays, total };
   }
+
+  async searchEssays(keyword: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+
+    const [essays, total] = await this.essayRepository
+      .createQueryBuilder('essay')
+      .addSelect(
+        `2 * similarity(essay.title, :keyword) + similarity(essay.content, :keyword)`,
+        'relevance',
+      )
+      .where(
+        'essay.deleted_date IS NULL AND (essay.title ILIKE :keyword OR essay.content ILIKE :keyword)',
+        { keyword: `%${keyword}%` },
+      )
+      .andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PUBLISHED, EssayStatus.LINKEDOUT],
+      })
+      .orderBy('relevance', 'DESC')
+      .offset(offset)
+      .limit(limit)
+      .getManyAndCount();
+
+    return { essays, total };
+  }
 }
