@@ -23,12 +23,13 @@ export const TypeormConfig: TypeOrmModuleAsyncOptions = {
     cli: {
       migrationsDir: 'src/migrations',
     },
-    logging: false,
     extra: {
       max: 9,
       connectionTimeoutMillis: 5000,
     },
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+    logging: false,
+    logger: 'advanced-console',
   }),
   async dataSourceFactory(option) {
     if (!option) throw new Error('Invalid options passed');

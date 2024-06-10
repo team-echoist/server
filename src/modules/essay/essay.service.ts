@@ -464,4 +464,16 @@ export class EssayService {
   async removeBookmark(userId: number, essayId: number) {
     return this.bookmarkService.removeBookmark(userId, essayId);
   }
+
+  async searchEssays(keyword: string, page: number, limit: number) {
+    const { essays, total } = await this.essayRepository.searchEssays(keyword, page, limit);
+    const totalPage: number = Math.ceil(total / limit);
+
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.highlightKeywordSnippet(essay.content, keyword);
+    });
+    const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
+
+    return { essays: essayDtos, total, totalPage, page };
+  }
 }
