@@ -63,8 +63,15 @@ describe('EssayService', () => {
     addViewRecord: jest.fn(),
   };
   const mockBookmarkService = {};
+  const mockRedis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
 
   beforeEach(async () => {
+    const RedisInstance = jest.fn(() => mockRedis);
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [UtilsModule],
       providers: [
@@ -79,6 +86,7 @@ describe('EssayService', () => {
         { provide: BadgeService, useValue: mockBadgeService },
         { provide: ViewService, useValue: mockViewService },
         { provide: BookmarkService, useValue: mockBookmarkService },
+        { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
 
