@@ -25,6 +25,7 @@ import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
 import { BookmarkModule } from './modules/bookmark/bookmark.module';
+import { BlockPhpRequestsMiddleware } from './common/middlewares/blockPhpRequests.middleware';
 
 @Module({
   imports: [
@@ -72,5 +73,6 @@ export class AppModule implements OnModuleInit, NestModule {
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(TimezoneMiddleware).forRoutes('*');
+    consumer.apply(BlockPhpRequestsMiddleware).forRoutes('*');
   }
 }

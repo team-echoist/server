@@ -28,7 +28,14 @@ export class BookmarkRepository {
     return this.bookmarkRepository.save(bookmark);
   }
 
-  async removeBookmark(userId: number, essayId: number) {
-    return this.bookmarkRepository.delete({ user: { id: userId }, essay: { id: essayId } });
+  async removeBookmarks(userId: number, essayIds: number[]) {
+    const deletePromises = essayIds.map((essayId) =>
+      this.bookmarkRepository.delete({ user: { id: userId }, essay: { id: essayId } }),
+    );
+    return Promise.all(deletePromises);
+  }
+
+  async resetBookmarks(userId: number) {
+    return this.bookmarkRepository.delete({ user: { id: userId } });
   }
 }

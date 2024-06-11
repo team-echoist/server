@@ -169,17 +169,10 @@ export class UtilsService {
       return text.slice(0, snippetLength);
     }
 
-    const start = text.lastIndexOf(' ', keywordIndex - 1);
-    const end = keywordIndex + snippetLength;
+    const start = Math.max(0, keywordIndex - 30);
+    const end = keywordIndex + keyword.length + 70;
 
-    let snippet = text.slice(start, end).trim();
-
-    const lastSpaceIndex = snippet.lastIndexOf(' ');
-    if (lastSpaceIndex !== -1 && snippet.length > snippetLength) {
-      snippet = snippet.slice(0, lastSpaceIndex).trim();
-    }
-
-    return snippet;
+    return text.slice(start, end).trim();
   }
 
   private lorem = new LoremIpsum({
@@ -355,5 +348,12 @@ export class UtilsService {
       .split('')
       .map((digit) => koreanDigits[parseInt(digit)])
       .join('');
+  }
+
+  preprocessKeyword(keyword: string) {
+    return keyword
+      .split(/\s+/)
+      .map((kw) => `%${kw}%`)
+      .join(' | ');
   }
 }
