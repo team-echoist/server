@@ -351,9 +351,6 @@ export class UtilsService {
   }
 
   preprocessKeyword(keyword: string) {
-    return keyword
-      .split(/\s+/)
-      .map((kw) => `%${kw}%`)
-      .join(' | ');
+    return `%${keyword.trim()}%`;
   }
 }

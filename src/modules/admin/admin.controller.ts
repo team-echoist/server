@@ -830,6 +830,25 @@ export class AdminController {
     return this.adminService.getHistories(page, limit, target, action);
   }
 
+  @Get('inactive')
+  @ApiOperation({
+    summary: '비활성화 어드민 리스트',
+    description: `
+  비활성화 어드민 리스트를 조회합니다.
+    
+  **동작 과정:**
+  1. \`active\`가 false인 어드민을 조회합니다.
+  2. 조회된 어드민 목록을 DTO로 변환하여 반환합니다.
+  `,
+  })
+  @ApiResponse({
+    status: 200,
+    type: AdminsSchemaDto,
+  })
+  async getInactiveAdmins() {
+    return this.adminService.getInactiveAdmins();
+  }
+
   @Get(':adminId')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({

@@ -351,8 +351,8 @@ export class EssayRepository {
         'relevance',
       )
       .where(
-        'essay.deleted_date IS NULL AND (similarity(essay.title, :keyword) > 0.2 OR similarity(essay.content, :keyword) > 0.2)',
-        // 'essay.deleted_date IS NULL AND (essay.title ILIKE :keyword OR essay.content ILIKE :keyword)',
+        // 'essay.deleted_date IS NULL AND (similarity(essay.title, :keyword) > 0.2 OR similarity(essay.content, :keyword) > 0.2)',
+        'essay.deleted_date IS NULL AND (essay.title ILIKE :keyword OR essay.content ILIKE :keyword)',
         { keyword: `%${keyword}%` },
       )
       .andWhere('essay.status IN (:...statuses)', {
