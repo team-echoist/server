@@ -624,4 +624,12 @@ export class AdminService {
     }
     return;
   }
+
+  async getInactiveAdmins() {
+    const admins = await this.adminRepository.findAdmins(false);
+
+    const adminsDto = this.utilsService.transformToDto(AdminsResDto, admins);
+
+    return { admins: adminsDto };
+  }
 }
