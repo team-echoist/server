@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BookmarkRepository } from './bookmark.repository';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class BookmarkService {
@@ -15,7 +16,13 @@ export class BookmarkService {
     return this.bookmarkRepository.addBookmark(user, essay);
   }
 
-  async removeBookmark(userId: number, essayId: number) {
-    return this.bookmarkRepository.removeBookmark(userId, essayId);
+  @Transactional()
+  async removeBookmarks(userId: number, essayIds: number[]) {
+    return this.bookmarkRepository.removeBookmarks(userId, essayIds);
+  }
+
+  @Transactional()
+  async resetBookmarks(userId: number) {
+    return this.bookmarkRepository.resetBookmarks(userId);
   }
 }

@@ -31,6 +31,8 @@ import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 import { ViewService } from '../view/view.service';
 import { BookmarkService } from '../bookmark/bookmark.service';
+import Redis from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class EssayService {
@@ -46,6 +48,7 @@ export class EssayService {
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private async checkEssayPermissions(essay: Essay, userId: number) {
@@ -461,12 +464,24 @@ export class EssayService {
     return this.bookmarkService.addBookmark(user, essay);
   }
 
-  async removeBookmark(userId: number, essayId: number) {
-    return this.bookmarkService.removeBookmark(userId, essayId);
+  async removeBookmarks(userId: number, essayIds: number[]) {
+    return this.bookmarkService.removeBookmarks(userId, essayIds);
+  }
+
+  async resetBookmarks(userId: number) {
+    return this.bookmarkService.resetBookmarks(userId);
   }
 
   async searchEssays(keyword: string, page: number, limit: number) {
-    const { essays, total } = await this.essayRepository.searchEssays(keyword, page, limit);
+    const cacheKey = `search:${keyword}:${page}:${limit}`;
+    const cachedResult = await this.redis.get(cacheKey);
+    if (cachedResult) {
+      return JSON.parse(cachedResult);
+    }
+
+    const searchKeyword = this.utilsService.preprocessKeyword(keyword);
+
+    const { essays, total } = await this.essayRepository.searchEssays(searchKeyword, page, limit);
     const totalPage: number = Math.ceil(total / limit);
 
     essays.forEach((essay) => {
@@ -474,6 +489,9 @@ export class EssayService {
     });
     const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
 
-    return { essays: essayDtos, total, totalPage, page };
+    const result = { essays: essayDtos, total, totalPage, page };
+    await this.redis.setex(cacheKey, 3600, JSON.stringify(result));
+
+    return result;
   }
 }

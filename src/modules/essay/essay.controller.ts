@@ -34,6 +34,7 @@ import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
 import { UpdateStoryReqDto } from '../story/dto/repuest/updateStoryReq.dto';
 import { EssaysSummarySchemaDto } from './dto/schema/essaysSummarySchema.dto';
+import { EssayIdsReqDto } from './dto/request/essayIdsReq.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -637,15 +638,15 @@ export class EssayController {
     return this.essayService.addBookmark(req.user.id, essayId);
   }
 
-  @Delete('bookmarks/:essayId')
+  @Delete('bookmarks')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({
     summary: '에세이 북마크 삭제',
     description: `
-  특정 에세이의 북마크를 삭제합니다.
+  특정 에세이들의 북마크를 삭제합니다.
 
-  **경로 파라미터:**
-  - \`essayId\`: 북마크를 삭제할 에세이의 ID
+  **요청 본문:**
+  - \`essayIds\`: 북마크를 삭제할 에세이의 ID 배열
    
   **동작 과정:**
   1. 사용자의 ID와 에세이의 ID를 기반으로 북마크를 삭제합니다.
@@ -656,8 +657,28 @@ export class EssayController {
   `,
   })
   @ApiResponse({ status: 200 })
-  async removeBookmark(@Req() req: ExpressRequest, @Param('essayId') essayId: number) {
-    return this.essayService.removeBookmark(req.user.id, essayId);
+  async removeBookmarks(@Req() req: ExpressRequest, @Body() body: EssayIdsReqDto) {
+    return this.essayService.removeBookmarks(req.user.id, body.essayIds);
+  }
+
+  @Delete('bookmarks/reset')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({
+    summary: '사용자의 모든 북마크 삭제',
+    description: `
+  사용자의 모든 북마크를 삭제합니다.
+
+  **동작 과정:**
+  1. 로그인한 사용자의 ID를 기반으로 모든 북마크를 삭제합니다.
+  2. 성공 상태를 반환합니다.
+
+  **주의 사항:**
+  - 로그인한 사용자가 접근할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  async resetBookmarks(@Req() req: ExpressRequest) {
+    return this.essayService.resetBookmarks(req.user.id);
   }
 
   @Get('search')
