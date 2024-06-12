@@ -155,4 +155,11 @@ export class UserService {
     const badgesWithTags = await this.badgeService.getBadgeWithTags(userId);
     return { badges: badgesWithTags };
   }
+
+  async getUserSummary(userId: number) {
+    const userSummary = await this.getUserSummaryById(userId);
+    const weeklyEssayCounts = await this.essayService.getWeeklyEssayCounts(userId);
+
+    return { ...userSummary, weeklyEssayCounts: weeklyEssayCounts };
+  }
 }

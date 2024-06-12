@@ -28,6 +28,7 @@ import { BadgesSchemaDto } from '../badge/dto/schema/badgesSchema.dto';
 import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchema.dto';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { UserSummaryResSchemaDto } from './dto/schema/userSummaryResSchema.dto';
+import { UserSummaryWithCountSchemaDto } from './dto/schema/userSummaryWithCountSchema.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -266,6 +267,33 @@ export class UserController {
   @ApiResponse({ status: 200, type: BadgesWithTagsSchemaDto })
   async userBadgesWithTags(@Req() req: ExpressRequest) {
     return this.userService.getBadgeWithTags(req.user.id);
+  }
+
+  @Get('summary')
+  @ApiOperation({
+    summary: '유저 요약 정보 및 주간 에세이 통계 조회',
+    description: `
+  로그인한 사용자의 요약 정보를 조회합니다. 
+
+  **요청 헤더:**
+  - \`Authorization\`: Bearer {token}
+
+  **동작 과정:**
+  1. 요청 헤더의 인증 토큰을 사용하여 사용자를 식별합니다.
+  2. 사용자의 요약 정보를 포함하여 최근 5주간의 에세이 작성 통계를 반환합니다.
+
+  **응답 필드:**
+  - \`summary\`: 사용자의 기본 정보 (ID, 닉네임, 프로필 이미지, 가입일 등)
+  - \`weeklyEssayCounts\`: 최근 5주간의 주별 에세이 작성 개수 및 기간
+
+  **주의 사항:**
+  - 인증 토큰이 유효하지 않거나 제공되지 않으면 \`401 Unauthorized\` 에러가 발생합니다.
+  - 요청이 성공하면 \`200 OK\` 상태를 반환합니다.
+  `,
+  })
+  @ApiResponse({ type: UserSummaryWithCountSchemaDto })
+  async userSummary(@Req() req: ExpressRequest) {
+    return this.userService.getUserSummary(req.user.id);
   }
 
   @Get(':userId')

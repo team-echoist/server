@@ -341,28 +341,94 @@ export class EssayRepository {
     return { essays, total };
   }
 
+  // 버전1: 토큰매치 방식(빠름)
+  // async searchEssays(keyword: string, page: number, limit: number) {
+  //   const offset = (page - 1) * limit;
+  //
+  //   const query = this.essayRepository
+  //     .createQueryBuilder('essay')
+  //     .addSelect(
+  //       `ts_rank_cd(search_vector, plainto_tsquery('simple', unaccent(:keyword)))`,
+  //       'relevance',
+  //     )
+  //     .where('essay.deleted_date IS NULL AND search_vector @@ plainto_tsquery(:keyword)', {
+  //       keyword,
+  //     })
+  //     .andWhere('essay.status IN (:...statuses)', {
+  //       statuses: [EssayStatus.PUBLISHED, EssayStatus.LINKEDOUT],
+  //     });
+  //
+  //   const [essays, total] = await query
+  //     .orderBy('relevance', 'DESC')
+  //     .offset(offset)
+  //     .limit(limit)
+  //     .getManyAndCount();
+  //
+  //   return { essays, total };
+  // }
+
+  // 버전2: 유사도 매치
   async searchEssays(keyword: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
 
-    const [essays, total] = await this.essayRepository
-      .createQueryBuilder('essay')
-      .addSelect(
-        `0.7 * similarity(essay.title, :keyword) + 0.3 * similarity(essay.content, :keyword)`,
-        'relevance',
-      )
-      .where(
-        // 'essay.deleted_date IS NULL AND (similarity(essay.title, :keyword) > 0.2 OR similarity(essay.content, :keyword) > 0.2)',
-        'essay.deleted_date IS NULL AND (essay.title ILIKE :keyword OR essay.content ILIKE :keyword)',
-        { keyword: `%${keyword}%` },
-      )
+    const useTrigramSearch = keyword.length >= 3;
+
+    const query = this.essayRepository.createQueryBuilder('essay');
+
+    if (useTrigramSearch) {
+      query
+        .addSelect(
+          `0.5 * (
+        similarity(unaccented_title, :keyword) +
+        similarity(unaccented_content, :keyword)
+      )`,
+          'relevance',
+        )
+        .where(
+          'essay.deleted_date IS NULL AND (unaccented_title ILIKE :wildcardKeyword OR unaccented_content ILIKE :wildcardKeyword)',
+          { keyword, wildcardKeyword: `%${keyword}%` },
+        );
+    } else {
+      query
+        .addSelect(
+          `0.5 * ts_rank_cd(search_vector, plainto_tsquery('simple', :keyword)) +
+       0.5 * (
+         similarity(unaccented_title, :keyword) +
+         similarity(unaccented_content, :keyword)
+       )`,
+          'relevance',
+        )
+        .where(
+          'essay.deleted_date IS NULL AND (search_vector @@ plainto_tsquery(:keyword) OR ' +
+            'unaccented_title ILIKE :wildcardKeyword OR unaccented_content ILIKE :wildcardKeyword)',
+          { keyword, wildcardKeyword: `%${keyword}%` },
+        );
+    }
+
+    query
       .andWhere('essay.status IN (:...statuses)', {
         statuses: [EssayStatus.PUBLISHED, EssayStatus.LINKEDOUT],
       })
       .orderBy('relevance', 'DESC')
       .offset(offset)
-      .limit(limit)
-      .getManyAndCount();
+      .limit(limit);
+
+    const [essays, total] = await query.getManyAndCount();
 
     return { essays, total };
+  }
+
+  async getWeeklyEssayCounts(userId: number, startDate: Date) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .select("DATE_TRUNC('week', essay.createdDate) AS weekstart")
+      .addSelect('COUNT(*)', 'count')
+      .where('essay.author.id = :userId AND essay.createdDate >= :start', {
+        userId,
+        start: startDate,
+      })
+      .groupBy("DATE_TRUNC('week', essay.createdDate)")
+      .orderBy('weekstart', 'ASC')
+      .getRawMany();
   }
 }

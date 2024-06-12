@@ -113,4 +113,13 @@ export class Essay {
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
+
+  @Column({ type: 'tsvector', select: false, nullable: true })
+  search_vector?: any;
+
+  @Column({ type: 'text', nullable: true, select: false })
+  unaccented_title?: string;
+
+  @Column({ type: 'text', nullable: true, select: false })
+  unaccented_content?: string;
 }
