@@ -102,6 +102,48 @@ export class UtilsService {
     return result;
   }
 
+  getStartOfWeek(date: Date): Date {
+    const currentDate = new Date(date);
+    const day = currentDate.getUTCDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    currentDate.setUTCDate(currentDate.getUTCDate() + diff);
+    currentDate.setUTCHours(0, 0, 0, 0);
+    return currentDate;
+  }
+
+  formatWeeklyData(rawData: any[], startDate: Date, endDate: Date) {
+    const result: { weekStart: Date; weekEnd: Date; count: number }[] = [];
+
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const weekStart = new Date(currentDate);
+      const weekEnd = new Date(currentDate);
+      weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
+      weekEnd.setUTCHours(23, 59, 59, 999);
+
+      const matchingData = rawData.find((item) => {
+        const itemWeekStart = new Date(item.weekstart);
+        return (
+          itemWeekStart.getUTCFullYear() === weekStart.getUTCFullYear() &&
+          itemWeekStart.getUTCMonth() === weekStart.getUTCMonth() &&
+          itemWeekStart.getUTCDate() === weekStart.getUTCDate()
+        );
+      });
+
+      result.push({
+        weekStart: weekStart,
+        weekEnd: weekEnd,
+        count: matchingData ? parseInt(matchingData.count, 10) : 0,
+      });
+
+      currentDate.setUTCDate(currentDate.getUTCDate() + 7);
+      currentDate.setUTCHours(0, 0, 0, 0);
+    }
+
+    return result;
+  }
+
   transformTagsToNames(data: any): any {
     if (data.tags && Array.isArray(data.tags)) {
       data.tags = data.tags.map((tag: any) => tag.name);

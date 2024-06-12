@@ -33,6 +33,8 @@ import { ViewService } from '../view/view.service';
 import { BookmarkService } from '../bookmark/bookmark.service';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import { addDays, startOfWeek, subWeeks } from 'date-fns';
+import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 
 @Injectable()
 export class EssayService {
@@ -493,5 +495,17 @@ export class EssayService {
     await this.redis.setex(cacheKey, 3600, JSON.stringify(result));
 
     return result;
+  }
+
+  async getWeeklyEssayCounts(userId: number) {
+    const now = new Date();
+    const fiveWeeksAgo = this.utilsService.getStartOfWeek(new Date(now));
+    fiveWeeksAgo.setDate(fiveWeeksAgo.getDate() - 28);
+
+    const rawData = await this.essayRepository.getWeeklyEssayCounts(userId, fiveWeeksAgo);
+
+    const weeklyEssayCounts = this.utilsService.formatWeeklyData(rawData, fiveWeeksAgo, now);
+
+    return this.utilsService.transformToDto(WeeklyEssayCountResDto, weeklyEssayCounts);
   }
 }

@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FollowRepository } from './follow.repository';
 import { User } from '../../entities/user.entity';
 import { UtilsService } from '../utils/utils.service';
-import { UserSummaryResSchemaDto } from '../user/dto/schema/userSummaryResSchema.dto';
 
 @Injectable()
 export class FollowService {
