@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { UtilsService } from '../utils/utils.service';
@@ -13,6 +14,7 @@ import { EssayService } from '../essay/essay.service';
 import { AwsService } from '../aws/aws.service';
 import { FollowService } from '../follow/follow.service';
 import { BadgeService } from '../badge/badge.service';
+import { NicknameService } from '../nickname/nickname.service';
 import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
@@ -20,8 +22,6 @@ import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
-import * as bcrypt from 'bcrypt';
-import { NicknameService } from '../nickname/nickname.service';
 
 @Injectable()
 export class UserService {

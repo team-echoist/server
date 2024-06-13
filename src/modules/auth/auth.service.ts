@@ -1,16 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import Redis from 'ioredis';
+import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { UtilsService } from '../utils/utils.service';
 import { MailService } from '../mail/mail.service';
+import { NicknameService } from '../nickname/nickname.service';
 import { AuthRepository } from './auth.repository';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
-import Redis from 'ioredis';
-import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { NicknameService } from '../nickname/nickname.service';
 
 @Injectable()
 export class AuthService {

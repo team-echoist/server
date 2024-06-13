@@ -10,6 +10,6 @@ export class BasicNickname {
   nickname: string;
 
   @Index()
-  @Column({ default: false })
+  @Column({ name: 'is_used', default: false })
   isUsed: boolean;
 }

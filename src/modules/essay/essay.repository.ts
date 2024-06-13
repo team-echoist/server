@@ -3,6 +3,7 @@ import { Between, Brackets, In, Repository } from 'typeorm';
 import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
+import { Bookmark } from '../../entities/bookmark.entity';
 
 export class EssayRepository {
   constructor(
@@ -101,14 +102,41 @@ export class EssayRepository {
     await this.essayRepository.update(essay.id, { deletedDate: new Date() });
   }
 
-  async getRecommendEssays(limit: number) {
+  async getRecommendEssays() {
+    const viewWeight = 0.2;
+    const dateWeight = 0.1;
+    const bookmarkWeight = 0.2;
+    const trendWeight = 0.2;
+    const reputationWeight = 0.3;
+    const largerPoolLimit = 1000;
+
     return this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
-      .leftJoinAndSelect('essay.tags', 'tags')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select('"bookmark"."essayId"', 'essayId')
+            .addSelect('COUNT("bookmark"."id")', 'bookmarkCount')
+            .from(Bookmark, 'bookmark')
+            .groupBy('"bookmark"."essayId"'),
+        'bookmark',
+        '"bookmark"."essayId" = "essay"."id"',
+      )
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
-      .orderBy('RANDOM()')
-      .limit(limit)
+      .andWhere('essay.deletedDate IS NULL')
+      .addSelect(
+        `
+        ${viewWeight} * essay.views +
+        ${dateWeight} * (EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - essay.createdDate)) / 3600) +
+        ${bookmarkWeight} * COALESCE("bookmark"."bookmarkCount", 0) +
+        ${trendWeight} * essay.trendScore +
+        ${reputationWeight} * author.reputation
+      `,
+        'weighted_score',
+      )
+      .orderBy('weighted_score', 'DESC')
+      .limit(largerPoolLimit)
       .getMany();
   }
 

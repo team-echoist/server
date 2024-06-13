@@ -66,6 +66,9 @@ export class User {
   })
   status: UserStatus;
 
+  @Column({ default: 0 })
+  reputation: number;
+
   @Column({
     name: 'subscription_end',
     nullable: true,

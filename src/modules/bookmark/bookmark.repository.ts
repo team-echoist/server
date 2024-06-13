@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Bookmark } from '../../entities/bookmark.entity';
 import { Repository } from 'typeorm';
+import { Bookmark } from '../../entities/bookmark.entity';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 
