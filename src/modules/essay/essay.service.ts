@@ -7,6 +7,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
+import Redis from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { Tag } from '../../entities/tag.entity';
+import { Story } from '../../entities/story.entity';
+import { User, UserStatus } from '../../entities/user.entity';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { ReviewService } from '../review/review.service';
@@ -14,11 +20,10 @@ import { StoryService } from '../story/story.service';
 import { UserService } from '../user/user.service';
 import { TagService } from '../tag/tag.service';
 import { FollowService } from '../follow/follow.service';
+import { BadgeService } from '../badge/badge.service';
+import { ViewService } from '../view/view.service';
+import { BookmarkService } from '../bookmark/bookmark.service';
 import { EssayRepository } from './essay.repository';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
-import { Tag } from '../../entities/tag.entity';
-import { Story } from '../../entities/story.entity';
-import { User, UserStatus } from '../../entities/user.entity';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
@@ -26,14 +31,8 @@ import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
-import { BadgeService } from '../badge/badge.service';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
-import { ViewService } from '../view/view.service';
-import { BookmarkService } from '../bookmark/bookmark.service';
-import Redis from 'ioredis';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { addDays, startOfWeek, subWeeks } from 'date-fns';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 
 @Injectable()
@@ -276,14 +275,21 @@ export class EssayService {
   }
 
   async getRecommendEssays(limit: number) {
-    const essays = await this.essayRepository.getRecommendEssays(limit);
+    const essays = await this.essayRepository.getRecommendEssays();
 
-    essays.forEach((essay) => {
+    const selectedEssays = this.getRandomElements(essays, limit);
+    selectedEssays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
-    const essayDtos = this.utilsService.transformToDto(EssaysResDto, essays);
+
+    const essayDtos = this.utilsService.transformToDto(EssaysResDto, selectedEssays);
 
     return { essays: essayDtos };
+  }
+
+  private getRandomElements<T>(array: T[], count: number): T[] {
+    const shuffled = array.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   }
 
   async essayStatsByUserId(userId: number) {
@@ -380,8 +386,10 @@ export class EssayService {
   }
 
   async getSentenceEssays(type: string, limit: number) {
-    const essays = await this.essayRepository.getRecommendEssays(limit);
-    essays.forEach((essay) => {
+    const essays = await this.essayRepository.getRecommendEssays();
+    const selectedEssays = this.getRandomElements(essays, limit);
+
+    selectedEssays.forEach((essay) => {
       type === 'first'
         ? (essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50))
         : (essay.content = this.utilsService.extractEndSentences(essay.content, 10, 50));

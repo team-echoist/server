@@ -74,6 +74,9 @@ export class Essay {
   @Column({ default: 0 })
   views: number;
 
+  @Column({ name: 'trend_score', default: 0 })
+  trendScore: number;
+
   @Index()
   @Column({
     type: 'enum',

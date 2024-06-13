@@ -13,6 +13,6 @@ export class Bookmark {
   @ManyToOne(() => Essay, (essay) => essay.bookmarks)
   essay: Essay;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_date' })
   createdDate: Date;
 }
