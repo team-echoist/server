@@ -74,7 +74,7 @@ export class Essay {
   @Column({ default: 0 })
   views: number;
 
-  @Column({ name: 'trend_score', default: 0 })
+  @Column({ name: 'trend_score', default: 50 })
   trendScore: number;
 
   @Index()

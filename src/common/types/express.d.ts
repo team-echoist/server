@@ -5,11 +5,11 @@ declare global {
   namespace Express {
     export interface User {
       id?: number;
+      nickname?: string;
       email: string;
       password?: string;
       gender?: string;
       status?: UserStatus;
-      role?: string;
       oauthInfo?: object;
       birthDate?: Date;
       createdAt?: Date;

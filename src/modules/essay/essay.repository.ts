@@ -26,8 +26,12 @@ export class EssayRepository {
     return this.essayRepository.save(essays);
   }
 
-  async incrementViews(essay: Essay) {
-    await this.essayRepository.update(essay.id, { views: (essay.views || 0) + 1 });
+  async incrementViews(essay: Essay, newViews: number) {
+    return await this.essayRepository.update(essay.id, { views: newViews });
+  }
+
+  async updateTrendScore(essayId: number, newTrendScore: number) {
+    await this.essayRepository.update(essayId, { trendScore: newTrendScore });
   }
 
   async updateEssay(essay: Essay, data: UpdateEssayDto) {
@@ -103,10 +107,8 @@ export class EssayRepository {
   }
 
   async getRecommendEssays() {
-    const viewWeight = 0.2;
-    const dateWeight = 0.1;
-    const bookmarkWeight = 0.2;
-    const trendWeight = 0.2;
+    const bookmarkWeight = 0.3;
+    const trendWeight = 0.4;
     const reputationWeight = 0.3;
     const largerPoolLimit = 1000;
 
@@ -127,8 +129,6 @@ export class EssayRepository {
       .andWhere('essay.deletedDate IS NULL')
       .addSelect(
         `
-        ${viewWeight} * essay.views +
-        ${dateWeight} * (EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - essay.createdDate)) / 3600) +
         ${bookmarkWeight} * COALESCE("bookmark"."bookmarkCount", 0) +
         ${trendWeight} * essay.trendScore +
         ${reputationWeight} * author.reputation

@@ -89,4 +89,12 @@ export class UserRepository {
     const userData = this.userRepository.create({ ...user, ...data });
     return this.userRepository.save(userData);
   }
+
+  async increaseReputation(userId: number, newReputation: number) {
+    await this.userRepository.update(userId, { reputation: newReputation });
+  }
+
+  async decreaseReputation(userId: number, newReputation: number) {
+    await this.userRepository.update(userId, { reputation: newReputation });
+  }
 }

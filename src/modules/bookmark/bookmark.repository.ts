@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
@@ -28,14 +28,35 @@ export class BookmarkRepository {
     return this.bookmarkRepository.save(bookmark);
   }
 
-  async removeBookmarks(userId: number, essayIds: number[]) {
-    const deletePromises = essayIds.map((essayId) =>
-      this.bookmarkRepository.delete({ user: { id: userId }, essay: { id: essayId } }),
-    );
-    return Promise.all(deletePromises);
+  async findBookmarks(userId: number, essayIds: number[]) {
+    return this.bookmarkRepository.find({
+      where: {
+        user: { id: userId },
+        essay: { id: In(essayIds) },
+      },
+      relations: ['essay', 'essay.author'],
+    });
   }
 
-  async resetBookmarks(userId: number) {
-    return this.bookmarkRepository.delete({ user: { id: userId } });
+  async findAllBookmarks(userId: number) {
+    return this.bookmarkRepository
+      .createQueryBuilder('bookmark')
+      .innerJoinAndSelect('bookmark.essay', 'essay')
+      .innerJoinAndSelect('essay.author', 'author')
+      .where('bookmark.user.id = :userId', { userId })
+      .getMany();
+  }
+
+  async removeBookmarks(bookmarks: Bookmark[]) {
+    return this.bookmarkRepository.remove(bookmarks);
+  }
+
+  async findBookmark(user: User, essay: Essay) {
+    return this.bookmarkRepository.findOne({
+      where: {
+        user: { id: user.id },
+        essay: { id: essay.id },
+      },
+    });
   }
 }

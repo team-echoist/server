@@ -31,7 +31,7 @@ export class AdminResDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  imageUrl: string;
+  profileImage: string;
 
   @ApiProperty()
   @Expose()

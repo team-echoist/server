@@ -205,8 +205,12 @@ export class EssayService {
         throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
       } else {
         const user = await this.userService.fetchUserEntityById(userId);
+        const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
+        const newViews = (essay.views || 0) + 1;
 
-        await this.essayRepository.incrementViews(essay);
+        if (!viewHistory) await this.essayRepository.incrementViews(essay, newViews);
+        await this.checkViewsForReputation(essay);
+        await this.updateTrendScoreOnView(essay);
         await this.viewService.addViewRecord(user, essay);
       }
     }
@@ -215,6 +219,43 @@ export class EssayService {
     const essayDto = this.utilsService.transformToDto(EssayResDto, essay);
 
     return { essay: essayDto, previousEssays: previousEssay };
+  }
+
+  private async checkViewsForReputation(essay: Essay) {
+    const viewThreshold = 100;
+
+    if (essay.views > 0 && essay.views % viewThreshold === 0) {
+      const increasePoints = 10;
+      await this.userService.increaseReputation(essay.author, increasePoints);
+    }
+  }
+
+  private async increaseTrendScore(essay: Essay, incrementFactor: number) {
+    const newTrendScore = essay.trendScore * incrementFactor;
+    await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
+  }
+
+  private async decreaseTrendScore(essay: Essay, decayFactor: number) {
+    const newTrendScore = essay.trendScore / decayFactor;
+    await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
+  }
+
+  private async updateTrendScoreOnView(essay: Essay) {
+    const incrementFactor = 1.01;
+    const decayFactor = 0.99;
+
+    const currentDate = new Date();
+    const createdDate = essay.createdDate;
+    const daysSinceCreation =
+      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
+
+    let newTrendScore = essay.trendScore / Math.pow(decayFactor, daysSinceCreation);
+
+    newTrendScore *= incrementFactor;
+
+    newTrendScore = Math.max(newTrendScore, 0);
+
+    await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
   private async previousEssay(userId: number, essay: Essay) {
@@ -467,17 +508,30 @@ export class EssayService {
     return { essays: essaysDto, totalPage, page, total };
   }
 
+  @Transactional()
   async addBookmark(userId: number, essayId: number) {
     const user = await this.userService.fetchUserEntityById(userId);
     const essay = await this.essayRepository.findEssayById(essayId);
 
-    return this.bookmarkService.addBookmark(user, essay);
+    if (essay.status === 'private') throw new HttpException('Bad request.', HttpStatus.BAD_REQUEST);
+
+    const existingBookmark = await this.bookmarkService.getBookmark(user, essay);
+
+    if (existingBookmark) {
+      throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
+    }
+
+    await this.userService.increaseReputation(essay.author, 10);
+    await this.bookmarkService.addBookmark(user, essay);
+    await this.increaseTrendScore(essay, 1.05);
   }
 
+  @Transactional()
   async removeBookmarks(userId: number, essayIds: number[]) {
-    return this.bookmarkService.removeBookmarks(userId, essayIds);
+    return await this.bookmarkService.removeBookmarks(userId, essayIds);
   }
 
+  @Transactional()
   async resetBookmarks(userId: number) {
     return this.bookmarkService.resetBookmarks(userId);
   }

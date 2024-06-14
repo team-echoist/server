@@ -1,8 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { ViewRecord } from '../../entities/viewRecord.entity';
 import { Repository } from 'typeorm';
-import { Essay } from '../../entities/essay.entity';
-import { User } from '../../entities/user.entity';
 
 export class ViewRepository {
   constructor(
@@ -10,8 +8,10 @@ export class ViewRepository {
     private readonly viewRepository: Repository<ViewRecord>,
   ) {}
 
-  async findViewRecord(user: User, essay: Essay) {
-    return await this.viewRepository.findOne({ where: { user: user, essay: essay } });
+  async findViewRecord(userId: number, essayId: number) {
+    return await this.viewRepository.findOne({
+      where: { user: { id: userId }, essay: { id: essayId } },
+    });
   }
 
   async saveViewRecord(viewRecord: ViewRecord) {
