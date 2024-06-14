@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsLatitude,
   IsLongitude,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
@@ -90,4 +92,10 @@ export class EssayResDto {
   @Type(() => StoryDto)
   @Expose()
   story: StoryDto;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  isBookmarked?: boolean;
 }

@@ -12,10 +12,13 @@ export class EssayRepository {
   ) {}
 
   async findEssayById(essayId: number) {
-    return await this.essayRepository.findOne({
-      where: { id: essayId },
-      relations: ['author', 'story', 'tags'],
-    });
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.story', 'story')
+      .leftJoinAndSelect('essay.tags', 'tags')
+      .where('essay.id = :id', { id: essayId })
+      .getOne();
   }
 
   async saveEssay(data: SaveEssayDto) {
