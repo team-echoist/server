@@ -10,7 +10,7 @@ export class Bookmark {
   @ManyToOne(() => User, (user) => user.bookmarks)
   user: User;
 
-  @ManyToOne(() => Essay, (essay) => essay.bookmarks)
+  @ManyToOne(() => Essay, (essay) => essay.bookmarks, { onDelete: 'CASCADE' })
   essay: Essay;
 
   @CreateDateColumn({ name: 'created_date' })

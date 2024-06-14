@@ -114,7 +114,7 @@ export class Essay {
   @OneToMany(() => ViewRecord, (essayView) => essayView.essay)
   viewRecords: ViewRecord[];
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.essay)
   bookmarks: Bookmark[];
 
   @Column({ type: 'tsvector', select: false, nullable: true })

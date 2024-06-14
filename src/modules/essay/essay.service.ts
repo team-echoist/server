@@ -198,7 +198,9 @@ export class EssayService {
 
   @Transactional()
   async getEssay(userId: number, essayId: number) {
+    const user = await this.userService.fetchUserEntityById(userId);
     const essay = await this.essayRepository.findEssayById(essayId);
+    const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
     if (userId !== essay.author.id) {
       if (essay.status === EssayStatus.PRIVATE) {
@@ -216,7 +218,9 @@ export class EssayService {
     }
 
     const previousEssay = await this.previousEssay(essay.author.id, essay);
-    const essayDto = this.utilsService.transformToDto(EssayResDto, essay);
+
+    const newEssayData = { ...essay, isBookmarked: isBookmarked };
+    const essayDto = this.utilsService.transformToDto(EssayResDto, newEssayData);
 
     return { essay: essayDto, previousEssays: previousEssay };
   }
