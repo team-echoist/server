@@ -21,7 +21,7 @@ export class MailService {
     });
   }
 
-  private getHtmlTemplate(title: string, message: string, verificationUrl: string) {
+  private getHtmlTemplate(title: string, message: string, verificationUrl?: string) {
     const templatePath = path.resolve(
       process.cwd(),
       'src/modules/mail/template/emailTemplate.html',
@@ -49,6 +49,27 @@ export class MailService {
       from: `"LinkedOut" <linkedoutapp@gmail.com>`,
       to: to,
       subject: '링크드아웃 회원가입을 위한 이메일 인증입니다.',
+      html: htmlContent,
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          cid: 'logo',
+          contentDisposition: 'inline',
+        },
+      ],
+    });
+  }
+
+  async sendActiveComplete(to: string) {
+    const title = '안녕하세요! 링크드아웃 입니다. :)';
+    const message = `요청하신 관리자 계정이 활성화되어 사용하실 수 있습니다.`;
+    const htmlContent = this.getHtmlTemplate(title, message);
+
+    await this.transporter.sendMail({
+      from: `"LinkedOut" <linkedoutapp@gmail.com>`,
+      to: to,
+      subject: '관리자 계정 활성화 완료.',
       html: htmlContent,
       attachments: [
         {

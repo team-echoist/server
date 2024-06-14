@@ -600,7 +600,11 @@ export class AdminService {
     }
     const admin = await this.adminRepository.findAdmin(adminId);
     admin.active = active;
+
     const updatedAdmin = await this.adminRepository.saveAdmin(admin);
+
+    if (active === true) await this.mailService.sendActiveComplete(admin.email);
+
     return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
   }
 
@@ -612,6 +616,8 @@ export class AdminService {
       ...data,
       active: false,
     };
+    adminData.password = await bcrypt.hash(data.password, 10);
+
     await this.adminRepository.saveAdmin(adminData);
 
     return { message: 'Wait for the root administrator to confirm.' };

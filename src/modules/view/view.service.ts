@@ -8,8 +8,12 @@ import { ViewRecord } from '../../entities/viewRecord.entity';
 export class ViewService {
   constructor(private readonly viewRepository: ViewRepository) {}
 
+  async findViewRecord(userId: number, essayId: number) {
+    return await this.viewRepository.findViewRecord(userId, essayId);
+  }
+
   async addViewRecord(user: User, essay: Essay) {
-    let viewRecord = await this.viewRepository.findViewRecord(user, essay);
+    let viewRecord = await this.viewRepository.findViewRecord(user.id, essay.id);
 
     if (viewRecord) {
       viewRecord.viewedDate = new Date();

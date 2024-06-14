@@ -22,6 +22,7 @@ import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -161,5 +162,23 @@ export class UserService {
     const weeklyEssayCounts = await this.essayService.getWeeklyEssayCounts(userId);
 
     return { ...userSummary, weeklyEssayCounts: weeklyEssayCounts };
+  }
+
+  async increaseReputation(user: User, points: number) {
+    const newReputation = user.reputation + points;
+    await this.userRepository.increaseReputation(user.id, newReputation);
+  }
+
+  async decreaseReputation(userId: number, points: number) {
+    // if (isNaN(points) || points <= 0) {
+    //   console.log(`Invalid points to decrease: ${points}. Skipping reputation decrease.`);
+    //   return;
+    // }
+    const user = await this.userRepository.findUserById(userId);
+
+    const currentReputation = user.reputation ?? 0;
+    const newReputation = Math.max(currentReputation - points, 0);
+
+    await this.userRepository.decreaseReputation(user.id, newReputation);
   }
 }

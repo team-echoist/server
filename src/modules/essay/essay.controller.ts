@@ -180,30 +180,6 @@ export class EssayController {
     return this.essayService.getTargetUserEssays(userId, storyId, page, limit);
   }
 
-  @Delete(':essayId')
-  @ApiOperation({
-    summary: '에세이 삭제',
-    description: `
-  지정된 ID를 가진 에세이를 삭제합니다. 에세이는 논리적으로 삭제되며, 실제 데이터는 유지되지만 삭제된 것으로 표시됩니다.
-
-  **경로 파라미터:**
-  - \`essayId\`: 삭제할 에세이의 ID (필수)
-
-  **동작 과정:**
-  1. 에세이 ID와 사용자 ID를 기반으로 에세이를 조회합니다.
-  2. 에세이가 존재하지 않거나 사용자가 에세이의 작성자가 아닌 경우 오류를 반환합니다.
-  3. 에세이를 논리적으로 삭제합니다 (deletedDate 필드를 현재 날짜로 설정).
-
-  **주의 사항:**
-  - 사용자는 본인이 작성한 에세이만 삭제할 수 있습니다.
-  - 논리 삭제를 통해 실제 데이터는 유지되며, 이후 복구가 가능합니다.
-  `,
-  })
-  @ApiResponse({ status: 200 })
-  async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
-    await this.essayService.deleteEssay(req.user.id, essayId);
-  }
-
   @Post('images')
   @ApiOperation({
     summary: '썸네일 업로드',
@@ -740,5 +716,29 @@ export class EssayController {
   @ApiResponse({ status: 200, type: EssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
+  }
+
+  @Delete(':essayId')
+  @ApiOperation({
+    summary: '에세이 삭제',
+    description: `
+  지정된 ID를 가진 에세이를 삭제합니다. 에세이는 논리적으로 삭제되며, 실제 데이터는 유지되지만 삭제된 것으로 표시됩니다.
+
+  **경로 파라미터:**
+  - \`essayId\`: 삭제할 에세이의 ID (필수)
+
+  **동작 과정:**
+  1. 에세이 ID와 사용자 ID를 기반으로 에세이를 조회합니다.
+  2. 에세이가 존재하지 않거나 사용자가 에세이의 작성자가 아닌 경우 오류를 반환합니다.
+  3. 에세이를 논리적으로 삭제합니다 (deletedDate 필드를 현재 날짜로 설정).
+
+  **주의 사항:**
+  - 사용자는 본인이 작성한 에세이만 삭제할 수 있습니다.
+  - 논리 삭제를 통해 실제 데이터는 유지되며, 이후 복구가 가능합니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
+    await this.essayService.deleteEssay(req.user.id, essayId);
   }
 }
