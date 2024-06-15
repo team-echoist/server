@@ -108,6 +108,11 @@ export class FullEssayResDto {
   @IsNumber()
   category: StoryInfoDto;
 
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  trandScore: number;
+
   @ApiProperty({ type: () => [ReportDto] })
   @Type(() => ReportDto)
   @Expose()

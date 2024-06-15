@@ -16,6 +16,7 @@ import { EssayStatus } from '../../../../entities/essay.entity';
 import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 import { StoryDto } from '../../../story/dto/story.dto';
 
+// todo 스키마로 변경
 export class EssayResDto {
   @ApiProperty()
   @IsNumber()

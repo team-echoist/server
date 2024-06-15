@@ -38,11 +38,23 @@ export class UserService {
   ) {}
 
   async fetchUserEntityById(userId: number) {
-    return this.userRepository.findUserById(userId);
+    const cacheKey = `user:${userId}`;
+
+    const cachedUser = await this.redis.get(cacheKey);
+
+    let user = cachedUser ? JSON.parse(cachedUser) : null;
+    if (!user) {
+      user = await this.userRepository.findUserById(userId);
+      if (user) {
+        await this.redis.setex(cacheKey, 3600, JSON.stringify(user));
+        return user;
+      }
+    }
+    return user;
   }
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
-    const user = await this.userRepository.findUserById(userId);
+    const user = await this.fetchUserEntityById(userId);
     const newExt = file.originalname.split('.').pop();
 
     let fileName: any;
@@ -79,7 +91,7 @@ export class UserService {
   }
 
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
-    const user = await this.userRepository.findUserById(userId);
+    const user = await this.fetchUserEntityById(userId);
 
     if (data.nickname && data.nickname !== user.nickname) {
       await this.nicknameService.setNicknameUsage(user.nickname, false);
@@ -95,12 +107,12 @@ export class UserService {
   }
 
   async findUserById(userId: number) {
-    const user = await this.userRepository.findUserById(userId);
+    const user = await this.fetchUserEntityById(userId);
     return this.utilsService.transformToDto(UserResDto, user);
   }
 
   async getUserSummaryById(userId: number) {
-    const user = await this.userRepository.findUserById(userId);
+    const user = await this.fetchUserEntityById(userId);
     return this.utilsService.transformToDto(UserSummaryResDto, user);
   }
 
@@ -120,8 +132,8 @@ export class UserService {
       throw new HttpException('You are already following', HttpStatus.CONFLICT);
     }
 
-    const follower = await this.userRepository.findUserById(followerId);
-    const following = await this.userRepository.findUserById(followingId);
+    const follower = await this.fetchUserEntityById(followerId);
+    const following = await this.fetchUserEntityById(followingId);
 
     if (!follower || !following) {
       throw new NotFoundException('User not found');
@@ -170,10 +182,6 @@ export class UserService {
   }
 
   async decreaseReputation(userId: number, points: number) {
-    // if (isNaN(points) || points <= 0) {
-    //   console.log(`Invalid points to decrease: ${points}. Skipping reputation decrease.`);
-    //   return;
-    // }
     const user = await this.userRepository.findUserById(userId);
 
     const currentReputation = user.reputation ?? 0;

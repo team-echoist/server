@@ -35,6 +35,7 @@ import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
 import { UpdateStoryReqDto } from '../story/dto/repuest/updateStoryReq.dto';
 import { EssaysSummarySchemaDto } from './dto/schema/essaysSummarySchema.dto';
 import { EssayIdsReqDto } from './dto/request/essayIdsReq.dto';
+import { EssaySchemaDto } from './dto/schema/essaySchema.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -254,8 +255,11 @@ export class EssayController {
   })
   @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
   @ApiQuery({ name: 'limit', required: false })
-  async getRecommendEssays(@Query('limit', new PagingParseIntPipe(10)) limit: number) {
-    return this.essayService.getRecommendEssays(limit);
+  async getRecommendEssays(
+    @Req() req: ExpressRequest,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.essayService.getRecommendEssays(req.user.id, limit);
   }
 
   @Get('followings')
@@ -414,10 +418,11 @@ export class EssayController {
   @ApiQuery({ name: 'type', required: true })
   @ApiQuery({ name: 'limit', required: false })
   async oneSentenceEssays(
+    @Req() req: ExpressRequest,
     @Query('type', new DefaultValuePipe('first')) type: 'first' | 'last' = 'first',
     @Query('limit', new PagingParseIntPipe(6)) limit: number,
   ) {
-    return await this.essayService.getSentenceEssays(type, limit);
+    return await this.essayService.getSentenceEssays(req.user.id, type, limit);
   }
 
   @Put(':essayId/stories/:storyId')
@@ -713,7 +718,7 @@ export class EssayController {
   - 에세이 ID는 유효한 숫자여야 합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssayResDto })
+  @ApiResponse({ status: 200, type: EssaySchemaDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
   }

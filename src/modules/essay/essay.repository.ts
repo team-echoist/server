@@ -109,9 +109,10 @@ export class EssayRepository {
     await this.essayRepository.update(essay.id, { deletedDate: new Date() });
   }
 
-  async getRecommendEssays() {
-    const bookmarkWeight = 0.3;
-    const trendWeight = 0.4;
+  async getRecommendEssays(recentTags: number[]) {
+    const bookmarkWeight = 0.2;
+    const tagWeight = 0.2;
+    const trendWeight = 0.3;
     const reputationWeight = 0.3;
     const largerPoolLimit = 1000;
 
@@ -125,21 +126,29 @@ export class EssayRepository {
             .addSelect('COUNT("bookmark"."id")', 'bookmarkCount')
             .from(Bookmark, 'bookmark')
             .groupBy('"bookmark"."essayId"'),
-        'bookmark',
-        '"bookmark"."essayId" = "essay"."id"',
+        'bookmarkCounts',
+        '"bookmarkCounts"."essayId" = "essay"."id"',
       )
+      .leftJoin('essay.tags', 'tags')
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
       .andWhere('essay.deletedDate IS NULL')
       .addSelect(
         `
-        ${bookmarkWeight} * COALESCE("bookmark"."bookmarkCount", 0) +
+        ${bookmarkWeight} * COALESCE("bookmarkCounts"."bookmarkCount", 0) +
         ${trendWeight} * essay.trendScore +
-        ${reputationWeight} * author.reputation
+        ${reputationWeight} * author.reputation +
+        ${tagWeight} * COALESCE(
+        SUM(
+          CASE WHEN tags.id IN (:...recentTags) THEN 1 ELSE 0 END
+        ), 0
+      )
       `,
         'weighted_score',
       )
+      .groupBy('essay.id, author.id, "bookmarkCounts"."bookmarkCount"')
       .orderBy('weighted_score', 'DESC')
       .limit(largerPoolLimit)
+      .setParameter('recentTags', recentTags)
       .getMany();
   }
 
@@ -460,6 +469,33 @@ export class EssayRepository {
       })
       .groupBy("DATE_TRUNC('week', essay.createdDate)")
       .orderBy('weekstart', 'ASC')
+      .getRawMany();
+  }
+
+  async findEssaysLastWeek(userId: number, now: Date) {
+    return this.essayRepository.count({
+      where: {
+        author: { id: userId },
+        createdDate: Between(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7), now),
+      },
+    });
+  }
+
+  async findEssaysLastMonth(userId: number, now: Date) {
+    return await this.essayRepository.count({
+      where: {
+        author: { id: userId },
+        createdDate: Between(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()), now),
+      },
+    });
+  }
+
+  async getRecentTags(essayIds: number[]) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .innerJoin('essay.tags', 'tag')
+      .select('DISTINCT tag.id', 'tagId')
+      .where('essay.id IN (:...essayIds)', { essayIds })
       .getRawMany();
   }
 }

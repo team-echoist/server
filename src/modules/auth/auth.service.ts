@@ -74,12 +74,13 @@ export class AuthService {
     return null;
   }
 
-  async validatePayload(email: string) {
-    const cacheKey = `validate_${email}`;
+  async validatePayload(id: number) {
+    // todo 아이디로만 인가를 진행하는게 맞나?
+    const cacheKey = `validate_${id}`;
     const cachedUser = await this.redis.get(cacheKey);
     let user = cachedUser ? JSON.parse(cachedUser) : null;
     if (!user) {
-      user = await this.authRepository.findByEmail(email);
+      user = await this.authRepository.findById(id);
       if (user) {
         await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
         return user;
