@@ -37,6 +37,7 @@ describe('UserService', () => {
     get: jest.fn(),
     set: jest.fn(),
     del: jest.fn(),
+    setex: jest.fn(),
   };
   const mockNicknameService = {
     setNicknameUsage: jest.fn(),

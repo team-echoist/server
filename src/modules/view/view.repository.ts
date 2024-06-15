@@ -31,4 +31,14 @@ export class ViewRepository {
 
     return { viewRecords, total };
   }
+
+  async recentEssayIds(userId: number, recentCount: number) {
+    return await this.viewRepository
+      .createQueryBuilder('viewRecord')
+      .select(['viewRecord.essayId', 'viewRecord.viewedDate'])
+      .where('viewRecord.userId = :userId', { userId })
+      .orderBy('viewRecord.viewedDate', 'DESC')
+      .limit(recentCount)
+      .getRawMany();
+  }
 }

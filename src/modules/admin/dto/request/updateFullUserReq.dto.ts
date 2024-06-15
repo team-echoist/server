@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsString, Length, Matches } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 import { UserStatus } from '../../../../entities/user.entity';
 
 export class UpdateFullUserReqDto {
@@ -51,4 +59,9 @@ export class UpdateFullUserReqDto {
   @IsOptional()
   @IsEnum(UserStatus)
   status?: UserStatus;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  reputation?: number;
 }

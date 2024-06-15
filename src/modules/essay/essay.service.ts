@@ -76,7 +76,31 @@ export class EssayService {
     const savedEssay = await this.essayRepository.saveEssay(essayData);
     void this.badgeService.addExperience(user, tags);
 
+    await this.evaluateUserReputation(user);
+
     return this.utilsService.transformToDto(EssayResDto, savedEssay);
+  }
+
+  private async evaluateUserReputation(user: User) {
+    const now = new Date();
+
+    const essaysLastWeek = await this.essayRepository.findEssaysLastWeek(user.id, now);
+
+    const essaysLastMonth = await this.essayRepository.findEssaysLastMonth(user.id, now);
+
+    let reputationIncrease = 0;
+
+    if (essaysLastWeek >= 2) {
+      reputationIncrease += 1;
+    }
+
+    if (essaysLastMonth >= 10) {
+      reputationIncrease += 2;
+    }
+
+    if (reputationIncrease > 0) {
+      await this.userService.increaseReputation(user, reputationIncrease);
+    }
   }
 
   private async handleMonitoredUser(user: User, essayData: any, data: CreateEssayReqDto) {
@@ -229,7 +253,7 @@ export class EssayService {
     const viewThreshold = 100;
 
     if (essay.views > 0 && essay.views % viewThreshold === 0) {
-      const increasePoints = 10;
+      const increasePoints = 0.2;
       await this.userService.increaseReputation(essay.author, increasePoints);
     }
   }
@@ -319,8 +343,12 @@ export class EssayService {
     return essay.thumbnail ? essay.thumbnail.split('/').pop() : this.utilsService.getUUID();
   }
 
-  async getRecommendEssays(limit: number) {
-    const essays = await this.essayRepository.getRecommendEssays();
+  async getRecommendEssays(userId: number, limit: number) {
+    const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
+    const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
+    const recentTags = recentTagObjects.map((tag) => tag.tagId);
+
+    const essays = await this.essayRepository.getRecommendEssays(recentTags);
 
     const selectedEssays = this.getRandomElements(essays, limit);
     selectedEssays.forEach((essay) => {
@@ -430,8 +458,11 @@ export class EssayService {
     await this.storyService.deleteStory(userId, storyId);
   }
 
-  async getSentenceEssays(type: string, limit: number) {
-    const essays = await this.essayRepository.getRecommendEssays();
+  async getSentenceEssays(userId: number, type: string, limit: number) {
+    const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
+    const recentTags = await this.essayRepository.getRecentTags(recentEssayIds);
+
+    const essays = await this.essayRepository.getRecommendEssays(recentTags);
     const selectedEssays = this.getRandomElements(essays, limit);
 
     selectedEssays.forEach((essay) => {
@@ -525,7 +556,7 @@ export class EssayService {
       throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
     }
 
-    await this.userService.increaseReputation(essay.author, 10);
+    await this.userService.increaseReputation(essay.author, 0.2);
     await this.bookmarkService.addBookmark(user, essay);
     await this.increaseTrendScore(essay, 1.05);
   }

@@ -8,7 +8,6 @@ import {
   IsLongitude,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
 } from 'class-validator';
 import { EssayStatus } from '../../../../entities/essay.entity';
@@ -108,4 +107,9 @@ export class EssaysInfoResDto {
   @Expose()
   @IsNumber()
   reviewCount: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  trandScore: number;
 }

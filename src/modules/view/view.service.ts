@@ -29,4 +29,14 @@ export class ViewService {
   async findRecentViewedEssays(userId: number, page: number, limit: number) {
     return await this.viewRepository.findRecentViewedEssays(userId, page, limit);
   }
+
+  async getRecentEssayIds(userId: number, recentCount: number) {
+    const recentEssayIds = await this.viewRepository.recentEssayIds(userId, recentCount);
+    const essayIds = recentEssayIds.map((record) => record.essayId);
+
+    if (essayIds.length === 0) {
+      return [];
+    }
+    return essayIds;
+  }
 }

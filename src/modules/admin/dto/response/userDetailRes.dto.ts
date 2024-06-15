@@ -79,6 +79,11 @@ export class UserDetailResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
+  reputation: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
   reportCount: number;
 
   @ApiProperty()
