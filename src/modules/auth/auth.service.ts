@@ -75,7 +75,6 @@ export class AuthService {
   }
 
   async validatePayload(id: number) {
-    // todo 아이디로만 인가를 진행하는게 맞나?
     const cacheKey = `validate_${id}`;
     const cachedUser = await this.redis.get(cacheKey);
     let user = cachedUser ? JSON.parse(cachedUser) : null;
