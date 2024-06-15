@@ -85,6 +85,7 @@ describe('AdminService', () => {
     get: jest.fn(),
     set: jest.fn(),
     del: jest.fn(),
+    getex: jest.fn(),
   };
 
   beforeEach(async () => {
