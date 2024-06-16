@@ -71,6 +71,7 @@ describe('AdminService', () => {
   };
   const mockUserService = {
     updateUser: jest.fn(),
+    decreaseReputation: jest.fn(),
   };
   const mockUtilsService = {
     startOfDay: jest.fn(),
@@ -393,13 +394,14 @@ describe('AdminService', () => {
       const userId = 1;
       const essayId = 1;
       const data: ProcessReqDto = { actionType: ActionType.APPROVED, comment: 'This is approved' };
-      const essay = { id: 1, status: EssayStatus.PUBLISHED };
+      const essay = { id: 1, status: EssayStatus.PUBLISHED, author: { id: 2 } };
 
       mockEssayRepository.findEssayById.mockResolvedValue(essay);
       mockAdminRepository.findReportByEssayId.mockResolvedValue([{ id: 1 }]);
       mockEssayRepository.saveEssay.mockResolvedValue(essay);
       mockAdminRepository.saveReport.mockResolvedValue({});
       mockAdminRepository.saveHistory.mockResolvedValue({});
+      mockUserService.decreaseReputation.mockResolvedValue(true);
 
       await adminService.processReports(userId, essayId, data);
 

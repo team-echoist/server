@@ -34,6 +34,8 @@ import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
+import { CreateReportReqDto } from '../report/dto/request/createReportReq.dto';
+import { ReportService } from '../report/report.service';
 
 @Injectable()
 export class EssayService {
@@ -48,6 +50,7 @@ export class EssayService {
     private readonly badgeService: BadgeService,
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
+    private readonly reportService: ReportService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -91,11 +94,11 @@ export class EssayService {
     let reputationIncrease = 0;
 
     if (essaysLastWeek >= 2) {
-      reputationIncrease += 1;
+      reputationIncrease += 5;
     }
 
-    if (essaysLastMonth >= 10) {
-      reputationIncrease += 2;
+    if (essaysLastMonth >= 8) {
+      reputationIncrease += 5;
     }
 
     if (reputationIncrease > 0) {
@@ -253,13 +256,13 @@ export class EssayService {
     const viewThreshold = 100;
 
     if (essay.views > 0 && essay.views % viewThreshold === 0) {
-      const increasePoints = 0.2;
+      const increasePoints = 1;
       await this.userService.increaseReputation(essay.author, increasePoints);
     }
   }
 
-  private async increaseTrendScore(essay: Essay, incrementFactor: number) {
-    const newTrendScore = essay.trendScore * incrementFactor;
+  private async increaseTrendScore(essay: Essay, incrementAmount: number) {
+    const newTrendScore = essay.trendScore + incrementAmount;
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
@@ -269,7 +272,7 @@ export class EssayService {
   }
 
   private async updateTrendScoreOnView(essay: Essay) {
-    const incrementFactor = 1.01;
+    const incrementAmount = 1;
     const decayFactor = 0.99;
 
     const currentDate = new Date();
@@ -278,8 +281,9 @@ export class EssayService {
       (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
 
     let newTrendScore = essay.trendScore / Math.pow(decayFactor, daysSinceCreation);
+    newTrendScore = Math.floor(newTrendScore);
 
-    newTrendScore *= incrementFactor;
+    newTrendScore += incrementAmount;
 
     newTrendScore = Math.max(newTrendScore, 0);
 
@@ -345,10 +349,14 @@ export class EssayService {
 
   async getRecommendEssays(userId: number, limit: number) {
     const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
-    const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
-    const recentTags = recentTagObjects.map((tag) => tag.tagId);
+    let recentTags: any[];
 
-    const essays = await this.essayRepository.getRecommendEssays(recentTags);
+    if (recentEssayIds.length > 0) {
+      const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
+      recentTags = recentTagObjects.map((tag) => tag.tagId);
+    }
+
+    const essays = await this.essayRepository.getRecommendEssays(userId, recentTags);
 
     const selectedEssays = this.getRandomElements(essays, limit);
     selectedEssays.forEach((essay) => {
@@ -462,7 +470,7 @@ export class EssayService {
     const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
     const recentTags = await this.essayRepository.getRecentTags(recentEssayIds);
 
-    const essays = await this.essayRepository.getRecommendEssays(recentTags);
+    const essays = await this.essayRepository.getRecommendEssays(userId, recentTags);
     const selectedEssays = this.getRandomElements(essays, limit);
 
     selectedEssays.forEach((essay) => {
@@ -556,9 +564,9 @@ export class EssayService {
       throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
     }
 
-    await this.userService.increaseReputation(essay.author, 0.2);
+    await this.userService.increaseReputation(essay.author, 1);
     await this.bookmarkService.addBookmark(user, essay);
-    await this.increaseTrendScore(essay, 1.05);
+    await this.increaseTrendScore(essay, 2);
   }
 
   @Transactional()
@@ -604,5 +612,27 @@ export class EssayService {
     const weeklyEssayCounts = this.utilsService.formatWeeklyData(rawData, fiveWeeksAgo, now);
 
     return this.utilsService.transformToDto(WeeklyEssayCountResDto, weeklyEssayCounts);
+  }
+
+  @Transactional()
+  async createReport(userId: number, essayId: number, data: CreateReportReqDto) {
+    const essay = await this.essayRepository.findEssayById(essayId);
+
+    if (!essay) {
+      throw new HttpException('Essay not found.', HttpStatus.NOT_FOUND);
+    }
+
+    if (essay.status === 'private') {
+      throw new HttpException('Cannot report a private essay.', HttpStatus.BAD_REQUEST);
+    }
+
+    const existingReport = await this.reportService.getReportByReporter(userId, essayId);
+
+    if (existingReport) {
+      throw new HttpException('You have already reported this essay.', HttpStatus.CONFLICT);
+    }
+
+    await this.reportService.createReport(userId, essayId, data.reason);
+    await this.userService.decreaseReputation(essay.author.id, 1);
   }
 }

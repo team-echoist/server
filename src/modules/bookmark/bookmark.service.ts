@@ -33,7 +33,7 @@ export class BookmarkService {
       if (!authorReputationMap[authorId]) {
         authorReputationMap[authorId] = 0;
       }
-      authorReputationMap[authorId] += 10;
+      authorReputationMap[authorId] += 1;
     }
 
     for (const authorId of Object.keys(authorReputationMap)) {
@@ -58,7 +58,7 @@ export class BookmarkService {
       if (!authorReputationMap[authorId]) {
         authorReputationMap[authorId] = 0;
       }
-      authorReputationMap[authorId] += 10;
+      authorReputationMap[authorId] += 1;
       if (authorReputationMap[authorId] < 0) {
         authorReputationMap[authorId] = 0;
       }

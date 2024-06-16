@@ -4,6 +4,7 @@ import { Essay, EssayStatus } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 import { Bookmark } from '../../entities/bookmark.entity';
+import { ReportQueue } from '../../entities/reportQueue.entity';
 
 export class EssayRepository {
   constructor(
@@ -109,12 +110,14 @@ export class EssayRepository {
     await this.essayRepository.update(essay.id, { deletedDate: new Date() });
   }
 
-  async getRecommendEssays(recentTags: number[]) {
+  async getRecommendEssays(userId: number, recentTags: number[]) {
     const bookmarkWeight = 0.2;
     const tagWeight = 0.2;
     const trendWeight = 0.3;
     const reputationWeight = 0.3;
     const largerPoolLimit = 1000;
+
+    recentTags = recentTags || [];
 
     return this.essayRepository
       .createQueryBuilder('essay')
@@ -122,33 +125,39 @@ export class EssayRepository {
       .leftJoin(
         (subQuery) =>
           subQuery
-            .select('"bookmark"."essayId"', 'essayId')
+            .select('"bookmark"."essay_id"', 'essay_id')
             .addSelect('COUNT("bookmark"."id")', 'bookmarkCount')
             .from(Bookmark, 'bookmark')
-            .groupBy('"bookmark"."essayId"'),
+            .groupBy('"bookmark"."essay_id"'),
         'bookmarkCounts',
-        '"bookmarkCounts"."essayId" = "essay"."id"',
+        '"bookmarkCounts"."essay_id" = "essay"."id"',
       )
       .leftJoin('essay.tags', 'tags')
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
       .andWhere('essay.deletedDate IS NULL')
+      .andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('"reportQueue"."essay_id"')
+          .from(ReportQueue, 'reportQueue')
+          .where('"reportQueue"."reporter_id" = :userId')
+          .getQuery();
+        return `"essay"."id" NOT IN ${subQuery}`;
+      })
       .addSelect(
         `
-        ${bookmarkWeight} * COALESCE("bookmarkCounts"."bookmarkCount", 0) +
-        ${trendWeight} * essay.trendScore +
-        ${reputationWeight} * author.reputation +
-        ${tagWeight} * COALESCE(
-        SUM(
-          CASE WHEN tags.id IN (:...recentTags) THEN 1 ELSE 0 END
-        ), 0
-      )
-      `,
+      ${bookmarkWeight} * COALESCE("bookmarkCounts"."bookmarkCount", 0) +
+      ${trendWeight} * essay.trendScore +
+      ${reputationWeight} * author.reputation
+      ${recentTags.length > 0 ? ` + ${tagWeight} * COALESCE(SUM(CASE WHEN tags.id IN (:...recentTags) THEN 1 ELSE 0 END), 0)` : ''}
+    `,
         'weighted_score',
       )
       .groupBy('essay.id, author.id, "bookmarkCounts"."bookmarkCount"')
       .orderBy('weighted_score', 'DESC')
       .limit(largerPoolLimit)
       .setParameter('recentTags', recentTags)
+      .setParameter('userId', userId)
       .getMany();
   }
 

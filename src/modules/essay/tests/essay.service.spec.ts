@@ -17,6 +17,8 @@ import { FollowService } from '../../follow/follow.service';
 import { BadgeService } from '../../badge/badge.service';
 import { ViewService } from '../../view/view.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
+import { ReportModule } from '../../report/report.module';
+import { ReportService } from '../../report/report.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -65,6 +67,9 @@ describe('EssayService', () => {
     addViewRecord: jest.fn(),
   };
   const mockBookmarkService = {};
+
+  const mockReportService = {};
+
   const mockRedis = {
     get: jest.fn(),
     set: jest.fn(),
@@ -88,6 +93,7 @@ describe('EssayService', () => {
         { provide: BadgeService, useValue: mockBadgeService },
         { provide: ViewService, useValue: mockViewService },
         { provide: BookmarkService, useValue: mockBookmarkService },
+        { provide: ReportService, useValue: mockReportService },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
