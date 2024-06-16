@@ -13,7 +13,7 @@ export class BookmarkRepository {
     const queryBuilder = this.bookmarkRepository
       .createQueryBuilder('bookmark')
       .leftJoinAndSelect('bookmark.essay', 'essay')
-      .where('bookmark.user.id = :userId', { userId })
+      .where('bookmark.user_id = :userId', { userId })
       .orderBy('bookmark.createdDate', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit);

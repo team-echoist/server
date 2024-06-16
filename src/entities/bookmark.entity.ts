@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
 
@@ -7,9 +7,11 @@ export class Bookmark {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.bookmarks)
   user: User;
 
+  @JoinColumn({ name: 'essay_id' })
   @ManyToOne(() => Essay, (essay) => essay.bookmarks, { onDelete: 'CASCADE' })
   essay: Essay;
 
