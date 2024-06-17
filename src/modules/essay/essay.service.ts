@@ -233,7 +233,6 @@ export class EssayService {
       if (essay.status === EssayStatus.PRIVATE) {
         throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
       } else {
-        const user = await this.userService.fetchUserEntityById(userId);
         const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
         const newViews = (essay.views || 0) + 1;
 
@@ -564,8 +563,8 @@ export class EssayService {
       throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
     }
 
-    await this.userService.increaseReputation(essay.author, 1);
     await this.bookmarkService.addBookmark(user, essay);
+    await this.userService.increaseReputation(essay.author, 1);
     await this.increaseTrendScore(essay, 2);
   }
 

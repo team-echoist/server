@@ -28,6 +28,7 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'https://www.linkedoutapp.com',
+    'https://linkedout-umber.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
   ];
