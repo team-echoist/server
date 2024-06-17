@@ -266,6 +266,7 @@ export class AdminService {
 
     if (data.actionType === 'approved') {
       await this.handleApprovedAction(essay);
+      // todo 푸쉬알림
     }
 
     await this.syncReportsProcessed(essayId, userId, data);
