@@ -59,11 +59,11 @@ export class UserService {
 
     let fileName: any;
     if (user.profileImage) {
-      const urlParts = user.profileImage.split('/');
-      fileName = urlParts[urlParts.length - 1];
+      const urlParts = user.profileImage.split('/').pop();
+      fileName = `profile/${urlParts}`;
     } else {
       const imageName = this.utilsService.getUUID();
-      fileName = `${imageName}`;
+      fileName = `profile/${imageName}`;
     }
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
@@ -80,8 +80,8 @@ export class UserService {
       throw new NotFoundException('No profile image to delete');
     }
 
-    const urlParts = user.profileImage.split('/');
-    const fileName = urlParts[urlParts.length - 1];
+    const urlParts = user.profileImage.split('/').pop();
+    const fileName = `profiles/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
     user.profileImage = null;
