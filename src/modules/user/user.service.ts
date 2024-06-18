@@ -60,10 +60,10 @@ export class UserService {
     let fileName: any;
     if (user.profileImage) {
       const urlParts = user.profileImage.split('/').pop();
-      fileName = `profiles/${urlParts}`;
+      fileName = `profile/${urlParts}`;
     } else {
       const imageName = this.utilsService.getUUID();
-      fileName = `profiles/${imageName}`;
+      fileName = `profile/${imageName}`;
     }
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
@@ -81,7 +81,7 @@ export class UserService {
     }
 
     const urlParts = user.profileImage.split('/').pop();
-    const fileName = `profiles/${urlParts}`;
+    const fileName = `profile/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
     user.profileImage = null;
