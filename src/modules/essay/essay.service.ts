@@ -327,8 +327,8 @@ export class EssayService {
       throw new NotFoundException('No thumbnail to delete');
     }
 
-    const urlParts = essay.thumbnail.split('/');
-    const fileName = urlParts[urlParts.length - 1];
+    const urlParts = essay.thumbnail.split('/').pop();
+    const fileName = `images/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
     essay.thumbnail = null;
@@ -343,17 +343,18 @@ export class EssayService {
     }
 
     const essay = await this.essayRepository.findEssayById(essayId);
-    return essay.thumbnail ? essay.thumbnail.split('/').pop() : this.utilsService.getUUID();
+
+    if (essay.thumbnail) {
+      const urlParts = essay.thumbnail.split('/').pop();
+      return `images/${urlParts}`;
+    } else {
+      const imageName = this.utilsService.getUUID();
+      return `images/${imageName}`;
+    }
   }
 
   async getRecommendEssays(userId: number, limit: number) {
-    const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
-    let recentTags: any[];
-
-    if (recentEssayIds.length > 0) {
-      const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
-      recentTags = recentTagObjects.map((tag) => tag.tagId);
-    }
+    const recentTags = await this.getRecentTags(userId);
 
     const essays = await this.essayRepository.getRecommendEssays(userId, recentTags);
 
@@ -365,6 +366,17 @@ export class EssayService {
     const essayDtos = this.utilsService.transformToDto(EssaysResDto, selectedEssays);
 
     return { essays: essayDtos };
+  }
+
+  private async getRecentTags(userId: number) {
+    const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
+
+    let recentTags: any[];
+    if (recentEssayIds.length > 0) {
+      const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
+      recentTags = recentTagObjects.map((tag) => tag.tagId);
+    }
+    return recentTags;
   }
 
   private getRandomElements<T>(array: T[], count: number): T[] {
@@ -466,8 +478,7 @@ export class EssayService {
   }
 
   async getSentenceEssays(userId: number, type: string, limit: number) {
-    const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
-    const recentTags = await this.essayRepository.getRecentTags(recentEssayIds);
+    const recentTags = await this.getRecentTags(userId);
 
     const essays = await this.essayRepository.getRecommendEssays(userId, recentTags);
     const selectedEssays = this.getRandomElements(essays, limit);

@@ -23,7 +23,6 @@ import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
-import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import { BadgesSchemaDto } from '../badge/dto/schema/badgesSchema.dto';
 import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchema.dto';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
