@@ -81,7 +81,7 @@ export class UserService {
     }
 
     const urlParts = user.profileImage.split('/').pop();
-    const fileName = `profiles/${urlParts}`;
+    const fileName = `profile/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
     user.profileImage = null;
