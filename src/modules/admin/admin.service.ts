@@ -586,7 +586,7 @@ export class AdminService {
     }
 
     const urlParts = admin.profileImage.split('/').pop();
-    const fileName = `profiles/${urlParts}`;
+    const fileName = `profile/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
     admin.profileImage = null;
