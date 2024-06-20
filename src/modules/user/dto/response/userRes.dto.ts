@@ -57,4 +57,9 @@ export class UserResDto {
   @Expose()
   @IsDate()
   updatedDate: Date;
+
+  @ApiProperty()
+  @Expose()
+  @IsDate()
+  deactivationDate: Date;
 }

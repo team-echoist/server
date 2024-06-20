@@ -168,7 +168,7 @@ export class AuthController {
   **동작 과정:**
   1. 제공된 이메일과 비밀번호로 사용자를 인증합니다.
   2. 인증에 실패하면 적절한 에러 메시지를 반환합니다.
-  3. 사용자가 'BANNED' 상태인 경우, 계정이 정지되었음을 알리는 메시지를 반환합니다.
+  3. 사용자가 'BANNED' 상태인 경우, 403을 반환합니다.
   4. 인증에 성공하면 사용자 정보를 반환합니다.
 
   **주의 사항:**
@@ -177,7 +177,10 @@ export class AuthController {
   - 계정이 정지된 사용자는 로그인할 수 없습니다.
   `,
   })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, description: '로그인 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패: 잘못된 이메일 또는 비밀번호' })
+  @ApiResponse({ status: 202, description: '탈퇴를 요청한 계정' })
+  @ApiResponse({ status: 403, description: '정지 계정' })
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
   async login() {

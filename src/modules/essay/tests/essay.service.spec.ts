@@ -138,7 +138,7 @@ describe('EssayService', () => {
       const savedEssay = new Essay();
       const category = new Story();
 
-      user.status = UserStatus.ACTIVE;
+      user.status = UserStatus.ACTIVATED;
       savedEssay.status = EssayStatus.PUBLISHED;
       mockUserService.fetchUserEntityById.mockResolvedValue(user);
       mockEssayRepository.findCategoryById.mockResolvedValue(category);

@@ -75,7 +75,7 @@ export class SeederService {
     const admins = Array.from({ length: 10 }, (_, i) => ({
       email: `admin${i + 1}@linkedoutapp.com`,
       password: hashedPassword,
-      active: true,
+      activated: true,
     }));
     await this.utilsService.batchProcess(admins, 2, async (batch) => {
       const adminEntities = batch.map((admin) => this.adminRepository.create(admin));
@@ -90,7 +90,7 @@ export class SeederService {
       email: `user${i + 1}@linkedoutapp.com`,
       password: hashedPassword,
       role: 'client',
-      status: Math.random() < 0.1 ? UserStatus.MONITORED : UserStatus.ACTIVE,
+      status: Math.random() < 0.1 ? UserStatus.MONITORED : UserStatus.ACTIVATED,
       createdDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
       updatedDate: this.utilsService.getRandomDate(new Date(2020, 0, 1), new Date()),
     }));

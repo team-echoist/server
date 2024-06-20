@@ -77,6 +77,7 @@ export class EssayService {
     }
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
+
     void this.badgeService.addExperience(user, tags);
 
     await this.evaluateUserReputation(user);
@@ -113,19 +114,14 @@ export class EssayService {
     };
 
     const savedMonitoredEssay = await this.essayRepository.saveEssay(adjustedData);
-    const essay = await this.essayRepository.findEssayById(savedMonitoredEssay.id);
-
-    const monitoredEssay = this.utilsService.transformToDto(EssayResDto, essay);
 
     if (data.status !== EssayStatus.PRIVATE) {
-      await this.reviewService.saveReviewRequest(user, essay, data);
-      return {
-        ...monitoredEssay,
-        message: 'Your essay is under review due to policy violations.',
-      };
+      await this.reviewService.saveReviewRequest(user, savedMonitoredEssay, data);
     }
 
-    return monitoredEssay;
+    const essay = await this.essayRepository.findEssayById(savedMonitoredEssay.id);
+
+    return this.utilsService.transformToDto(EssayResDto, essay);
   }
 
   @Transactional()

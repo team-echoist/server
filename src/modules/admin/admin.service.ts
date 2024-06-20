@@ -112,7 +112,7 @@ export class AdminService {
 
   private async handleUserBanStatus(userId: number, status: UserStatus) {
     if (status === UserStatus.BANNED) await this.handleBannedUser(userId);
-    if (status === UserStatus.ACTIVE) await this.essayRepository.restoreAllEssay(userId);
+    if (status === UserStatus.ACTIVATED) await this.essayRepository.restoreAllEssay(userId);
   }
 
   private async handleBannedUser(userId: number) {
@@ -149,7 +149,7 @@ export class AdminService {
     data.password = await bcrypt.hash(data.password, 10);
     const newAdmin: CreateAdminDto = {
       ...data,
-      active: true,
+      activated: true,
     };
     const savedAdmin = await this.adminRepository.saveAdmin(newAdmin);
 
@@ -537,8 +537,8 @@ export class AdminService {
     return !admin ? null : admin;
   }
 
-  async getAdmins(active?: boolean) {
-    const admins = await this.adminRepository.findAdmins(active);
+  async getAdmins(activated?: boolean) {
+    const admins = await this.adminRepository.findAdmins(activated);
     const adminsDto = this.utilsService.transformToDto(AdminsResDto, admins);
 
     return { admins: adminsDto };
@@ -595,17 +595,17 @@ export class AdminService {
     return { message: 'Profile image deleted successfully' };
   }
 
-  async activationSettings(rootAdminId: number, adminId: number, active: boolean) {
+  async activationSettings(rootAdminId: number, adminId: number, activated: boolean) {
     const rootAdmin = await this.adminRepository.findAdmin(rootAdminId);
     if (rootAdmin.id !== 1) {
       throw new HttpException('Root administrator only', HttpStatus.FORBIDDEN);
     }
     const admin = await this.adminRepository.findAdmin(adminId);
-    admin.active = active;
+    admin.activated = activated;
 
     const updatedAdmin = await this.adminRepository.saveAdmin(admin);
 
-    if (active === true) await this.mailService.sendActiveComplete(admin.email);
+    if (activated === true) await this.mailService.sendActiveComplete(admin.email);
 
     return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
   }
@@ -616,7 +616,7 @@ export class AdminService {
 
     const adminData: CreateAdminDto = {
       ...data,
-      active: false,
+      activated: false,
     };
     adminData.password = await bcrypt.hash(data.password, 10);
 

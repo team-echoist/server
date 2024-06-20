@@ -21,7 +21,7 @@ export class AdminResDto {
   @ApiProperty()
   @Expose()
   @IsBoolean()
-  active: boolean;
+  activated: boolean;
 
   @ApiProperty()
   @Expose()

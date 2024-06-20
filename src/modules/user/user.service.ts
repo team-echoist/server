@@ -22,7 +22,7 @@ import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
-import { User } from '../../entities/user.entity';
+import { User, UserStatus } from '../../entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -54,7 +54,7 @@ export class UserService {
   }
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
-    const user = await this.fetchUserEntityById(userId);
+    const user = await this.userRepository.findUserById(userId);
     const newExt = file.originalname.split('.').pop();
 
     let fileName: any;
@@ -182,11 +182,36 @@ export class UserService {
   }
 
   async decreaseReputation(userId: number, points: number) {
-    const user = await this.userRepository.findUserById(userId);
+    const user = await this.fetchUserEntityById(userId);
 
     const currentReputation = user.reputation ?? 0;
     const newReputation = Math.max(currentReputation - points, 0);
 
     await this.userRepository.decreaseReputation(user.id, newReputation);
+  }
+
+  async requestDeactivation(userId: number) {
+    const user = await this.fetchUserEntityById(userId);
+
+    if (user.deactivationDate)
+      throw new HttpException(
+        'This account has already been requested to be deleted.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    user.deactivationDate = new Date();
+
+    await this.userRepository.saveUser(user);
+  }
+
+  async cancelDeactivation(userId: number) {
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user.deactivationDate)
+      throw new HttpException('Account is not in deactivated status', HttpStatus.BAD_REQUEST);
+
+    user.deactivationDate = null;
+
+    await this.userRepository.saveUser(user);
   }
 }

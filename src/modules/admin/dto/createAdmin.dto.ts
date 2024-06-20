@@ -15,5 +15,5 @@ export class CreateAdminDto {
 
   @IsNotEmpty()
   @IsBoolean()
-  active: boolean;
+  activated: boolean;
 }
