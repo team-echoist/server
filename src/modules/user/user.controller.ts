@@ -35,6 +35,51 @@ import { UserSummaryWithCountSchemaDto } from './dto/schema/userSummaryWithCount
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Post('deactivate')
+  @ApiOperation({
+    summary: '회원탈퇴 요청',
+    description: `
+  사용자가 회원탈퇴를 요청합니다. 
+  
+  **동작 과정:**
+  1. 사용자가 회원탈퇴를 요청합니다.
+  2. 사용자의 status 필드를 "deactivate"로 변경하고, 30일간의 유예기간이 부여됩니다.
+  3. 유예기간 동안에는 계정 복구 요청이 가능합니다.
+  4. 유예기간이 지나면 탈퇴가 진행됩니다.
+  
+  **주의 사항:**
+  - 유예기간 동안 계정 복구를 요청하지 않으면 계정이 영구적으로 삭제됩니다.
+  - 유예기간 내에 로그인시 202응답코드를 반환합니다.
+  `,
+  })
+  @ApiResponse({
+    status: 200,
+  })
+  async requestDeactivation(@Req() req: ExpressRequest) {
+    return this.userService.requestDeactivation(req.user.id);
+  }
+
+  @Post('reactivate')
+  @ApiOperation({
+    summary: '회원탈퇴 요청 취소',
+    description: `
+  사용자가 회원탈퇴 요청을 취소하고 계정을 복구합
+  **동작 과정:**
+  1. 사용자가 회원탈퇴 요청을 취소합니다.
+  2. 계정이 다시 활성상태로 변경됩니다.
+
+  **주의 사항:**
+  - 유예기간 내에만 회원탈퇴 요청을 취소할 수 있습니다.
+  - 유예기간이 지나면 계정을 복구할 수 없습니다.
+  `,
+  })
+  @ApiResponse({
+    status: 200,
+  })
+  async cancelDeactivation(@Req() req: ExpressRequest) {
+    return this.userService.cancelDeactivation(req.user.id);
+  }
+
   @Post('images')
   @ApiOperation({
     summary: '프로필 이미지 업로드',

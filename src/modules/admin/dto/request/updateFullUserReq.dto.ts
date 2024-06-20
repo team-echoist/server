@@ -55,7 +55,11 @@ export class UpdateFullUserReqDto {
   @IsDateString()
   birthDate?: Date;
 
-  @ApiProperty({ enum: UserStatus, description: 'banned || monitored || active', required: false })
+  @ApiProperty({
+    enum: UserStatus,
+    description: 'banned || monitored || activated || deactivated',
+    required: false,
+  })
   @IsOptional()
   @IsEnum(UserStatus)
   status?: UserStatus;

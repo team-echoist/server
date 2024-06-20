@@ -173,9 +173,9 @@ export class AdminRepository {
     return this.adminRepository.findOne({ where: { email: email } });
   }
 
-  async findAdmins(active: boolean) {
-    if (active !== undefined) {
-      return this.adminRepository.find({ where: { active: active } });
+  async findAdmins(activated: boolean) {
+    if (activated !== undefined) {
+      return this.adminRepository.find({ where: { activated: activated } });
     }
     return this.adminRepository.find();
   }

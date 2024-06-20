@@ -173,23 +173,23 @@ export class AdminController {
   @ApiOperation({
     summary: '어드민 리스트',
     description: `
-  활성 상태에 따라 어드민 리스트를 조회합니다. 'active' 쿼리 파라미터를 사용하여 활성 상태를 필터링할 수 있습니다.
+  활성 상태에 따라 어드민 리스트를 조회합니다. 'activated' 쿼리 파라미터를 사용하여 활성 상태를 필터링할 수 있습니다.
     
   **쿼리 파라미터:**
-  - \`active\`: 어드민의 활성 상태 (true 또는 false, 선택적)
+  - \`activated\`: 어드민의 활성 상태 (true 또는 false, 선택적)
     
   **동작 과정:**
-  1. 선택적 쿼리 파라미터 \`active\`를 기반으로 어드민을 조회합니다.
+  1. 선택적 쿼리 파라미터 \`activated\`를 기반으로 어드민을 조회합니다.
   2. 조회된 어드민 목록을 DTO로 변환하여 반환합니다.
     
   **주의 사항:**
-  - \`active\` 파라미터가 제공되지 않으면 모든 어드민을 조회합니다.
+  - \`activated\` 파라미터가 제공되지 않으면 모든 어드민을 조회합니다.
   `,
   })
   @ApiResponse({ status: 200, type: AdminsSchemaDto })
-  @ApiQuery({ name: 'active', required: false })
-  async getAdmins(@Query('active', OptionalBoolPipe) active?: boolean) {
-    return this.adminService.getAdmins(active);
+  @ApiQuery({ name: 'activated', required: false })
+  async getAdmins(@Query('activated', OptionalBoolPipe) activated?: boolean) {
+    return this.adminService.getAdmins(activated);
   }
 
   @Post('produce')
@@ -837,7 +837,7 @@ export class AdminController {
   비활성화 어드민 리스트를 조회합니다.
     
   **동작 과정:**
-  1. \`active\`가 false인 어드민을 조회합니다.
+  1. \`activated\`가 false인 어드민을 조회합니다.
   2. 조회된 어드민 목록을 DTO로 변환하여 반환합니다.
   `,
   })
@@ -883,12 +883,12 @@ export class AdminController {
   - \`adminId\`: 활성화 상태를 변경할 어드민의 ID
   
   **쿼리 파라미터:**
-  - \`active\`: 활성화 또는 비활성화 상태 (true 또는 false)
+  - \`activated\`: 활성화 또는 비활성화 상태 (true 또는 false)
 
   **동작 과정:**
   1. 주어진 \`adminId\`를 기반으로 해당 어드민의 활성화 상태를 조회합니다.
-  2. \`active\` 파라미터를 통해 활성화 또는 비활성화 상태로 설정합니다.
-  3. \`active\` 파라미터가 true라면 요청자 메일로 활성상태 알림이 전송됩니다.
+  2. \`activated\` 파라미터를 통해 활성화 또는 비활성화 상태로 설정합니다.
+  3. \`activated\` 파라미터가 true라면 요청자 메일로 활성상태 알림이 전송됩니다.
   4. 변경된 활성화 상태의 어드민 정보를 반환합니다.
 
   **주의 사항:**
@@ -897,12 +897,12 @@ export class AdminController {
   `,
   })
   @ApiResponse({ status: 200, type: AdminResDto })
-  @ApiQuery({ name: 'active', required: true })
+  @ApiQuery({ name: 'activated', required: true })
   async activationSettings(
     @Req() req: ExpressRequest,
     @Param('adminId', ParseIntPipe) adminId: number,
-    @Query('active', ParseBoolPipe) active: boolean,
+    @Query('activated', ParseBoolPipe) activated: boolean,
   ) {
-    return this.adminService.activationSettings(req.user.id, adminId, active);
+    return this.adminService.activationSettings(req.user.id, adminId, activated);
   }
 }

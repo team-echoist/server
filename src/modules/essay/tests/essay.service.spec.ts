@@ -17,7 +17,6 @@ import { FollowService } from '../../follow/follow.service';
 import { BadgeService } from '../../badge/badge.service';
 import { ViewService } from '../../view/view.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
-import { ReportModule } from '../../report/report.module';
 import { ReportService } from '../../report/report.service';
 
 jest.mock('typeorm-transactional', () => ({
@@ -129,7 +128,7 @@ describe('EssayService', () => {
 
       const result = await essayService.saveEssay(user, 'web', data);
       expect(mockReviewService.saveReviewRequest).toHaveBeenCalled();
-      expect(result).toEqual({ message: 'Your essay is under review due to policy violations.' });
+      expect(result).toEqual({});
     });
 
     it('일반 유저는 그냥 저장', async () => {
@@ -138,7 +137,7 @@ describe('EssayService', () => {
       const savedEssay = new Essay();
       const category = new Story();
 
-      user.status = UserStatus.ACTIVE;
+      user.status = UserStatus.ACTIVATED;
       savedEssay.status = EssayStatus.PUBLISHED;
       mockUserService.fetchUserEntityById.mockResolvedValue(user);
       mockEssayRepository.findCategoryById.mockResolvedValue(category);

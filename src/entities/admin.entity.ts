@@ -24,7 +24,7 @@ export class Admin {
   name: string;
 
   @Column({ default: false, nullable: false })
-  active: boolean;
+  activated: boolean;
 
   @Column({ nullable: true })
   info: string;

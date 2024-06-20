@@ -17,7 +17,7 @@ export class AdminLocalStrategy extends PassportStrategy(Strategy, 'admin-local'
     if (!admin) {
       throw new UnauthorizedException('Invalid email or password.');
     }
-    if (!admin.active) {
+    if (!admin.activated) {
       throw new HttpException('Your account has not been activated.', HttpStatus.UNAUTHORIZED);
     }
     return admin;

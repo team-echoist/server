@@ -21,9 +21,10 @@ import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 
 export enum UserStatus {
-  ACTIVE = 'active',
+  ACTIVATED = 'activated',
   MONITORED = 'monitored',
   BANNED = 'banned',
+  DEACTIVATED = 'deactivated',
 }
 
 @Entity()
@@ -62,7 +63,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserStatus,
-    default: UserStatus.ACTIVE,
+    default: UserStatus.ACTIVATED,
   })
   status: UserStatus;
 
@@ -81,6 +82,13 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
+
+  @Column({
+    type: 'timestamptz',
+    nullable: true,
+    name: 'deactivation_date',
+  })
+  deactivationDate: Date;
 
   @DeleteDateColumn({
     name: 'deleted_date',

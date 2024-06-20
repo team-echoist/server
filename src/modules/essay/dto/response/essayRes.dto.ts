@@ -15,6 +15,8 @@ import { TagDto } from '../tag.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
 import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 import { StoryDto } from '../../../story/dto/story.dto';
+import { ReviewQueue } from '../../../../entities/reviewQueue.entity';
+import { ReviewResDto } from '../../../review/dto/response/reviewRes.dto';
 
 export class EssayResDto {
   @ApiProperty()
@@ -92,6 +94,11 @@ export class EssayResDto {
   @Type(() => StoryDto)
   @Expose()
   story: StoryDto;
+
+  @ApiProperty({ type: [ReviewResDto] })
+  @Type(() => ReviewResDto)
+  @Expose()
+  reviews: ReviewQueue[];
 
   @ApiProperty()
   @IsBoolean()

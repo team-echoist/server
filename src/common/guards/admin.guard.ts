@@ -15,7 +15,7 @@ export class AdminGuard extends AuthGuard('admin-jwt') {
 
   validate(request: any) {
     const user = request.user;
-    if (user && user.active) {
+    if (user && user.activated) {
       return true;
     }
     throw new UnauthorizedException('Admin access only');

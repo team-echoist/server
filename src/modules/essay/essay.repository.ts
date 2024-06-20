@@ -18,7 +18,10 @@ export class EssayRepository {
       .leftJoinAndSelect('essay.author', 'author')
       .leftJoinAndSelect('essay.story', 'story')
       .leftJoinAndSelect('essay.tags', 'tags')
+      .leftJoin('essay.reviews', 'reviews')
+      .addSelect(['reviews'])
       .where('essay.id = :id', { id: essayId })
+      .andWhere('reviews.processed = false')
       .getOne();
   }
 
