@@ -23,20 +23,10 @@ export class JwtInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse<Response>();
 
-    if (request.user.status === UserStatus.BANNED) {
-      throw new HttpException(
-        'Your account has been banned. Please contact support for more information.',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
     return next.handle().pipe(
       tap(() => {
         if (!response.headersSent && request.user) {
           const newJwt = this.utilsService.generateJWT(request.user.id, request.user.email);
-
-          if (request.user.deactivationDate) response.statusCode = HttpStatus.ACCEPTED;
-
           response.setHeader('Authorization', `Bearer ${newJwt}`);
         }
       }),
