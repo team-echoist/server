@@ -35,8 +35,7 @@ export class JwtInterceptor implements NestInterceptor {
         if (!response.headersSent && request.user) {
           const newJwt = this.utilsService.generateJWT(request.user.id, request.user.email);
 
-          if (request.user.status === UserStatus.DEACTIVATED)
-            response.statusCode = HttpStatus.ACCEPTED;
+          if (request.user.deactivationDate) response.statusCode = HttpStatus.ACCEPTED;
 
           response.setHeader('Authorization', `Bearer ${newJwt}`);
         }
