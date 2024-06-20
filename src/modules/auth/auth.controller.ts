@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -183,8 +193,8 @@ export class AuthController {
   @ApiResponse({ status: 403, description: '정지 계정' })
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
-  async login(@Req() req: ExpressRequest) {
-    return req.user;
+  async login() {
+    return;
   }
 
   //-------------------------------------------------------OAuth
