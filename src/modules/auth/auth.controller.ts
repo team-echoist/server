@@ -183,8 +183,8 @@ export class AuthController {
   @ApiResponse({ status: 403, description: '정지 계정' })
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
-  async login() {
-    return;
+  async login(@Req() req: ExpressRequest) {
+    return req.user;
   }
 
   //-------------------------------------------------------OAuth
