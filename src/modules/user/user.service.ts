@@ -22,7 +22,7 @@ import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class UserService {
