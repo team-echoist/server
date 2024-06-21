@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BasicNickname } from '../../entities/basicNickname.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 export class NicknameRepository {
   constructor(

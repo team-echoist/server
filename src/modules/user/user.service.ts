@@ -20,9 +20,9 @@ import { UserResDto } from './dto/response/userRes.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
-import { UserInfoResDto } from './dto/response/userInfoRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import { User } from '../../entities/user.entity';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -34,6 +34,7 @@ export class UserService {
     private readonly awsService: AwsService,
     private readonly badgeService: BadgeService,
     private readonly nicknameService: NicknameService,
+    private readonly authService: AuthService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
   ) {}
 
@@ -91,9 +92,11 @@ export class UserService {
   }
 
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
+    const cacheKey = `user:${userId}`;
     const user = await this.fetchUserEntityById(userId);
 
     if (data.nickname && data.nickname !== user.nickname) {
+      await this.authService.checkNickname(data.nickname);
       await this.nicknameService.setNicknameUsage(user.nickname, false);
       await this.nicknameService.setNicknameUsage(data.nickname, true);
     }
@@ -102,6 +105,7 @@ export class UserService {
       data.password = await bcrypt.hash(data.password, 10);
     }
     const updatedUser = await this.userRepository.updateUser(user, data);
+    await this.redis.setex(cacheKey, 3600, JSON.stringify(updatedUser));
 
     return this.utilsService.transformToDto(UserResDto, updatedUser);
   }
@@ -120,7 +124,7 @@ export class UserService {
     const user = await this.getUserSummaryById(userId);
     const essayStats = await this.essayService.essayStatsByUserId(userId);
 
-    return this.utilsService.transformToDto(UserInfoResDto, { user, essayStats });
+    return { user: user, essayStats: essayStats };
   }
 
   async follow(followerId: number, followingId: number) {
