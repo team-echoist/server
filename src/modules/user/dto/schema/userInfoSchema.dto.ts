@@ -1,12 +1,12 @@
-import { UserResDto } from './userRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { EssayStatsDto } from '../../../essay/dto/essayStats.dto';
+import { UserSummaryResDto } from '../response/userSummaryRes.dto';
 
-export class UserInfoResDto {
-  @ApiProperty({ type: UserResDto })
+export class UserInfoSchemaDto {
+  @ApiProperty({ type: UserSummaryResDto })
   @Expose()
-  user: UserResDto;
+  user: UserSummaryResDto;
 
   @ApiProperty({ type: EssayStatsDto })
   @Expose()

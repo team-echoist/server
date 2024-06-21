@@ -1,7 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  HttpException,
   HttpStatus,
   Injectable,
   NestInterceptor,
@@ -9,7 +8,6 @@ import {
 import { Observable, tap } from 'rxjs';
 import { Response } from 'express';
 import { UtilsService } from '../../modules/utils/utils.service';
-import { UserStatus } from '../../entities/user.entity';
 
 /**
  * @title jwt 발급 및 갱신 자동화를 위한 인터셉터
@@ -26,6 +24,9 @@ export class JwtInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         if (!response.headersSent && request.user) {
+          if (request.user.deactivationDate !== null) {
+            response.statusCode = HttpStatus.ACCEPTED;
+          }
           const newJwt = this.utilsService.generateJWT(request.user.id, request.user.email);
           response.setHeader('Authorization', `Bearer ${newJwt}`);
         }

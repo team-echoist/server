@@ -22,7 +22,7 @@ import { ProfileImageReqDto } from './dto/request/profileImageReq.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
-import { UserInfoResDto } from './dto/response/userInfoRes.dto';
+import { UserInfoSchemaDto } from './dto/schema/userInfoSchema.dto';
 import { BadgesSchemaDto } from '../badge/dto/schema/badgesSchema.dto';
 import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchema.dto';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
@@ -358,7 +358,7 @@ export class UserController {
   - 유효한 사용자 ID가 제공되어야 합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UserInfoResDto })
+  @ApiResponse({ status: 200, type: UserInfoSchemaDto })
   async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
     return this.userService.getUserInfo(userId);
   }
