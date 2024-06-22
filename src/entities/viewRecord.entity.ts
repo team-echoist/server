@@ -2,7 +2,7 @@ import { CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typ
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
 
-@Entity()
+@Entity('view_record')
 export class ViewRecord {
   @PrimaryGeneratedColumn()
   id: number;

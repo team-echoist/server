@@ -9,6 +9,7 @@ export class BookmarkRepository {
     @InjectRepository(Bookmark) private readonly bookmarkRepository: Repository<Bookmark>,
   ) {}
 
+  // todo 만약 발행했던 에세이를 다시 비공개로 전환한다면..? 조회못하게 막ㅇ야함.
   async findUserBookmarks(userId: number, page: number, limit: number) {
     const queryBuilder = this.bookmarkRepository
       .createQueryBuilder('bookmark')

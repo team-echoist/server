@@ -9,6 +9,9 @@ import { EssayService } from '../../essay/essay.service';
 import { FollowService } from '../../follow/follow.service';
 import { BadgeService } from '../../badge/badge.service';
 import { NicknameService } from '../../nickname/nickname.service';
+import { AuthService } from '../../auth/auth.service';
+import { Queue } from 'bull';
+import { BullModule, getQueueToken } from '@nestjs/bull';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -42,11 +45,20 @@ describe('UserService', () => {
   const mockNicknameService = {
     setNicknameUsage: jest.fn(),
   };
+  const mockAuthService = {
+    checkNickname: jest.fn(),
+  };
 
   beforeEach(async () => {
     const RedisInstance = jest.fn(() => mockRedis);
+    const mockQueue = { add: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        BullModule.registerQueue({
+          name: 'user',
+        }),
+      ],
       providers: [
         UserService,
         { provide: UserRepository, useValue: mockUserRepository },
@@ -56,7 +68,9 @@ describe('UserService', () => {
         { provide: FollowService, useValue: mockFollowService },
         { provide: BadgeService, useValue: mockBadgeService },
         { provide: NicknameService, useValue: mockNicknameService },
+        { provide: AuthService, useValue: mockAuthService },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
+        { provide: getQueueToken('user'), useValue: mockQueue },
       ],
     }).compile();
 

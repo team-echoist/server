@@ -26,6 +26,8 @@ import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
 import { BookmarkModule } from './modules/bookmark/bookmark.module';
 import { BlockPhpRequestsMiddleware } from './common/middlewares/blockPhpRequests.middleware';
+import { CronService } from './modules/cron/cron.service';
+import { CronModule } from './modules/cron/cron.module';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { BlockPhpRequestsMiddleware } from './common/middlewares/blockPhpRequest
     BadgeModule,
     ViewModule,
     BookmarkModule,
+    CronModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
@@ -61,9 +64,13 @@ import { BlockPhpRequestsMiddleware } from './common/middlewares/blockPhpRequest
   ],
 })
 export class AppModule implements OnModuleInit, NestModule {
-  constructor(private readonly seederService: SeederService) {}
+  constructor(
+    private readonly seederService: SeederService,
+    private readonly cronService: CronService,
+  ) {}
 
   async onModuleInit() {
+    await this.cronService.startCronJobs();
     if (process.env.INITIALIZE === 'true') {
       await this.seederService.initializeAdmin();
       await this.seederService.initializeNicknames();

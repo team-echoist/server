@@ -620,7 +620,7 @@ export class EssayController {
     return this.essayService.addBookmark(req.user.id, essayId);
   }
 
-  @Delete('bookmarks')
+  @Put('bookmarks')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({
     summary: '에세이 북마크 삭제',

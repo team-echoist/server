@@ -24,6 +24,7 @@ import * as strategies from '../../common/guards/strategies';
 import * as dotenv from 'dotenv';
 import { ViewModule } from '../view/view.module';
 import { BookmarkModule } from '../bookmark/bookmark.module';
+import { ConfigModule } from '@nestjs/config';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ dotenv.config();
       secret: process.env.JWT_SECRET,
     }),
     TypeOrmModule.forFeature([User, Essay, Story, ReviewQueue, Tag]),
+    ConfigModule,
     AuthModule,
     MailModule,
     TagModule,

@@ -17,7 +17,7 @@ export enum ReviewQueueType {
   PUBLISHED = 'published',
 }
 
-@Entity()
+@Entity('review_queue')
 export class ReviewQueue {
   @PrimaryGeneratedColumn()
   id: number;

@@ -10,6 +10,7 @@ import { AppModule } from './app.module';
 import { swaggerConfig } from './config/swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
+import { writeFileSync } from 'fs';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
@@ -122,6 +123,7 @@ async function bootstrap() {
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api-doc', app, document);
+    writeFileSync(join(process.cwd(), 'swagger.json'), JSON.stringify(document));
   }
 
   await app.listen(process.env.SERVER_PORT);

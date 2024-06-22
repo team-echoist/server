@@ -36,6 +36,8 @@ import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { CreateReportReqDto } from '../report/dto/request/createReportReq.dto';
 import { ReportService } from '../report/report.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class EssayService {
@@ -552,6 +554,10 @@ export class EssayService {
     const essays = bookmarks.map((bookmark) => bookmark.essay);
     const totalPage: number = Math.ceil(total / limit);
 
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractPartContent(essay.content);
+    });
+
     const essaysDto = this.utilsService.transformToDto(EssaysResDto, essays);
 
     return { essays: essaysDto, totalPage, page, total };
@@ -562,14 +568,14 @@ export class EssayService {
     const user = await this.userService.fetchUserEntityById(userId);
     const essay = await this.essayRepository.findEssayById(essayId);
 
-    if (essay.status === 'private') throw new HttpException('Bad request.', HttpStatus.BAD_REQUEST);
+    if (essay.status === EssayStatus.PRIVATE)
+      throw new HttpException('Bad request.', HttpStatus.BAD_REQUEST);
 
     const existingBookmark = await this.bookmarkService.getBookmark(user, essay);
 
     if (existingBookmark) {
       throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
     }
-
     await this.bookmarkService.addBookmark(user, essay);
     await this.userService.increaseReputation(essay.author, 1);
     await this.increaseTrendScore(essay, 2);
@@ -640,5 +646,9 @@ export class EssayService {
 
     await this.reportService.createReport(userId, essayId, data.reason);
     await this.userService.decreaseReputation(essay.author.id, 1);
+  }
+
+  async handleUpdateEssayStatus(userIds: number[]) {
+    await this.essayRepository.handleUpdateEssayStatus(userIds);
   }
 }

@@ -23,6 +23,11 @@ import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import { User } from '../../entities/user.entity';
 import { AuthService } from '../auth/auth.service';
+import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
+import { DeactivationReason } from '../../entities/deactivationReason.entity';
+import { Transactional } from 'typeorm-transactional';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class UserService {
@@ -36,6 +41,7 @@ export class UserService {
     private readonly nicknameService: NicknameService,
     private readonly authService: AuthService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
+    @InjectQueue('user') private readonly userQueue: Queue,
   ) {}
 
   async fetchUserEntityById(userId: number) {
@@ -194,7 +200,8 @@ export class UserService {
     await this.userRepository.decreaseReputation(user.id, newReputation);
   }
 
-  async requestDeactivation(userId: number) {
+  @Transactional()
+  async requestDeactivation(userId: number, data: DeactivateReqDto) {
     const user = await this.fetchUserEntityById(userId);
 
     if (user.deactivationDate)
@@ -206,6 +213,15 @@ export class UserService {
     user.deactivationDate = new Date();
 
     await this.userRepository.saveUser(user);
+
+    const deactivationReasons = data.reasons.map((reason) => {
+      const deactivationReason = new DeactivationReason();
+      deactivationReason.user = user;
+      deactivationReason.reason = reason;
+      return deactivationReason;
+    });
+
+    await this.userRepository.saveDeactivationReasons(deactivationReasons);
   }
 
   async cancelDeactivation(userId: number) {
@@ -217,5 +233,13 @@ export class UserService {
     user.deactivationDate = null;
 
     await this.userRepository.saveUser(user);
+  }
+
+  @Transactional()
+  async deleteAccount(userId: number) {
+    const userIds = [userId];
+    const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    await this.userRepository.deleteAccount(userId, todayDate);
+    await this.userQueue.add('updateEssayStatus', { userIds });
   }
 }

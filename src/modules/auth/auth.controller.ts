@@ -67,7 +67,7 @@ export class AuthController {
     return this.authService.checkEmail(data.email);
   }
 
-  @Get('check/nickname')
+  @Post('check/nickname')
   @ApiOperation({
     summary: '닉네임 중복 검사',
     description: `
@@ -184,7 +184,7 @@ export class AuthController {
   **주의 사항:**
   - 이메일과 비밀번호는 필수 항목입니다.
   - 잘못된 이메일 또는 비밀번호로 시도하면 \`401 Unauthorized\` 에러가 발생합니다.
-  - 계정이 정지된 사용자는 로그인할 수 없습니다.
+  - 계정이 정지된 사용자는 202로 응답되며 유예기간까지 일반 사용자와 동일하게 서비스를 이용합니다.
   `,
   })
   @ApiResponse({ status: 200, description: '로그인 성공' })
