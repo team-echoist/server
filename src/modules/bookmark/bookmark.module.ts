@@ -9,17 +9,22 @@ import { Essay } from '../../entities/essay.entity';
 import { User } from '../../entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { BookmarkProcessor } from './bookmark.processor';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Bookmark, Essay, User]),
-    BullModule.registerQueue({
+    BullModule.registerQueueAsync({
       name: 'bookmark',
-      redis: {
-        host: 'localhost', // Redis 서버 호스트명
-        port: 6379, // Redis 서버 포트
-      },
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+        },
+      }),
+      inject: [ConfigService],
     }),
+    ConfigModule,
     UtilsModule,
     UserModule,
   ],

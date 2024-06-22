@@ -12,7 +12,7 @@ import { User } from './user.entity';
 import { Essay } from './essay.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 
-@Entity()
+@Entity('report_queue')
 export class ReportQueue {
   @PrimaryGeneratedColumn()
   id: number;

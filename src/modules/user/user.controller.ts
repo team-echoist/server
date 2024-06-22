@@ -28,6 +28,7 @@ import { BadgesWithTagsSchemaDto } from '../badge/dto/schema/badgesWithTagsSchem
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { UserSummaryResSchemaDto } from './dto/schema/userSummaryResSchema.dto';
 import { UserSummaryWithCountSchemaDto } from './dto/schema/userSummaryWithCountSchema.dto';
+import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -40,6 +41,9 @@ export class UserController {
     summary: '회원탈퇴 요청',
     description: `
   사용자가 회원탈퇴를 요청합니다. 
+  
+  **요청 본문:**
+  - \`reasons\`: 이용자가 탈퇴한 사유.
   
   **동작 과정:**
   1. 사용자가 회원탈퇴를 요청합니다.
@@ -55,8 +59,9 @@ export class UserController {
   @ApiResponse({
     status: 200,
   })
-  async requestDeactivation(@Req() req: ExpressRequest) {
-    return this.userService.requestDeactivation(req.user.id);
+  @ApiBody({ type: DeactivateReqDto })
+  async requestDeactivation(@Req() req: ExpressRequest, @Body() data: DeactivateReqDto) {
+    return this.userService.requestDeactivation(req.user.id, data);
   }
 
   @Post('reactivate')
@@ -78,6 +83,25 @@ export class UserController {
   })
   async cancelDeactivation(@Req() req: ExpressRequest) {
     return this.userService.cancelDeactivation(req.user.id);
+  }
+
+  @Delete()
+  @ApiOperation({
+    summary: '회원탈퇴 바로 진행',
+    description: `
+    사용자가 즉시 회원탈퇴를 요청합니다. 
+    
+    **동작 과정:**
+    1. 사용자가 회원탈퇴를 요청합니다.
+    2. 사용자의 계정을 논리적으로 삭제하고, 관련 데이터를 처리합니다.
+    
+    **주의 사항:**
+    - 계정이 즉시 삭제되며, 복구가 불가능합니다.
+    `,
+  })
+  @ApiResponse({ status: 200 })
+  async deleteAccount(@Req() req: ExpressRequest) {
+    return this.userService.deleteAccount(req.user.id);
   }
 
   @Post('images')

@@ -15,13 +15,27 @@ import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import * as strategies from '../../common/guards/strategies';
 import { NicknameModule } from '../nickname/nickname.module';
+import { DeactivationReason } from '../../entities/deactivationReason.entity';
+import { BullModule } from '@nestjs/bull';
+import { ConfigService } from '@nestjs/config';
+import { UserProcessor } from './user.processor';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Essay]),
+    TypeOrmModule.forFeature([User, Essay, DeactivationReason]),
+    BullModule.registerQueueAsync({
+      name: 'user',
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     FollowModule,
     MailModule,
@@ -32,7 +46,7 @@ import { NicknameModule } from '../nickname/nickname.module';
     forwardRef(() => EssayModule),
   ],
   controllers: [UserController],
-  providers: [UserService, UserRepository, strategies.JwtStrategy],
+  providers: [UserService, UserRepository, UserProcessor, strategies.JwtStrategy],
   exports: [UserService, UserRepository],
 })
 export class UserModule {}

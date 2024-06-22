@@ -26,7 +26,7 @@ export enum ActionType {
   MONITORED = 'monitored',
 }
 
-@Entity()
+@Entity('processed_history')
 export class ProcessedHistory {
   @PrimaryGeneratedColumn()
   id: number;

@@ -19,6 +19,7 @@ import { Badge } from './badge.entity';
 import { TagExp } from './tagExp.entity';
 import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
+import { DeactivationReason } from './deactivationReason.entity';
 
 export enum UserStatus {
   ACTIVATED = 'activated',
@@ -64,6 +65,7 @@ export class User {
     type: 'enum',
     enum: UserStatus,
     default: UserStatus.ACTIVATED,
+    nullable: false,
   })
   status: UserStatus;
 
@@ -132,4 +134,7 @@ export class User {
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
+
+  @OneToMany(() => DeactivationReason, (reason) => reason.user)
+  deactivationReasons: DeactivationReason[];
 }

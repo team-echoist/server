@@ -2,11 +2,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserStatus } from '../../entities/user.entity';
 import { MoreThan, Repository } from 'typeorm';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
+import { DeactivationReason } from '../../entities/deactivationReason.entity';
 
 export class UserRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(DeactivationReason)
+    private readonly deactivationReasonRepository: Repository<DeactivationReason>,
   ) {}
 
   async findUserById(userId: number) {
@@ -96,5 +99,22 @@ export class UserRepository {
 
   async decreaseReputation(userId: number, newReputation: number) {
     await this.userRepository.update(userId, { reputation: newReputation });
+  }
+
+  async saveDeactivationReasons(deactivationReasons: DeactivationReason[]) {
+    await this.deactivationReasonRepository.save(deactivationReasons);
+  }
+
+  async deleteAccount(userId: number, todayDate: string) {
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({
+        email: () => `CONCAT('${todayDate}_', email)`,
+        nickname: null,
+        deletedDate: () => `NOW()`,
+      })
+      .where('id = :userId', { userId })
+      .execute();
   }
 }

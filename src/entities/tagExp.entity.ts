@@ -3,7 +3,7 @@ import { User } from './user.entity';
 import { Tag } from './tag.entity';
 import { Badge } from './badge.entity';
 
-@Entity()
+@Entity('tag_exp')
 export class TagExp {
   @PrimaryGeneratedColumn()
   id: number;
