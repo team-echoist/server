@@ -273,8 +273,15 @@ export class AdminService {
   }
 
   private async handleApprovedAction(essay: Essay) {
-    essay.status = EssayStatus.PRIVATE;
-    await this.essayRepository.saveEssay(essay);
+    if (essay.status === EssayStatus.PUBLISHED) {
+      essay.status = EssayStatus.PRIVATE;
+      await this.essayRepository.saveEssay(essay);
+    }
+
+    if (essay.status === EssayStatus.LINKEDOUT) {
+      await this.essayRepository.deleteEssay(essay);
+    }
+
     await this.userService.decreaseReputation(essay.author.id, 10);
     // TODO: 여기에 앱 푸쉬 알림 및 메일링 추가
   }

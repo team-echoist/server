@@ -2,19 +2,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { User } from '../../entities/user.entity';
-import { Essay } from '../../entities/essay.entity';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
 
 export class BookmarkRepository {
   constructor(
     @InjectRepository(Bookmark) private readonly bookmarkRepository: Repository<Bookmark>,
   ) {}
 
-  // todo 만약 발행했던 에세이를 다시 비공개로 전환한다면..? 조회못하게 막ㅇ야함.
   async findUserBookmarks(userId: number, page: number, limit: number) {
     const queryBuilder = this.bookmarkRepository
       .createQueryBuilder('bookmark')
       .leftJoinAndSelect('bookmark.essay', 'essay')
       .where('bookmark.user_id = :userId', { userId })
+      .andWhere('essay.status != :status', { status: EssayStatus.PRIVATE })
       .orderBy('bookmark.createdDate', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit);

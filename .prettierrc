@@ -10,11 +10,26 @@
   "singleAttributePerLine": false,
   "htmlWhitespaceSensitivity": "css",
   "vueIndentScriptAndStyle": false,
-  "proseWrap": "preserve",
+  "proseWrap": "always",
   "insertPragma": false,
   "printWidth": 100,
   "requirePragma": false,
   "tabWidth": 2,
   "useTabs": false,
-  "embeddedLanguageFormatting": "auto"
+  "embeddedLanguageFormatting": "auto",
+	"endOfLine": "lf",
+	"overrides": [
+    {
+      "files": "*.json",
+      "options": {
+        "printWidth": 80
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "proseWrap": "always"
+      }
+    }
+  ]
 }
