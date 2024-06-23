@@ -36,6 +36,8 @@ import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { CreateReportReqDto } from '../report/dto/request/createReportReq.dto';
 import { ReportService } from '../report/report.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class EssayService {
