@@ -30,7 +30,7 @@ export class CronService {
   }
 
   async startCronJobs() {
-    cron.schedule('15 18 * * *', async () => {
+    cron.schedule('0 5 * * *', async () => {
       const logId = await this.logStart('deactivate_users_and_update_essays');
       try {
         await this.deactivateUsersAndQueueEssays();
@@ -56,7 +56,7 @@ export class CronService {
         })
         .andWhere('deleted_date IS NULL')
         .getMany();
-      console.log(users);
+
       const userIds = users.map((user) => user.id);
 
       if (userIds.length > 0) {

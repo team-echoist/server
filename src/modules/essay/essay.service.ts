@@ -241,12 +241,19 @@ export class EssayService {
       }
     }
 
-    const previousEssay = await this.previousEssay(essay.author.id, essay);
+    const previousEssaysOrRecommendations =
+      essay.status === EssayStatus.LINKEDOUT
+        ? await this.getRecommendEssays(userId, 6)
+        : await this.previousEssay(essay.author.id, essay);
 
-    const newEssayData = { ...essay, isBookmarked: isBookmarked };
+    const newEssayData = {
+      ...essay,
+      author: essay.status === EssayStatus.LINKEDOUT ? undefined : essay.author,
+      isBookmarked: isBookmarked,
+    };
     const essayDto = this.utilsService.transformToDto(EssayResDto, newEssayData);
 
-    return { essay: essayDto, previousEssays: previousEssay };
+    return { essay: essayDto, previousEssays: previousEssaysOrRecommendations };
   }
 
   private async checkViewsForReputation(essay: Essay) {

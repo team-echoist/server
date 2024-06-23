@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { User } from '../../entities/user.entity';
-import { Essay } from '../../entities/essay.entity';
+import { Essay, EssayStatus } from '../../entities/essay.entity';
 
 export class BookmarkRepository {
   constructor(
@@ -15,6 +15,7 @@ export class BookmarkRepository {
       .createQueryBuilder('bookmark')
       .leftJoinAndSelect('bookmark.essay', 'essay')
       .where('bookmark.user_id = :userId', { userId })
+      .andWhere('essay.status != :status', { status: EssayStatus.PRIVATE })
       .orderBy('bookmark.createdDate', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit);
