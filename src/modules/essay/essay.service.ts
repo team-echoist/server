@@ -241,10 +241,13 @@ export class EssayService {
       }
     }
 
-    const previousEssaysOrRecommendations =
-      essay.status === EssayStatus.LINKEDOUT
-        ? await this.getRecommendEssays(userId, 6)
-        : await this.previousEssay(essay.author.id, essay);
+    const previousEssays = await this.getRecommendEssays(userId, 6);
+
+    // todo 구독서비스 개시 후
+    // const previousEssaysOrRecommendations =
+    //   essay.status === EssayStatus.LINKEDOUT
+    //     ? await this.getRecommendEssays(userId, 6)
+    //     : await this.previousEssay(essay.author.id, essay);
 
     const newEssayData = {
       ...essay,
@@ -253,7 +256,7 @@ export class EssayService {
     };
     const essayDto = this.utilsService.transformToDto(EssayResDto, newEssayData);
 
-    return { essay: essayDto, previousEssays: previousEssaysOrRecommendations };
+    return { essay: essayDto, previousEssays: previousEssays };
   }
 
   private async checkViewsForReputation(essay: Essay) {

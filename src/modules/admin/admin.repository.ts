@@ -9,12 +9,15 @@ import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 
 export class AdminRepository {
-  @InjectRepository(Subscription) private readonly subscriptionRepository: Repository<Subscription>;
-  @InjectRepository(ReportQueue) private readonly reportRepository: Repository<ReportQueue>;
-  @InjectRepository(ReviewQueue) private readonly reviewRepository: Repository<ReviewQueue>;
-  @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>;
-  @InjectRepository(ProcessedHistory)
-  private readonly processedRepository: Repository<ProcessedHistory>;
+  constructor(
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepository: Repository<Subscription>,
+    @InjectRepository(ReportQueue) private readonly reportRepository: Repository<ReportQueue>,
+    @InjectRepository(ReviewQueue) private readonly reviewRepository: Repository<ReviewQueue>,
+    @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>,
+    @InjectRepository(ProcessedHistory)
+    private readonly processedRepository: Repository<ProcessedHistory>,
+  ) {}
 
   async totalSubscriberCount(today: Date) {
     return this.subscriptionRepository.count({

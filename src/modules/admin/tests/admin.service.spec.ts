@@ -15,6 +15,8 @@ import { UserStatus } from '../../../entities/user.entity';
 import { ActionType } from '../../../entities/processedHistory.entity';
 import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
 import { AwsService } from '../../aws/aws.service';
+import { SupportService } from '../../support/support.service';
+import { SupportRepository } from '../../support/support.repository';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -24,6 +26,14 @@ jest.mock('typeorm-transactional', () => ({
 
 describe('AdminService', () => {
   let adminService: AdminService;
+
+  const mockSupportService = {
+    getNotifications: jest.fn(),
+  };
+  const mockSupportRepository = {
+    saveNotification: jest.fn(),
+    findNotification: jest.fn(),
+  };
 
   const mockAdminRepository = {
     totalSubscriberCount: jest.fn(),
@@ -102,6 +112,8 @@ describe('AdminService', () => {
         { provide: UtilsService, useValue: mockUtilsService },
         { provide: AwsService, useValue: mockAwsService },
         { provide: MailService, useValue: {} },
+        { provide: SupportService, useValue: mockSupportService },
+        { provide: SupportRepository, useValue: mockSupportRepository },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();

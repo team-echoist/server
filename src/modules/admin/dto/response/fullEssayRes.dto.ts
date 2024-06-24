@@ -106,7 +106,7 @@ export class FullEssayResDto {
   @Type(() => StoryInfoDto)
   @Expose()
   @IsNumber()
-  category: StoryInfoDto;
+  story: StoryInfoDto;
 
   @ApiProperty()
   @Expose()

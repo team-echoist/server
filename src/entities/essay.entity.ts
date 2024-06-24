@@ -94,7 +94,7 @@ export class Essay {
   tags: Tag[];
 
   @JoinColumn({ name: 'story_id' })
-  @ManyToOne(() => Story, (category) => category.essays)
+  @ManyToOne(() => Story, (story) => story.essays)
   story: Story;
 
   @Index()

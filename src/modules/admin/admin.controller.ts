@@ -44,6 +44,10 @@ import { AdminResDto } from './dto/response/adminRes.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { AdminRegisterReqDto } from './dto/request/adminRegisterReq.dto';
+import { CreateNoticeReqDto } from './dto/request/createNoticeReq.dto';
+import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
+import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
+import { NoticesSchemaDto } from '../support/dto/schema/noticesSchema.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -850,28 +854,126 @@ export class AdminController {
     return this.adminService.getInactiveAdmins();
   }
 
-  @Get(':adminId')
+  @Post('notices')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '어드민 상세조회',
+    summary: '공지 생성',
     description: `
-  특정 어드민의 상세 정보를 조회합니다.
+  새로운 공지를 생성합니다. 공지의 제목과 내용을 입력받아 데이터베이스에 저장합니다.
 
-  **경로 파라미터:**
-  - \`adminId\`: 조회할 어드민의 ID
-
-  **동작 과정:**
-  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 상세 정보를 조회합니다.
-  2. 조회된 어드민 정보를 반환합니다.
+  **요청 본문:**
+  - \`title\` (string, required): 공지의 제목
+  - \`content\` (string, required): 공지의 내용
 
   **주의 사항:**
-  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  - 공지 제목과 내용은 모두 필수 항목입니다.
+  - 이 엔드포인트는 관리자가 사용할 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200, type: AdminResDto })
-  async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
-    return this.adminService.getAdmin(adminId);
+  @ApiResponse({ status: 201, type: NoticeWithProcessorResDto })
+  @ApiBody({ type: CreateNoticeReqDto })
+  async createNotice(@Req() req: ExpressRequest, @Body() data: CreateNoticeReqDto) {
+    return this.adminService.createNotice(req.user.id, data);
   }
+
+  @Put('notices/:noticeId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '공지 수정',
+    description: `
+  기존의 공지를 수정합니다. 공지의 제목 또는 내용을 수정할 수 있습니다.
+
+  **경로 파라미터:**
+  - \`noticeId\` (number, required): 수정할 공지의 ID
+
+  **요청 본문:**
+  - \`title\` (string, optional): 공지의 제목
+  - \`content\` (string, optional): 공지의 내용
+
+  **주의 사항:**
+  - 제목 또는 내용 중 하나는 반드시 포함되어야 합니다.
+  - 이 엔드포인트는 관리자가 사용할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: NoticeWithProcessorResDto })
+  @ApiBody({ type: UpdateNoticeReqDto })
+  async updateNotice(
+    @Req() req: ExpressRequest,
+    @Param('noticeId', ParseIntPipe) noticeId: number,
+    @Body() data: UpdateNoticeReqDto,
+  ) {
+    return this.adminService.updateNotice(req.user.id, noticeId, data);
+  }
+
+  @Delete('notices/:noticeId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '공지 삭제',
+    description: `
+  기존의 공지를 삭제합니다. 공지를 논리적으로 삭제하여 삭제 날짜를 기록합니다.
+
+  **경로 파라미터:**
+  - \`noticeId\` (number, required): 삭제할 공지의 ID
+
+  **주의 사항:**
+  - 이 엔드포인트는 관리자가 사용할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  async deleteNotice(
+    @Req() req: ExpressRequest,
+    @Param('noticeId', ParseIntPipe) noticeId: number,
+  ) {
+    return this.adminService.deleteNotice(req.user.id, noticeId);
+  }
+
+  @Get('notices')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '공지 목록 조회',
+    description: `
+  공지 목록을 페이지네이션하여 조회합니다. 페이지와 페이지당 항목 수를 파라미터로 받습니다.
+
+  **쿼리 파라미터:**
+  - \`page\` (number, optional): 페이지 번호 (기본값: 1)
+  - \`limit\` (number, optional): 페이지당 항목 수 (기본값: 10)
+
+  **주의 사항:**
+  - 이 엔드포인트는 관리자가 사용할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: NoticesSchemaDto })
+  async getNotices(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getNotices(page, limit);
+  }
+
+  @Get('notices/:noticeId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '공지 상세 조회',
+    description: `
+  특정 공지의 상세 정보를 조회합니다.
+
+  **경로 파라미터:**
+  - \`noticeId\` (number, required): 조회할 공지의 ID
+
+  **주의 사항:**
+  - 이 엔드포인트는 관리자가 사용할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: NoticeWithProcessorResDto })
+  async getNotice(@Param('noticeId', ParseIntPipe) noticeId: number) {
+    return this.adminService.getNotice(noticeId);
+  }
+
+  @Get('inquiry')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({})
+  @ApiResponse({})
+  async getInquiry() {}
 
   @Put(':adminId')
   @UseGuards(AuthGuard('admin-jwt'))
@@ -905,5 +1007,28 @@ export class AdminController {
     @Query('activated', ParseBoolPipe) activated: boolean,
   ) {
     return this.adminService.activationSettings(req.user.id, adminId, activated);
+  }
+
+  @Get(':adminId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '어드민 상세조회',
+    description: `
+  특정 어드민의 상세 정보를 조회합니다.
+
+  **경로 파라미터:**
+  - \`adminId\`: 조회할 어드민의 ID
+
+  **동작 과정:**
+  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 상세 정보를 조회합니다.
+  2. 조회된 어드민 정보를 반환합니다.
+
+  **주의 사항:**
+  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: AdminResDto })
+  async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
+    return this.adminService.getAdmin(adminId);
   }
 }

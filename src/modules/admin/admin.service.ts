@@ -39,6 +39,12 @@ import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
 import { AwsService } from '../aws/aws.service';
 import { AdminRegisterReqDto } from './dto/request/adminRegisterReq.dto';
+import { CreateNoticeReqDto } from './dto/request/createNoticeReq.dto';
+import { Notice } from '../../entities/notice.entity';
+import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
+import { SupportRepository } from '../support/support.repository';
+import { SupportService } from '../support/support.service';
+import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -50,6 +56,8 @@ export class AdminService {
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
+    private readonly supportSerivce: SupportService,
+    private readonly supportRepository: SupportRepository,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
@@ -463,7 +471,7 @@ export class AdminService {
     const data = essays.map((essay) => ({
       ...essay,
       authorId: essay.author.id,
-      storiesId: essay.story?.id ?? null,
+      storyId: essay.story?.id ?? null,
       reportCount: essay?.reports ? essay.reports.length : null,
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
@@ -646,5 +654,76 @@ export class AdminService {
     const adminsDto = this.utilsService.transformToDto(AdminsResDto, admins);
 
     return { admins: adminsDto };
+  }
+
+  @Transactional()
+  async createNotice(adminId: number, data: CreateNoticeReqDto) {
+    const processor = await this.adminRepository.findAdmin(adminId);
+    const newNotice = new Notice();
+    newNotice.title = data.title;
+    newNotice.content = data.content;
+    newNotice.processor = processor;
+
+    const savedNotice = await this.supportRepository.saveNotice(newNotice);
+
+    const newHistory = this.createProcessedHistory(
+      ActionType.UPDATED,
+      'notice',
+      savedNotice,
+      processor,
+    );
+
+    await this.adminRepository.saveHistory(newHistory);
+
+    return this.utilsService.transformToDto(NoticeWithProcessorResDto, savedNotice);
+  }
+
+  @Transactional()
+  async updateNotice(adminId: number, announcementId: number, data: UpdateNoticeReqDto) {
+    const processor = await this.adminRepository.findAdmin(adminId);
+    const Notice = await this.supportRepository.findNotice(announcementId);
+
+    const newNotice = {
+      ...Notice,
+      ...data,
+      processor: processor,
+    };
+
+    const savedNotice = await this.supportRepository.saveNotice(newNotice);
+
+    const newHistory = this.createProcessedHistory(
+      ActionType.UPDATED,
+      'notice',
+      savedNotice,
+      processor,
+    );
+
+    await this.adminRepository.saveHistory(newHistory);
+
+    return this.utilsService.transformToDto(NoticeWithProcessorResDto, savedNotice);
+  }
+
+  @Transactional()
+  async deleteNotice(adminId: number, announcementId: number) {
+    const processor = await this.adminRepository.findAdmin(adminId);
+    const Notice = await this.supportRepository.findNotice(announcementId);
+
+    const newNotice = {
+      ...Notice,
+      processor: processor,
+      deletedDate: new Date(),
+    };
+
+    await this.supportRepository.saveNotice(newNotice);
+  }
+
+  async getNotices(page: number, limit: number) {
+    return await this.supportSerivce.getNotices(page, limit);
+  }
+
+  async getNotice(noticeId: number) {
+    const notice = await this.supportRepository.findNotice(noticeId);
+
+    return this.utilsService.transformToDto(NoticeWithProcessorResDto, notice);
   }
 }

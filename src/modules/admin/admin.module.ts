@@ -18,6 +18,9 @@ import { Subscription } from '../../entities/subscription.entity';
 import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { Story } from '../../entities/story.entity';
 import { Admin } from '../../entities/admin.entity';
+import { Inquiry } from '../../entities/inquiry.entity';
+import { Notice } from '../../entities/notice.entity';
+import { SupportModule } from '../support/support.module';
 
 @Module({
   imports: [
@@ -33,12 +36,15 @@ import { Admin } from '../../entities/admin.entity';
       Subscription,
       ProcessedHistory,
       Admin,
+      Inquiry,
+      Notice,
     ]),
     UserModule,
     EssayModule,
     MailModule,
     UtilsModule,
     AwsModule,
+    SupportModule,
   ],
   controllers: [AdminController],
   providers: [
