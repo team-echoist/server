@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ReportQueue } from './reportQueue.entity';
@@ -11,6 +12,8 @@ import { ReviewQueue } from './reviewQueue.entity';
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
 import { Admin } from './admin.entity';
+import { Inquiry } from './inquiry.entity';
+import { Notice } from './notice.entity';
 
 export enum ActionType {
   APPROVED = 'approved',
@@ -24,6 +27,7 @@ export enum ActionType {
   LINKEDOUT = 'linkedout',
   BANNED = 'banned',
   MONITORED = 'monitored',
+  ANSWERED = 'answered',
 }
 
 @Entity('processed_history')
@@ -62,4 +66,12 @@ export class ProcessedHistory {
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.processedHistories)
   user: User;
+
+  @JoinColumn({ name: 'inquiry_id' })
+  @OneToOne(() => Inquiry, (inquiry) => inquiry.processedHistory)
+  inquiry: Inquiry;
+
+  @JoinColumn({ name: 'notice_id' })
+  @ManyToOne(() => Notice, (notice) => notice.processedHistories)
+  notice: Notice;
 }

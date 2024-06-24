@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ProcessedHistory } from './processedHistory.entity';
+import { Notice } from './notice.entity';
 
 @Entity()
 export class Admin {
@@ -40,5 +41,8 @@ export class Admin {
 
   @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.processor)
-  processedHistories: ProcessedHistory;
+  processedHistories: ProcessedHistory[];
+
+  @OneToMany(() => Notice, (notice) => notice.processor)
+  notice: Notice[];
 }

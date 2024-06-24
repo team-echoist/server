@@ -20,10 +20,11 @@ export class ViewRepository {
 
   async findRecentViewedEssays(userId: number, page: number, limit: number) {
     const queryBuilder = this.viewRepository
-      .createQueryBuilder('viewRecord')
-      .leftJoinAndSelect('viewRecord.essay', 'essay')
-      .where('viewRecord.user.id = :userId', { userId })
-      .orderBy('viewRecord.viewedAt', 'DESC')
+      .createQueryBuilder('view_record')
+      .leftJoinAndSelect('view_record.essay', 'essay')
+      .leftJoin('view_record.user', 'user')
+      .where('view_record.user = :userId', { userId })
+      .orderBy('view_record.viewed_date', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit);
 

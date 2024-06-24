@@ -24,7 +24,7 @@ export class JwtInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         if (!response.headersSent && request.user) {
-          if (request.user.deactivationDate !== null) {
+          if (request.user.activated === undefined && request.user.deactivationDate !== null) {
             response.statusCode = HttpStatus.ACCEPTED;
           }
           const newJwt = this.utilsService.generateJWT(request.user.id, request.user.email);

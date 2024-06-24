@@ -96,7 +96,7 @@ export class EssaysInfoResDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
-  categoryId: number;
+  storyId: number;
 
   @ApiProperty()
   @Expose()

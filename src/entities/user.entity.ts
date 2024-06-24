@@ -20,6 +20,7 @@ import { TagExp } from './tagExp.entity';
 import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 import { DeactivationReason } from './deactivationReason.entity';
+import { Inquiry } from './inquiry.entity';
 
 export enum UserStatus {
   ACTIVATED = 'activated',
@@ -137,4 +138,7 @@ export class User {
 
   @OneToMany(() => DeactivationReason, (reason) => reason.user)
   deactivationReasons: DeactivationReason[];
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
+  inquiries: Inquiry[];
 }

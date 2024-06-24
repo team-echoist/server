@@ -107,6 +107,10 @@ export class UserService {
       await this.nicknameService.setNicknameUsage(data.nickname, true);
     }
 
+    if (data.email && data.email !== user.email) {
+      await this.authService.checkEmail(data.email);
+    }
+
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }
