@@ -1,10 +1,22 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { SupportService } from './support.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { NoticeResDto } from './dto/response/noticeRes.dto';
 import { NoticesSchemaDto } from './dto/schema/noticesSchema.dto';
+import { CreateReportReqDto } from '../report/dto/request/createReportReq.dto';
+import { Request as ExpressRequest } from 'express';
 
 @ApiTags('Support')
 @UseGuards(AuthGuard('jwt'))
