@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilsModule } from '../utils/utils.module';
@@ -10,6 +10,8 @@ import { User } from '../../entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { BookmarkProcessor } from './bookmark.processor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BookmarkController } from './bookmark.controller';
+import { EssayModule } from '../essay/essay.module';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ConfigModule,
     UtilsModule,
     UserModule,
+    forwardRef(() => EssayModule),
   ],
+  controllers: [BookmarkController],
   providers: [BookmarkService, BookmarkRepository, BookmarkProcessor],
   exports: [BookmarkService, BookmarkRepository],
 })

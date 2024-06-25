@@ -31,13 +31,7 @@ import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { EssayStatsDto } from './dto/essayStats.dto';
 import { EssaysResDto } from './dto/response/essaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
-import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
-import { EssaySummaryResDto } from './dto/response/essaySummaryRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
-import { CreateReportReqDto } from '../report/dto/request/createReportReq.dto';
-import { ReportService } from '../report/report.service';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
 
 @Injectable()
 export class EssayService {
@@ -52,7 +46,6 @@ export class EssayService {
     private readonly badgeService: BadgeService,
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
-    private readonly reportService: ReportService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -268,7 +261,7 @@ export class EssayService {
     }
   }
 
-  private async increaseTrendScore(essay: Essay, incrementAmount: number) {
+  async increaseTrendScore(essay: Essay, incrementAmount: number) {
     const newTrendScore = essay.trendScore + incrementAmount;
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
@@ -522,48 +515,6 @@ export class EssayService {
     return { essays: essaysDto, totalPage, page, total };
   }
 
-  async getUserBookmarks(userId: number, page: number, limit: number) {
-    const { bookmarks, total } = await this.bookmarkService.getUserBookmarks(userId, page, limit);
-    const essays = bookmarks.map((bookmark) => bookmark.essay);
-    const totalPage: number = Math.ceil(total / limit);
-
-    essays.forEach((essay) => {
-      essay.content = this.utilsService.extractPartContent(essay.content);
-    });
-
-    const essaysDto = this.utilsService.transformToDto(EssaysResDto, essays);
-
-    return { essays: essaysDto, totalPage, page, total };
-  }
-
-  @Transactional()
-  async addBookmark(userId: number, essayId: number) {
-    const user = await this.userService.fetchUserEntityById(userId);
-    const essay = await this.essayRepository.findEssayById(essayId);
-
-    if (essay.status === EssayStatus.PRIVATE)
-      throw new HttpException('Bad request.', HttpStatus.BAD_REQUEST);
-
-    const existingBookmark = await this.bookmarkService.getBookmark(user, essay);
-
-    if (existingBookmark) {
-      throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
-    }
-    await this.bookmarkService.addBookmark(user, essay);
-    await this.userService.increaseReputation(essay.author, 1);
-    await this.increaseTrendScore(essay, 2);
-  }
-
-  @Transactional()
-  async removeBookmarks(userId: number, essayIds: number[]) {
-    return await this.bookmarkService.removeBookmarks(userId, essayIds);
-  }
-
-  @Transactional()
-  async resetBookmarks(userId: number) {
-    return this.bookmarkService.resetBookmarks(userId);
-  }
-
   async searchEssays(keyword: string, page: number, limit: number) {
     const cacheKey = `search:${keyword}:${page}:${limit}`;
     const cachedResult = await this.redis.get(cacheKey);
@@ -597,28 +548,6 @@ export class EssayService {
     const weeklyEssayCounts = this.utilsService.formatWeeklyData(rawData, fiveWeeksAgo, now);
 
     return this.utilsService.transformToDto(WeeklyEssayCountResDto, weeklyEssayCounts);
-  }
-
-  @Transactional()
-  async createReport(userId: number, essayId: number, data: CreateReportReqDto) {
-    const essay = await this.essayRepository.findEssayById(essayId);
-
-    if (!essay) {
-      throw new HttpException('Essay not found.', HttpStatus.NOT_FOUND);
-    }
-
-    if (essay.status === 'private') {
-      throw new HttpException('Cannot report a private essay.', HttpStatus.BAD_REQUEST);
-    }
-
-    const existingReport = await this.reportService.getReportByReporter(userId, essayId);
-
-    if (existingReport) {
-      throw new HttpException('You have already reported this essay.', HttpStatus.CONFLICT);
-    }
-
-    await this.reportService.createReport(userId, essayId, data.reason);
-    await this.userService.decreaseReputation(essay.author.id, 1);
   }
 
   async handleUpdateEssayStatus(userIds: number[]) {

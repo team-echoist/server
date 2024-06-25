@@ -28,15 +28,9 @@ import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
 import { EssaysSchemaDto } from './dto/schema/essaysSchema.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { StoriesResDto } from '../story/dto/response/storiesRes.dto';
 import { PublicEssaysSchemaDto } from './dto/schema/publicEssaysSchema.dto';
-import { CreateStoryReqDto } from '../story/dto/repuest/createStoryReq.dto';
 import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
-import { UpdateStoryReqDto } from '../story/dto/repuest/updateStoryReq.dto';
-import { EssaysSummarySchemaDto } from './dto/schema/essaysSummarySchema.dto';
-import { EssayIdsReqDto } from './dto/request/essayIdsReq.dto';
 import { EssaySchemaDto } from './dto/schema/essaySchema.dto';
-import { CreateReportReqDto } from '../report/dto/request/createReportReq.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -326,8 +320,6 @@ export class EssayController {
     return await this.essayService.getSentenceEssays(req.user.id, type, limit);
   }
 
-  // todo 여기까지했따
-
   @Get('recent')
   @ApiOperation({
     summary: '최근 조회한 에세이 목록',
@@ -355,98 +347,6 @@ export class EssayController {
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     return this.essayService.getRecentViewedEssays(req.user.id, page, limit);
-  }
-
-  @Get('bookmark')
-  @ApiOperation({
-    summary: '북마크한 에세이 목록',
-    description: `
-  사용자가 북마크한 에세이 목록을 가져옵니다.
-    
-  **쿼리 파라미터:**
-  - \`page\`: 페이지 번호 (기본값: 1)
-  - \`limit\`: 한 페이지에 보여줄 에세이 수 (기본값: 10)
-
-  **동작 과정:**
-  1. 사용자의 ID를 기반으로 북마크한 에세이 목록을 조회합니다.
-  2. 조회된 에세이 목록과 총 개수를 반환합니다.
-    
-  `,
-  })
-  @ApiResponse({ status: 200, type: EssaysSchemaDto })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  async getUserBookmarks(
-    @Req() req: ExpressRequest,
-    @Query('page', new PagingParseIntPipe(1)) page: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit: number,
-  ) {
-    return this.essayService.getUserBookmarks(req.user.id, page, limit);
-  }
-
-  @Post('bookmarks/:essayId')
-  @ApiOperation({
-    summary: '에세이 북마크 추가',
-    description: `
-  특정 에세이를 북마크합니다.
-
-  **경로 파라미터:**
-  - \`essayId\`: 북마크할 에세이의 ID
-    
-  **동작 과정:**
-  1. 사용자의 ID와 에세이의 ID를 기반으로 북마크를 추가합니다.
-  2. 성공 상태를 반환합니다.
-    
-  **주의 사항:**
-  - 로그인한 사용자가 접근할 수 있습니다.
-  `,
-  })
-  @ApiResponse({ status: 201 })
-  async addBookmark(@Req() req: ExpressRequest, @Param('essayId') essayId: number) {
-    return this.essayService.addBookmark(req.user.id, essayId);
-  }
-
-  @Put('bookmarks')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({
-    summary: '에세이 북마크 삭제',
-    description: `
-  특정 에세이들의 북마크를 삭제합니다.
-
-  **요청 본문:**
-  - \`essayIds\`: 북마크를 삭제할 에세이의 ID 배열
-   
-  **동작 과정:**
-  1. 사용자의 ID와 에세이의 ID를 기반으로 북마크를 삭제합니다.
-  2. 성공 상태를 반환합니다.
-    
-  **주의 사항:**
-  - 로그인한 사용자가 접근할 수 있습니다.
-  `,
-  })
-  @ApiResponse({ status: 200 })
-  async removeBookmarks(@Req() req: ExpressRequest, @Body() body: EssayIdsReqDto) {
-    return this.essayService.removeBookmarks(req.user.id, body.essayIds);
-  }
-
-  @Delete('bookmarks/reset')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({
-    summary: '사용자의 모든 북마크 삭제',
-    description: `
-  사용자의 모든 북마크를 삭제합니다.
-
-  **동작 과정:**
-  1. 로그인한 사용자의 ID를 기반으로 모든 북마크를 삭제합니다.
-  2. 성공 상태를 반환합니다.
-
-  **주의 사항:**
-  - 로그인한 사용자가 접근할 수 있습니다.
-  `,
-  })
-  @ApiResponse({ status: 200 })
-  async resetBookmarks(@Req() req: ExpressRequest) {
-    return this.essayService.resetBookmarks(req.user.id);
   }
 
   @Get('search')
@@ -532,32 +432,5 @@ export class EssayController {
   @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     await this.essayService.deleteEssay(req.user.id, essayId);
-  }
-
-  @Post('reports/:essayId')
-  @ApiOperation({
-    summary: '에세이 신고',
-    description: `
-  특정 에세이를 신고합니다.
-      
-  **경로 파라미터:**
-  - \`essayId\` (number, required): 신고할 에세이의 ID
-      
-  **동작 과정:**
-  1. 에세이가 PRIVATE 상태인 경우 신고할 수 없습니다.
-  2. 중복 신고는 불가능합니다.
-  3. 신고가 성공적으로 접수되면, 에세이 작성자의 평판이 감소됩니다.
-      
-  **주의 사항:**
-  - 요청 바디의 \`reason\` 필드는 필수입니다. `,
-  })
-  @ApiResponse({ status: 201 })
-  @ApiBody({ type: CreateReportReqDto })
-  async reportEssay(
-    @Req() req: ExpressRequest,
-    @Param('essayId', ParseIntPipe) essayId: number,
-    @Body() data: CreateReportReqDto,
-  ) {
-    return this.essayService.createReport(req.user.id, essayId, data);
   }
 }

@@ -46,7 +46,7 @@ dotenv.config();
     FollowModule,
     BadgeModule,
     ViewModule,
-    BookmarkModule,
+    forwardRef(() => BookmarkModule),
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],
