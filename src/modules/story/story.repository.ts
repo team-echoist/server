@@ -19,7 +19,7 @@ export class StoryRepository {
     });
   }
 
-  async getStoriesById(userId: number) {
+  async findStoriesById(userId: number) {
     return this.storyRepository
       .createQueryBuilder('story')
       .leftJoinAndSelect('story.essays', 'essay')

@@ -258,7 +258,8 @@ export class BadgeService {
       };
     });
 
-    return this.utilsService.transformToDto(BadgeResDto, allBadgesWithDefaults);
+    const badges = this.utilsService.transformToDto(BadgeResDto, allBadgesWithDefaults);
+    return { badges: badges };
   }
 
   async getBadgeWithTags(userId: number) {
@@ -285,6 +286,10 @@ export class BadgeService {
       };
     });
 
-    return this.utilsService.transformToDto(BadgeWithTagResDto, allBadgesWithDefaults);
+    const badgesWithTags = this.utilsService.transformToDto(
+      BadgeWithTagResDto,
+      allBadgesWithDefaults,
+    );
+    return { badges: badgesWithTags };
   }
 }
