@@ -358,6 +358,9 @@ export class AdminService {
       case 'review':
         history.review = target;
         break;
+      case 'notice':
+        history.notice = target;
+        break;
       default:
         throw new Error(`Unknown target name: ${targetName}`);
     }

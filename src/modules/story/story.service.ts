@@ -13,6 +13,9 @@ import { StoryDto } from './dto/story.dto';
 import { UtilsService } from '../utils/utils.service';
 import { UserService } from '../user/user.service';
 import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
+import { EssayService } from '../essay/essay.service';
+import { Transactional } from 'typeorm-transactional';
+import { EssaySummaryResDto } from '../essay/dto/response/essaySummaryRes.dto';
 
 @Injectable()
 export class StoryService {
@@ -20,6 +23,7 @@ export class StoryService {
     private readonly storyRepository: StoryRepository,
     private readonly utilsService: UtilsService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
   ) {}
 
   async getStoryById(user: User, storyId?: number): Promise<Story> {
@@ -29,21 +33,37 @@ export class StoryService {
     return story;
   }
 
-  async getStoriesByUserId(userId: number) {
-    const stories = await this.storyRepository.getStoriesById(userId);
-    return this.utilsService.transformToDto(StoryDto, stories);
+  async getStories(userId: number) {
+    const stories = await this.storyRepository.findStoriesById(userId);
+    const storiesDto = this.utilsService.transformToDto(StoryDto, stories);
+
+    return { stories: storiesDto };
   }
 
-  async saveStory(userId: number, name: string) {
+  @Transactional()
+  async saveStory(userId: number, data: CreateStoryReqDto) {
     const user = await this.userService.fetchUserEntityById(userId);
-    return await this.saveStoryWithUser(user, name);
+    const savedStory = await this.saveStoryWithUser(user, data.name);
+
+    if (data.essayIds && data.essayIds.length > 0) {
+      const essays = await this.essayService.getEssaysByIds(userId, data.essayIds);
+      essays.forEach((essay) => {
+        essay.story = savedStory;
+      });
+      await this.essayService.saveEssays(essays);
+    }
   }
 
+  @Transactional()
   async updateStory(userId: number, storyId: number, data: CreateStoryReqDto) {
     const story = await this.storyRepository.findStoryWithEssayById(userId, storyId);
     if (!story) throw new NotFoundException('Story not found');
-    story.name = data.name;
-    return await this.storyRepository.saveStory(story);
+
+    if (data.name && data.name !== '') story.name = data.name;
+    await this.storyRepository.saveStory(story);
+
+    if (data.essayIds && data.essayIds.length > 0)
+      await this.essayService.updatedEssaysOfStory(userId, story, data.essayIds);
   }
 
   async saveStoryWithUser(user: User, storyName: string) {
@@ -53,8 +73,47 @@ export class StoryService {
     return await this.storyRepository.saveStory(story);
   }
 
+  @Transactional()
   async deleteStory(userId: number, storyId: number) {
     const story: Story = await this.storyRepository.findStoryById(userId, storyId);
     await this.storyRepository.deleteStory(story);
+  }
+
+  @Transactional()
+  async updateEssayStory(userId: number, essayId: number, storyId: number) {
+    const user = await this.userService.fetchUserEntityById(userId);
+    const essay = await this.essayService.getEssayById(essayId);
+
+    await this.essayService.checkEssayPermissions(essay, userId);
+
+    essay.story = await this.getStoryById(user, storyId);
+
+    await this.essayService.updateStoryOfEssay(essay);
+  }
+
+  async deleteEssayStory(userId: number, essayId: number) {
+    return this.essayService.deleteEssayStory(userId, essayId);
+  }
+
+  @Transactional()
+  async getEssayToUpdateStory(userId: number, storyId: number, page: number, limit: number) {
+    const { essays, total } = await this.essayService.getEssayToUpdateStory(
+      userId,
+      storyId,
+      page,
+      limit,
+    );
+    const totalPage: number = Math.ceil(total / limit);
+
+    const transformedEssays = essays.map((essay) => ({
+      id: essay.id,
+      title: essay.title,
+      createdDate: essay.createdDate,
+      story: essay.story ? essay.story.id : null,
+    }));
+
+    const essaysDto = this.utilsService.transformToDto(EssaySummaryResDto, transformedEssays);
+
+    return { essays: essaysDto, totalPage, page, total };
   }
 }

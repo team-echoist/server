@@ -7,9 +7,11 @@ import { User } from '../../entities/user.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Badge } from '../../entities/badge.entity';
 import { TagExp } from '../../entities/tagExp.entity';
+import { BadgeController } from './badge.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Tag, Badge, TagExp]), UtilsModule],
+  controllers: [BadgeController],
   providers: [BadgeService, BadgeRepository],
   exports: [BadgeService, BadgeRepository],
 })

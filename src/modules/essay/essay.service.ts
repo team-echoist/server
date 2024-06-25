@@ -57,7 +57,7 @@ export class EssayService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  private async checkEssayPermissions(essay: Essay, userId: number) {
+  async checkEssayPermissions(essay: Essay, userId: number) {
     if (essay.author.id !== userId)
       throw new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN);
   }
@@ -420,34 +420,12 @@ export class EssayService {
     return { essays: essayDtos, total, totalPage, page };
   }
 
-  async getStories(userId: number) {
-    const stories = await this.storyService.getStoriesByUserId(userId);
-    return { stories: stories };
+  async getEssaysByIds(userId: number, essayIds: number[]) {
+    return this.essayRepository.findByIds(userId, essayIds);
   }
 
-  @Transactional()
-  async saveStory(userId: number, data: CreateStoryReqDto) {
-    const savedStory = await this.storyService.saveStory(userId, data.name);
-
-    if (data.essayIds && data.essayIds.length > 0) {
-      const essays = await this.essayRepository.findByIds(userId, data.essayIds);
-      essays.forEach((essay) => {
-        essay.story = savedStory;
-      });
-      await this.essayRepository.saveEssays(essays);
-    }
-  }
-
-  @Transactional()
-  async updateStory(userId: number, StoryId: number, data: CreateStoryReqDto) {
-    let story: Story;
-    if (data.name && data.name !== '') {
-      story = await this.storyService.updateStory(userId, StoryId, data);
-    }
-
-    if (data.essayIds && data.essayIds.length > 0) {
-      await this.updatedEssaysOfStory(userId, story, data.essayIds);
-    }
+  async saveEssays(essays: Essay[]) {
+    return await this.essayRepository.saveEssays(essays);
   }
 
   async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
@@ -481,10 +459,6 @@ export class EssayService {
     await this.essayRepository.saveEssays(essays);
   }
 
-  async deleteStory(userId: number, storyId: number) {
-    await this.storyService.deleteStory(userId, storyId);
-  }
-
   async getSentenceEssays(userId: number, type: string, limit: number) {
     const recentTags = await this.getRecentTags(userId);
 
@@ -501,16 +475,15 @@ export class EssayService {
     return { essays: essayDtos };
   }
 
-  async updateEssayStory(userId: number, essayId: number, storyId: number) {
-    const user = await this.userService.fetchUserEntityById(userId);
-    const essay = await this.essayRepository.findEssayById(essayId);
-
-    await this.checkEssayPermissions(essay, userId);
-
-    essay.story = await this.storyService.getStoryById(user, storyId);
-    await this.essayRepository.saveEssay(essay);
+  async getEssayById(essayId: number) {
+    return this.essayRepository.findEssayById(essayId);
   }
 
+  async updateStoryOfEssay(essay: Essay) {
+    return this.essayRepository.saveEssay(essay);
+  }
+
+  @Transactional()
   async deleteEssayStory(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
 
@@ -527,18 +500,8 @@ export class EssayService {
       page,
       limit,
     );
-    const totalPage: number = Math.ceil(total / limit);
 
-    const transformedEssays = essays.map((essay) => ({
-      id: essay.id,
-      title: essay.title,
-      createdDate: essay.createdDate,
-      story: essay.story ? essay.story.id : null,
-    }));
-
-    const essaysDto = this.utilsService.transformToDto(EssaySummaryResDto, transformedEssays);
-
-    return { essays: essaysDto, totalPage, page, total };
+    return { essays, total };
   }
 
   async getRecentViewedEssays(userId: number, page: number, limit: number) {

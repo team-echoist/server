@@ -12,8 +12,6 @@ import Redis from 'ioredis';
 import { UtilsService } from '../utils/utils.service';
 import { EssayService } from '../essay/essay.service';
 import { AwsService } from '../aws/aws.service';
-import { FollowService } from '../follow/follow.service';
-import { BadgeService } from '../badge/badge.service';
 import { NicknameService } from '../nickname/nickname.service';
 import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
@@ -34,10 +32,8 @@ export class UserService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly userRepository: UserRepository,
-    private readonly followService: FollowService,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
-    private readonly badgeService: BadgeService,
     private readonly nicknameService: NicknameService,
     private readonly authService: AuthService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
@@ -135,52 +131,6 @@ export class UserService {
     const essayStats = await this.essayService.essayStatsByUserId(userId);
 
     return { user: user, essayStats: essayStats };
-  }
-
-  async follow(followerId: number, followingId: number) {
-    if (followerId === followingId) {
-      throw new HttpException('You cannot follow yourself', HttpStatus.CONFLICT);
-    }
-    const followerRelation = await this.followService.findFollowerRelation(followerId, followingId);
-    if (followerRelation) {
-      throw new HttpException('You are already following', HttpStatus.CONFLICT);
-    }
-
-    const follower = await this.fetchUserEntityById(followerId);
-    const following = await this.fetchUserEntityById(followingId);
-
-    if (!follower || !following) {
-      throw new NotFoundException('User not found');
-    }
-    await this.followService.follow(follower, following);
-  }
-
-  async unFollow(followerId: number, followingId: number) {
-    await this.followService.unFollow(followerId, followingId);
-  }
-
-  async getFollowings(userId: number, page: number, limit: number) {
-    const { followings, total } = await this.followService.getFollowings(userId, page, limit);
-    const totalPage: number = Math.ceil(total / limit);
-
-    const followingsDto = followings.map((follow) => {
-      return this.utilsService.transformToDto(UserSummaryResDto, follow.following);
-    });
-    return { followings: followingsDto, total, totalPage, page };
-  }
-
-  async levelUpBadge(userId: number, badgeId: number) {
-    return this.badgeService.levelUpBadge(userId, badgeId);
-  }
-
-  async getBadges(userId: number) {
-    const badges = await this.badgeService.getBadges(userId);
-    return { badges: badges };
-  }
-
-  async getBadgeWithTags(userId: number) {
-    const badgesWithTags = await this.badgeService.getBadgeWithTags(userId);
-    return { badges: badgesWithTags };
   }
 
   async getUserSummary(userId: number) {
