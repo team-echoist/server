@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Post,
-  Query,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -18,11 +8,15 @@ import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
 import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
+import { UtilsService } from '../utils/utils.service';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly utilsService: UtilsService,
+  ) {}
 
   @Get('health-check')
   @ApiOperation({ summary: 'health check' })
@@ -102,6 +96,34 @@ export class AuthController {
     return this.authService.checkNickname(data.nickname);
   }
 
+  @Post('verify/email')
+  @ApiOperation({
+    summary: '이메일 변경을 위한 이메일 인증 요청',
+    description: `
+  이메일 변경 과정에서 이메일 인증을 요청합니다.
+
+  **요청 본문:**
+  - \`email\`: 변경할 이메일 주소
+
+  **동작 과정:**
+  1. 입력된 이메일 주소가 이미 존재하는지 확인합니다.
+  2. 존재할 경우, 에러를 반환합니다.
+  3. 존재하지 않을 경우, 인증 토큰을 생성합니다.
+  4. 생성된 토큰을 Redis에 저장하고, 유효기간을 설정합니다.
+  5. 입력된 이메일 주소로 인증 이메일을 발송합니다.
+
+  **주의 사항:**
+  - 이메일 주소가 이미 존재하는 경우, \`400 Bad Request\` 에러가 발생합니다.
+  - 인증 토큰의 유효기간은 10분입니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: CreateUserReqDto })
+  async verifEmail(@Body() createUserDto: CreateUserReqDto) {
+    await this.authService.isEmailOwned(createUserDto);
+    return;
+  }
+
   @Post('verify')
   @ApiOperation({
     summary: '회원가입을 위한 이메일 인증 요청',
@@ -156,13 +178,19 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
-    req.user = await this.authService.register(token);
-    if (req.device === 'iPhone' || req.device === 'iPad' || req.device === 'Android') {
-      res.redirect('todo 딥링크');
-    } else {
-      res.redirect('https://www.linkedoutapp.com');
+    const user = await this.authService.register(token);
+
+    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+
+    let redirectUrl = 'https://www.linkedoutapp.com';
+    if (req.device === 'iPhone' || req.device === 'iPad') {
+      redirectUrl = 'todo 딥링크';
     }
-    return;
+    if (req.device === 'Android') redirectUrl = 'https://www.linkedout.com/SignUpComplete';
+
+    redirectUrl += `?token=${newJwt}`;
+
+    res.redirect(redirectUrl);
   }
 
   @Post('login')
