@@ -45,6 +45,8 @@ import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
 import { SupportRepository } from '../support/support.repository';
 import { SupportService } from '../support/support.service';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
+import { InquiriesResDto } from '../support/dto/response/inquiriesRes.dto';
+import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -360,6 +362,9 @@ export class AdminService {
         break;
       case 'notice':
         history.notice = target;
+        break;
+      case 'inquiry':
+        history.inquiry = target;
         break;
       default:
         throw new Error(`Unknown target name: ${targetName}`);
@@ -728,5 +733,35 @@ export class AdminService {
     const notice = await this.supportRepository.findNotice(noticeId);
 
     return this.utilsService.transformToDto(NoticeWithProcessorResDto, notice);
+  }
+
+  async getInquiries() {
+    const inquiries = await this.supportRepository.findUnprocessedInquiry();
+
+    return this.utilsService.transformToDto(InquiriesResDto, inquiries);
+  }
+
+  async getInquiry(inquiryId: number) {
+    const inquiry = await this.supportRepository.findInquiryById(inquiryId);
+
+    return this.utilsService.transformToDto(FullInquiryResDto, inquiry);
+  }
+
+  async createAnswer(adminId: number, inquiryId: number, answer: string) {
+    const inquiry = await this.supportRepository.findInquiryById(inquiryId);
+    const processor = await this.adminRepository.findAdmin(adminId);
+
+    inquiry.answer = answer;
+
+    await this.supportRepository.saveInquiry(inquiry);
+
+    const newHistory = this.createProcessedHistory(
+      ActionType.UPDATED,
+      'inquiry',
+      inquiry,
+      processor,
+    );
+
+    await this.adminRepository.saveHistory(newHistory);
   }
 }

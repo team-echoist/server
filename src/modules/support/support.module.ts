@@ -10,6 +10,7 @@ import { SupportService } from './support.service';
 import { AuthModule } from '../auth/auth.module';
 import { User } from '../../entities/user.entity';
 import { UtilsModule } from '../utils/utils.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UtilsModule } from '../utils/utils.module';
     TypeOrmModule.forFeature([User, Notice, Inquiry]),
     AuthModule,
     UtilsModule,
+    UserModule,
   ],
   controllers: [SupportController],
   providers: [SupportService, SupportRepository, strategies.JwtStrategy],

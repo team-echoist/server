@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsEmail, IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsEnum, IsNumber, IsString } from 'class-validator';
 import { UserStatus } from '../../../../entities/user.entity';
 
 export class FullUserResDto {
@@ -17,27 +17,27 @@ export class FullUserResDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  nickname?: string;
+  nickname: string;
 
   @ApiProperty()
   @Exclude()
   @IsString()
-  password?: string;
+  password: string;
 
   @ApiProperty()
   @Expose()
   @IsString()
-  gender?: string;
+  gender: string;
 
   @ApiProperty()
   @Expose()
   @IsString()
-  profileImage?: string;
+  profileImage: string;
 
   @ApiProperty()
   @Expose()
   @IsDate()
-  birthDate?: Date;
+  birthDate: Date;
 
   @ApiProperty()
   @Expose()
@@ -57,8 +57,13 @@ export class FullUserResDto {
 
   @ApiProperty()
   @Expose()
+  @IsNumber()
+  reputation: number;
+
+  @ApiProperty()
+  @Expose()
   @IsDate()
-  subscriptionEnd?: Date;
+  subscriptionEnd: Date;
 
   @ApiProperty()
   @Expose()
@@ -73,5 +78,10 @@ export class FullUserResDto {
   @ApiProperty()
   @Expose()
   @IsDate()
-  deletedDate?: Date;
+  deactivationDate: Date;
+
+  @ApiProperty()
+  @Expose()
+  @IsDate()
+  deletedDate: Date;
 }

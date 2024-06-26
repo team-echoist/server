@@ -32,4 +32,24 @@ export class SupportRepository {
 
     return { notices, total };
   }
+
+  async saveInquiry(newInquiry: Inquiry) {
+    return this.inquiryRepository.save(newInquiry);
+  }
+
+  async findInquiries(userId: number) {
+    return this.inquiryRepository.find({ where: { user: { id: userId } } });
+  }
+
+  async findInquiry(userId: number, inquiryId: number) {
+    return this.inquiryRepository.findOne({ where: { user: { id: userId }, id: inquiryId } });
+  }
+
+  async findUnprocessedInquiry() {
+    return this.inquiryRepository.find({ where: { processed: false } });
+  }
+
+  async findInquiryById(inquiryId: number) {
+    return this.inquiryRepository.findOne({ where: { id: inquiryId }, relations: ['user'] });
+  }
 }
