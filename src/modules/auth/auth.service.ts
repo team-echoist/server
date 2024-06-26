@@ -11,6 +11,8 @@ import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
+import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +40,7 @@ export class AuthService {
     return;
   }
 
+  @Transactional()
   async isEmailOwned(createUserDto: CreateUserReqDto) {
     const email = createUserDto.email;
     const emailExists = await this.authRepository.findByEmail(email);
@@ -52,10 +55,9 @@ export class AuthService {
     await this.redis.set(token, JSON.stringify(createUserDto), 'EX', 600);
 
     await this.mailService.sendVerificationEmail(email, token);
-
-    return;
   }
 
+  @Transactional()
   async register(token: string) {
     const user = await this.redis.get(token);
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -63,7 +65,7 @@ export class AuthService {
     const userData = JSON.parse(user);
     userData.nickname = await this.nicknameService.generateUniqueNickname();
 
-    return await this.authRepository.createUser(userData);
+    return await this.authRepository.saveUser(userData);
   }
 
   async validateUser(email: string, password: string) {
@@ -88,12 +90,47 @@ export class AuthService {
     return !user ? null : user;
   }
 
+  @Transactional()
+  async passwordResetReq(email: string) {
+    const user = await this.authRepository.findByEmail(email);
+    if (!user) throw new HttpException('This is an incorrect email.', HttpStatus.BAD_REQUEST);
+
+    const token = await this.utilsService.generateVerifyToken();
+
+    await this.redis.set(token, JSON.stringify(user), 'EX', 600);
+
+    await this.mailService.sendPasswordResetEmail(email, token);
+  }
+
+  @Transactional()
+  async passwordResetVerify(token: string) {
+    const exUser = await this.redis.get(token);
+    if (!exUser) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    const user = JSON.parse(exUser);
+
+    const newToken = await this.utilsService.generateVerifyToken();
+    await this.redis.set(newToken, JSON.stringify(user), 'EX', 600);
+
+    return newToken;
+  }
+
+  @Transactional()
+  async passwordReset(data: PasswordResetReqDto) {
+    const user = await this.redis.get(data.token);
+    if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+
+    const userData = JSON.parse(user);
+    userData.password = await bcrypt.hash(data.password, 10);
+
+    await this.authRepository.saveUser(userData);
+  }
+
   // ----------------- OAuth ---------------------
 
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByEmail(oauthUser.email);
     if (!user) {
-      user = await this.authRepository.createUser({
+      user = await this.authRepository.saveUser({
         email: oauthUser.email,
         oauthInfo: { [`${oauthUser.platform}Id`]: oauthUser.platformId },
       });
