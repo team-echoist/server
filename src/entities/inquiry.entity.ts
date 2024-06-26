@@ -17,7 +17,16 @@ export class Inquiry {
   id: number;
 
   @Column()
-  contents: string;
+  type: string;
+
+  @Column()
+  title: string;
+
+  @Column()
+  content: string;
+
+  @Column({ nullable: true })
+  answer: string;
 
   @Index()
   @Column({ default: false })

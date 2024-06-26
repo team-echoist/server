@@ -48,6 +48,9 @@ import { CreateNoticeReqDto } from './dto/request/createNoticeReq.dto';
 import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
 import { NoticesSchemaDto } from '../support/dto/schema/noticesSchema.dto';
+import { InquiriesResDto } from '../support/dto/response/inquiriesRes.dto';
+import { InquiryAnswerReqDto } from './dto/request/inquiryAnswerReq.dto';
+import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -969,11 +972,80 @@ export class AdminController {
     return this.adminService.getNotice(noticeId);
   }
 
-  @Get('inquiry')
+  @Get('inquiries')
   @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({})
-  @ApiResponse({})
-  async getInquiry() {}
+  @ApiOperation({
+    summary: '처리되지 않은 모든 고객 문의 조회',
+    description: `
+  관리자가 처리되지 않은 모든 고객 문의를 조회합니다.
+
+  **동작 과정:**
+  1. 처리되지 않은 모든 고객 문의를 조회합니다.
+  2. 조회된 문의 목록을 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: InquiriesResDto })
+  async getInquiries() {
+    return this.adminService.getInquiries();
+  }
+
+  @Get('inquiries/:inquiryId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '특정 고객 문의 상세 조회',
+    description: `
+  관리자가 특정 고객 문의의 상세 정보를 조회합니다.
+
+  **경로 파라미터:**
+  - \`inquiryId\` (number, required): 조회할 고객 문의의 ID
+
+  **동작 과정:**
+  1. 요청된 문의 ID로 고객 문의를 조회합니다.
+  2. 조회된 문의와 작성자의 상세 정보를 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: FullInquiryResDto })
+  async getInquiry(@Param('inquiryId', ParseIntPipe) inquiryId: number) {
+    return this.adminService.getInquiry(inquiryId);
+  }
+
+  @Post('inquiries/:inquiryId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '고객 문의 답변 작성 및 수정',
+    description: `
+  관리자가 특정 고객 문의에 대한 답변을 작성하거나 수정합니다.
+
+  **경로 파라미터:**
+  - \`inquiryId\` (number, required): 답변할 고객 문의의 ID
+
+  **요청 본문:**
+  - \`answer\` (string, required): 고객 문의에 대한 답변 내용
+
+  **동작 과정:**
+  1. 요청된 문의 ID로 고객 문의를 조회합니다.
+  2. 고객 문의에 대한 답변을 작성하거나 수정합니다.
+  3. 작성 또는 수정된 답변 내용을 저장합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: InquiryAnswerReqDto })
+  async createAnswer(
+    @Req() req: ExpressRequest,
+    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Body() data: InquiryAnswerReqDto,
+  ) {
+    return this.adminService.createAnswer(req.user.id, inquiryId, data.answer);
+  }
 
   @Put(':adminId')
   @UseGuards(AuthGuard('admin-jwt'))
