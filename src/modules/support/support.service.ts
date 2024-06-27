@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { SupportRepository } from './support.repository';
 import { UtilsService } from '../utils/utils.service';
-import { NoticesResDto } from './dto/response/noticesRes.dto';
+import { NoticeSummaryResDto } from './dto/response/noticeSummaryRes.dto';
 import { NoticeResDto } from './dto/response/noticeRes.dto';
 import { InquiryReqDto } from './dto/request/inquiryReq.dto';
 import { Inquiry } from '../../entities/inquiry.entity';
 import { UserService } from '../user/user.service';
-import { InquiriesResDto } from './dto/response/inquiriesRes.dto';
+import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
 import { UpdatedHistoryResDto } from './dto/response/updatedHistoryRes.dto';
 
@@ -22,7 +22,7 @@ export class SupportService {
     const { notices, total } = await this.supportRepository.findNotices(page, limit);
     const totalPage: number = Math.ceil(total / limit);
 
-    const noticesDto = this.utilsService.transformToDto(NoticesResDto, notices);
+    const noticesDto = this.utilsService.transformToDto(NoticeSummaryResDto, notices);
 
     return { Notices: noticesDto, total, page, totalPage };
   }
@@ -48,7 +48,7 @@ export class SupportService {
   async getInquiries(userId: number) {
     const inquiries = await this.supportRepository.findInquiries(userId);
 
-    return this.utilsService.transformToDto(InquiriesResDto, inquiries);
+    return this.utilsService.transformToDto(InquirySummaryResDto, inquiries);
   }
 
   async getInquiry(userId: number, inquiryId: number) {

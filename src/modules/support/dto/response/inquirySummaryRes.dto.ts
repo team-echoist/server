@@ -3,7 +3,7 @@ import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-v
 import { Expose, Type } from 'class-transformer';
 import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 
-export class InquiriesResDto {
+export class InquirySummaryResDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
@@ -30,5 +30,6 @@ export class InquiriesResDto {
 
   @ApiProperty({ type: UserSummaryResDto })
   @Type(() => UserSummaryResDto)
+  @Expose()
   user: UserSummaryResDto;
 }

@@ -21,8 +21,8 @@ import { ProfileImageReqDto } from './dto/request/profileImageReq.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
-import { UserInfoSchemaDto } from './dto/schema/userInfoSchema.dto';
-import { UserSummaryWithCountSchemaDto } from './dto/schema/userSummaryWithCountSchema.dto';
+import { UsersSummaryWithStatsResDto } from './dto/response/usersSummaryWithStatsRes.dto';
+import { UserSummaryWithCountResDto } from './dto/response/userSummaryWithCountRes.dto';
 import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
 
 @ApiTags('User')
@@ -207,7 +207,7 @@ export class UserController {
   - 요청이 성공하면 \`200 OK\` 상태를 반환합니다.
   `,
   })
-  @ApiResponse({ type: UserSummaryWithCountSchemaDto })
+  @ApiResponse({ type: UserSummaryWithCountResDto })
   async userSummary(@Req() req: ExpressRequest) {
     return this.userService.getUserSummary(req.user.id);
   }
@@ -230,7 +230,7 @@ export class UserController {
   - 유효한 사용자 ID가 제공되어야 합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UserInfoSchemaDto })
+  @ApiResponse({ status: 200, type: UsersSummaryWithStatsResDto })
   async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
     return this.userService.getUserInfo(userId);
   }

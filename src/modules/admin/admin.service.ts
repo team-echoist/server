@@ -17,11 +17,11 @@ import { AdminRepository } from './admin.repository';
 import { UserRepository } from '../user/user.repository';
 import { EssayRepository } from '../essay/essay.repository';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
-import { ReportsResDto } from './dto/response/reportsRes.dto';
+import { ReportResDto } from './dto/response/reportRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
 import { ReviewResDto } from './dto/response/reviewRes.dto';
-import { ReportsSchemaDto } from './dto/schema/reportsSchema.dto';
+import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { FullUserResDto } from './dto/response/fullUserRes.dto';
@@ -30,10 +30,9 @@ import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
-import { EssaysInfoResDto } from './dto/response/essaysInfoRes.dto';
+import { EssayInfoResDto } from './dto/response/essayInfoRes.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
-import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
@@ -45,7 +44,7 @@ import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
 import { SupportRepository } from '../support/support.repository';
 import { SupportService } from '../support/support.service';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
-import { InquiriesResDto } from '../support/dto/response/inquiriesRes.dto';
+import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
@@ -240,14 +239,14 @@ export class AdminService {
   }
 
   @Transactional()
-  async getReports(sort: string, page: number, limit: number): Promise<ReportsSchemaDto> {
+  async getReports(sort: string, page: number, limit: number): Promise<ReportsResDto> {
     const { reports, totalReports, totalEssay } = await this.adminRepository.getReports(
       sort,
       page,
       limit,
     );
     const totalPage: number = Math.ceil(totalEssay / limit);
-    const reportDtos = this.utilsService.transformToDto(ReportsResDto, reports) as ReportsResDto[];
+    const reportDtos = this.utilsService.transformToDto(ReportResDto, reports) as ReportResDto[];
 
     return { reports: reportDtos, totalReports, totalEssay, totalPage, page };
   }
@@ -486,7 +485,7 @@ export class AdminService {
       reviewCount: essay?.createdDate ? essay.reviews.length : null,
     }));
 
-    const essaysDto = this.utilsService.transformToDto(EssaysInfoResDto, data);
+    const essaysDto = this.utilsService.transformToDto(EssayInfoResDto, data);
     return { essays: essaysDto, total, page, totalPage };
   }
 
@@ -564,7 +563,7 @@ export class AdminService {
 
   async getAdmins(activated?: boolean) {
     const admins = await this.adminRepository.findAdmins(activated);
-    const adminsDto = this.utilsService.transformToDto(AdminsResDto, admins);
+    const adminsDto = this.utilsService.transformToDto(AdminResDto, admins);
 
     return { admins: adminsDto };
   }
@@ -661,7 +660,7 @@ export class AdminService {
   async getInactiveAdmins() {
     const admins = await this.adminRepository.findAdmins(false);
 
-    const adminsDto = this.utilsService.transformToDto(AdminsResDto, admins);
+    const adminsDto = this.utilsService.transformToDto(AdminResDto, admins);
 
     return { admins: adminsDto };
   }
@@ -745,7 +744,8 @@ export class AdminService {
     );
 
     const totalPage: number = Math.ceil(total / limit);
-    const inquiriesDto = this.utilsService.transformToDto(InquiriesResDto, inquiries);
+    const inquiriesDto = this.utilsService.transformToDto(InquirySummaryResDto, inquiries);
+    console.log(inquiriesDto);
 
     return { inquiries: inquiriesDto, total, page, totalPage };
   }

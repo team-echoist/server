@@ -3,8 +3,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BadgeService } from './badge.service';
 import { Request as ExpressRequest } from 'express';
-import { BadgesSchemaDto } from './dto/schema/badgesSchema.dto';
-import { BadgesWithTagsSchemaDto } from './dto/schema/badgesWithTagsSchema.dto';
+import { BadgesResDto } from './dto/response/badgesRes.dto';
+import { BadgesWithTagsResDto } from './dto/response/badgesWithTagsRes.dto';
 
 @ApiTags('Badge')
 @Controller('badges')
@@ -53,7 +53,7 @@ export class BadgeController {
   - 사용자가 아직 획득하지 않은 뱃지도 기본 정보와 함께 반환됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: BadgesSchemaDto })
+  @ApiResponse({ status: 200, type: BadgesResDto })
   async userBadges(@Req() req: ExpressRequest) {
     return this.badgeService.getBadges(req.user.id);
   }
@@ -74,7 +74,7 @@ export class BadgeController {
   - 각 뱃지에는 연관된 태그 목록이 포함됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: BadgesWithTagsSchemaDto })
+  @ApiResponse({ status: 200, type: BadgesWithTagsResDto })
   async userBadgesWithTags(@Req() req: ExpressRequest) {
     return this.badgeService.getBadgeWithTags(req.user.id);
   }

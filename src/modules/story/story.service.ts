@@ -15,7 +15,7 @@ import { UserService } from '../user/user.service';
 import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
 import { EssayService } from '../essay/essay.service';
 import { Transactional } from 'typeorm-transactional';
-import { EssaySummaryResDto } from '../essay/dto/response/essaySummaryRes.dto';
+import { StoryUpdateEssayResDto } from '../essay/dto/response/storyUpdateEssayRes.dto';
 
 @Injectable()
 export class StoryService {
@@ -112,7 +112,7 @@ export class StoryService {
       story: essay.story ? essay.story.id : null,
     }));
 
-    const essaysDto = this.utilsService.transformToDto(EssaySummaryResDto, transformedEssays);
+    const essaysDto = this.utilsService.transformToDto(StoryUpdateEssayResDto, transformedEssays);
 
     return { essays: essaysDto, totalPage, page, total };
   }

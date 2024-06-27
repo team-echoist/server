@@ -1,12 +1,12 @@
-import { EssaySummaryResDto } from '../response/essaySummaryRes.dto';
+import { StoryUpdateEssayResDto } from './storyUpdateEssayRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
 
-export class EssaysSummarySchemaDto {
-  @ApiProperty({ type: [EssaySummaryResDto] })
+export class StoryUpdateEssaysResDto {
+  @ApiProperty({ type: [StoryUpdateEssayResDto] })
   @Expose()
-  essays: EssaySummaryResDto[];
+  essays: StoryUpdateEssayResDto[];
 
   @ApiProperty()
   @IsNumber()

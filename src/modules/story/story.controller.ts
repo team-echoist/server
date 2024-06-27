@@ -18,7 +18,7 @@ import { StoriesResDto } from './dto/response/storiesRes.dto';
 import { Request as ExpressRequest } from 'express';
 import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
 import { UpdateStoryReqDto } from './dto/repuest/updateStoryReq.dto';
-import { EssaysSummarySchemaDto } from '../essay/dto/schema/essaysSummarySchema.dto';
+import { StoryUpdateEssaysResDto } from '../essay/dto/response/storyUpdateEssaysRes.dto';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 
@@ -208,7 +208,7 @@ export class StoryController {
   - \`storyId\`와 일치하는 스토리 또는 스토리가 없는 에세이만 조회됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssaysSummarySchemaDto })
+  @ApiResponse({ status: 200, type: StoryUpdateEssaysResDto })
   @ApiQuery({ name: 'storyId', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })

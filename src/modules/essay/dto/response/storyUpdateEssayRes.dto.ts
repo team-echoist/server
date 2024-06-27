@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 
-export class EssaySummaryResDto {
+export class StoryUpdateEssayResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()
