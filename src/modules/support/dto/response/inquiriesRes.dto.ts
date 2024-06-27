@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 
 export class InquiriesResDto {
   @ApiProperty()
@@ -26,4 +27,8 @@ export class InquiriesResDto {
   @IsBoolean()
   @Expose()
   processed: boolean;
+
+  @ApiProperty({ type: UserSummaryResDto })
+  @Type(() => UserSummaryResDto)
+  user: UserSummaryResDto;
 }

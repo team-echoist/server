@@ -48,9 +48,11 @@ import { CreateNoticeReqDto } from './dto/request/createNoticeReq.dto';
 import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
 import { NoticesSchemaDto } from '../support/dto/schema/noticesSchema.dto';
-import { InquiriesResDto } from '../support/dto/response/inquiriesRes.dto';
 import { InquiryAnswerReqDto } from './dto/request/inquiryAnswerReq.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
+import { UpdateHistoryReqDto } from './dto/request/updateHistoryReq.dto';
+import { InquiriesSchemaDto } from '../support/dto/schema/inquiriesSchema.dto';
+import { UpdatedHistoriesResDto } from '../support/dto/response/updatedHistoriesRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -978,6 +980,11 @@ export class AdminController {
     summary: '처리되지 않은 모든 고객 문의 조회',
     description: `
   관리자가 처리되지 않은 모든 고객 문의를 조회합니다.
+  
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 페이지당 항목 수 (기본값: 10)
+  - \`status\`: 처리 상태 (optional, 'all' 또는 'unprocessed', 기본값: 'all')
 
   **동작 과정:**
   1. 처리되지 않은 모든 고객 문의를 조회합니다.
@@ -987,9 +994,13 @@ export class AdminController {
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: InquiriesResDto })
-  async getInquiries() {
-    return this.adminService.getInquiries();
+  @ApiResponse({ status: 200, type: InquiriesSchemaDto })
+  async getInquiries(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('status') status: 'all' | 'unprocessed' = 'all',
+  ) {
+    return this.adminService.getInquiries(page, limit, status);
   }
 
   @Get('inquiries/:inquiryId')
@@ -1045,6 +1056,86 @@ export class AdminController {
     @Body() data: InquiryAnswerReqDto,
   ) {
     return this.adminService.createAnswer(req.user.id, inquiryId, data.answer);
+  }
+
+  @Post('updated-histories')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '업데이트 히스토리 생성',
+    description: `
+  관리자가 업데이트 히스토리를 생성합니다.
+  
+  **요청 본문:**
+  - \`history\`: 업데이트 히스토리 내용
+
+  **동작 과정:**
+  1. 관리자가 업데이트 히스토리 내용을 입력하여 요청을 보냅니다.
+  2. 입력된 내용을 기반으로 새로운 업데이트 히스토리가 생성됩니다.
+  3. 생성된 업데이트 히스토리가 데이터베이스에 저장됩니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: UpdateHistoryReqDto })
+  async createUpdateHistory(@Req() req: ExpressRequest, @Body() data: UpdateHistoryReqDto) {
+    return this.adminService.createUpdateHistory(req.user.id, data.history);
+  }
+
+  @Put('updated_histories/:historyId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '업데이트 히스토리 수정',
+    description: `
+  관리자가 기존 업데이트 히스토리를 수정합니다.
+
+  **경로 파라미터:**
+  - \`historyId\`: 수정할 업데이트 히스토리의 ID
+
+  **요청 본문:**
+  - \`history\`: 수정된 업데이트 히스토리 내용
+
+  **동작 과정:**
+  1. 관리자가 수정할 업데이트 히스토리의 ID와 내용을 입력하여 요청을 보냅니다.
+  2. 해당 ID의 업데이트 히스토리가 수정됩니다.
+  3. 수정된 업데이트 히스토리가 데이터베이스에 저장됩니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: UpdateHistoryReqDto })
+  async modifyUpdateHistory(@Req() req: ExpressRequest, @Body() data: UpdateHistoryReqDto) {
+    return this.adminService.createUpdateHistory(req.user.id, data.history);
+  }
+
+  @Get('updated-histories')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '전체 업데이트 히스토리 조회 (관리자용)',
+    description: `
+  관리자가 모든 업데이트 히스토리를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 페이지당 항목 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 모든 업데이트 히스토리를 페이지네이션하여 조회합니다.
+  2. 조회된 업데이트 히스토리 목록을 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
+  async getAllUpdateHistories(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getAllUpdateHistories(page, limit);
   }
 
   @Put(':adminId')

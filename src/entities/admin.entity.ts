@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Notice } from './notice.entity';
+import { UpdatedHistory } from './updatedHistory.entity';
 
 @Entity()
 export class Admin {
@@ -42,6 +43,10 @@ export class Admin {
   @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.processor)
   processedHistories: ProcessedHistory[];
+
+  @JoinColumn({ name: 'updated_histories' })
+  @OneToMany(() => UpdatedHistory, (updatedHistory) => updatedHistory.processor)
+  updatedHistories: UpdatedHistory[];
 
   @OneToMany(() => Notice, (notice) => notice.processor)
   notice: Notice[];

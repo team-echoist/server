@@ -18,6 +18,7 @@ import { NoticeResDto } from './dto/response/noticeRes.dto';
 import { NoticesSchemaDto } from './dto/schema/noticesSchema.dto';
 import { InquiryReqDto } from './dto/request/inquiryReq.dto';
 import { InquiriesResDto } from './dto/response/inquiriesRes.dto';
+import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
 
 @ApiTags('Support')
 @UseGuards(AuthGuard('jwt'))
@@ -119,5 +120,31 @@ export class SupportController {
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
   ) {
     return this.supportService.getInquiry(req.user.id, inquiryId);
+  }
+
+  @Get('updated-histories')
+  @ApiOperation({
+    summary: '전체 업데이트 히스토리 조회 (유저용)',
+    description: `
+  유저가 모든 업데이트 히스토리를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 페이지당 항목 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 모든 업데이트 히스토리를 페이지네이션하여 조회합니다.
+  2. 작성자 정보를 제외한 업데이트 히스토리 목록을 반환합니다.
+
+  **주의 사항:**
+  - 유저 권한으로 접근할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
+  async getUserUpdateHistories(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.supportService.getUserUpdateHistories(page, limit);
   }
 }
