@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -282,7 +282,7 @@ export class AuthController {
     if (req.device === 'iPhone' || req.device === 'iPad') {
       redirectUrl = 'todo 딥링크';
     }
-    if (req.device === 'Android') redirectUrl = 'https://www.linkedout.com/SignUpComplete';
+    if (req.device === 'Android') redirectUrl = 'https://www.linkedout.com/ResetPwPage?token=';
 
     redirectUrl += `?token=${newToken}`;
 
@@ -310,7 +310,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: '비밀번호 재설정 성공' })
   @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
-  async passwordReset(@Body() data: PasswordResetReqDto, @Req() req: ExpressRequest) {
+  async passwordReset(@Body() data: PasswordResetReqDto) {
     return this.authService.passwordReset(data);
   }
 
