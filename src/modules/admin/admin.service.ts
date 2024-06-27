@@ -47,6 +47,8 @@ import { SupportService } from '../support/support.service';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
 import { InquiriesResDto } from '../support/dto/response/inquiriesRes.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
+import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -58,7 +60,7 @@ export class AdminService {
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
-    private readonly supportSerivce: SupportService,
+    private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -726,7 +728,7 @@ export class AdminService {
   }
 
   async getNotices(page: number, limit: number) {
-    return await this.supportSerivce.getNotices(page, limit);
+    return await this.supportService.getNotices(page, limit);
   }
 
   async getNotice(noticeId: number) {
@@ -735,10 +737,17 @@ export class AdminService {
     return this.utilsService.transformToDto(NoticeWithProcessorResDto, notice);
   }
 
-  async getInquiries() {
-    const inquiries = await this.supportRepository.findUnprocessedInquiry();
+  async getInquiries(page: number, limit: number, status: 'all' | 'unprocessed') {
+    const { inquiries, total } = await this.supportRepository.findAdminInquiries(
+      page,
+      limit,
+      status,
+    );
 
-    return this.utilsService.transformToDto(InquiriesResDto, inquiries);
+    const totalPage: number = Math.ceil(total / limit);
+    const inquiriesDto = this.utilsService.transformToDto(InquiriesResDto, inquiries);
+
+    return { inquiries: inquiriesDto, total, page, totalPage };
   }
 
   async getInquiry(inquiryId: number) {
@@ -763,5 +772,24 @@ export class AdminService {
     );
 
     await this.adminRepository.saveHistory(newHistory);
+  }
+
+  async createUpdateHistory(adminId: number, history: string) {
+    const processor = await this.adminRepository.findAdmin(adminId);
+
+    const newUpdateHistory = new UpdatedHistory();
+    newUpdateHistory.history = history;
+    newUpdateHistory.processor = processor;
+
+    await this.supportRepository.saveUpdateHistory(newUpdateHistory);
+  }
+
+  async getAllUpdateHistories(page: number, limit: number) {
+    const { histories, total } = await this.supportRepository.findAllUpdateHistories(page, limit);
+
+    const totalPage = Math.ceil(total / limit);
+    const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
+
+    return { histories: historiesDto, total, page, totalPage };
   }
 }

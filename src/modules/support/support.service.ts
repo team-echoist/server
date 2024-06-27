@@ -8,6 +8,7 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UserService } from '../user/user.service';
 import { InquiriesResDto } from './dto/response/inquiriesRes.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
+import { UpdatedHistoryResDto } from './dto/response/updatedHistoryRes.dto';
 
 @Injectable()
 export class SupportService {
@@ -54,5 +55,14 @@ export class SupportService {
     const inquiry = await this.supportRepository.findInquiry(userId, inquiryId);
 
     return this.utilsService.transformToDto(InquiryResDto, inquiry);
+  }
+
+  async getUserUpdateHistories(page: number, limit: number) {
+    const { histories, total } = await this.supportRepository.findUserUpdateHistories(page, limit);
+
+    const totalPage = Math.ceil(total / limit);
+    const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
+
+    return { histories: historiesDto, total, page, totalPage };
   }
 }

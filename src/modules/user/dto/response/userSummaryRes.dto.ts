@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -12,11 +12,6 @@ export class UserSummaryResDto {
   @Expose()
   @IsString()
   nickname: string;
-
-  @ApiProperty()
-  @Exclude()
-  @IsString()
-  password: string;
 
   @ApiProperty()
   @Expose()

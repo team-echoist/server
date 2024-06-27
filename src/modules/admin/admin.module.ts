@@ -21,6 +21,7 @@ import { Admin } from '../../entities/admin.entity';
 import { Inquiry } from '../../entities/inquiry.entity';
 import { Notice } from '../../entities/notice.entity';
 import { SupportModule } from '../support/support.module';
+import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SupportModule } from '../support/support.module';
       Admin,
       Inquiry,
       Notice,
+      UpdatedHistory,
     ]),
     UserModule,
     EssayModule,
