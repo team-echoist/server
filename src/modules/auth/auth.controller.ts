@@ -9,6 +9,8 @@ import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
 import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
 import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
 import { UtilsService } from '../utils/utils.service';
+import { EmailReqDto } from './dto/request/emailReq.dto';
+import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -223,6 +225,93 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   async login(@Req() req: ExpressRequest) {
     return;
+  }
+
+  @Post('password/reset-req')
+  @ApiOperation({
+    summary: '비밀번호 재설정 요청',
+    description: `
+  비밀번호 재설정을 요청합니다. 
+  사용자는 이메일로 재설정 링크를 받게 됩니다.
+
+  **동작 과정:**
+  1. 사용자가 비밀번호 재설정을 요청합니다.
+  2. 제공된 이메일 주소로 재설정 링크가 포함된 이메일이 발송됩니다.
+
+  **주의 사항:**
+  - 유효한 이메일 주소를 제공해야 합니다.
+  - 재설정 링크는 10분 동안 유효합니다.
+  `,
+  })
+  @ApiResponse({ status: 201, description: '비밀번호 재설정 요청 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 이메일 주소' })
+  @ApiBody({ type: EmailReqDto })
+  async passwordResetReq(@Body() data: EmailReqDto) {
+    return this.authService.passwordResetReq(data.email);
+  }
+
+  @Post('password/reset-verify')
+  @ApiOperation({
+    summary: '비밀번호 재설정 검증',
+    description: `
+  이메일로 받은 비밀번호 재설정 토큰을 검증합니다. 
+  검증이 완료되면 새로운 토큰을 생성하여 리디렉션합니다.
+
+  **쿼리 파라미터:**
+  - \`token\`: 비밀번호 재설정 토큰
+
+  **동작 과정:**
+  1. 제공된 토큰을 검증합니다.
+  2. 유효한 토큰이면 새로운 토큰을 생성하고 리디렉션합니다.
+
+  **주의 사항:**
+  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
+  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리디렉션됩니다.
+  `,
+  })
+  @ApiResponse({ status: 302, description: '토큰 검증 및 리디렉션 성공' })
+  @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
+  async passwordResetVerify(
+    @Query('token') token: string,
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+  ) {
+    const newToken = await this.authService.passwordResetVerify(token);
+
+    let redirectUrl = 'https://www.linkedoutapp.com';
+    if (req.device === 'iPhone' || req.device === 'iPad') {
+      redirectUrl = 'todo 딥링크';
+    }
+    if (req.device === 'Android') redirectUrl = 'https://www.linkedout.com/ResetPwPage?token=';
+
+    redirectUrl += `?token=${newToken}`;
+
+    res.redirect(redirectUrl);
+  }
+
+  @Post('password/reset')
+  @ApiOperation({
+    summary: '비밀번호 재설정',
+    description: `
+  제공된 새로운 비밀번호로 비밀번호를 재설정합니다.
+
+  **요청 본문:**
+  - \`token\`: 비밀번호 재설정 토큰
+  - \`password\`: 새로운 비밀번호
+
+  **동작 과정:**
+  1. 제공된 토큰을 검증합니다.
+  2. 유효한 토큰이면 비밀번호를 재설정합니다.
+
+  **주의 사항:**
+  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
+  - 새로운 비밀번호는 안전하게 저장됩니다.
+  `,
+  })
+  @ApiResponse({ status: 200, description: '비밀번호 재설정 성공' })
+  @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
+  async passwordReset(@Body() data: PasswordResetReqDto) {
+    return this.authService.passwordReset(data);
   }
 
   //-------------------------------------------------------OAuth

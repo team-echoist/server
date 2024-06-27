@@ -22,7 +22,7 @@ export class AuthRepository {
     return this.userRepository.findOne({ where: { nickname } });
   }
 
-  async createUser(createUserDto: CreateUserReqDto | CreateAdminDto) {
+  async saveUser(createUserDto: CreateUserReqDto | CreateAdminDto) {
     return this.userRepository.save(createUserDto);
   }
 
