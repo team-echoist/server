@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 
-export class NoticesResDto {
+export class NoticeSummaryResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()

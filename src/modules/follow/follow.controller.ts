@@ -12,7 +12,7 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { FollowService } from './follow.service';
-import { UserSummaryResSchemaDto } from '../user/dto/schema/userSummaryResSchema.dto';
+import { UsersSummaryResDto } from '../user/dto/response/usersSummaryRes.dto';
 import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 
@@ -41,7 +41,7 @@ export class FollowController {
   - 팔로우 정보는 간략한 사용자 정보로 변환되어 반환됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UserSummaryResSchemaDto })
+  @ApiResponse({ status: 200, type: UsersSummaryResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getFollowings(

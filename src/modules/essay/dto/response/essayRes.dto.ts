@@ -10,7 +10,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
 import { EssayStatus } from '../../../../entities/essay.entity';
 import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
@@ -33,11 +33,6 @@ export class EssayResDto {
   @IsDateString()
   @Expose()
   updatedDate: Date;
-
-  @ApiProperty()
-  @IsNumber()
-  @Exclude()
-  views: number;
 
   @ApiProperty()
   @IsEnum(EssayStatus)

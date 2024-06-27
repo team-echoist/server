@@ -25,12 +25,12 @@ import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
-import { EssaysSchemaDto } from './dto/schema/essaysSchema.dto';
+import { SummaryEssaysResDto } from './dto/response/SummaryEssaysRes.dto';
 import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
-import { PublicEssaysSchemaDto } from './dto/schema/publicEssaysSchema.dto';
-import { SentenceEssaySchemaDto } from './dto/schema/sentenceEssaySchema.dto';
-import { EssaySchemaDto } from './dto/schema/essaySchema.dto';
+import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
+import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
+import { EssayWithPreviousEssayResDto } from './dto/response/essayWithPreviousEssayRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -125,7 +125,7 @@ export class EssayController {
   - 쿼리 파라미터 키는 필수이지만 값이 비어있어도 됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiResponse({ status: 200, type: SummaryEssaysResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'published', required: false })
@@ -163,7 +163,7 @@ export class EssayController {
   - 스토리 ID가 제공되지 않으면 모든 퍼블릭 에세이를 조회합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiResponse({ status: 200, type: SummaryEssaysResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'storyId', required: false })
@@ -248,7 +248,7 @@ export class EssayController {
   - 에세이의 상태가 'PRIVATE'인 경우 조회되지 않습니다.
   `,
   })
-  @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
+  @ApiResponse({ status: 200, type: PublicEssaysResDto })
   @ApiQuery({ name: 'limit', required: false })
   async getRecommendEssays(
     @Req() req: ExpressRequest,
@@ -278,7 +278,7 @@ export class EssayController {
   - 에세이의 상태가 'PRIVATE' 또는 'LINKEDOUT' 인 경우 조회되지 않습니다.
   `,
   })
-  @ApiResponse({ status: 200, type: PublicEssaysSchemaDto })
+  @ApiResponse({ status: 200, type: PublicEssaysResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getFollowingsEssays(
@@ -309,7 +309,7 @@ export class EssayController {
   - 'limit' 파라미터는 선택 사항이며 기본값은 6입니다.
   `,
   })
-  @ApiResponse({ status: 200, type: SentenceEssaySchemaDto })
+  @ApiResponse({ status: 200, type: SentenceEssaysResDto })
   @ApiQuery({ name: 'type', required: true })
   @ApiQuery({ name: 'limit', required: false })
   async oneSentenceEssays(
@@ -338,7 +338,7 @@ export class EssayController {
   - 로그인한 사용자의 최근 조회 기록을 가져옵니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiResponse({ status: 200, type: SummaryEssaysResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getRecentViewedEssays(
@@ -375,7 +375,7 @@ export class EssayController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({
     status: 200,
-    type: EssaysSchemaDto,
+    type: SummaryEssaysResDto,
   })
   async searchEssays(
     @Query('keyword') keyword: string,
@@ -405,7 +405,7 @@ export class EssayController {
   - 에세이 ID는 유효한 숫자여야 합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssaySchemaDto })
+  @ApiResponse({ status: 200, type: EssayWithPreviousEssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
   }

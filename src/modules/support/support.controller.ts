@@ -15,9 +15,9 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { NoticeResDto } from './dto/response/noticeRes.dto';
-import { NoticesSchemaDto } from './dto/schema/noticesSchema.dto';
+import { NoticesSummaryResDto } from './dto/response/noticesSummaryRes.dto';
 import { InquiryReqDto } from './dto/request/inquiryReq.dto';
-import { InquiriesResDto } from './dto/response/inquiriesRes.dto';
+import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
 
 @ApiTags('Support')
@@ -37,7 +37,7 @@ export class SupportController {
   - \`limit\` (number, optional): 페이지당 항목 수 (기본값: 10)
   `,
   })
-  @ApiResponse({ status: 200, type: NoticesSchemaDto })
+  @ApiResponse({ status: 200, type: NoticesSummaryResDto })
   async getNotices(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
@@ -97,7 +97,7 @@ export class SupportController {
   
   `,
   })
-  @ApiResponse({ status: 200, type: InquiriesResDto })
+  @ApiResponse({ status: 200, type: InquirySummaryResDto })
   async getInquiries(@Req() req: ExpressRequest) {
     return this.supportService.getInquiries(req.user.id);
   }

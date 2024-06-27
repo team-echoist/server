@@ -1,115 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { EssayInfoResDto } from './essayInfoRes.dto';
 import { Expose } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDate,
-  IsEnum,
-  IsLatitude,
-  IsLongitude,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
-import { EssayStatus } from '../../../../entities/essay.entity';
+import { IsNumber } from 'class-validator';
 
 export class EssaysInfoResDto {
-  @ApiProperty()
+  @ApiProperty({ type: [EssayInfoResDto] })
   @Expose()
-  @IsNumber()
-  @IsNotEmpty()
-  id: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsString()
-  @IsNotEmpty()
-  title: string;
-
-  @ApiProperty()
-  @Expose()
-  @IsString()
-  @IsNotEmpty()
-  content: string;
+  essays: EssayInfoResDto[];
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  linkedOutGauge: number;
-
-  @IsLatitude()
-  @Expose()
-  latitude: number;
-
-  @IsLongitude()
-  @Expose()
-  longitude: number;
-
-  @IsString()
-  @Expose()
-  location: string;
-
-  @ApiProperty()
-  @Expose()
-  @IsDate()
-  createdDate: Date;
-
-  @ApiProperty()
-  @Expose()
-  @IsDate()
-  updatedDate: Date;
-
-  @ApiProperty()
-  @Expose()
-  @IsString()
-  thumbnail: string;
-
-  @ApiProperty()
-  @Expose()
-  @IsBoolean()
-  @IsNotEmpty()
-  bookmarks: boolean;
+  total: number;
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsNotEmpty()
-  views: number;
-
-  @ApiProperty({ type: 'enum' })
-  @IsNotEmpty()
-  @IsEnum(EssayStatus)
-  @Expose()
-  status: EssayStatus;
-
   @ApiProperty()
   @Expose()
-  @IsString()
-  @IsNotEmpty()
-  device: string;
+  @IsNumber()
+  page: number;
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  @IsNotEmpty()
-  authorId: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  storyId: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  reportCount: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  reviewCount: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  trandScore: number;
+  totalPage: number;
 }

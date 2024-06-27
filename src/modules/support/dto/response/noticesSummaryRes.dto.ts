@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { InquiriesResDto } from '../response/inquiriesRes.dto';
+import { IsNumber } from 'class-validator';
+import { NoticeSummaryResDto } from './noticeSummaryRes.dto';
 
-export class InquiriesSchemaDto {
-  @ApiProperty({ type: InquiriesResDto })
+export class NoticesSummaryResDto {
+  @ApiProperty({ type: NoticeSummaryResDto })
   @Expose()
-  inquiries: InquiriesResDto;
+  notifications: NoticeSummaryResDto;
 
   @ApiProperty()
   @IsNumber()

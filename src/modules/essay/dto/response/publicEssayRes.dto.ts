@@ -9,11 +9,11 @@ import {
   IsString,
 } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { TagDto } from './tag.dto';
-import { EssayStatus } from '../../../entities/essay.entity';
-import { LimitedUserDto } from '../../user/dto/limitedUser.dto';
+import { TagDto } from '../tag.dto';
+import { EssayStatus } from '../../../../entities/essay.entity';
+import { LimitedUserDto } from '../../../user/dto/limitedUser.dto';
 
-export class PublicEssaysDto {
+export class PublicEssayResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()

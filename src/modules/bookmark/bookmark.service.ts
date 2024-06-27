@@ -6,7 +6,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { UserService } from '../user/user.service';
-import { EssaysResDto } from '../essay/dto/response/essaysRes.dto';
+import { SummaryEssayResDto } from '../essay/dto/response/summaryEssayRes.dto';
 import { UtilsService } from '../utils/utils.service';
 import { Transactional } from 'typeorm-transactional';
 import { EssayService } from '../essay/essay.service';
@@ -36,7 +36,7 @@ export class BookmarkService {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
 
-    const essaysDto = this.utilsService.transformToDto(EssaysResDto, essays);
+    const essaysDto = this.utilsService.transformToDto(SummaryEssayResDto, essays);
 
     return { essays: essaysDto, totalPage, page, total };
   }

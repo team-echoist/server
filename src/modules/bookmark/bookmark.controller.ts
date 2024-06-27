@@ -13,7 +13,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BookmarkService } from './bookmark.service';
-import { EssaysSchemaDto } from '../essay/dto/schema/essaysSchema.dto';
+import { SummaryEssaysResDto } from '../essay/dto/response/SummaryEssaysRes.dto';
 import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { EssayIdsReqDto } from './dto/request/essayIdsReq.dto';
@@ -40,7 +40,7 @@ export class BookmarkController {
     
   `,
   })
-  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiResponse({ status: 200, type: SummaryEssaysResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getUserBookmarks(

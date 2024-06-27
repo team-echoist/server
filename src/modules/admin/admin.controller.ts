@@ -21,20 +21,19 @@ import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { DashboardResDto } from './dto/response/dashboardRes.dto';
-import { ReportsSchemaDto } from './dto/schema/reportsSchema.dto';
+import { ReportsResDto } from './dto/response/reportsRes.dto';
 import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ReviewsSchemaDto } from './dto/schema/reviewsSchema.dto';
+import { ReviewsResDto } from './dto/response/reviewsRes.dto';
 import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
 import { HistoriesResDto } from './dto/response/historiesRes.dto';
 import { UserDetailResDto } from './dto/response/userDetailRes.dto';
 import { UsersResDto } from './dto/response/usersRes.dto';
 import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
 import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
-import { EssaysSchemaDto } from './dto/schema/essaysSchema.dto';
+import { EssaysInfoResDto } from './dto/response/essaysInfoRes.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
 import { AdminLoginReqDto } from './dto/request/adminLoginReq.dto';
-import { AdminsSchemaDto } from './dto/schema/adminsSchema.dto';
 import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
@@ -47,12 +46,13 @@ import { AdminRegisterReqDto } from './dto/request/adminRegisterReq.dto';
 import { CreateNoticeReqDto } from './dto/request/createNoticeReq.dto';
 import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
-import { NoticesSchemaDto } from '../support/dto/schema/noticesSchema.dto';
+import { NoticesSummaryResDto } from '../support/dto/response/noticesSummaryRes.dto';
 import { InquiryAnswerReqDto } from './dto/request/inquiryAnswerReq.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 import { UpdateHistoryReqDto } from './dto/request/updateHistoryReq.dto';
-import { InquiriesSchemaDto } from '../support/dto/schema/inquiriesSchema.dto';
+import { InquiriesSummaryResDto } from '../support/dto/response/inquiriesSummaryRes.dto';
 import { UpdatedHistoriesResDto } from '../support/dto/response/updatedHistoriesRes.dto';
+import { AdminsResDto } from './dto/response/adminsRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -195,7 +195,7 @@ export class AdminController {
   - \`activated\` 파라미터가 제공되지 않으면 모든 어드민을 조회합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: AdminsSchemaDto })
+  @ApiResponse({ status: 200, type: AdminsResDto })
   @ApiQuery({ name: 'activated', required: false })
   async getAdmins(@Query('activated', OptionalBoolPipe) activated?: boolean) {
     return this.adminService.getAdmins(activated);
@@ -478,7 +478,7 @@ export class AdminController {
   - \`page\`와 \`limit\`는 선택 사항으로, 제공되지 않으면 기본값이 사용됩니다.
   `,
   })
-  @ApiResponse({ status: 200, type: ReportsSchemaDto })
+  @ApiResponse({ status: 200, type: ReportsResDto })
   @ApiQuery({ name: 'sort', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -568,7 +568,7 @@ export class AdminController {
   - 페이지 번호와 한 페이지당 조회할 리뷰 수는 선택적으로 제공될 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200, type: ReviewsSchemaDto })
+  @ApiResponse({ status: 200, type: ReviewsResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getReviews(
@@ -740,7 +740,7 @@ export class AdminController {
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssaysSchemaDto })
+  @ApiResponse({ status: 200, type: EssaysInfoResDto })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getEssays(
@@ -853,7 +853,7 @@ export class AdminController {
   })
   @ApiResponse({
     status: 200,
-    type: AdminsSchemaDto,
+    type: AdminsResDto,
   })
   async getInactiveAdmins() {
     return this.adminService.getInactiveAdmins();
@@ -947,7 +947,7 @@ export class AdminController {
   - 이 엔드포인트는 관리자가 사용할 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200, type: NoticesSchemaDto })
+  @ApiResponse({ status: 200, type: NoticesSummaryResDto })
   async getNotices(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
@@ -994,7 +994,7 @@ export class AdminController {
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: InquiriesSchemaDto })
+  @ApiResponse({ status: 200, type: InquiriesSummaryResDto })
   async getInquiries(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
