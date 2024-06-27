@@ -33,7 +33,6 @@ import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { EssayInfoResDto } from './dto/response/essayInfoRes.dto';
 import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
 import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
-import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
