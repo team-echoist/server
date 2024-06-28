@@ -528,7 +528,7 @@ export class AdminService {
       skip: (page - 1) * limit,
       take: limit,
       order: { processedDate: 'DESC' },
-      relations: ['report', 'review', 'user', 'essay', 'processor'],
+      relations: ['report', 'review', 'user', 'essay', 'processor', 'notice', 'inquiry'],
       where: whereConditions,
     };
 

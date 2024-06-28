@@ -78,6 +78,9 @@ export class SupportRepository {
 
   async findAllUpdateHistories(page: number, limit: number) {
     const [histories, total] = await this.updatedHistoryRepository.findAndCount({
+      order: {
+        createdDate: 'DESC',
+      },
       skip: (page - 1) * limit,
       take: limit,
       relations: ['processor'],
