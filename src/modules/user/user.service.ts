@@ -158,6 +158,9 @@ export class UserService {
   async requestDeactivation(userId: number, data: DeactivateReqDto) {
     const user = await this.fetchUserEntityById(userId);
 
+    if (user && (await bcrypt.compare(data.password, user.password)))
+      throw new HttpException('', HttpStatus.FORBIDDEN);
+
     if (user.deactivationDate)
       throw new HttpException(
         'This account has already been requested to be deleted.',

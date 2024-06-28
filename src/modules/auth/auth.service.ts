@@ -40,21 +40,58 @@ export class AuthService {
     return;
   }
 
-  @Transactional()
-  async isEmailOwned(createUserDto: CreateUserReqDto) {
-    const email = createUserDto.email;
+  async isEmailOwned(email: string) {
     const emailExists = await this.authRepository.findByEmail(email);
 
-    if (emailExists) {
+    if (emailExists)
       throw new HttpException('Email or nickname is already exists.', HttpStatus.BAD_REQUEST);
-    }
+
+    return;
+  }
+
+  @Transactional()
+  async signingUp(data: CreateUserReqDto) {
+    await this.isEmailOwned(data.email);
 
     const token = await this.utilsService.generateVerifyToken();
-    createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+    data.password = await bcrypt.hash(data.password, 10);
 
-    await this.redis.set(token, JSON.stringify(createUserDto), 'EX', 600);
+    await this.redis.set(token, JSON.stringify(data), 'EX', 600);
 
-    await this.mailService.sendVerificationEmail(email, token);
+    await this.mailService.sendVerificationEmail(data.email, token);
+  }
+
+  @Transactional()
+  async verifEmail(userId: number, email: string) {
+    await this.isEmailOwned(email);
+
+    const token = await this.utilsService.generateVerifyToken();
+
+    const userEmailData = { email, userId };
+
+    await this.redis.set(token, JSON.stringify(userEmailData), 'EX', 600);
+
+    await this.mailService.updateEmail(email, token);
+  }
+
+  @Transactional()
+  async updateEmail(token: string) {
+    const userEmailData = await this.redis.get(token);
+
+    if (!userEmailData) throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
+
+    const { email, userId } = JSON.parse(userEmailData);
+
+    const user = await this.authRepository.findById(userId);
+
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    user.email = email;
+    const updatedUser = await this.authRepository.saveUser(user);
+
+    const cacheKey = `validate_${user.id}`;
+    await this.redis.set(cacheKey, JSON.stringify(updatedUser), 'EX', 600);
+    return user;
   }
 
   @Transactional()

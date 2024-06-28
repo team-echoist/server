@@ -99,6 +99,7 @@ export class AuthController {
   }
 
   @Post('verify/email')
+  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({
     summary: '이메일 변경을 위한 이메일 인증 요청',
     description: `
@@ -120,9 +121,43 @@ export class AuthController {
   `,
   })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: CreateUserReqDto })
-  async verifEmail(@Body() createUserDto: CreateUserReqDto) {
-    await this.authService.isEmailOwned(createUserDto);
+  @ApiBody({ type: EmailReqDto })
+  async verifEmail(@Req() req: ExpressRequest, @Body() data: EmailReqDto) {
+    await this.authService.verifEmail(req.user.id, data.email);
+    return;
+  }
+
+  @Post('change-email')
+  @ApiOperation({
+    summary: '이메일 변경',
+    description: `
+  이메일 인증 후 이메일 변경을 처리합니다. 이메일의 인증 링크를 클릭하면 호출됩니다.
+
+  **쿼리 파라미터:**
+  - \`token\`: 이메일 인증 토큰
+
+  **동작 과정:**
+  1. 제공된 인증 토큰을 Redis에서 조회합니다.
+  2. 토큰이 유효하지 않으면 에러를 반환합니다.
+  3. 토큰이 유효하면 해당 데이터를 사용하여 새 이메일로 변경합니다.
+  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
+  5. 그 외의 경우, 웹사이트로 리디렉션합니다.
+
+  **주의 사항:**
+  - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
+  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
+  - 모바일 기기에서는 딥링크로 리디렉션되며, 웹에서는 웹사이트로 리디렉션됩니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: EmailReqDto })
+  async updateEmail(
+    @Query('token') token: string,
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+  ) {
+    await this.authService.updateEmail(token);
+    // todo 리다이렉션
     return;
   }
 
@@ -151,7 +186,7 @@ export class AuthController {
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateUserReqDto })
   async verify(@Body() createUserDto: CreateUserReqDto) {
-    await this.authService.isEmailOwned(createUserDto);
+    await this.authService.signingUp(createUserDto);
     return;
   }
 
