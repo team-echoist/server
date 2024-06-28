@@ -218,6 +218,9 @@ export class EssayService {
   async getEssay(userId: number, essayId: number) {
     const user = await this.userService.fetchUserEntityById(userId);
     const essay = await this.essayRepository.findEssayById(essayId);
+
+    if (!essay) throw new HttpException('There are no essays.', HttpStatus.NOT_FOUND);
+
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
     if (userId !== essay.author.id) {
@@ -227,10 +230,12 @@ export class EssayService {
         const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
         const newViews = (essay.views || 0) + 1;
 
-        if (!viewHistory) await this.essayRepository.incrementViews(essay, newViews);
-        await this.checkViewsForReputation(essay);
-        await this.updateTrendScoreOnView(essay);
-        await this.viewService.addViewRecord(user, essay);
+        if (viewHistory === null) {
+          await this.essayRepository.incrementViews(essay, newViews);
+          await this.checkViewsForReputation(essay);
+          await this.updateTrendScoreOnView(essay);
+          await this.viewService.addViewRecord(user, essay);
+        }
       }
     }
 
@@ -280,7 +285,7 @@ export class EssayService {
     const daysSinceCreation =
       (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
 
-    let newTrendScore = essay.trendScore / Math.pow(decayFactor, daysSinceCreation);
+    let newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceCreation);
     newTrendScore = Math.floor(newTrendScore);
 
     newTrendScore += incrementAmount;

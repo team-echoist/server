@@ -1,6 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Story } from '../../entities/story.entity';
+import { Essay } from '../../entities/essay.entity';
 
 export class StoryRepository {
   constructor(
@@ -34,5 +35,14 @@ export class StoryRepository {
 
   async deleteStory(story: Story) {
     return this.storyRepository.remove(story);
+  }
+
+  async nullifyEssaysInStory(storyId: number) {
+    await this.storyRepository
+      .createQueryBuilder()
+      .update(Essay)
+      .set({ story: null })
+      .where('story.id = :storyId', { storyId })
+      .execute();
   }
 }

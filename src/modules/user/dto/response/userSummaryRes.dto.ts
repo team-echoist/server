@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserSummaryResDto {
@@ -7,6 +7,11 @@ export class UserSummaryResDto {
   @Expose()
   @IsNumber()
   id: number;
+
+  @ApiProperty()
+  @IsEmail()
+  @Expose()
+  email: string;
 
   @ApiProperty()
   @Expose()

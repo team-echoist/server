@@ -8,7 +8,7 @@ export class ViewRecord {
   id: number;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.essayViewRecords)
+  @ManyToOne(() => User, (user) => user.viewRecords)
   user: User;
 
   @JoinColumn({ name: 'essay_id' })

@@ -111,7 +111,7 @@ export class Essay {
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.essay)
   processedHistories: ProcessedHistory[];
 
-  @OneToMany(() => ViewRecord, (essayView) => essayView.essay)
+  @OneToMany(() => ViewRecord, (viewRecord) => viewRecord.essay)
   viewRecords: ViewRecord[];
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.essay)

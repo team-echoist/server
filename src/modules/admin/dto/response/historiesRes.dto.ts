@@ -63,4 +63,6 @@ export class HistoriesResDto {
   @Type(() => EssayDto)
   @Expose()
   essay: EssayDto;
+
+  //todo dto 추가
 }

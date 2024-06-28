@@ -745,7 +745,6 @@ export class AdminService {
 
     const totalPage: number = Math.ceil(total / limit);
     const inquiriesDto = this.utilsService.transformToDto(InquirySummaryResDto, inquiries);
-    console.log(inquiriesDto);
 
     return { inquiries: inquiriesDto, total, page, totalPage };
   }
@@ -761,6 +760,7 @@ export class AdminService {
     const processor = await this.adminRepository.findAdmin(adminId);
 
     inquiry.answer = answer;
+    inquiry.processed = true;
 
     await this.supportRepository.saveInquiry(inquiry);
 

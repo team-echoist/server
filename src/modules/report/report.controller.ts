@@ -11,7 +11,7 @@ import { ReportService } from './report.service';
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
-  @Post('reports/:essayId')
+  @Post(':essayId')
   @ApiOperation({
     summary: '에세이 신고',
     description: `

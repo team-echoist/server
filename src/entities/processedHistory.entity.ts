@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ReportQueue } from './reportQueue.entity';
@@ -68,7 +67,7 @@ export class ProcessedHistory {
   user: User;
 
   @JoinColumn({ name: 'inquiry_id' })
-  @OneToOne(() => Inquiry, (inquiry) => inquiry.processedHistory)
+  @ManyToOne(() => Inquiry, (inquiry) => inquiry.processedHistory)
   inquiry: Inquiry;
 
   @JoinColumn({ name: 'notice_id' })
