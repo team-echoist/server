@@ -25,6 +25,7 @@ import * as dotenv from 'dotenv';
 import { ViewModule } from '../view/view.module';
 import { BookmarkModule } from '../bookmark/bookmark.module';
 import { ConfigModule } from '@nestjs/config';
+import { ViewRecord } from '../../entities/viewRecord.entity';
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ dotenv.config();
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Essay, Story, ReviewQueue, Tag]),
+    TypeOrmModule.forFeature([User, Essay, Story, ReviewQueue, Tag, ViewRecord]),
     ConfigModule,
     AuthModule,
     MailModule,

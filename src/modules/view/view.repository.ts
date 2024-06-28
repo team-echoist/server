@@ -9,9 +9,13 @@ export class ViewRepository {
   ) {}
 
   async findViewRecord(userId: number, essayId: number) {
-    return await this.viewRepository.findOne({
-      where: { user: { id: userId }, essay: { id: essayId } },
-    });
+    return await this.viewRepository
+      .createQueryBuilder('view_record')
+      .leftJoinAndSelect('view_record.user', 'user')
+      .leftJoinAndSelect('view_record.essay', 'essay')
+      .where('user.id = :userId', { userId })
+      .andWhere('essay.id = :essayId', { essayId })
+      .getOne();
   }
 
   async saveViewRecord(viewRecord: ViewRecord) {
@@ -35,10 +39,10 @@ export class ViewRepository {
 
   async recentEssayIds(userId: number, recentCount: number) {
     return await this.viewRepository
-      .createQueryBuilder('viewRecord')
-      .select(['viewRecord.essayId', 'viewRecord.viewedDate'])
-      .where('viewRecord.userId = :userId', { userId })
-      .orderBy('viewRecord.viewedDate', 'DESC')
+      .createQueryBuilder('view_record')
+      .select(['view_record.viewedDate', 'view_record.essay.id'])
+      .where('view_record.user.id = :userId', { userId })
+      .orderBy('view_record.viewedDate', 'DESC')
       .limit(recentCount)
       .getRawMany();
   }

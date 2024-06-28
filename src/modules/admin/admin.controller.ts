@@ -977,7 +977,7 @@ export class AdminController {
   @Get('inquiries')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '처리되지 않은 모든 고객 문의 조회',
+    summary: '처리되지 않은 모든 고객 문의 또는 전체 조회',
     description: `
   관리자가 처리되지 않은 모든 고객 문의를 조회합니다.
   

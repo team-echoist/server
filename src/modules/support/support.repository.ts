@@ -47,6 +47,7 @@ export class SupportRepository {
     const queryBuilder = this.inquiryRepository
       .createQueryBuilder('inquiry')
       .leftJoinAndSelect('inquiry.user', 'user')
+      .orderBy('inquiry.createdDate', 'ASC')
       .skip((page - 1) * limit)
       .take(limit);
 

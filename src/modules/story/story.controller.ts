@@ -121,6 +121,7 @@ export class StoryController {
 
   **주의 사항:**
   - 유효한 스토리 ID를 전달해야 합니다.
+  - 포함된 에세이는 삭제되지 않습니다.
   `,
   })
   @ApiResponse({ status: 204 })
@@ -130,7 +131,7 @@ export class StoryController {
 
   @Put(':storyId/essays/:essayId')
   @ApiOperation({
-    summary: '에세이의 스토리 변경',
+    summary: '단일 에세이의 스토리 변경',
     description: `
   특정 에세이의 소속 스토리를 변경합니다.
   
@@ -163,7 +164,7 @@ export class StoryController {
 
   @Delete('essays/:essayId')
   @ApiOperation({
-    summary: '에세이 스토리 제거',
+    summary: '단일 에세이 스토리 제거',
     description: `
   특정 에세이에서 스토리를 제거합니다. 에세이 ID를 경로 파라미터로 받아 해당 에세이와 연결된 스토리를 해제합니다.
   

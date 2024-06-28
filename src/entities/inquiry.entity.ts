@@ -5,6 +5,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -47,6 +48,6 @@ export class Inquiry {
   user: User;
 
   @JoinColumn({ name: 'processed_history_id' })
-  @OneToOne(() => ProcessedHistory, (processedHistory) => processedHistory.inquiry)
+  @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.inquiry)
   processedHistory: ProcessedHistory;
 }

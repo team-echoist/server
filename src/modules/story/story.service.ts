@@ -47,6 +47,7 @@ export class StoryService {
 
     if (data.essayIds && data.essayIds.length > 0) {
       const essays = await this.essayService.getEssaysByIds(userId, data.essayIds);
+      console.log(essays);
       essays.forEach((essay) => {
         essay.story = savedStory;
       });
@@ -76,6 +77,10 @@ export class StoryService {
   @Transactional()
   async deleteStory(userId: number, storyId: number) {
     const story: Story = await this.storyRepository.findStoryById(userId, storyId);
+    if (!story)
+      throw new HttpException('Story not found or not owned by the user', HttpStatus.NOT_FOUND);
+
+    await this.storyRepository.nullifyEssaysInStory(storyId);
     await this.storyRepository.deleteStory(story);
   }
 

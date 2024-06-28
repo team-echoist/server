@@ -130,8 +130,8 @@ export class User {
   @OneToMany(() => TagExp, (tagExp) => tagExp.user)
   tagExps: TagExp[];
 
-  @OneToMany(() => ViewRecord, (essayView) => essayView.user)
-  essayViewRecords: ViewRecord[];
+  @OneToMany(() => ViewRecord, (viewRecord) => viewRecord.user)
+  viewRecords: ViewRecord[];
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
