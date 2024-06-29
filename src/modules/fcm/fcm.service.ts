@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class FcmService {
   constructor(private readonly configService: ConfigService) {
+    const y = '외않되?';
     const serviceAccount = {
       type: 'service_account',
       project_id: this.configService.get<string>('FIREBASE_PROJECT_ID'),
