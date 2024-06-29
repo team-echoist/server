@@ -3,6 +3,8 @@ import { Notice } from '../../entities/notice.entity';
 import { Repository } from 'typeorm';
 import { Inquiry } from '../../entities/inquiry.entity';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { AlertSettings } from '../../entities/alertSettings.entity';
+import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 
 export class SupportRepository {
   constructor(
@@ -10,6 +12,8 @@ export class SupportRepository {
     @InjectRepository(Notice) private readonly noticeRepository: Repository<Notice>,
     @InjectRepository(UpdatedHistory)
     private readonly updatedHistoryRepository: Repository<UpdatedHistory>,
+    @InjectRepository(AlertSettings)
+    private readonly alertSettingsRepository: Repository<AlertSettings>,
   ) {}
 
   async saveNotice(newNotice: Notice) {
@@ -96,5 +100,17 @@ export class SupportRepository {
     });
 
     return { histories, total };
+  }
+
+  async createAlertSettings(data: UpdateAlertSettingsReqDto, userId: number) {
+    return this.alertSettingsRepository.create({ ...data, user: { id: userId } });
+  }
+
+  async findSettings(userId: number) {
+    return this.alertSettingsRepository.findOne({ where: { user: { id: userId } } });
+  }
+
+  async saveSettings(settings: AlertSettings) {
+    return this.alertSettingsRepository.save(settings);
   }
 }

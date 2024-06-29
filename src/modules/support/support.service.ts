@@ -9,6 +9,9 @@ import { UserService } from '../user/user.service';
 import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
 import { UpdatedHistoryResDto } from './dto/response/updatedHistoryRes.dto';
+import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
+import { AlertSettings } from '../../entities/alertSettings.entity';
+import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 
 @Injectable()
 export class SupportService {
@@ -64,5 +67,28 @@ export class SupportService {
     const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
 
     return { histories: historiesDto, total, page, totalPage };
+  }
+
+  async getSettings(userId: number) {
+    let settings = await this.supportRepository.findSettings(userId);
+    if (!settings) {
+      settings = new AlertSettings();
+      settings.user = await this.userService.fetchUserEntityById(userId);
+
+      await this.supportRepository.saveSettings(settings);
+    }
+
+    return this.utilsService.transformToDto(AlertSettingsResDto, settings);
+  }
+
+  async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto) {
+    const settings = await this.supportRepository.findSettings(userId);
+    if (settings) {
+      Object.assign(settings, settingsData);
+      await this.supportRepository.saveSettings(settings);
+    } else {
+      const newSettings = await this.supportRepository.createAlertSettings(settingsData, userId);
+      await this.supportRepository.saveSettings(newSettings);
+    }
   }
 }

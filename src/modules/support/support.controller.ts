@@ -19,6 +19,8 @@ import { NoticesSummaryResDto } from './dto/response/noticesSummaryRes.dto';
 import { InquiryReqDto } from './dto/request/inquiryReq.dto';
 import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
+import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
+import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 
 @ApiTags('Support')
 @UseGuards(AuthGuard('jwt'))
@@ -146,5 +148,52 @@ export class SupportController {
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     return this.supportService.getUserUpdateHistories(page, limit);
+  }
+
+  @Get('settings')
+  @ApiOperation({
+    summary: '사용자의 알림 설정 조회',
+    description: `
+  사용자가 자신의 알림 설정을 조회합니다.
+
+  **동작 과정:**
+  1. 현재 로그인된 사용자의 알림 설정을 조회합니다.
+  2. 알림 설정이 없는 경우 기본 값을 생성하여 반환합니다.
+
+  **주의 사항:**
+  - 사용자는 인증이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: AlertSettingsResDto })
+  async getSettings(@Req() req: ExpressRequest) {
+    return this.supportService.getSettings(req.user.id);
+  }
+
+  @Post('settings')
+  @ApiOperation({
+    summary: '사용자의 알림 설정 업데이트',
+    description: `
+  사용자가 자신의 알림 설정을 업데이트합니다.
+
+  **요청 본문:**
+  - \`published\`: 발행한 글 조회 알림 (boolean)
+  - \`linkedout\`: 링크드아웃한 글 조회 알림 (boolean)
+  - \`report\`: 신고 완료 알림 (boolean)
+  - \`timeAllowed\`: 알림 허용 시간 설정 여부 (boolean)
+  - \`alertStart\`: 알림 허용 시작 시간 (string, "HH:mm" 형식)
+  - \`alertEnd\`: 알림 허용 종료 시간 (string, "HH:mm" 형식)
+
+  **동작 과정:**
+  1. 현재 로그인된 사용자의 알림 설정을 업데이트합니다.
+  2. 설정이 없으면 새로 생성하여 저장합니다.
+
+  **주의 사항:**
+  - 사용자는 인증이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @ApiBody({ type: UpdateAlertSettingsReqDto })
+  async updateSettings(@Req() req: ExpressRequest, @Body() data: UpdateAlertSettingsReqDto) {
+    return this.supportService.updateSettings(req.user.id, data);
   }
 }
