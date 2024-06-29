@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { SupportRepository } from './support.repository';
 import { UtilsService } from '../utils/utils.service';
 import { NoticeSummaryResDto } from './dto/response/noticeSummaryRes.dto';
