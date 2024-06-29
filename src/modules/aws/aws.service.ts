@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
 
 @Injectable()
 export class AwsService {
@@ -36,5 +42,28 @@ export class AwsService {
     });
 
     await this.s3Client.send(command);
+  }
+
+  async getServiceAccountKey(): Promise<any> {
+    const command = new GetObjectCommand({
+      Bucket: this.configService.get('AWS_S3_PRIVATE_BUCKET_NAME'),
+      Key: this.configService.get('SERVICE_ACCOUNT_KEY_FILE'),
+    });
+
+    const response = await this.s3Client.send(command);
+    const streamToString = (stream: Readable): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const chunks: any[] = [];
+        stream.on('data', (chunk) => chunks.push(chunk));
+        stream.on('error', reject);
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      });
+
+    if (response.Body) {
+      const data = await streamToString(response.Body as Readable);
+      return JSON.parse(data);
+    } else {
+      throw new Error('Service account key file is empty or not found');
+    }
   }
 }
