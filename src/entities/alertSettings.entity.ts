@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, Index } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity('alert_settings')
@@ -23,6 +23,10 @@ export class AlertSettings {
 
   @Column({ name: 'alert_end', type: 'time', nullable: true })
   alertEnd: string;
+
+  @Index()
+  @Column({ name: 'device_id', nullable: true, unique: true })
+  deviceId: string;
 
   @OneToOne(() => User, (user) => user.alertSettings)
   @JoinColumn({ name: 'user_id' })

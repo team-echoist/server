@@ -69,11 +69,12 @@ export class SupportService {
     return { histories: historiesDto, total, page, totalPage };
   }
 
-  async getSettings(userId: number) {
-    let settings = await this.supportRepository.findSettings(userId);
+  async getSettings(userId: number, deviceId: string) {
+    let settings = await this.supportRepository.findSettings(userId, deviceId);
     if (!settings) {
       settings = new AlertSettings();
       settings.user = await this.userService.fetchUserEntityById(userId);
+      settings.deviceId = deviceId;
 
       await this.supportRepository.saveSettings(settings);
     }
@@ -81,8 +82,8 @@ export class SupportService {
     return this.utilsService.transformToDto(AlertSettingsResDto, settings);
   }
 
-  async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto) {
-    const settings = await this.supportRepository.findSettings(userId);
+  async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
+    const settings = await this.supportRepository.findSettings(userId, deviceId);
     if (settings) {
       Object.assign(settings, settingsData);
       await this.supportRepository.saveSettings(settings);
@@ -90,5 +91,16 @@ export class SupportService {
       const newSettings = await this.supportRepository.createAlertSettings(settingsData, userId);
       await this.supportRepository.saveSettings(newSettings);
     }
+  }
+
+  async registerDevice(userId: number, deviceId: string, deviceToken: string) {
+    const user = await this.userService.fetchUserEntityById(userId);
+    let device = await this.supportRepository.findDevice(deviceId);
+
+    device
+      ? (device.deviceToken = deviceToken)
+      : (device = await this.supportRepository.createDevice(user, deviceId, deviceToken));
+
+    return await this.supportRepository.saveDevice(device);
   }
 }
