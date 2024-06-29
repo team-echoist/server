@@ -5,12 +5,7 @@ export class UpdateAlertSettingsReqDto {
   @ApiProperty()
   @IsOptional()
   @IsBoolean()
-  published?: boolean;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsBoolean()
-  linkedout?: boolean;
+  viewed?: boolean;
 
   @ApiProperty()
   @IsOptional()

@@ -26,6 +26,8 @@ import { ViewModule } from '../view/view.module';
 import { BookmarkModule } from '../bookmark/bookmark.module';
 import { ConfigModule } from '@nestjs/config';
 import { ViewRecord } from '../../entities/viewRecord.entity';
+import { SupportModule } from '../support/support.module';
+import { FcmService } from '../fcm/fcm.service';
 
 dotenv.config();
 
@@ -47,11 +49,12 @@ dotenv.config();
     FollowModule,
     BadgeModule,
     ViewModule,
+    SupportModule,
     forwardRef(() => BookmarkModule),
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],
-  providers: [EssayService, EssayRepository, strategies.JwtStrategy],
+  providers: [EssayService, EssayRepository, FcmService, strategies.JwtStrategy],
   exports: [EssayService, EssayRepository],
 })
 export class EssayModule {}

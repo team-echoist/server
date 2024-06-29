@@ -32,6 +32,9 @@ import { EssayStatsDto } from './dto/essayStats.dto';
 import { SummaryEssayResDto } from './dto/response/summaryEssayRes.dto';
 import { SentenceEssayResDto } from './dto/response/sentenceEssayRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
+import { SupportService } from '../support/support.service';
+import { FcmService } from '../fcm/fcm.service';
+import { AlertSettings } from '../../entities/alertSettings.entity';
 
 @Injectable()
 export class EssayService {
@@ -46,6 +49,8 @@ export class EssayService {
     private readonly badgeService: BadgeService,
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
+    private readonly supportService: SupportService,
+    private readonly fcmService: FcmService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -224,19 +229,7 @@ export class EssayService {
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
     if (userId !== essay.author.id) {
-      if (essay.status === EssayStatus.PRIVATE) {
-        throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
-      } else {
-        const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
-        const newViews = (essay.views || 0) + 1;
-
-        if (viewHistory === null) {
-          await this.essayRepository.incrementViews(essay, newViews);
-          await this.checkViewsForReputation(essay);
-          await this.updateTrendScoreOnView(essay);
-          await this.viewService.addViewRecord(user, essay);
-        }
-      }
+      await this.handleNonAuthorView(userId, essay);
     }
 
     const previousEssays = await this.getRecommendEssays(userId, 6);
@@ -255,6 +248,72 @@ export class EssayService {
     const essayDto = this.utilsService.transformToDto(EssayResDto, newEssayData);
 
     return { essay: essayDto, previousEssays: previousEssays };
+  }
+
+  private async handleNonAuthorView(userId: number, essay: Essay) {
+    if (essay.status === EssayStatus.PRIVATE) {
+      throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
+    }
+
+    const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
+    const newViews = (essay.views || 0) + 1;
+
+    if (viewHistory === null) {
+      await this.essayRepository.incrementViews(essay, newViews);
+      await this.checkViewsForReputation(essay);
+      await this.updateTrendScoreOnView(essay);
+      await this.viewService.addViewRecord(
+        await this.userService.fetchUserEntityById(userId),
+        essay,
+      );
+      await this.notifyFirstView(essay, newViews);
+    }
+  }
+
+  private async notifyFirstView(essay: Essay, newViews: number) {
+    if (newViews !== 1) return;
+
+    const devices = await this.supportService.getDevices(essay.author.id);
+    for (const device of devices) {
+      const alertSettings = await this.supportService.fetchSettingEntityById(
+        essay.author.id,
+        device.deviceId,
+      );
+      if (alertSettings.viewed && this.isWithinAllowedTime(alertSettings)) {
+        await this.fcmService.sendPushNotification(
+          device.deviceToken,
+          '이리오너라!',
+          `"${essay.title}" 이라는 제목의 에세이가 처음으로 조회되었습니다.`,
+        );
+      }
+    }
+  }
+
+  private isWithinAllowedTime(alertSettings: AlertSettings): boolean {
+    if (!alertSettings.timeAllowed) return true;
+
+    const now = new Date();
+    const nowKST = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Seoul',
+    }).format(now);
+
+    const [currentHours, currentMinutes] = nowKST.split(':').map(Number);
+    const currentTime = currentHours * 60 + currentMinutes;
+
+    const [startHours, startMinutes] = alertSettings.alertStart.split(':').map(Number);
+    const startTime = startHours * 60 + startMinutes;
+
+    const [endHours, endMinutes] = alertSettings.alertEnd.split(':').map(Number);
+    const endTime = endHours * 60 + endMinutes;
+
+    if (startTime < endTime) {
+      return currentTime >= startTime && currentTime <= endTime;
+    } else {
+      return currentTime >= startTime || currentTime <= endTime;
+    }
   }
 
   private async checkViewsForReputation(essay: Essay) {

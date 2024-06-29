@@ -131,4 +131,8 @@ export class SupportRepository {
   async saveDevice(device: Device) {
     return this.deviceRepository.save(device);
   }
+
+  async findDevices(userId: number) {
+    return this.deviceRepository.find({ where: { user: { id: userId } } });
+  }
 }
