@@ -4,7 +4,9 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,6 +23,7 @@ import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 import { DeactivationReason } from './deactivationReason.entity';
 import { Inquiry } from './inquiry.entity';
+import { AlertSettings } from './alertSettings.entity';
 
 export enum UserStatus {
   ACTIVATED = 'activated',
@@ -141,4 +144,8 @@ export class User {
 
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
   inquiries: Inquiry[];
+
+  @JoinColumn({ name: 'alert_settings_id' })
+  @OneToOne(() => AlertSettings, (settings) => settings.user)
+  alertSettings: AlertSettings;
 }
