@@ -21,6 +21,8 @@ import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
+import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
+import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
 
 @ApiTags('Support')
 @UseGuards(AuthGuard('jwt'))
@@ -150,11 +152,14 @@ export class SupportController {
     return this.supportService.getUserUpdateHistories(page, limit);
   }
 
-  @Get('settings')
+  @Get('settings/:deviceId')
   @ApiOperation({
     summary: '사용자의 알림 설정 조회',
     description: `
   사용자가 자신의 알림 설정을 조회합니다.
+  
+  **경로 파라미터:**
+  - \`deviceId\` (string, required): 조회할 디바이스의 고유 ID
 
   **동작 과정:**
   1. 현재 로그인된 사용자의 알림 설정을 조회합니다.
@@ -165,15 +170,18 @@ export class SupportController {
   `,
   })
   @ApiResponse({ status: 200, type: AlertSettingsResDto })
-  async getSettings(@Req() req: ExpressRequest) {
-    return this.supportService.getSettings(req.user.id);
+  async getSettings(@Req() req: ExpressRequest, @Param('deviceId') deviceId?: string) {
+    return this.supportService.getSettings(req.user.id, deviceId);
   }
 
-  @Post('settings')
+  @Post('settings/:deviceId')
   @ApiOperation({
     summary: '사용자의 알림 설정 업데이트',
     description: `
   사용자가 자신의 알림 설정을 업데이트합니다.
+
+  **경로 파라미터:**
+  - \`deviceId\` (string, required): 업데이트할 디바이스의 고유 ID
 
   **요청 본문:**
   - \`published\`: 발행한 글 조회 알림 (boolean)
@@ -193,7 +201,37 @@ export class SupportController {
   })
   @ApiResponse({ status: 200 })
   @ApiBody({ type: UpdateAlertSettingsReqDto })
-  async updateSettings(@Req() req: ExpressRequest, @Body() data: UpdateAlertSettingsReqDto) {
-    return this.supportService.updateSettings(req.user.id, data);
+  async updateSettings(
+    @Req() req: ExpressRequest,
+    @Param('deviceId') deviceId: string,
+    @Body() data: UpdateAlertSettingsReqDto,
+  ) {
+    return this.supportService.updateSettings(req.user.id, data, deviceId);
+  }
+
+  @Post('devices/register')
+  @ApiOperation({
+    summary: '디바이스 등록',
+    description: `
+  사용자의 디바이스를 등록합니다. 
+
+  **요청 본문:**
+  - \`deviceId\` (string, required): 디바이스 고유 식별자
+  - \`deviceToken\` (string, required): FCM에서 발급한 디바이스 토큰
+
+  **동작 과정:**
+  1. 클라이언트에서 디바이스 고유 식별자와 FCM 디바이스 토큰을 서버로 전송합니다.
+  2. 서버는 해당 정보를 데이터베이스에 저장합니다.
+  3. 이미 등록된 디바이스의 경우, 토큰을 업데이트합니다.
+
+  **주의 사항:**
+  - 사용자는 인증이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: RegisterDeviceReqDto })
+  async registerDevice(@Req() req: ExpressRequest, @Body() body: RegisterDeviceReqDto) {
+    const userId = req.user.id;
+    return this.supportService.registerDevice(userId, body.deviceId, body.deviceToken);
   }
 }

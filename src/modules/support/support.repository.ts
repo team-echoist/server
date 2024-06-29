@@ -5,6 +5,8 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
+import { Device } from '../../entities/devcie.entity';
+import { User } from '../../entities/user.entity';
 
 export class SupportRepository {
   constructor(
@@ -14,6 +16,8 @@ export class SupportRepository {
     private readonly updatedHistoryRepository: Repository<UpdatedHistory>,
     @InjectRepository(AlertSettings)
     private readonly alertSettingsRepository: Repository<AlertSettings>,
+    @InjectRepository(Device)
+    private readonly deviceRepository: Repository<Device>,
   ) {}
 
   async saveNotice(newNotice: Notice) {
@@ -106,11 +110,25 @@ export class SupportRepository {
     return this.alertSettingsRepository.create({ ...data, user: { id: userId } });
   }
 
-  async findSettings(userId: number) {
-    return this.alertSettingsRepository.findOne({ where: { user: { id: userId } } });
+  async findSettings(userId: number, deviceId: string) {
+    return this.alertSettingsRepository.findOne({
+      where: { user: { id: userId }, deviceId: deviceId },
+    });
   }
 
   async saveSettings(settings: AlertSettings) {
     return this.alertSettingsRepository.save(settings);
+  }
+
+  async findDevice(deviceId: string) {
+    return this.deviceRepository.findOne({ where: { deviceId: deviceId } });
+  }
+
+  async createDevice(user: User, deviceId: string, deviceToken: string) {
+    return this.deviceRepository.create({ user, deviceId, deviceToken });
+  }
+
+  async saveDevice(device: Device) {
+    return this.deviceRepository.save(device);
   }
 }
