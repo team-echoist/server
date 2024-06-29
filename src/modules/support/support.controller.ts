@@ -21,7 +21,6 @@ import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
-import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
 
 @ApiTags('Support')
