@@ -183,8 +183,7 @@ export class SupportController {
   - \`deviceId\` (string, required): 업데이트할 디바이스의 고유 ID
 
   **요청 본문:**
-  - \`published\`: 발행한 글 조회 알림 (boolean)
-  - \`linkedout\`: 링크드아웃한 글 조회 알림 (boolean)
+  - \`viewed\`: 링크드아웃한 글 조회 알림 (boolean)
   - \`report\`: 신고 완료 알림 (boolean)
   - \`timeAllowed\`: 알림 허용 시간 설정 여부 (boolean)
   - \`alertStart\`: 알림 허용 시작 시간 (string, "HH:mm" 형식)

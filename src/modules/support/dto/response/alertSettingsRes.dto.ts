@@ -6,17 +6,12 @@ export class AlertSettingsResDto {
   @ApiProperty()
   @IsBoolean()
   @Expose()
-  published?: boolean;
+  viewed: boolean;
 
   @ApiProperty()
   @IsBoolean()
   @Expose()
-  linkedout?: boolean;
-
-  @ApiProperty()
-  @IsBoolean()
-  @Expose()
-  report?: boolean;
+  report: boolean;
 
   @ApiProperty()
   @IsBoolean()

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { SupportRepository } from './support.repository';
 import { UtilsService } from '../utils/utils.service';
 import { NoticeSummaryResDto } from './dto/response/noticeSummaryRes.dto';
@@ -18,7 +18,7 @@ export class SupportService {
   constructor(
     private readonly utilsService: UtilsService,
     private readonly supportRepository: SupportRepository,
-    private readonly userService: UserService,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
   async getNotices(page: number, limit: number) {
@@ -82,6 +82,10 @@ export class SupportService {
     return this.utilsService.transformToDto(AlertSettingsResDto, settings);
   }
 
+  async fetchSettingEntityById(userId: number, deviceId: string) {
+    return await this.supportRepository.findSettings(userId, deviceId);
+  }
+
   async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
     const settings = await this.supportRepository.findSettings(userId, deviceId);
     if (settings) {
@@ -102,5 +106,9 @@ export class SupportService {
       : (device = await this.supportRepository.createDevice(user, deviceId, deviceToken));
 
     return await this.supportRepository.saveDevice(device);
+  }
+
+  async getDevices(userId: number) {
+    return await this.supportRepository.findDevices(userId);
   }
 }

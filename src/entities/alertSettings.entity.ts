@@ -6,13 +6,10 @@ export class AlertSettings {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: true })
-  published: boolean;
+  @Column({ default: false })
+  viewed: boolean;
 
-  @Column({ default: true })
-  linkedout: boolean;
-
-  @Column({ default: true })
+  @Column({ default: false })
   report: boolean;
 
   @Column({ name: 'time_allowed', default: false })
