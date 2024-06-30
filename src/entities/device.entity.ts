@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -33,6 +34,7 @@ export class Device {
   })
   updatedDate: Date;
 
+  @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
   user: User;
 }

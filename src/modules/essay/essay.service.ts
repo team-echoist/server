@@ -35,6 +35,7 @@ import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { SupportService } from '../support/support.service';
 import { FcmService } from '../fcm/fcm.service';
 import { AlertSettings } from '../../entities/alertSettings.entity';
+import { AlertService } from '../alert/alert.service';
 
 @Injectable()
 export class EssayService {
@@ -51,6 +52,7 @@ export class EssayService {
     private readonly bookmarkService: BookmarkService,
     private readonly supportService: SupportService,
     private readonly fcmService: FcmService,
+    private readonly alertService: AlertService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -222,6 +224,7 @@ export class EssayService {
   @Transactional()
   async getEssay(userId: number, essayId: number) {
     const user = await this.userService.fetchUserEntityById(userId);
+
     const essay = await this.essayRepository.findEssayById(essayId);
 
     if (!essay) throw new HttpException('There are no essays.', HttpStatus.NOT_FOUND);
@@ -273,18 +276,20 @@ export class EssayService {
   private async notifyFirstView(essay: Essay, newViews: number) {
     if (newViews !== 1) return;
 
+    await this.alertService.createEssayAlert(essay);
+
+    const title = '이리오너라!';
+    const body = `"${essay.title}" 이라는 제목의 에세이가 처음으로 조회되었습니다.`;
+
     const devices = await this.supportService.getDevices(essay.author.id);
+
     for (const device of devices) {
       const alertSettings = await this.supportService.fetchSettingEntityById(
         essay.author.id,
         device.deviceId,
       );
       if (alertSettings.viewed && this.isWithinAllowedTime(alertSettings)) {
-        await this.fcmService.sendPushNotification(
-          device.deviceToken,
-          '이리오너라!',
-          `"${essay.title}" 이라는 제목의 에세이가 처음으로 조회되었습니다.`,
-        );
+        await this.fcmService.sendPushAlert(device.deviceToken, title, body);
       }
     }
   }

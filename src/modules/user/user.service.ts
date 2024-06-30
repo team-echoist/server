@@ -42,7 +42,6 @@ export class UserService {
 
   async fetchUserEntityById(userId: number) {
     const cacheKey = `user:${userId}`;
-
     const cachedUser = await this.redis.get(cacheKey);
 
     let user = cachedUser ? JSON.parse(cachedUser) : null;

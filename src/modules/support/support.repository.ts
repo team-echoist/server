@@ -5,7 +5,7 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
-import { Device } from '../../entities/devcie.entity';
+import { Device } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 
 export class SupportRepository {
@@ -113,6 +113,7 @@ export class SupportRepository {
   async findSettings(userId: number, deviceId: string) {
     return this.alertSettingsRepository.findOne({
       where: { user: { id: userId }, deviceId: deviceId },
+      relations: ['user'],
     });
   }
 

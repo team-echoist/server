@@ -18,7 +18,7 @@ export class FcmService {
     }
   }
 
-  async sendPushNotification(deviceToken: string, title: string, body: string) {
+  async sendPushAlert(deviceToken: string, title: string, body: string) {
     const message = {
       notification: {
         title: title,

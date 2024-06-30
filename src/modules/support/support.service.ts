@@ -69,12 +69,12 @@ export class SupportService {
     return { histories: historiesDto, total, page, totalPage };
   }
 
-  async getSettings(userId: number, deviceId: string) {
+  async getSettings(userId: number, deviceId?: string) {
     let settings = await this.supportRepository.findSettings(userId, deviceId);
     if (!settings) {
       settings = new AlertSettings();
       settings.user = await this.userService.fetchUserEntityById(userId);
-      settings.deviceId = deviceId;
+      settings.deviceId = deviceId ? deviceId : null;
 
       await this.supportRepository.saveSettings(settings);
     }
