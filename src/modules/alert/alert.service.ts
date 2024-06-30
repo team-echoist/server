@@ -12,14 +12,9 @@ export class AlertService {
   ) {}
 
   async createEssayAlert(essay: Essay) {
-    const titles = [
-      `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 찾았어요!`,
-      `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 발견!`,
-      `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 읽고있어요.`,
-      `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 정독 중이에요.`,
-    ];
-    const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-    const title = `다른 아무개가 ${essay.author.nickname} 아무개님의 '${essay.title}'글을 ${randomTitle}`;
+    const ends = [`찾았어요!`, `발견!`, `읽고있어요.`, `정독 중이에요.`];
+    const randomEnd = ends[Math.floor(Math.random() * ends.length)];
+    const title = `다른 아무개가 ${essay.author.nickname} 아무개님의 '${essay.title}'글을 ${randomEnd}`;
 
     const createdDate = new Date(essay.createdDate);
     const koreanFormatter = new Intl.DateTimeFormat('ko-KR', {
