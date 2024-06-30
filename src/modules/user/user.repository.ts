@@ -13,7 +13,7 @@ export class UserRepository {
   ) {}
 
   async findUserById(userId: number) {
-    return this.userRepository.findOne({ where: { id: userId }, relations: ['device'] });
+    return this.userRepository.findOne({ where: { id: userId }, relations: ['devices'] });
   }
 
   async saveUser(user: User) {

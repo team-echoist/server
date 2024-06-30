@@ -29,6 +29,7 @@ import { BlockPhpRequestsMiddleware } from './common/middlewares/blockPhpRequest
 import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { SupportModule } from './modules/support/support.module';
+import { AlertModule } from './modules/alert/alert.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { SupportModule } from './modules/support/support.module';
     BookmarkModule,
     CronModule,
     SupportModule,
+    AlertModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },

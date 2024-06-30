@@ -13,7 +13,7 @@ import { UtilsModule } from '../utils/utils.module';
 import { UserModule } from '../user/user.module';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
-import { Device } from '../../entities/devcie.entity';
+import { Device } from '../../entities/device.entity';
 
 @Module({
   imports: [

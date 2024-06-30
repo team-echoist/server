@@ -78,7 +78,11 @@ export class UtilsService {
   }
 
   convertToKST(date: Date): string {
-    return moment(date).tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    // return moment(date).tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    const kstOffset = 9 * 60;
+    const kstDate = new Date(date.getTime() + kstOffset * 60 * 1000);
+
+    return kstDate.toISOString().replace('Z', '+09:00');
   }
 
   transformDatesToKST(data: any): any {

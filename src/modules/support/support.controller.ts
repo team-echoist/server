@@ -169,7 +169,7 @@ export class SupportController {
   `,
   })
   @ApiResponse({ status: 200, type: AlertSettingsResDto })
-  async getSettings(@Req() req: ExpressRequest, @Param('deviceId') deviceId?: string) {
+  async getSettings(@Req() req: ExpressRequest, @Param('deviceId') deviceId: string) {
     return this.supportService.getSettings(req.user.id, deviceId);
   }
 

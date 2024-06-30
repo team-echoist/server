@@ -24,7 +24,8 @@ import { Bookmark } from './bookmark.entity';
 import { DeactivationReason } from './deactivationReason.entity';
 import { Inquiry } from './inquiry.entity';
 import { AlertSettings } from './alertSettings.entity';
-import { Device } from './devcie.entity';
+import { Device } from './device.entity';
+import { Alert } from './alert.entity';
 
 export enum UserStatus {
   ACTIVATED = 'activated',
@@ -152,4 +153,7 @@ export class User {
 
   @OneToMany(() => Device, (device) => device.user)
   devices: Device[];
+
+  @OneToMany(() => Alert, (alert) => alert.user)
+  alerts: Alert[];
 }
