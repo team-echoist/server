@@ -32,9 +32,6 @@ import { EssayStatsDto } from './dto/essayStats.dto';
 import { SummaryEssayResDto } from './dto/response/summaryEssayRes.dto';
 import { SentenceEssayResDto } from './dto/response/sentenceEssayRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
-import { SupportService } from '../support/support.service';
-import { FcmService } from '../fcm/fcm.service';
-import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertService } from '../alert/alert.service';
 
 @Injectable()
@@ -50,8 +47,6 @@ export class EssayService {
     private readonly badgeService: BadgeService,
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
-    private readonly supportService: SupportService,
-    private readonly fcmService: FcmService,
     private readonly alertService: AlertService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
@@ -269,56 +264,17 @@ export class EssayService {
         await this.userService.fetchUserEntityById(userId),
         essay,
       );
-      await this.notifyFirstView(essay, newViews);
+      setImmediate(() => {
+        this.alertFirstView(essay, newViews);
+      });
     }
   }
 
-  private async notifyFirstView(essay: Essay, newViews: number) {
+  private async alertFirstView(essay: Essay, newViews: number) {
     if (newViews !== 1) return;
 
-    await this.alertService.createEssayAlert(essay);
-
-    const title = '이리오너라!';
-    const body = `"${essay.title}" 이라는 제목의 에세이가 처음으로 조회되었습니다.`;
-
-    const devices = await this.supportService.getDevices(essay.author.id);
-
-    for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.deviceId,
-      );
-      if (alertSettings.viewed && this.isWithinAllowedTime(alertSettings)) {
-        await this.fcmService.sendPushAlert(device.deviceToken, title, body);
-      }
-    }
-  }
-
-  private isWithinAllowedTime(alertSettings: AlertSettings): boolean {
-    if (!alertSettings.timeAllowed) return true;
-
-    const now = new Date();
-    const nowKST = new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Seoul',
-    }).format(now);
-
-    const [currentHours, currentMinutes] = nowKST.split(':').map(Number);
-    const currentTime = currentHours * 60 + currentMinutes;
-
-    const [startHours, startMinutes] = alertSettings.alertStart.split(':').map(Number);
-    const startTime = startHours * 60 + startMinutes;
-
-    const [endHours, endMinutes] = alertSettings.alertEnd.split(':').map(Number);
-    const endTime = endHours * 60 + endMinutes;
-
-    if (startTime < endTime) {
-      return currentTime >= startTime && currentTime <= endTime;
-    } else {
-      return currentTime >= startTime || currentTime <= endTime;
-    }
+    await this.alertService.createAlertFirstView(essay);
+    await this.alertService.sendPushAlertFirstView(essay);
   }
 
   private async checkViewsForReputation(essay: Essay) {

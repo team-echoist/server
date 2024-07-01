@@ -5,6 +5,7 @@ import { v4 } from 'uuid';
 import * as moment from 'moment-timezone';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { LoremIpsum } from 'lorem-ipsum';
+import { AlertSettings } from '../../entities/alertSettings.entity';
 
 @Injectable()
 export class UtilsService {
@@ -164,6 +165,43 @@ export class UtilsService {
     }
     const transformedPlain = plainToInstance(cls, plain, { excludeExtraneousValues: true });
     return this.transformDatesToKST(transformedPlain);
+  }
+
+  isWithinAllowedTime(alertSettings: AlertSettings) {
+    if (!alertSettings.timeAllowed) return true;
+
+    const now = new Date();
+    const nowKST = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Seoul',
+    }).format(now);
+
+    const [currentHours, currentMinutes] = nowKST.split(':').map(Number);
+    const currentTime = currentHours * 60 + currentMinutes;
+
+    const [startHours, startMinutes] = alertSettings.alertStart.split(':').map(Number);
+    const startTime = startHours * 60 + startMinutes;
+
+    const [endHours, endMinutes] = alertSettings.alertEnd.split(':').map(Number);
+    const endTime = endHours * 60 + endMinutes;
+
+    if (startTime < endTime) {
+      return currentTime >= startTime && currentTime <= endTime;
+    } else {
+      return currentTime >= startTime || currentTime <= endTime;
+    }
+  }
+
+  formatDateToKorean(date: Date): string {
+    const koreanFormatter = new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'Asia/Seoul',
+    });
+    return koreanFormatter.format(date);
   }
 
   getRandomDate(start: Date, end: Date) {

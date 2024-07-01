@@ -113,7 +113,10 @@ export class AdminRepository {
   }
 
   async findReportByEssayId(essayId: number) {
-    return this.reportRepository.find({ where: { essay: { id: essayId } } });
+    return this.reportRepository.find({
+      where: { essay: { id: essayId } },
+      relations: ['reporter', 'essay'],
+    });
   }
 
   async saveReport(report: ReportQueue) {

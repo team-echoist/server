@@ -22,6 +22,10 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { Notice } from '../../entities/notice.entity';
 import { SupportModule } from '../support/support.module';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { BullModule } from '@nestjs/bull';
+import { ConfigService } from '@nestjs/config';
+import { AdminProcessor } from './admin.processor';
+import { AlertModule } from '../alert/alert.module';
 
 @Module({
   imports: [
@@ -41,17 +45,29 @@ import { UpdatedHistory } from '../../entities/updatedHistory.entity';
       Notice,
       UpdatedHistory,
     ]),
+    BullModule.registerQueueAsync({
+      name: 'admin',
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     UserModule,
     EssayModule,
     MailModule,
     UtilsModule,
     AwsModule,
     SupportModule,
+    AlertModule,
   ],
   controllers: [AdminController],
   providers: [
     AdminService,
     AdminRepository,
+    AdminProcessor,
     strategies.AdminJwtStrategy,
     strategies.AdminLocalStrategy,
   ],
