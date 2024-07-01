@@ -22,6 +22,7 @@ import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
+import { InquiryResDto } from './dto/response/inquiryRes.dto';
 
 @ApiTags('Support')
 @UseGuards(AuthGuard('jwt'))
@@ -117,7 +118,7 @@ export class SupportController {
   
   `,
   })
-  @ApiResponse({ status: 200, type: '' })
+  @ApiResponse({ status: 200, type: InquiryResDto })
   async getInquiry(
     @Req() req: ExpressRequest,
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
