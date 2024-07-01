@@ -48,6 +48,9 @@ import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { AlertService } from '../alert/alert.service';
 
 @Injectable()
 export class AdminService {
@@ -61,7 +64,9 @@ export class AdminService {
     private readonly awsService: AwsService,
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
+    private readonly alertService: AlertService,
     @InjectRedis() private readonly redis: Redis,
+    @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
 
   @Transactional()
@@ -277,7 +282,6 @@ export class AdminService {
 
     if (data.actionType === 'approved') {
       await this.handleApprovedAction(essay);
-      // todo 푸쉬알림
     }
 
     await this.syncReportsProcessed(essayId, userId, data);
@@ -299,24 +303,34 @@ export class AdminService {
 
   @Transactional()
   async syncReportsProcessed(essayId: number, adminId: number, data: ProcessReqDto) {
-    const admin = await this.adminRepository.findAdmin(adminId);
     const reports = await this.adminRepository.findReportByEssayId(essayId);
     if (!reports.length)
       throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
 
-    await Promise.all(
-      reports.map(async (report) => {
-        await this.processReport(report);
-        const newHistory = this.createProcessedHistory(
-          data.actionType,
-          'report',
-          report,
-          admin,
-          data.comment,
-        );
-        await this.adminRepository.saveHistory(newHistory);
-      }),
+    setImmediate(() => {
+      this.alertService.createAndSendAlerts(reports, data.actionType);
+    });
+
+    console.log(
+      `Adding syncReportsProcessed job for essay ${essayId} with ${reports.length} reports`,
     );
+    await this.adminQueue.add('syncReportsProcessed', { reports, adminId, data });
+  }
+
+  async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+
+    for (const report of reports) {
+      await this.processReport(report);
+      const newHistory = this.createProcessedHistory(
+        data.actionType,
+        'report',
+        report,
+        admin,
+        data.comment,
+      );
+      await this.adminRepository.saveHistory(newHistory);
+    }
   }
 
   private async processReport(report: ReportQueue) {

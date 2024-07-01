@@ -1083,7 +1083,7 @@ export class AdminController {
     return this.adminService.createUpdateHistory(req.user.id, data.history);
   }
 
-  @Put('updated_histories/:historyId')
+  @Put('updated-histories/:historyId')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '업데이트 히스토리 수정',

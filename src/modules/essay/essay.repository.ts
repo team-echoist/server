@@ -95,13 +95,14 @@ export class EssayRepository {
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
+      queryBuilder.orderBy('essay.createdDate', 'ASC');
+    } else {
+      queryBuilder.orderBy('essay.createdDate', 'DESC');
     }
 
     queryBuilder.offset((page - 1) * limit).limit(limit);
 
-    const [essays, total] = await queryBuilder
-      .orderBy('essay.createdDate', 'DESC')
-      .getManyAndCount();
+    const [essays, total] = await queryBuilder.getManyAndCount();
 
     return { essays, total };
   }

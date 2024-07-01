@@ -1,0 +1,35 @@
+import { Process, Processor } from '@nestjs/bull';
+import { Job } from 'bull';
+import { AdminService } from './admin.service';
+import { ProcessReqDto } from './dto/request/processReq.dto';
+import { ReportQueue } from '../../entities/reportQueue.entity';
+
+@Processor('admin')
+export class AdminProcessor {
+  constructor(private readonly adminService: AdminService) {}
+
+  @Process('syncReportsProcessed')
+  async handleSyncReportsProcessed(
+    job: Job<{ reports: ReportQueue[]; adminId: number; data: ProcessReqDto }>,
+  ) {
+    console.log('Processing syncReportsProcessed job:', job.id);
+
+    const { reports, adminId, data } = job.data;
+    const batchSize = 10;
+    const delayBetweenBatches = 3000;
+
+    for (let i = 0; i < reports.length; i += batchSize) {
+      const batch = reports.slice(i, i + batchSize);
+
+      await this.adminService.processBatchReports(batch, adminId, data);
+
+      if (i + batchSize < reports.length) {
+        await this.sleep(delayBetweenBatches);
+      }
+    }
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}

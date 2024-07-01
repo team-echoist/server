@@ -11,7 +11,7 @@ import { User } from './user.entity';
 export enum AlertType {
   PUBLISHED = 'published',
   LINKEDOUT = 'linkedout',
-  REPORT = 'report',
+  UPDATED = 'updated',
 }
 
 @Entity()
