@@ -97,6 +97,14 @@ export class SupportRepository {
     return { histories, total };
   }
 
+  async findUpdatedHistory(historyId: number) {
+    return this.updatedHistoryRepository
+      .createQueryBuilder('updated_history')
+      .leftJoinAndSelect('updated_history.processor', 'processor')
+      .where('updated_history.id = :id', { id: historyId })
+      .getOne();
+  }
+
   async findUserUpdateHistories(page: number, limit: number) {
     const [histories, total] = await this.updatedHistoryRepository.findAndCount({
       skip: (page - 1) * limit,

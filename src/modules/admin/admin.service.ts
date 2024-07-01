@@ -792,4 +792,10 @@ export class AdminService {
 
     return { histories: historiesDto, total, page, totalPage };
   }
+
+  async getUpdateHistory(historyId: number) {
+    const history = await this.supportRepository.findUpdatedHistory(historyId);
+
+    return this.utilsService.transformToDto(UpdatedHistoryResDto, history);
+  }
 }

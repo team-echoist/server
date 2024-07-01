@@ -243,7 +243,7 @@ export class AdminController {
   `,
   })
   @ApiResponse({ status: 200, type: DashboardResDto })
-  async dashboard(@Req() req: ExpressRequest) {
+  async dashboard() {
     return this.adminService.dashboard();
   }
 
@@ -1136,6 +1136,25 @@ export class AdminController {
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     return this.adminService.getAllUpdateHistories(page, limit);
+  }
+
+  @Get('updated-histories/:historyId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '특정 업데이트 히스토리 조회 (관리자용)',
+    description: `
+  관리자가 특정 업데이트 히스토리를 조회합니다.
+
+  **경로 파라미터:**
+  - \`historyId\`: 조회할 업데이트 히스토리 아이디
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
+  async getUpdateHistory(@Param('historyId', ParseIntPipe) historyId: number) {
+    return this.adminService.getUpdateHistory(historyId);
   }
 
   @Put(':adminId')
