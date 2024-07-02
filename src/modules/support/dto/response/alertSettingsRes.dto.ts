@@ -12,19 +12,4 @@ export class AlertSettingsResDto {
   @IsBoolean()
   @Expose()
   report: boolean;
-
-  @ApiProperty()
-  @IsBoolean()
-  @Expose()
-  timeAllowed: boolean;
-
-  @ApiProperty()
-  @IsString()
-  @Expose()
-  alertStart: string;
-
-  @ApiProperty()
-  @IsString()
-  @Expose()
-  alertEnd: string;
 }

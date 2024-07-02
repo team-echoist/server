@@ -72,13 +72,13 @@ export class SupportService {
   }
 
   @Transactional()
-  async getSettings(userId: number, deviceId?: string) {
+  async getSettings(userId: number, deviceId: string) {
     let settings = await this.supportRepository.findSettings(userId, deviceId);
 
     if (!settings) {
       settings = new AlertSettings();
       settings.user = await this.userService.fetchUserEntityById(userId);
-      settings.deviceId = deviceId ? deviceId : null;
+      settings.deviceId = deviceId;
 
       await this.supportRepository.saveSettings(settings);
     }
@@ -86,11 +86,15 @@ export class SupportService {
     return this.utilsService.transformToDto(AlertSettingsResDto, settings);
   }
 
-  async fetchSettingEntityById(userId: number, deviceId: string) {
-    return await this.supportRepository.findSettings(userId, deviceId);
-  }
-
+  @Transactional()
   async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
+    // if (settingsData.alertStart === '') {
+    //   settingsData.alertStart = null;
+    // }
+    // if (settingsData.alertEnd === '') {
+    //   settingsData.alertEnd = null;
+    // }
+
     const settings = await this.supportRepository.findSettings(userId, deviceId);
     if (settings) {
       Object.assign(settings, settingsData);
@@ -99,6 +103,10 @@ export class SupportService {
       const newSettings = await this.supportRepository.createAlertSettings(settingsData, userId);
       await this.supportRepository.saveSettings(newSettings);
     }
+  }
+
+  async fetchSettingEntityById(userId: number, deviceId: string) {
+    return await this.supportRepository.findSettings(userId, deviceId);
   }
 
   async registerDevice(userId: number, deviceId: string, deviceToken: string) {
