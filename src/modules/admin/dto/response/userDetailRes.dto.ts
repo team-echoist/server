@@ -1,7 +1,8 @@
-import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { IsDate, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserStatus } from '../../../../entities/user.entity';
+import { AlertSettingsResDto } from '../../../support/dto/response/alertSettingsRes.dto';
 
 export class UserDetailResDto {
   @ApiProperty()
@@ -95,4 +96,9 @@ export class UserDetailResDto {
   @Expose()
   @IsNumber()
   essayCount: number;
+
+  @ApiProperty({ type: AlertSettingsResDto })
+  @Type(() => AlertSettingsResDto)
+  @Expose()
+  alertSettings: AlertSettingsResDto;
 }
