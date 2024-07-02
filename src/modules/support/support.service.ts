@@ -12,6 +12,7 @@ import { UpdatedHistoryResDto } from './dto/response/updatedHistoryRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class SupportService {
@@ -60,6 +61,7 @@ export class SupportService {
     return this.utilsService.transformToDto(InquiryResDto, inquiry);
   }
 
+  @Transactional()
   async getUserUpdateHistories(page: number, limit: number) {
     const { histories, total } = await this.supportRepository.findUserUpdateHistories(page, limit);
 
@@ -69,8 +71,10 @@ export class SupportService {
     return { histories: historiesDto, total, page, totalPage };
   }
 
+  @Transactional()
   async getSettings(userId: number, deviceId?: string) {
     let settings = await this.supportRepository.findSettings(userId, deviceId);
+
     if (!settings) {
       settings = new AlertSettings();
       settings.user = await this.userService.fetchUserEntityById(userId);

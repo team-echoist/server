@@ -7,6 +7,8 @@ import { UserDto } from '../../../user/dto/user.dto';
 import { EssayDto } from '../../../essay/dto/essay.dto';
 import { ActionType } from '../../../../entities/processedHistory.entity';
 import { AdminResDto } from './adminRes.dto';
+import { NoticeResDto } from '../../../support/dto/response/noticeRes.dto';
+import { InquiryResDto } from '../../../support/dto/response/inquiryRes.dto';
 
 export class HistoriesResDto {
   @ApiProperty()
@@ -64,5 +66,13 @@ export class HistoriesResDto {
   @Expose()
   essay: EssayDto;
 
-  //todo dto 추가
+  @ApiProperty({ type: () => NoticeResDto })
+  @Type(() => NoticeResDto)
+  @Expose()
+  notice: NoticeResDto;
+
+  @ApiProperty({ type: () => InquiryResDto })
+  @Type(() => InquiryResDto)
+  @Expose()
+  inquiry: InquiryResDto;
 }

@@ -306,10 +306,9 @@ export class EssayService {
       (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
 
     let newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceCreation);
+
     newTrendScore = Math.floor(newTrendScore);
-
     newTrendScore += incrementAmount;
-
     newTrendScore = Math.max(newTrendScore, 0);
 
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
