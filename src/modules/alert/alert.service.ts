@@ -102,9 +102,8 @@ export class AlertService {
         essay.author.id,
         device.deviceId,
       );
-      if (alertSettings.viewed && this.utilsService.isWithinAllowedTime(alertSettings)) {
+      if (alertSettings.viewed)
         await this.fcmService.sendPushAlert(device.deviceToken, title, body);
-      }
     }
   }
 

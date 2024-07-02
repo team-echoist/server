@@ -11,19 +11,4 @@ export class UpdateAlertSettingsReqDto {
   @IsOptional()
   @IsBoolean()
   report?: boolean;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsBoolean()
-  timeAllowed?: boolean;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  alertStart?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  alertEnd?: string;
 }

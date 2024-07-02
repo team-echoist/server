@@ -186,9 +186,6 @@ export class SupportController {
   **요청 본문:**
   - \`viewed\`: 링크드아웃한 글 조회 알림 (boolean)
   - \`report\`: 신고 완료 알림 (boolean)
-  - \`timeAllowed\`: 알림 허용 시간 설정 여부 (boolean)
-  - \`alertStart\`: 알림 허용 시작 시간 (string, "HH:mm" 형식)
-  - \`alertEnd\`: 알림 허용 종료 시간 (string, "HH:mm" 형식)
 
   **동작 과정:**
   1. 현재 로그인된 사용자의 알림 설정을 업데이트합니다.

@@ -4,8 +4,6 @@ import * as jwt from 'jsonwebtoken';
 import { v4 } from 'uuid';
 import * as moment from 'moment-timezone';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
-import { LoremIpsum } from 'lorem-ipsum';
-import { AlertSettings } from '../../entities/alertSettings.entity';
 
 @Injectable()
 export class UtilsService {
@@ -149,12 +147,12 @@ export class UtilsService {
     return result;
   }
 
-  transformTagsToNames(data: any): any {
-    if (data.tags && Array.isArray(data.tags)) {
-      data.tags = data.tags.map((tag: any) => tag.name);
-    }
-    return data;
-  }
+  // transformTagsToNames(data: any): any {
+  //   if (data.tags && Array.isArray(data.tags)) {
+  //     data.tags = data.tags.map((tag: any) => tag.name);
+  //   }
+  //   return data;
+  // }
 
   transformToDto<T, V>(cls: ClassConstructor<T>, plain: V | V[]): T | T[] {
     if (Array.isArray(plain)) {
@@ -165,33 +163,6 @@ export class UtilsService {
     }
     const transformedPlain = plainToInstance(cls, plain, { excludeExtraneousValues: true });
     return this.transformDatesToKST(transformedPlain);
-  }
-
-  isWithinAllowedTime(alertSettings: AlertSettings) {
-    if (!alertSettings.timeAllowed) return true;
-
-    const now = new Date();
-    const nowKST = new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Seoul',
-    }).format(now);
-
-    const [currentHours, currentMinutes] = nowKST.split(':').map(Number);
-    const currentTime = currentHours * 60 + currentMinutes;
-
-    const [startHours, startMinutes] = alertSettings.alertStart.split(':').map(Number);
-    const startTime = startHours * 60 + startMinutes;
-
-    const [endHours, endMinutes] = alertSettings.alertEnd.split(':').map(Number);
-    const endTime = endHours * 60 + endMinutes;
-
-    if (startTime < endTime) {
-      return currentTime >= startTime && currentTime <= endTime;
-    } else {
-      return currentTime >= startTime || currentTime <= endTime;
-    }
   }
 
   formatDateToKorean(date: Date): string {
@@ -259,16 +230,6 @@ export class UtilsService {
     return text.slice(start, end).trim();
   }
 
-  private lorem = new LoremIpsum({
-    sentencesPerParagraph: {
-      max: 8,
-      min: 4,
-    },
-    wordsPerSentence: {
-      max: 16,
-      min: 4,
-    },
-  });
   generateCustomKoreanContent(): string {
     const sentences = [
       '나는 오늘 아침에 일어나서 생각했다.',
