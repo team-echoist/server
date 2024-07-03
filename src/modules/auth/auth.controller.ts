@@ -369,7 +369,7 @@ export class AuthController {
 
   @Get('google/callback')
   @ApiOperation({
-    summary: '구글 OAuth 콜백',
+    summary: 'OAuth-구글 콜백',
     description: `
   구글 로그인 후 콜백을 처리합니다. 사용자의 구글 정보를 검증하고, 새로운 사용자인 경우 계정을 생성합니다.
 
@@ -418,23 +418,83 @@ export class AuthController {
     return req.user;
   }
 
-  // @Post('kakao')
-  // @ApiOperation({
-  //   summary: 'OAuth-카카오 로그인',
-  // })
-  // @ApiResponse({ status: 200 })
-  // @UseGuards(AuthGuard('google'))
-  // async kakaoAuthRedirect() {
-  //   return;
-  // }
-  //
-  // @Post('naver')
-  // @ApiOperation({
-  //   summary: 'OAuth-네이버 로그인',
-  // })
-  // @ApiResponse({ status: 200 })
-  // @UseGuards(AuthGuard('google'))
-  // async naverAuthRedirect() {
-  //   return;
-  // }
+  @Get('kakao')
+  @ApiOperation({
+    summary: 'OAuth-카카오 로그인',
+    description: `
+  사용자가 카카오 계정을 통해 로그인할 수 있도록 합니다.
+
+  **동작 과정:**
+  1. 사용자가 카카오 로그인 버튼을 클릭하면, 카카오 로그인 페이지로 리디렉션됩니다.
+  2. 사용자가 카카오 계정으로 인증을 완료하면, 카카오 콜백 URL로 리디렉션됩니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('kakao'))
+  async kakaoAuthRedirect() {
+    return;
+  }
+
+  @Get('kakao/callback')
+  @ApiOperation({
+    summary: 'OAuth-카카오 콜백',
+    description: `
+  카카오 로그인 후 콜백을 처리합니다. 사용자의 카카오 정보를 검증하고, 새로운 사용자인 경우 계정을 생성합니다.
+
+  **동작 과정:**
+  1. 카카오로부터 전달된 사용자 정보를 검증합니다.
+  2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
+  3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
+  4. 사용자 정보를 기반으로 JWT 토큰을 생성하여 응답합니다.
+
+  **주의 사항:**
+  - 유효하지 않은 카카오 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('kakao'))
+  async kakaoCallback(@Req() req: ExpressRequest) {
+    req.user = await this.authService.oauthLogin(req.user);
+    return;
+  }
+
+  @Get('naver')
+  @ApiOperation({
+    summary: 'OAuth-네이버 로그인',
+    description: `
+  사용자가 네이버 계정을 통해 로그인할 수 있도록 합니다.
+
+  **동작 과정:**
+  1. 사용자가 네이버 로그인 버튼을 클릭하면, 네이버 로그인 페이지로 리디렉션됩니다.
+  2. 사용자가 네이버 계정으로 인증을 완료하면, 네이버 콜백 URL로 리디렉션됩니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('naver'))
+  async naverAuthRedirect() {
+    return;
+  }
+
+  @Get('naver/callback')
+  @ApiOperation({
+    summary: 'OAuth-네이버 콜백',
+    description: `
+  네이버 로그인 후 콜백을 처리합니다. 사용자의 네이버 정보를 검증하고, 새로운 사용자인 경우 계정을 생성합니다.
+
+  **동작 과정:**
+  1. 네이버로부터 전달된 사용자 정보를 검증합니다.
+  2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
+  3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
+  4. 사용자 정보를 기반으로 JWT 토큰을 생성하여 응답합니다.
+
+  **주의 사항:**
+  - 유효하지 않은 네이버 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('naver'))
+  async naverCallback(@Req() req: ExpressRequest) {
+    req.user = await this.authService.oauthLogin(req.user);
+    return;
+  }
 }

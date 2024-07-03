@@ -1,8 +1,8 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
 import { Injectable } from '@nestjs/common';
+import * as process from 'node:process';
 
-// 타입 확인 필요
 type VerifyCallback = (error: any, user?: any, info?: any) => void;
 
 @Injectable()
@@ -11,7 +11,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     super({
       clientID: process.env.KAKAO_CLIENT_ID,
       clientSecret: process.env.KAKAO_CLIENT_SECRET,
-      callbackURL: 'https://....com/api/auth/kakao',
+      callbackURL: process.env.KAKAO_CLIENT_CALLBACK,
     });
   }
 

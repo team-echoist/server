@@ -287,6 +287,7 @@ export class EssayRepository {
       })
       .leftJoin('report.reporter', 'reporter')
       .leftJoin('essay.author', 'author')
+      .leftJoinAndSelect('essay.bookmarks', 'bookmark')
       .select([
         'essay.id',
         'essay.title',
@@ -295,7 +296,6 @@ export class EssayRepository {
         'essay.createdDate',
         'essay.updatedDate',
         'essay.thumbnail',
-        'essay.bookmarks',
         'essay.views',
         'essay.status',
         'essay.device',
