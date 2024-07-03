@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { SupportRepository } from './support.repository';
 import { UtilsService } from '../utils/utils.service';
 import { NoticeSummaryResDto } from './dto/response/noticeSummaryRes.dto';
@@ -73,6 +73,8 @@ export class SupportService {
 
   @Transactional()
   async getSettings(userId: number, deviceId: string) {
+    if (deviceId === '' && !deviceId)
+      throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
     let settings = await this.supportRepository.findSettings(userId, deviceId);
 
     if (!settings) {
@@ -94,6 +96,8 @@ export class SupportService {
     // if (settingsData.alertEnd === '') {
     //   settingsData.alertEnd = null;
     // }
+    if (deviceId === '' && !deviceId)
+      throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
 
     const settings = await this.supportRepository.findSettings(userId, deviceId);
     if (settings) {
