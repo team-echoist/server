@@ -90,12 +90,6 @@ export class SupportService {
 
   @Transactional()
   async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
-    // if (settingsData.alertStart === '') {
-    //   settingsData.alertStart = null;
-    // }
-    // if (settingsData.alertEnd === '') {
-    //   settingsData.alertEnd = null;
-    // }
     if (deviceId === '' && !deviceId)
       throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
 

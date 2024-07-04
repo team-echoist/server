@@ -8,7 +8,7 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
 export class AlertProcessor {
   constructor(private readonly alertService: AlertService) {}
 
-  @Process('createAndSendAlerts')
+  @Process('createAndSendReportProcessedAlerts')
   async handleCreateAndSendAlerts(job: Job<{ reports: ReportQueue[]; type: ActionType }>) {
     console.log('Processing createAndSendAlerts job:', job.id);
 
@@ -19,7 +19,7 @@ export class AlertProcessor {
     for (let i = 0; i < reports.length; i += batchSize) {
       const batch = reports.slice(i, i + batchSize);
 
-      await this.alertService.processAlerts(batch, type);
+      await this.alertService.processReportAlerts(batch, type);
 
       if (i + batchSize < reports.length) {
         await this.sleep(delayBetweenBatches);

@@ -69,15 +69,15 @@ export class EssayService {
       tags: tags,
     };
 
+    void this.badgeService.addExperience(user, tags);
+
+    await this.evaluateUserReputation(user);
+
     if (requester.status === UserStatus.MONITORED) {
       return await this.handleMonitoredUser(user, essayData, data);
     }
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
-
-    void this.badgeService.addExperience(user, tags);
-
-    await this.evaluateUserReputation(user);
 
     return this.utilsService.transformToDto(EssayResDto, savedEssay);
   }
@@ -117,6 +117,9 @@ export class EssayService {
     }
 
     const essay = await this.essayRepository.findEssayById(savedMonitoredEssay.id);
+
+    await this.alertService.createReviewAlerts(essay, data.status);
+    await this.alertService.sendPushReviewAlert(essay);
 
     return this.utilsService.transformToDto(EssayResDto, essay);
   }

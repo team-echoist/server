@@ -288,17 +288,16 @@ export class AdminService {
   }
 
   private async handleApprovedAction(essay: Essay) {
+    await this.userService.decreaseReputation(essay.author.id, 10);
+
+    if (essay.status === EssayStatus.LINKEDOUT) await this.essayRepository.deleteEssay(essay);
+
     if (essay.status === EssayStatus.PUBLISHED) {
       essay.status = EssayStatus.PRIVATE;
       await this.essayRepository.saveEssay(essay);
+      await this.alertService.createReportResultAlerts(essay.author.id);
+      await this.alertService.sendPushAlertReportProcessed(essay);
     }
-
-    if (essay.status === EssayStatus.LINKEDOUT) {
-      await this.essayRepository.deleteEssay(essay);
-    }
-
-    await this.userService.decreaseReputation(essay.author.id, 10);
-    // TODO: 여기에 앱 푸쉬 알림 및 메일링 추가
   }
 
   @Transactional()
@@ -307,14 +306,11 @@ export class AdminService {
     if (!reports.length)
       throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
 
-    setImmediate(() => {
-      this.alertService.createAndSendAlerts(reports, data.actionType);
-    });
-
     console.log(
       `Adding syncReportsProcessed job for essay ${essayId} with ${reports.length} reports`,
     );
     await this.adminQueue.add('syncReportsProcessed', { reports, adminId, data });
+    await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
   }
 
   async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {
@@ -432,11 +428,12 @@ export class AdminService {
     );
     await this.adminRepository.saveHistory(newHistory);
 
-    // todo 유저에게 결과 메일 또는 푸쉬알림
+    await this.alertService.createReviewResultAlert(review.user.id, review.type, data.actionType);
+    await this.alertService.sendPushReviewResultAlert(review.user.id);
   }
 
   private handleReviewAction(review: ReviewQueue, actionType: string) {
-    if (actionType === 'approved') {
+    if (actionType === ActionType.APPROVED) {
       if (review.type === 'published') {
         review.essay.status = EssayStatus.PUBLISHED;
       } else {

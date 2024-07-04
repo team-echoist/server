@@ -16,6 +16,7 @@ import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
 import { EssayService } from '../essay/essay.service';
 import { Transactional } from 'typeorm-transactional';
 import { StoryUpdateEssayResDto } from '../essay/dto/response/storyUpdateEssayRes.dto';
+import { UpdateStoryReqDto } from './dto/repuest/updateStoryReq.dto';
 
 @Injectable()
 export class StoryService {
@@ -56,7 +57,7 @@ export class StoryService {
   }
 
   @Transactional()
-  async updateStory(userId: number, storyId: number, data: CreateStoryReqDto) {
+  async updateStory(userId: number, storyId: number, data: UpdateStoryReqDto) {
     const story = await this.storyRepository.findStoryWithEssayById(userId, storyId);
     if (!story) throw new NotFoundException('Story not found');
 
