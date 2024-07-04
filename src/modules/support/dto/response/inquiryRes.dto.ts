@@ -11,7 +11,7 @@ export class InquiryResDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  title: number;
+  title: string;
 
   @ApiProperty()
   @Expose()

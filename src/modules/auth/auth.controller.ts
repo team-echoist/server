@@ -50,11 +50,6 @@ export class AuthController {
     description: '이메일이 사용 가능한 경우',
     schema: { type: 'boolean', example: true },
   })
-  @ApiResponse({
-    status: 409,
-    description: '이메일이 이미 존재하는 경우',
-    schema: { type: 'boolean', example: false },
-  })
   @ApiBody({
     description: '이메일 중복 검사 요청 데이터',
     type: CheckEmailReqDto,
@@ -151,11 +146,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: EmailReqDto })
-  async updateEmail(
-    @Query('token') token: string,
-    @Req() req: ExpressRequest,
-    @Res() res: Response,
-  ) {
+  async updateEmail(@Query('token') token: string) {
     await this.authService.updateEmail(token);
     // todo 리다이렉션
     return;

@@ -24,50 +24,203 @@ export class AlertService {
     @InjectQueue('alert') private readonly alertQueue: Queue,
   ) {}
 
-  async createAndSendAlerts(reports: ReportQueue[], type: ActionType) {
-    await this.alertQueue.add('createAndSendAlerts', { reports, type });
+  async hasUnreadAlerts(userId: number) {
+    const result = await this.alertRepository.countingAlert(userId);
+
+    return result > 0;
   }
 
-  async processAlerts(reports: ReportQueue[], type: ActionType) {
+  async getAlerts(userId: number, page: number, limit: number) {
+    const { alerts, total } = await this.alertRepository.findAlerts(userId, page, limit);
+
+    const totalPage: number = Math.ceil(total / limit);
+    const alertsDto = this.utilsService.transformToDto(AlertResDto, alerts);
+
+    return { alerts: alertsDto, total, page, totalPage };
+  }
+
+  async markAlertAsRead(userId: number, alertId: number) {
+    const alert = await this.alertRepository.findAlert(userId, alertId);
+
+    if (!alert) throw new HttpException('Alert not found', HttpStatus.NOT_FOUND);
+
+    alert.read = true;
+    await this.alertRepository.saveAlert(alert);
+  }
+
+  async createAndSendReportProcessedAlerts(reports: ReportQueue[], type: ActionType) {
+    await this.alertQueue.add('createAndSendReportProcessedAlerts', { reports, type });
+  }
+
+  async processReportAlerts(reports: ReportQueue[], type: ActionType) {
     for (const report of reports) {
       const user = await this.userService.fetchUserEntityById(report.reporter.id);
 
-      await this.createProcessedAlert(user, report, type);
+      await this.createReportProcessedAlert(user, report, type);
 
-      await this.fcmService.sendPushAlert(
-        user.deviceToken,
-        '처리 결과 푸쉬 알림',
-        '대충 확인하라는 문구.',
-      );
+      const devices = await this.supportService.getDevices(report.reporter.id);
+      if (!devices && devices.length === 0) return;
+
+      for (const device of devices) {
+        const alertSettings = await this.supportService.fetchSettingEntityById(
+          report.reporter.id,
+          device.deviceId,
+        );
+        if (alertSettings.report)
+          await this.fcmService.sendPushAlert(
+            user.deviceToken,
+            '신고 결과를 알려드릴려고 왔어요!',
+            '요청하신 지원에 대한 업데이트가 있어요.',
+          );
+      }
     }
   }
 
-  async createProcessedAlert(user: User, report: ReportQueue, type: ActionType) {
+  MESSAGE_TEMPLATES = {
+    approvedBody: (result: string) =>
+      `해당 글을 검토한 결과 커뮤니티 가이드라인을 위반하는 콘텐츠를 포함하고 있어 ${result}되었습니다. 신고해주셔서 감사합니다!`,
+    rejectBody:
+      '저희는 커뮤니티 가이드라인을 바탕으로 콘텐츠를 검토하고 있습니다. 해당 글을 검토한 결과 위반 사항이 없어 별도의 조치가 취해지지 않습니다.',
+    contentEnd: {
+      [EssayStatus.PUBLISHED]: '비공개 처리되었습니다.',
+      [EssayStatus.LINKEDOUT]: '삭제되었습니다.',
+      default: '처리되지 않았습니다.',
+    },
+    result: {
+      [EssayStatus.PUBLISHED]: '비공개 처리',
+      [EssayStatus.LINKEDOUT]: '삭제',
+      default: '',
+    },
+  };
+
+  async createReportProcessedAlert(user: User, report: ReportQueue, type: ActionType) {
     const alert = new Alert();
     const koreanDate = this.utilsService.formatDateToKorean(report.createdDate);
-    let contentEnd: string;
-    let result: string;
+    // let contentEnd: string;
+    // let result: string;
 
-    if (report.essay.status === EssayStatus.PUBLISHED && type === ActionType.APPROVED) {
-      contentEnd = `비공개 처리되었습니다.`;
-      result = '비공개';
-    } else if (report.essay.status === EssayStatus.LINKEDOUT && type === ActionType.APPROVED) {
-      contentEnd = '삭제되었습니다.';
-      result = '삭제';
-    } else {
-      contentEnd = '처리되지 않았습니다.';
-    }
-
-    const approvedBody = `해당 글을 컴도 결과 커뮤니티 가이드라인을 위반하는 콘텐츠를 포함하고 있어 ${result}되었습니다. 신고해주셔서 감사합니다!`;
-    const rejectBody = `저희는 커뮤니티 가이드라인을 바탕으로 콘텐츠를 검토하고 있습니다. 해당 글을 검토한 결과 위반사항이 없음으로 별도의 조치가 취해지지 않습니다.`;
+    const contentEnd = this.getContentEnd(report.essay.status, type);
+    const result = this.getResult(report.essay.status, type);
+    const body = this.getAlertBody(type, result);
 
     alert.user = user;
-    alert.title = `${koreanDate}에 요청하신 지원에 대한 내용이 업데이트 됐어요.`;
+    alert.title = `${koreanDate}에 요청하신 지원에 대한 내용이 업데이트 되었습니다.`;
     alert.content = `${koreanDate}에 신고하신 게시물이 ${contentEnd}`;
-    alert.body = type === ActionType.APPROVED ? approvedBody : rejectBody;
+    alert.body = body;
     alert.type = AlertType.UPDATED;
 
     return this.alertRepository.saveAlert(alert);
+  }
+
+  private getContentEnd(status: EssayStatus, type: ActionType): string {
+    if (type === ActionType.APPROVED) {
+      return this.MESSAGE_TEMPLATES.contentEnd[status] || this.MESSAGE_TEMPLATES.contentEnd.default;
+    }
+    return this.MESSAGE_TEMPLATES.contentEnd.default;
+  }
+
+  private getResult(status: EssayStatus, type: ActionType): string {
+    if (type === ActionType.APPROVED) {
+      return this.MESSAGE_TEMPLATES.result[status] || this.MESSAGE_TEMPLATES.result.default;
+    }
+    return this.MESSAGE_TEMPLATES.result.default;
+  }
+
+  private getAlertBody(type: ActionType, result: string): string {
+    if (type === ActionType.APPROVED) {
+      return this.MESSAGE_TEMPLATES.approvedBody(result);
+    }
+    return this.MESSAGE_TEMPLATES.rejectBody;
+  }
+
+  // todo 1
+  async createReportResultAlerts(userId: number) {
+    const alert = new Alert();
+
+    alert.user = await this.userService.fetchUserEntityById(userId);
+    alert.title = `님 신고당함`;
+    alert.content = `검토결과 부적절한 글임`;
+    alert.body = '비공개 처리함';
+    alert.type = AlertType.UPDATED;
+
+    return this.alertRepository.saveAlert(alert);
+  }
+
+  // todo 1
+  async sendPushAlertReportProcessed(essay: Essay) {
+    const devices = await this.supportService.getDevices(essay.author.id);
+    if (!devices && devices.length === 0) return;
+
+    for (const device of devices) {
+      const alertSettings = await this.supportService.fetchSettingEntityById(
+        essay.author.id,
+        device.deviceId,
+      );
+      if (alertSettings.report)
+        await this.fcmService.sendPushAlert(
+          device.deviceToken,
+          `님 신고당해서 에세이처리당함`,
+          `왜자꾸 똥글쌈`,
+        );
+    }
+  }
+
+  // todo 2
+  async createReviewAlerts(essay: Essay, status: EssayStatus) {
+    const alert = new Alert();
+    const koreanDate = this.utilsService.formatDateToKorean(essay.createdDate);
+
+    alert.user = essay.author;
+    alert.title = `${koreanDate}에 ${status} 요청하신 에세이에 대한 검토를 진행중이에요.`;
+    alert.content = `${koreanDate}에 블라블라`;
+    alert.body = `블라블라`;
+    alert.type = AlertType.UPDATED;
+
+    return this.alertRepository.saveAlert(alert);
+  }
+
+  // todo 2
+  async sendPushReviewAlert(essay: Essay) {
+    const devices = await this.supportService.getDevices(essay.author.id);
+    if (!devices && devices.length === 0) return;
+
+    for (const device of devices) {
+      const alertSettings = await this.supportService.fetchSettingEntityById(
+        essay.author.id,
+        device.deviceId,
+      );
+      if (alertSettings.report)
+        await this.fcmService.sendPushAlert(device.deviceToken, `리뷰 생성댐`, `님 악성유저임`);
+    }
+  }
+
+  // todo 3
+  async createReviewResultAlert(userId: number, type: string, actionType: string) {
+    const alert = new Alert();
+    const req = type === 'published' ? '발행' : '링크드아웃';
+
+    alert.user = await this.userService.fetchUserEntityById(userId);
+    alert.title = `${req} 요청하신 에세이에 대한 검토 완료.`;
+    alert.content = actionType === ActionType.APPROVED ? `허락하마` : `ㄴㄴ;`;
+    alert.body = actionType === ActionType.APPROVED ? `허락하마` : `ㄴㄴ;`;
+    alert.type = AlertType.UPDATED;
+
+    return this.alertRepository.saveAlert(alert);
+  }
+
+  // todo 3
+  async sendPushReviewResultAlert(userId: number) {
+    const devices = await this.supportService.getDevices(userId);
+    if (!devices && devices.length === 0) return;
+
+    for (const device of devices) {
+      const alertSettings = await this.supportService.fetchSettingEntityById(
+        userId,
+        device.deviceId,
+      );
+      if (alertSettings.report)
+        await this.fcmService.sendPushAlert(device.deviceToken, `검토 완료`, `어찌저찌되었음`);
+    }
   }
 
   async createAlertFirstView(essay: Essay) {
@@ -92,10 +245,8 @@ export class AlertService {
   }
 
   async sendPushAlertFirstView(essay: Essay) {
-    const title = '이리오너라!';
-    const body = `"${essay.title}" 이라는 제목의 에세이가 처음으로 조회되었습니다.`;
-
     const devices = await this.supportService.getDevices(essay.author.id);
+    if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
       const alertSettings = await this.supportService.fetchSettingEntityById(
@@ -103,32 +254,11 @@ export class AlertService {
         device.deviceId,
       );
       if (alertSettings.viewed)
-        await this.fcmService.sendPushAlert(device.deviceToken, title, body);
+        await this.fcmService.sendPushAlert(
+          device.deviceToken,
+          `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 발견!`,
+          `사람들이 ${essay.author.nickname} 아무개님의 이야기를 읽기 시작했어요!`,
+        );
     }
-  }
-
-  async hasUnreadAlerts(userId: number) {
-    const result = await this.alertRepository.countingAlert(userId);
-
-    return result > 0;
-  }
-
-  async getAlerts(userId: number, page: number, limit: number) {
-    const { alerts, total } = await this.alertRepository.findAlerts(userId, page, limit);
-
-    const totalPage: number = Math.ceil(total / limit);
-
-    const alertsDto = this.utilsService.transformToDto(AlertResDto, alerts);
-
-    return { alerts: alertsDto, total, page, totalPage };
-  }
-
-  async markAlertAsRead(userId: number, alertId: number) {
-    const alert = await this.alertRepository.findAlert(userId, alertId);
-
-    if (!alert) throw new HttpException('Alert not found', HttpStatus.NOT_FOUND);
-
-    alert.read = true;
-    await this.alertRepository.saveAlert(alert);
   }
 }

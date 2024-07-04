@@ -5,20 +5,20 @@ export class AdminUpdateReqDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  password: string;
+  password?: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  info: string;
+  info?: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  profileImage: string;
+  profileImage?: string;
 }

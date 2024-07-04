@@ -101,7 +101,7 @@ export class StoryController {
   async updateStory(
     @Req() req: ExpressRequest,
     @Param('storyId', ParseIntPipe) storyId: number,
-    @Body() data: CreateStoryReqDto,
+    @Body() data: UpdateStoryReqDto,
   ) {
     return this.storyService.updateStory(req.user.id, storyId, data);
   }
