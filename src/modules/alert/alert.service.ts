@@ -12,6 +12,7 @@ import { Queue } from 'bull';
 import { UserService } from '../user/user.service';
 import { User } from '../../entities/user.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { ReviewQueue } from '../../entities/reviewQueue.entity';
 
 @Injectable()
 export class AlertService {
@@ -96,8 +97,6 @@ export class AlertService {
   async createReportProcessedAlert(user: User, report: ReportQueue, type: ActionType) {
     const alert = new Alert();
     const koreanDate = this.utilsService.formatDateToKorean(report.createdDate);
-    // let contentEnd: string;
-    // let result: string;
 
     const contentEnd = this.getContentEnd(report.essay.status, type);
     const result = this.getResult(report.essay.status, type);
@@ -107,7 +106,7 @@ export class AlertService {
     alert.title = `${koreanDate}에 요청하신 지원에 대한 내용이 업데이트 되었습니다.`;
     alert.content = `${koreanDate}에 신고하신 게시물이 ${contentEnd}`;
     alert.body = body;
-    alert.type = AlertType.UPDATED;
+    alert.type = AlertType.SUPPORT;
 
     return this.alertRepository.saveAlert(alert);
   }
@@ -133,20 +132,20 @@ export class AlertService {
     return this.MESSAGE_TEMPLATES.rejectBody;
   }
 
-  // todo 1
-  async createReportResultAlerts(userId: number) {
+  async createReportResultAlerts(essay: Essay) {
     const alert = new Alert();
+    const koreanDate = this.utilsService.formatDateToKorean(essay.createdDate);
 
-    alert.user = await this.userService.fetchUserEntityById(userId);
-    alert.title = `님 신고당함`;
-    alert.content = `검토결과 부적절한 글임`;
-    alert.body = '비공개 처리함';
-    alert.type = AlertType.UPDATED;
+    alert.user = await this.userService.fetchUserEntityById(essay.author.id);
+    alert.title = `${koreanDate}에 작성하신 게시물이 업데이트 됐어요.`;
+    alert.content = `${koreanDate}에 작성하신 게시물이 비공개 처리되었습니다.`;
+    alert.body =
+      '해당 글에 대한 신고 발생으로 인해, 커뮤니티 가이드라인을 바탕으로 콘텐츠를 검토한 결과 비공개 처리되었습니다.';
+    alert.type = AlertType.SUPPORT;
 
     return this.alertRepository.saveAlert(alert);
   }
 
-  // todo 1
   async sendPushAlertReportProcessed(essay: Essay) {
     const devices = await this.supportService.getDevices(essay.author.id);
     if (!devices && devices.length === 0) return;
@@ -159,27 +158,25 @@ export class AlertService {
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
           device.deviceToken,
-          `님 신고당해서 에세이처리당함`,
-          `왜자꾸 똥글쌈`,
+          `$작성하신 글에 대한 업데이트가 있어요.`,
+          `발행하신 글이 검토 후 비공개 상태로 전환됐어요.`,
         );
     }
   }
 
-  // todo 2
   async createReviewAlerts(essay: Essay, status: EssayStatus) {
     const alert = new Alert();
     const koreanDate = this.utilsService.formatDateToKorean(essay.createdDate);
 
     alert.user = essay.author;
-    alert.title = `${koreanDate}에 ${status} 요청하신 에세이에 대한 검토를 진행중이에요.`;
-    alert.content = `${koreanDate}에 블라블라`;
-    alert.body = `블라블라`;
-    alert.type = AlertType.UPDATED;
+    alert.title = `${koreanDate}에 ${status} 요청하신 글에 대한 내용이 업데이트 됐어요.`;
+    alert.content = `${koreanDate}에 작성하신 "${essay.title}" 게시물이 비공개 처리되었습니다.`;
+    alert.body = `해당 글이 커뮤니티 가이드라인을 준수하는지 검토 후 알려드릴게요!`;
+    alert.type = AlertType.SUPPORT;
 
     return this.alertRepository.saveAlert(alert);
   }
 
-  // todo 2
   async sendPushReviewAlert(essay: Essay) {
     const devices = await this.supportService.getDevices(essay.author.id);
     if (!devices && devices.length === 0) return;
@@ -190,28 +187,40 @@ export class AlertService {
         device.deviceId,
       );
       if (alertSettings.report)
-        await this.fcmService.sendPushAlert(device.deviceToken, `리뷰 생성댐`, `님 악성유저임`);
+        await this.fcmService.sendPushAlert(
+          device.deviceToken,
+          '작성하신 글에 대한 업데이트가 있어요.',
+          `발행 또는 링크드아웃하신 글이 검토 후 공개될 예정이에요.`,
+        );
     }
   }
 
-  // todo 3
-  async createReviewResultAlert(userId: number, type: string, actionType: string) {
+  async createReviewResultAlert(review: ReviewQueue, actionType: string) {
     const alert = new Alert();
-    const req = type === 'published' ? '발행' : '링크드아웃';
+    const req = review.type === 'published' ? '발행' : '링크드아웃';
+    const koreanDate = this.utilsService.formatDateToKorean(review.essay.createdDate);
 
-    alert.user = await this.userService.fetchUserEntityById(userId);
-    alert.title = `${req} 요청하신 에세이에 대한 검토 완료.`;
-    alert.content = actionType === ActionType.APPROVED ? `허락하마` : `ㄴㄴ;`;
-    alert.body = actionType === ActionType.APPROVED ? `허락하마` : `ㄴㄴ;`;
-    alert.type = AlertType.UPDATED;
+    alert.user = await this.userService.fetchUserEntityById(review.user.id);
+    alert.title = `${koreanDate}에 작성하신 글에 대한 내용이 업데이트 됐어요.`;
+    alert.content =
+      actionType === ActionType.APPROVED
+        ? `${koreanDate}에 작성하신 게시물이 공개처리되었습니다.`
+        : `${koreanDate}에 작성하신 게시물이 보류 처리되었습니다.`;
+    alert.body =
+      actionType === ActionType.APPROVED
+        ? `해당 글은 검토 결과 커뮤니티 가이드라인에 따라 공개 처리되었음을 알려드립니다. 기다려주셔서 감사합니다.`
+        : `해당 글은 검토 결과 커뮤니티 가이드라인을 위반하는 콘텐츠를 포함하고 있어 비공개 처리되었습니다.`;
+    alert.type = AlertType.SUPPORT;
 
     return this.alertRepository.saveAlert(alert);
   }
 
-  // todo 3
-  async sendPushReviewResultAlert(userId: number) {
+  async sendPushReviewResultAlert(userId: number, actionType: string) {
     const devices = await this.supportService.getDevices(userId);
     if (!devices && devices.length === 0) return;
+
+    const result = actionType === ActionType.APPROVED ? '공개' : '보류';
+    const body = `발행 또는 링크드아웃하신 글이 검토 후 ${result} 상태로 전환됐어요.`;
 
     for (const device of devices) {
       const alertSettings = await this.supportService.fetchSettingEntityById(
@@ -219,7 +228,11 @@ export class AlertService {
         device.deviceId,
       );
       if (alertSettings.report)
-        await this.fcmService.sendPushAlert(device.deviceToken, `검토 완료`, `어찌저찌되었음`);
+        await this.fcmService.sendPushAlert(
+          device.deviceToken,
+          `작성하신 글에 대한 업데이트가 있어요.`,
+          body,
+        );
     }
   }
 

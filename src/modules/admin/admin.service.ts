@@ -295,7 +295,7 @@ export class AdminService {
     if (essay.status === EssayStatus.PUBLISHED) {
       essay.status = EssayStatus.PRIVATE;
       await this.essayRepository.saveEssay(essay);
-      await this.alertService.createReportResultAlerts(essay.author.id);
+      await this.alertService.createReportResultAlerts(essay);
       await this.alertService.sendPushAlertReportProcessed(essay);
     }
   }
@@ -428,8 +428,8 @@ export class AdminService {
     );
     await this.adminRepository.saveHistory(newHistory);
 
-    await this.alertService.createReviewResultAlert(review.user.id, review.type, data.actionType);
-    await this.alertService.sendPushReviewResultAlert(review.user.id);
+    await this.alertService.createReviewResultAlert(review, data.actionType);
+    await this.alertService.sendPushReviewResultAlert(review.user.id, data.actionType);
   }
 
   private handleReviewAction(review: ReviewQueue, actionType: string) {
