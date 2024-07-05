@@ -303,13 +303,16 @@ export class AdminService {
   @Transactional()
   async syncReportsProcessed(essayId: number, adminId: number, data: ProcessReqDto) {
     const reports = await this.adminRepository.findReportByEssayId(essayId);
+
     if (!reports.length)
       throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
 
     console.log(
       `Adding syncReportsProcessed job for essay ${essayId} with ${reports.length} reports`,
     );
-    await this.adminQueue.add('syncReportsProcessed', { reports, adminId, data });
+
+    const combinedReports = reports.map((report) => ({ ...report, adminId, data }));
+    await this.adminQueue.add('syncReportsProcessed', { reports: combinedReports });
     await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
   }
 
