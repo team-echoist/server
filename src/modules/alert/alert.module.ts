@@ -13,26 +13,19 @@ import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { AlertProcessor } from './alert.processor';
 import { UserModule } from '../user/user.module';
-import * as Redis from 'ioredis';
+import { Essay } from '../../entities/essay.entity';
+import { DeactivationReason } from '../../entities/deactivationReason.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Alert, User]),
+    TypeOrmModule.forFeature([User, Essay, DeactivationReason]),
     BullModule.registerQueueAsync({
       name: 'alert',
       useFactory: async (configService: ConfigService) => ({
-        createClient: () => {
-          return new Redis.Cluster(
-            [
-              {
-                host: configService.get<string>('REDIS_HOST'),
-                port: configService.get<number>('REDIS_PORT'),
-              },
-            ],
-            {
-              enableReadyCheck: false,
-            },
-          );
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
         },
       }),
       inject: [ConfigService],

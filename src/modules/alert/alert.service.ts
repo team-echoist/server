@@ -7,8 +7,8 @@ import { AlertResDto } from './dto/response/alertRes.dto';
 import { SupportService } from '../support/support.service';
 import { FcmService } from '../fcm/fcm.service';
 import { ActionType } from '../../entities/processedHistory.entity';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { UserService } from '../user/user.service';
 import { User } from '../../entities/user.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
@@ -54,11 +54,7 @@ export class AlertService {
       `Adding createAndSendReportProcessedAlerts job: ${JSON.stringify({ reports, type })}`,
     );
 
-    try {
-      await this.alertQueue.add(`createAndSendReportProcessedAlerts`, { reports, type });
-    } catch (error) {
-      console.error('Error adding to alertQueue:', error);
-    }
+    await this.alertQueue.add(`createAndSendReportProcessedAlerts`, { reports, type });
   }
 
   async processReportAlerts(reports: ReportQueue[], type: ActionType) {

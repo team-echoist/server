@@ -48,8 +48,8 @@ import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { AlertService } from '../alert/alert.service';
 
 @Injectable()
@@ -313,17 +313,9 @@ export class AdminService {
 
     console.log(`Adding to adminQueue: ${JSON.stringify(combinedReports)}`);
 
-    try {
-      await this.adminQueue.add(`syncReportsProcessed`, { reports: combinedReports });
-    } catch (error) {
-      console.error('Error adding to adminQueue:', error);
-    }
+    await this.adminQueue.add(`syncReportsProcessed`, { reports: combinedReports });
 
-    try {
-      await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
-    } catch (error) {
-      console.error('Error calling createAndSendReportProcessedAlerts:', error);
-    }
+    await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
   }
 
   async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {
