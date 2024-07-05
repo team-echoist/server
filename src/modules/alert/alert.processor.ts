@@ -1,8 +1,9 @@
-import { Process, Processor } from '@nestjs/bull';
-import { Job } from 'bull';
+import { Processor } from '@nestjs/bullmq';
+import { Job } from 'bullmq';
 import { AlertService } from './alert.service';
 import { ActionType } from '../../entities/processedHistory.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { Process } from '@nestjs/bull';
 
 @Processor('alert')
 export class AlertProcessor {
