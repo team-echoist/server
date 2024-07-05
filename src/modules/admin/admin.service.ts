@@ -276,20 +276,18 @@ export class AdminService {
   @Transactional()
   async processReports(userId: number, essayId: number, data: ProcessReqDto) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    if (!essay) {
-      throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
-    }
+    if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
 
-    if (data.actionType === 'approved') {
-      await this.handleApprovedAction(essay);
-    }
+    if (essay.status === EssayStatus.PRIVATE)
+      throw new HttpException('The essay is private', HttpStatus.BAD_REQUEST);
+
+    if (data.actionType === 'approved') await this.handleApprovedAction(essay);
 
     await this.syncReportsProcessed(essayId, userId, data);
   }
 
   private async handleApprovedAction(essay: Essay) {
     await this.userService.decreaseReputation(essay.author.id, 10);
-
     if (essay.status === EssayStatus.LINKEDOUT) await this.essayRepository.deleteEssay(essay);
 
     if (essay.status === EssayStatus.PUBLISHED) {
@@ -312,10 +310,13 @@ export class AdminService {
     );
 
     const combinedReports = reports.map((report) => ({ ...report, adminId, data }));
-    const hashTag = `{essay:${essayId}}`;
 
-    await this.adminQueue.add(`${hashTag}:syncReportsProcessed`, { reports: combinedReports });
-    await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType, hashTag);
+    await this.adminQueue.add(
+      `syncReportsProcessed`,
+      { reports: combinedReports },
+      { jobId: `{essay}:${essayId}` },
+    );
+    await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
   }
 
   async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {

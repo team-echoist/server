@@ -49,12 +49,12 @@ export class AlertService {
     await this.alertRepository.saveAlert(alert);
   }
 
-  async createAndSendReportProcessedAlerts(
-    reports: ReportQueue[],
-    type: ActionType,
-    hashTag: string,
-  ) {
-    await this.alertQueue.add(`${hashTag}:createAndSendReportProcessedAlerts`, { reports, type });
+  async createAndSendReportProcessedAlerts(reports: ReportQueue[], type: ActionType) {
+    await this.alertQueue.add(
+      `createAndSendReportProcessedAlerts`,
+      { reports, type },
+      { jobId: `{alert}:${type}` },
+    );
   }
 
   async processReportAlerts(reports: ReportQueue[], type: ActionType) {
