@@ -53,7 +53,7 @@ export class AlertService {
     await this.alertQueue.add(
       `createAndSendReportProcessedAlerts`,
       { reports, type },
-      { jobId: `{alert}:${type}` },
+      { jobId: `{createAndSendReportProcessedAlerts}:${type}` },
     );
   }
 
