@@ -50,11 +50,7 @@ export class AlertService {
   }
 
   async createAndSendReportProcessedAlerts(reports: ReportQueue[], type: ActionType) {
-    await this.alertQueue.add(
-      `createAndSendReportProcessedAlerts`,
-      { reports, type },
-      { jobId: `{createAndSendReportProcessedAlerts}:${type}` },
-    );
+    await this.alertQueue.add(`createAndSendReportProcessedAlerts`, { reports, type });
   }
 
   async processReportAlerts(reports: ReportQueue[], type: ActionType) {
