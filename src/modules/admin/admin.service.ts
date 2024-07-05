@@ -311,8 +311,19 @@ export class AdminService {
 
     const combinedReports = reports.map((report) => ({ ...report, adminId, data }));
 
-    await this.adminQueue.add(`syncReportsProcessed`, { reports: combinedReports });
-    // await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
+    console.log(`Adding to adminQueue: ${JSON.stringify(combinedReports)}`);
+
+    try {
+      await this.adminQueue.add(`syncReportsProcessed`, { reports: combinedReports });
+    } catch (error) {
+      console.error('Error adding to adminQueue:', error);
+    }
+
+    try {
+      await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
+    } catch (error) {
+      console.error('Error calling createAndSendReportProcessedAlerts:', error);
+    }
   }
 
   async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {

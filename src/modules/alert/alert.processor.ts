@@ -13,13 +13,19 @@ export class AlertProcessor {
     console.log('Processing createAndSendAlerts job:', job.id);
 
     const { reports, type } = job.data;
+    console.log(`Job data: ${JSON.stringify(job.data)}`);
     const batchSize = 10;
     const delayBetweenBatches = 3000;
 
     for (let i = 0; i < reports.length; i += batchSize) {
       const batch = reports.slice(i, i + batchSize);
+      console.log(`Processing batch: ${JSON.stringify(batch)}`);
 
-      await this.alertService.processReportAlerts(batch, type);
+      try {
+        await this.alertService.processReportAlerts(batch, type);
+      } catch (error) {
+        console.error('Error processing batch:', error);
+      }
 
       if (i + batchSize < reports.length) {
         await this.sleep(delayBetweenBatches);
