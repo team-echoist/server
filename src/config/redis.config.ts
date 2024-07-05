@@ -5,7 +5,7 @@ export const redisConfig: RedisModuleOptions = {
   nodes: [
     {
       host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT, 10),
+      port: +process.env.REDIS_PORT,
     },
   ],
 };

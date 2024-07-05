@@ -52,6 +52,7 @@ import { AlertModule } from '../alert/alert.module';
           host: configService.get<string>('REDIS_HOST'),
           port: configService.get<number>('REDIS_PORT'),
         },
+        prefix: '{bull}',
       }),
       inject: [ConfigService],
     }),
