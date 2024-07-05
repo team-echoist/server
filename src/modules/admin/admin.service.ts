@@ -48,8 +48,8 @@ import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { AlertService } from '../alert/alert.service';
 
 @Injectable()
