@@ -312,8 +312,10 @@ export class AdminService {
     );
 
     const combinedReports = reports.map((report) => ({ ...report, adminId, data }));
-    await this.adminQueue.add('syncReportsProcessed', { reports: combinedReports });
-    await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
+    const hashTag = `{essay:${essayId}}`;
+
+    await this.adminQueue.add(`${hashTag}:syncReportsProcessed`, { reports: combinedReports });
+    await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType, hashTag);
   }
 
   async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {
