@@ -50,7 +50,15 @@ export class AlertService {
   }
 
   async createAndSendReportProcessedAlerts(reports: ReportQueue[], type: ActionType) {
-    await this.alertQueue.add(`createAndSendReportProcessedAlerts`, { reports, type });
+    console.log(
+      `Adding createAndSendReportProcessedAlerts job: ${JSON.stringify({ reports, type })}`,
+    );
+
+    try {
+      await this.alertQueue.add(`createAndSendReportProcessedAlerts`, { reports, type });
+    } catch (error) {
+      console.error('Error adding to alertQueue:', error);
+    }
   }
 
   async processReportAlerts(reports: ReportQueue[], type: ActionType) {

@@ -15,13 +15,19 @@ export class AdminProcessor {
     console.log('Processing syncReportsProcessed job:', job.id);
 
     const { reports, adminId, data } = job.data;
+    console.log(`Job data: ${JSON.stringify(job.data)}`);
     const batchSize = 10;
     const delayBetweenBatches = 3000;
 
     for (let i = 0; i < reports.length; i += batchSize) {
       const batch = reports.slice(i, i + batchSize);
+      console.log(`Processing batch: ${JSON.stringify(batch)}`);
 
-      await this.adminService.processBatchReports(batch, adminId, data);
+      try {
+        await this.adminService.processBatchReports(batch, adminId, data);
+      } catch (error) {
+        console.error('Error processing batch:', error);
+      }
 
       if (i + batchSize < reports.length) {
         await this.sleep(delayBetweenBatches);
