@@ -314,7 +314,7 @@ export class AdminService {
     await this.adminQueue.add(
       `syncReportsProcessed`,
       { reports: combinedReports },
-      { jobId: `{essay}:${essayId}` },
+      { jobId: `{syncReportsProcessed}:${essayId}` },
     );
     await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
   }
