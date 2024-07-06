@@ -15,8 +15,6 @@ import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
 import { CreateAdminDto } from '../dto/createAdmin.dto';
 import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { AdminResDto } from '../dto/response/adminRes.dto';
-import { AlertRepository } from '../../alert/alert.repository';
-import { FcmService } from '../../fcm/fcm.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
