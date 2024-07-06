@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { EssayStatus } from '../../../../entities/essay.entity';
+import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 
 export class SummaryEssayResDto {
   @ApiProperty()
@@ -33,4 +34,9 @@ export class SummaryEssayResDto {
   @IsString()
   @Expose()
   content: string;
+
+  @ApiProperty({ type: UserSummaryResDto })
+  @Type(() => UserSummaryResDto)
+  @Expose()
+  author: UserSummaryResDto;
 }

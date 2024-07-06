@@ -133,7 +133,7 @@ export class EssayRepository {
 
     return this.essayRepository
       .createQueryBuilder('essay')
-      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.author', 'author', 'author.deletedDate IS NULL')
       .leftJoin(
         (subQuery) =>
           subQuery
@@ -160,7 +160,7 @@ export class EssayRepository {
         `
       ${bookmarkWeight} * COALESCE("bookmarkCounts"."bookmarkCount", 0) +
       ${trendWeight} * essay.trendScore +
-      ${reputationWeight} * author.reputation
+      ${reputationWeight}  * COALESCE(author.reputation, 0)
       ${recentTags.length > 0 ? ` + ${tagWeight} * COALESCE(SUM(CASE WHEN tags.id IN (:...recentTags) THEN 1 ELSE 0 END), 0)` : ''}
     `,
         'weighted_score',
