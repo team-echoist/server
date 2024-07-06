@@ -275,7 +275,7 @@ export class AdminService {
 
   @Transactional()
   async processReports(userId: number, essayId: number, data: ProcessReqDto) {
-    const essay = await this.essayRepository.findEssayById(essayId);
+    const essay = await this.essayRepository.findPublishedEssayById(essayId);
     if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
 
     if (essay.status === EssayStatus.PRIVATE)
