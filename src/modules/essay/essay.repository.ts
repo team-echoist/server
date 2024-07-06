@@ -22,6 +22,17 @@ export class EssayRepository {
       .getOne();
   }
 
+  async findPublishedEssayById(essayId: number) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.story', 'story')
+      .leftJoinAndSelect('essay.tags', 'tags')
+      .where('essay.id = :id', { id: essayId })
+      .andWhere('essay.status != :status', { status: EssayStatus.PRIVATE })
+      .getOne();
+  }
+
   async saveEssay(data: SaveEssayDto) {
     return this.essayRepository.save(data);
   }
