@@ -1,10 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { NicknameRepository } from './nickname.repository';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class NicknameService {
   constructor(private readonly nicknameRepository: NicknameRepository) {}
 
+  @Transactional()
   async generateUniqueNickname(): Promise<string> {
     const maxDigits = 6;
 

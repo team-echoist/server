@@ -294,11 +294,6 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  private async decreaseTrendScore(essay: Essay, decayFactor: number) {
-    const newTrendScore = essay.trendScore / decayFactor;
-    await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
-  }
-
   private async updateTrendScoreOnView(essay: Essay) {
     const incrementAmount = 1;
     const decayFactor = 0.99;
@@ -317,19 +312,19 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  private async previousEssay(userId: number, essay: Essay) {
-    let previousEssay: Essay[];
-
-    userId === essay.author.id
-      ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
-      : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
-
-    previousEssay.forEach((essay) => {
-      essay.content = this.utilsService.extractPartContent(essay.content);
-    });
-
-    return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
-  }
+  // private async previousEssay(userId: number, essay: Essay) {
+  //   let previousEssay: Essay[];
+  //
+  //   userId === essay.author.id
+  //     ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
+  //     : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
+  //
+  //   previousEssay.forEach((essay) => {
+  //     essay.content = this.utilsService.extractPartContent(essay.content);
+  //   });
+  //
+  //   return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+  // }
 
   @Transactional()
   async deleteEssay(userId: number, essayId: number) {
@@ -396,7 +391,7 @@ export class EssayService {
     return { essays: essayDtos };
   }
 
-  private async getRecentTags(userId: number) {
+  async getRecentTags(userId: number) {
     const recentEssayIds = await this.viewService.getRecentEssayIds(userId, 5);
 
     let recentTags: any[];
@@ -463,7 +458,7 @@ export class EssayService {
     }
   }
 
-  private async addEssaysStory(userId: number, essayIds: number[], story: Story) {
+  async addEssaysStory(userId: number, essayIds: number[], story: Story) {
     const essays = await this.essayRepository.findByIds(userId, essayIds);
     essays.forEach((essay) => {
       essay.story = story;
@@ -471,7 +466,7 @@ export class EssayService {
     await this.essayRepository.saveEssays(essays);
   }
 
-  private async deleteEssaysStory(userId: number, essayIds: number[]) {
+  async deleteEssaysStory(userId: number, essayIds: number[]) {
     const essays = await this.essayRepository.findByIds(userId, essayIds);
     essays.forEach((essay) => {
       essay.story = null;

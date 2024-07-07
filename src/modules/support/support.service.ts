@@ -107,6 +107,7 @@ export class SupportService {
     return await this.supportRepository.findSettings(userId, deviceId);
   }
 
+  @Transactional()
   async registerDevice(userId: number, deviceId: string, deviceToken: string) {
     const user = await this.userService.fetchUserEntityById(userId);
     let device = await this.supportRepository.findDevice(deviceId);

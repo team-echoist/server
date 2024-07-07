@@ -3,6 +3,7 @@ import { ViewRepository } from './view.repository';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
 import { ViewRecord } from '../../entities/viewRecord.entity';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class ViewService {
@@ -12,6 +13,7 @@ export class ViewService {
     return await this.viewRepository.findViewRecord(userId, essayId);
   }
 
+  @Transactional()
   async addViewRecord(user: User, essay: Essay) {
     let viewRecord = await this.viewRepository.findViewRecord(user.id, essay.id);
 
