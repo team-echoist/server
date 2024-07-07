@@ -10,6 +10,7 @@ import { FollowRepository } from './follow.repository';
 import { UtilsService } from '../utils/utils.service';
 import { UserSummaryResDto } from '../user/dto/response/userSummaryRes.dto';
 import { UserService } from '../user/user.service';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class FollowService {
@@ -20,6 +21,7 @@ export class FollowService {
     private readonly userService: UserService,
   ) {}
 
+  @Transactional()
   async follow(followerId: number, followingId: number) {
     if (followerId === followingId) {
       throw new HttpException('You cannot follow yourself', HttpStatus.CONFLICT);

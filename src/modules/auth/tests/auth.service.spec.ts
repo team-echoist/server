@@ -7,7 +7,6 @@ import { NicknameService } from '../../nickname/nickname.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { OauthDto } from '../dto/oauth.dto';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
