@@ -246,6 +246,7 @@ export class AlertService {
 
     const createdDate = new Date(essay.createdDate);
     const koreanDate = this.utilsService.formatDateToKorean(createdDate);
+    const status = essay.status === EssayStatus.PUBLISHED ? '발행' : '링크드아웃';
 
     const alert = new Alert();
 
@@ -253,7 +254,7 @@ export class AlertService {
     // alert.title = `다른 아무개가 ${essay.author.nickname} 아무개님의 '${essay.title}'글을 ${randomEnd}`;
     alert.title = essay.title;
     alert.content = this.utilsService.extractPartContent(essay.content);
-    alert.body = `"로 시작하는 글, 기억하시나요?\n${koreanDate}에\n${essay.status} 글이 발견됐어요.`;
+    alert.body = `로 시작하는 글, 기억하시나요?\n${koreanDate}에\n${status}한 글이 발견됐어요.`;
 
     essay.status === 'published'
       ? (alert.type = AlertType.PUBLISHED)
