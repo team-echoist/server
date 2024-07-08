@@ -396,7 +396,7 @@ describe('AlertService', () => {
           user: mockEssay.author,
           title: expect.any(String),
           content: 'partial content',
-          body: `로 시작하는 글, 기억하시나요?\n2024-01-01에\n링크드아웃한 글이 발견됐어요.`,
+          body: `로 시작하는 글, 기억하시나요?\n\n2024-01-01에\n링크드아웃한 글이 발견됐어요.`,
           type: AlertType.LINKEDOUT,
         }),
       );
