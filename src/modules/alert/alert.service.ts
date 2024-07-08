@@ -241,9 +241,6 @@ export class AlertService {
   }
 
   async createAlertFirstView(essay: Essay) {
-    const ends = [`찾았어요!`, `발견!`, `읽고있어요.`, `정독 중이에요.`];
-    // const randomEnd = ends[Math.floor(Math.random() * ends.length)];
-
     const createdDate = new Date(essay.createdDate);
     const koreanDate = this.utilsService.formatDateToKorean(createdDate);
     const status = essay.status === EssayStatus.PUBLISHED ? '발행' : '링크드아웃';
@@ -251,10 +248,9 @@ export class AlertService {
     const alert = new Alert();
 
     alert.user = essay.author;
-    // alert.title = `다른 아무개가 ${essay.author.nickname} 아무개님의 '${essay.title}'글을 ${randomEnd}`;
     alert.title = essay.title;
     alert.content = this.utilsService.extractPartContent(essay.content);
-    alert.body = `로 시작하는 글, 기억하시나요?\n${koreanDate}에\n${status}한 글이 발견됐어요.`;
+    alert.body = `로 시작하는 글, 기억하시나요?\n\n${koreanDate}에\n${status}한 글이 발견됐어요.`;
 
     essay.status === 'published'
       ? (alert.type = AlertType.PUBLISHED)
