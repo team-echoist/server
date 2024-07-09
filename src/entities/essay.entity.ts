@@ -20,6 +20,7 @@ import { ProcessedHistory } from './processedHistory.entity';
 import { Tag } from './tag.entity';
 import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
+import { Alert } from './alert.entity';
 
 export enum EssayStatus {
   PRIVATE = 'private',
@@ -116,6 +117,9 @@ export class Essay {
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.essay)
   bookmarks: Bookmark[];
+
+  @OneToMany(() => Alert, (alert) => alert.essay)
+  alerts: Alert[];
 
   @Column({ type: 'tsvector', select: false, nullable: true })
   search_vector?: any;

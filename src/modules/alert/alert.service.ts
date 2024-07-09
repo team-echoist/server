@@ -251,6 +251,7 @@ export class AlertService {
     alert.title = essay.title;
     alert.content = this.utilsService.extractPartContent(essay.content);
     alert.body = `로 시작하는 글, 기억하시나요?\n\n${koreanDate}에\n${status}한 글이 발견됐어요.`;
+    alert.essay = essay;
 
     essay.status === 'published'
       ? (alert.type = AlertType.PUBLISHED)

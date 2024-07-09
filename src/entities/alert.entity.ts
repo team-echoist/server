@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Essay } from './essay.entity';
 
 export enum AlertType {
   PUBLISHED = 'published',
@@ -44,4 +45,8 @@ export class Alert {
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, (user) => user.alerts, { onDelete: 'CASCADE' })
   user: User;
+
+  @JoinColumn({ name: 'essay_id' })
+  @ManyToOne(() => Essay, (essay) => essay.alerts, { onDelete: 'CASCADE' })
+  essay: Essay;
 }

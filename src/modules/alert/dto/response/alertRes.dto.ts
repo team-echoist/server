@@ -1,7 +1,8 @@
 import { AlertType } from '../../../../entities/alert.entity';
 import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { EssayIdResDto } from '../../../essay/dto/response/essayIdRes.dto';
 
 export class AlertResDto {
   @ApiProperty()
@@ -38,4 +39,9 @@ export class AlertResDto {
   @IsString()
   @Expose()
   createdDate: string;
+
+  @ApiProperty({ type: EssayIdResDto })
+  @Expose()
+  @Type(() => EssayIdResDto)
+  essay: EssayIdResDto;
 }
