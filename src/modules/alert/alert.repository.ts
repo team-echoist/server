@@ -16,10 +16,12 @@ export class AlertRepository {
   async findAlerts(userId: number, page: number, limit: number) {
     const queryBuilder = this.alertRepository
       .createQueryBuilder('alert')
+      .leftJoin('alert.essay', 'essay')
       .where('alert.user_id = :userId', { userId })
       .orderBy('alert.createdDate', 'DESC')
       .offset((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .addSelect(['essay.id']);
 
     const [alerts, total] = await queryBuilder.getManyAndCount();
 
