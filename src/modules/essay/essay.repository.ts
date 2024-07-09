@@ -384,7 +384,7 @@ export class EssayRepository {
     if (storyId) {
       queryBuilder.andWhere(
         new Brackets((qb) => {
-          qb.where('essay.story = :storyId', { storyId }).orWhere('essay.story IS NULL');
+          qb.where('story.id = :storyId', { storyId });
         }),
       );
     } else {
