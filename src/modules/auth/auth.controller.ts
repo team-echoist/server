@@ -146,10 +146,22 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: EmailReqDto })
-  async updateEmail(@Query('token') token: string) {
+  async updateEmail(
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+    @Query('token') token: string,
+  ) {
     await this.authService.updateEmail(token);
+
     // todo 리다이렉션
-    return;
+    let redirectUrl = 'https://linkedoutapp.com';
+    if (req.device === 'iPhone' || req.device === 'iPad') {
+      // todo
+      redirectUrl = 'todo 딥링크';
+    }
+    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/AccountPage';
+
+    res.redirect(redirectUrl);
   }
 
   @Post('verify')
@@ -210,11 +222,12 @@ export class AuthController {
 
     const newJwt = this.utilsService.generateJWT(user.id, user.email);
 
-    let redirectUrl = 'https://www.linkedoutapp.com';
+    let redirectUrl = 'https://linkedoutapp.com';
     if (req.device === 'iPhone' || req.device === 'iPad') {
+      // todo
       redirectUrl = 'todo 딥링크';
     }
-    if (req.device === 'Android') redirectUrl = 'https://www.linkedout.com/SignUpComplete';
+    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/SignUpComplete';
 
     redirectUrl += `?token=${newJwt}`;
 
@@ -304,11 +317,12 @@ export class AuthController {
   ) {
     const newToken = await this.authService.passwordResetVerify(token);
 
-    let redirectUrl = 'https://www.linkedoutapp.com';
+    let redirectUrl = 'https://linkedoutapp.com';
     if (req.device === 'iPhone' || req.device === 'iPad') {
+      // todo
       redirectUrl = 'todo 딥링크';
     }
-    if (req.device === 'Android') redirectUrl = 'https://www.linkedout.com/ResetPwPage?token=';
+    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/ResetPwPage?token=';
 
     redirectUrl += `?token=${newToken}`;
 
