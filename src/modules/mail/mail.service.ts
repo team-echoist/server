@@ -40,7 +40,7 @@ export class MailService {
     const baseVerificationUrl =
       env === 'dev'
         ? 'http://localhost:3000/api/auth/register'
-        : 'https://www.linkedoutapp.com/api/auth/register';
+        : 'https://linkedoutapp.com/api/auth/register';
 
     const verificationUrl = `${baseVerificationUrl}?token=${token}`;
     const title = '안녕하세요! 링크드아웃에 가입해주셔서 감사합니다 :)';
@@ -89,7 +89,7 @@ export class MailService {
     const baseVerificationUrl =
       env === 'dev'
         ? 'http://localhost:3000/api/auth/password/reset'
-        : 'https://www.linkedoutapp.com/api/auth/password/reset';
+        : 'https://linkedoutapp.com/api/auth/password/reset';
 
     const verificationUrl = `${baseVerificationUrl}?token=${token}`;
     const title = '안녕하세요! 링크드아웃 입니다 :)';
@@ -117,7 +117,7 @@ export class MailService {
     const baseVerificationUrl =
       env === 'dev'
         ? 'http://localhost:3000/api/auth/change-email'
-        : 'https://www.linkedoutapp.com/api/auth/change-email';
+        : 'https://linkedoutapp.com/api/auth/change-email';
 
     const verificationUrl = `${baseVerificationUrl}?token=${token}`;
     const title = '안녕하세요! 링크드아웃 입니다 :)';

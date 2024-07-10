@@ -85,8 +85,10 @@ describe('AuthController', () => {
   describe('updateEmail', () => {
     it('should call service updateEmail method', async () => {
       const token = 'testToken';
+      const req: ExpressRequest = { user: { id: 1 } } as any;
+      const res: Response = { redirect: jest.fn() } as any;
 
-      await controller.updateEmail(token);
+      await controller.updateEmail(req, res, token);
       expect(authService.updateEmail).toHaveBeenCalledWith(token);
     });
   });
