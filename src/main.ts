@@ -28,7 +28,7 @@ async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule);
 
   const allowedOrigins = [
-    'https://www.linkedoutapp.com',
+    'https://linkedoutapp.com',
     'https://linkedout-umber.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
