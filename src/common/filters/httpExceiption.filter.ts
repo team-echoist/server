@@ -39,11 +39,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(
-        `${message}\nRequest Body: ${JSON.stringify(request.body)} Params: ${JSON.stringify(params)} Query: ${JSON.stringify(query)}\nResponse: ${JSON.stringify(originalError)}\nStack Trace: ${JSON.stringify(errorStack)}`,
+        `${message} Request Body: ${JSON.stringify(request.body)} Request Params: ${JSON.stringify(params)} Request Query: ${JSON.stringify(query)} Response: ${JSON.stringify(originalError)} Stack Trace: ${JSON.stringify(errorStack)}`,
       );
     } else if (status >= 400) {
       this.logger.warn(
-        `${message}\nRequest Body: ${JSON.stringify(request.body)} Params: ${JSON.stringify(params)} Query: ${JSON.stringify(query)}\nResponse: ${JSON.stringify(originalError)}\nStack Trace: ${JSON.stringify(errorStack)}`,
+        `${message} Request Body: ${JSON.stringify(request.body)} Request Params: ${JSON.stringify(params)} Request Query: ${JSON.stringify(query)} Response: ${JSON.stringify(originalError)} Stack Trace: ${JSON.stringify(errorStack)}`,
       );
     }
 
