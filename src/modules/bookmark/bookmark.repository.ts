@@ -13,6 +13,7 @@ export class BookmarkRepository {
     const queryBuilder = this.bookmarkRepository
       .createQueryBuilder('bookmark')
       .leftJoinAndSelect('bookmark.essay', 'essay')
+      .leftJoinAndSelect('essay.author', 'author')
       .where('bookmark.user_id = :userId', { userId })
       .andWhere('essay.status != :status', { status: EssayStatus.PRIVATE })
       .orderBy('bookmark.createdDate', 'DESC')
