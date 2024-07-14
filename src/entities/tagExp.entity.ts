@@ -12,7 +12,7 @@ export class TagExp {
   @Column({ default: false })
   used: boolean;
 
-  @ManyToOne(() => User, (user) => user.tagExps)
+  @ManyToOne(() => User, (user) => user.tagExps, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

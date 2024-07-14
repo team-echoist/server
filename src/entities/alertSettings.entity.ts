@@ -16,7 +16,7 @@ export class AlertSettings {
   @Column({ name: 'device_id', unique: true })
   deviceId: string;
 
-  @OneToOne(() => User, (user) => user.alertSettings)
+  @OneToOne(() => User, (user) => user.alertSettings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
