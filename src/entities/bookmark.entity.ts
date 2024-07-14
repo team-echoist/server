@@ -8,7 +8,7 @@ export class Bookmark {
   id: number;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.bookmarks)
+  @ManyToOne(() => User, (user) => user.bookmarks, { onDelete: 'CASCADE' })
   user: User;
 
   @JoinColumn({ name: 'essay_id' })

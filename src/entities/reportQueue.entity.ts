@@ -35,7 +35,7 @@ export class ReportQueue {
   createdDate: Date;
 
   @JoinColumn({ name: 'reporter_id' })
-  @ManyToOne(() => User, (user) => user.reports)
+  @ManyToOne(() => User, (user) => user.reports, { onDelete: 'CASCADE' })
   reporter: User;
 
   @JoinColumn({ name: 'essay_id' })
