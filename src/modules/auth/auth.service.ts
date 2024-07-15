@@ -7,12 +7,13 @@ import { MailService } from '../mail/mail.service';
 import { NicknameService } from '../nickname/nickname.service';
 import { AuthRepository } from './auth.repository';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
+import { OauthMobileReqDto } from './dto/request/OauthMobileReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { Transactional } from 'typeorm-transactional';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
     private readonly nicknameService: NicknameService,
+    private readonly httpService: HttpService,
     private configService: ConfigService,
   ) {}
   private readonly oauthClient = new OAuth2Client(
@@ -166,25 +168,24 @@ export class AuthService {
 
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByEmail(oauthUser.email);
-    if (!user) {
+
+    if (user.platformId !== oauthUser.platformId)
+      throw new HttpException('Please check your login information.', HttpStatus.ACCEPTED);
+
+    if (!user)
       user = await this.authRepository.saveUser({
         email: oauthUser.email,
-        oauthInfo: { [`${oauthUser.platform}Id`]: oauthUser.platformId },
+        platform: oauthUser.platform,
+        platformId: oauthUser.platformId,
       });
-    } else {
-      if (!user.oauthInfo || !user.oauthInfo[`${oauthUser.platform}Id`]) {
-        await this.authRepository.updateUserOauthInfo(user.id, {
-          [`${oauthUser.platform}Id`]: oauthUser.platformId,
-        });
-      }
-    }
+
     return user;
   }
 
-  async validateGoogleUser(data: GoogleUserReqDto) {
+  async validateGoogleUser(data: OauthMobileReqDto) {
     const ticket = await this.oauthClient.verifyIdToken({
       idToken: data.token,
-      audience: process.env.GOOGLE_ANDROID_CLIENT_ID,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
@@ -196,7 +197,49 @@ export class AuthService {
     const oauthDto = new OauthDto();
     oauthDto.platform = 'google';
     oauthDto.email = payload.email;
-    oauthDto.platformId = data.id;
+    oauthDto.platformId = data.platformId;
+
+    return await this.oauthLogin(oauthDto);
+  }
+
+  async validateKakaoUser(data: OauthMobileReqDto) {
+    const response = await this.httpService
+      .post('https://kapi.kakao.com/v2/user/me', null, {
+        headers: { Authorization: `Bearer ${data.token}` },
+      })
+      .toPromise();
+
+    const payload = response.data;
+
+    if (!payload) {
+      throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
+    }
+
+    const oauthDto = new OauthDto();
+    oauthDto.platform = 'kakao';
+    oauthDto.email = payload.kakao_account.email;
+    oauthDto.platformId = data.platformId;
+
+    return await this.oauthLogin(oauthDto);
+  }
+
+  async validateNaverUser(data: OauthMobileReqDto) {
+    const response = await this.httpService
+      .get('https://openapi.naver.com/v1/nid/me', {
+        headers: { Authorization: `Bearer ${data.token}` },
+      })
+      .toPromise();
+
+    const payload = response.data.response;
+
+    if (!payload) {
+      throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
+    }
+
+    const oauthDto = new OauthDto();
+    oauthDto.platform = 'naver';
+    oauthDto.email = payload.email;
+    oauthDto.platformId = data.platformId;
 
     return await this.oauthLogin(oauthDto);
   }

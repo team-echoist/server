@@ -11,7 +11,7 @@ import { CheckNicknameReqDto } from '../dto/request/checkNicknameReq.dto';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { EmailReqDto } from '../dto/request/emailReq.dto';
 import { PasswordResetReqDto } from '../dto/request/passwordResetReq.dto';
-import { GoogleUserReqDto } from '../dto/request/googleUserReq.dto';
+import { OauthMobileReqDto } from '../dto/request/OauthMobileReq.dto';
 
 jest.mock('../auth.service');
 jest.mock('../../utils/utils.service');
@@ -185,7 +185,7 @@ describe('AuthController', () => {
 
   describe('androidGoogleLogin', () => {
     it('should call service validateGoogleUser method', async () => {
-      const dto: GoogleUserReqDto = { token: 'googleToken', id: 'googleId' };
+      const dto: OauthMobileReqDto = { token: 'googleToken', id: 'googleId' };
       const req: ExpressRequest = {} as any;
       const user = { id: 1, email: 'test@example.com' };
 

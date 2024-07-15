@@ -63,13 +63,11 @@ export class User {
   @Column({ name: 'birth_date', nullable: true })
   birthDate: Date;
 
-  @Column({ name: 'oauth_info', type: 'jsonb', nullable: true })
-  oauthInfo: {
-    google: string;
-    kakao: string;
-    naver: string;
-    apple: string;
-  };
+  @Column({ nullable: true })
+  platform: string;
+
+  @Column({ name: 'platform_id', nullable: true })
+  platformId: string;
 
   @Column({
     type: 'enum',
