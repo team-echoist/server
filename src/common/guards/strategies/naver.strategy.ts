@@ -21,11 +21,11 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { id, email } = profile;
+    const { id, _json } = profile;
     const user = {
       platform: 'naver',
       platformId: id,
-      email,
+      email: _json.email,
       accessToken,
     };
     done(null, user);

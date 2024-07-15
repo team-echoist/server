@@ -27,6 +27,7 @@ declare global {
       platform?: string;
       platformId?: string;
       accessToken?: string;
+      isFirst?: boolean;
     }
   }
 }
