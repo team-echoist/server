@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsDate, IsEmail, IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { UserStatus } from '../../../../entities/user.entity';
 
 export class FullUserResDto {
@@ -41,7 +41,15 @@ export class FullUserResDto {
 
   @ApiProperty()
   @Expose()
-  oauthInfo?: any;
+  @IsString()
+  @IsOptional()
+  platform: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  @IsOptional()
+  platformId: string;
 
   @ApiProperty()
   @Expose()

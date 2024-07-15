@@ -10,7 +10,8 @@ declare global {
       password?: string;
       gender?: string;
       status?: UserStatus;
-      oauthInfo?: object;
+      platform?: string;
+      platformId?: string;
       birthDate?: Date;
       createdAt?: Date;
       updatedAt?: Date;
