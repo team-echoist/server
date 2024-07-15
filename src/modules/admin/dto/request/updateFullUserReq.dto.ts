@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
@@ -68,4 +69,9 @@ export class UpdateFullUserReqDto {
   @IsOptional()
   @IsNumber()
   reputation?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  isFirst?: boolean;
 }

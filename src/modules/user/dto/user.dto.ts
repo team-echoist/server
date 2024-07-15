@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsDate, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { UserStatus } from '../../../entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -41,8 +41,15 @@ export class UserDto {
 
   @ApiProperty()
   @Expose()
-  @IsObject()
-  oauthInfo: object;
+  @IsString()
+  @IsOptional()
+  platform: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  @IsOptional()
+  platformId: string;
 
   @ApiProperty()
   @Expose()

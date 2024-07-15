@@ -185,11 +185,12 @@ describe('AuthController', () => {
   describe('googleCallback', () => {
     it('should call service oauthLogin method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
+      const res = { json: jest.fn() } as any;
       const user = { id: 1 };
 
       authService.oauthLogin.mockResolvedValue(user as any);
 
-      await controller.googleCallback(req);
+      await controller.googleCallback(req, res);
       expect(authService.oauthLogin).toHaveBeenCalledWith(req.user);
     });
   });
@@ -198,11 +199,12 @@ describe('AuthController', () => {
     it('should call service validateGoogleUser method', async () => {
       const dto: OauthMobileReqDto = { token: 'googleToken', platformId: 'googleId' };
       const req: ExpressRequest = {} as any;
+      const res = { json: jest.fn() } as any;
       const user = { id: 1, email: 'test@example.com' };
 
       authService.validateGoogleUser.mockResolvedValue(user as any);
 
-      const result = await controller.androidGoogleLogin(req, dto);
+      const result = await controller.androidGoogleLogin(req, res, dto);
       expect(authService.validateGoogleUser).toHaveBeenCalledWith(dto);
       expect(result).toEqual(user);
     });

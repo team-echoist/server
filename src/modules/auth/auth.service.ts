@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { Transactional } from 'typeorm-transactional';
 import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -205,11 +206,11 @@ export class AuthService {
   }
 
   async validateKakaoUser(data: OauthMobileReqDto) {
-    const response = await this.httpService
-      .post('https://kapi.kakao.com/v2/user/me', null, {
+    const response = await firstValueFrom(
+      this.httpService.post('https://kapi.kakao.com/v2/user/me', null, {
         headers: { Authorization: `Bearer ${data.token}` },
-      })
-      .toPromise();
+      }),
+    );
 
     const payload = response.data;
 
@@ -226,11 +227,11 @@ export class AuthService {
   }
 
   async validateNaverUser(data: OauthMobileReqDto) {
-    const response = await this.httpService
-      .get('https://openapi.naver.com/v1/nid/me', {
+    const response = await firstValueFrom(
+      this.httpService.get('https://openapi.naver.com/v1/nid/me', {
         headers: { Authorization: `Bearer ${data.token}` },
-      })
-      .toPromise();
+      }),
+    );
 
     const payload = response.data.response;
 
