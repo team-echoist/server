@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsDate, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResDto {

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsDate, IsEnum, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { UserStatus } from '../../../entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
