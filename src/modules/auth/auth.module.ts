@@ -7,10 +7,11 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import { User } from '../../entities/user.entity';
+import { HttpModule } from '@nestjs/axios';
 import * as strategies from '../../common/guards/strategies';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), MailModule, UtilsModule, NicknameModule],
+  imports: [HttpModule, TypeOrmModule.forFeature([User]), MailModule, UtilsModule, NicknameModule],
   controllers: [AuthController],
   providers: [
     AuthService,

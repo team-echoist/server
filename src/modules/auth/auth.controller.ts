@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { LoginReqDto } from './dto/request/loginReq.dto';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import { GoogleUserReqDto } from './dto/request/googleUserReq.dto';
+import { OauthMobileReqDto } from './dto/request/OauthMobileReq.dto';
 import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
 import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
 import { UtilsService } from '../utils/utils.service';
@@ -400,11 +400,11 @@ export class AuthController {
     return;
   }
 
-  @Post('google/android')
+  @Post('google/mobile')
   @ApiOperation({
-    summary: 'OAuth-구글 안드로이드 로그인',
+    summary: 'OAuth-구글 모바일 로그인',
     description: `
-  안드로이드 기기에서 구글 OAuth를 통해 로그인합니다.
+  모바일 기기에서 구글 OAuth를 통해 로그인합니다.
 
   **요청 본문:**
   - \`token\`: 구글 인증 토큰
@@ -421,9 +421,9 @@ export class AuthController {
   - 안드로이드 클라이언트를 위한 별도의 클라이언트 ID가 필요합니다.
   `,
   })
-  @ApiBody({ type: GoogleUserReqDto })
+  @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200 })
-  async androidGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: GoogleUserReqDto) {
+  async androidGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateGoogleUser(googleUserData);
     return req.user;
   }
@@ -468,6 +468,33 @@ export class AuthController {
     return;
   }
 
+  @Post('kakao/mobile')
+  @ApiOperation({
+    summary: 'OAuth-카카오 모바일 로그인',
+    description: `
+  모바일 기기에서 카카오 OAuth를 통해 로그인합니다.
+
+  **요청 본문:**
+  - \`token\`: 카카오 인증 토큰
+  - \`platformId\`: 사용자의 고유 ID
+
+  **동작 과정:**
+  1. 클라이언트로부터 카카오 인증 토큰과 사용자 ID를 받습니다.
+  2. 카카오 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
+  3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
+  4. 추출된 사용자 정보를 기반으로 OAuth 로그인 처리를 합니다.
+
+  **주의 사항:**
+  - 카카오 인증 토큰이 유효하지 않으면 오류가 발생합니다.
+  `,
+  })
+  @ApiBody({ type: OauthMobileReqDto })
+  @ApiResponse({ status: 200 })
+  async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() kakaoUserData: OauthMobileReqDto) {
+    req.user = await this.authService.validateKakaoUser(kakaoUserData);
+    return req.user;
+  }
+
   @Get('naver')
   @ApiOperation({
     summary: 'OAuth-네이버 로그인',
@@ -506,5 +533,32 @@ export class AuthController {
   async naverCallback(@Req() req: ExpressRequest) {
     req.user = await this.authService.oauthLogin(req.user);
     return;
+  }
+
+  @Post('naver/mobile')
+  @ApiOperation({
+    summary: 'OAuth-네이버 모바일 로그인',
+    description: `
+  모바일 기기에서 네이버 OAuth를 통해 로그인합니다.
+
+  **요청 본문:**
+  - \`token\`: 네이버 인증 토큰
+  - \`platformId\`: 사용자의 고유 ID
+
+  **동작 과정:**
+  1. 클라이언트로부터 네이버 인증 토큰과 사용자 ID를 받습니다.
+  2. 네이버 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
+  3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
+  4. 추출된 사용자 정보를 기반으로 OAuth 로그인 처리를 합니다.
+
+  **주의 사항:**
+  - 네이버 인증 토큰이 유효하지 않으면 오류가 발생합니다.
+  `,
+  })
+  @ApiBody({ type: OauthMobileReqDto })
+  @ApiResponse({ status: 200 })
+  async mobileNaverLogin(@Req() req: ExpressRequest, @Body() naverUserData: OauthMobileReqDto) {
+    req.user = await this.authService.validateNaverUser(naverUserData);
+    return req.user;
   }
 }
