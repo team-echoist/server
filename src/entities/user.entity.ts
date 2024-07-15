@@ -107,6 +107,9 @@ export class User {
   })
   deletedDate?: Date;
 
+  @Column({ name: 'is_first', default: true })
+  isFirst: boolean;
+
   @OneToMany(() => Story, (story) => story.user)
   stories: Story[];
 

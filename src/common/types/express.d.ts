@@ -17,6 +17,7 @@ declare global {
       updatedAt?: Date;
       deletedAt?: Date;
       deactivationDate?: Date;
+      isFirst?: boolean;
     }
 
     export interface Request {

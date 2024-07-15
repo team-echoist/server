@@ -395,8 +395,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req: ExpressRequest) {
+  async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     req.user = await this.authService.oauthLogin(req.user);
+
+    if (req.user.isFirst) res.status(205).json(req.user);
+
     return;
   }
 
@@ -408,7 +411,7 @@ export class AuthController {
 
   **요청 본문:**
   - \`token\`: 구글 인증 토큰
-  - \`id\`: 사용자의 고유 ID
+  - \`platformId\`: 사용자의 고유 ID
 
   **동작 과정:**
   1. 클라이언트로부터 구글 인증 토큰과 사용자 ID를 받습니다.
@@ -423,8 +426,15 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200 })
-  async androidGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: OauthMobileReqDto) {
+  async androidGoogleLogin(
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+    @Body() googleUserData: OauthMobileReqDto,
+  ) {
     req.user = await this.authService.validateGoogleUser(googleUserData);
+
+    if (req.user.isFirst) res.status(205).json(req.user);
+
     return req.user;
   }
 
@@ -463,8 +473,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('kakao'))
-  async kakaoCallback(@Req() req: ExpressRequest) {
+  async kakaoCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     req.user = await this.authService.oauthLogin(req.user);
+
+    if (req.user.isFirst) res.status(205).json(req.user);
+
     return;
   }
 
@@ -490,8 +503,15 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200 })
-  async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() kakaoUserData: OauthMobileReqDto) {
+  async mobileKakaoLogin(
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+    @Body() kakaoUserData: OauthMobileReqDto,
+  ) {
     req.user = await this.authService.validateKakaoUser(kakaoUserData);
+
+    if (req.user.isFirst) res.status(205).json(req.user);
+
     return req.user;
   }
 
@@ -530,8 +550,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('naver'))
-  async naverCallback(@Req() req: ExpressRequest) {
+  async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     req.user = await this.authService.oauthLogin(req.user);
+
+    if (req.user.isFirst) res.status(205).json(req.user);
+
     return;
   }
 
@@ -557,8 +580,15 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200 })
-  async mobileNaverLogin(@Req() req: ExpressRequest, @Body() naverUserData: OauthMobileReqDto) {
+  async mobileNaverLogin(
+    @Req() req: ExpressRequest,
+    @Res() res: Response,
+    @Body() naverUserData: OauthMobileReqDto,
+  ) {
     req.user = await this.authService.validateNaverUser(naverUserData);
-    return req.user;
+
+    if (req.user.isFirst) res.status(205).json(req.user);
+
+    return;
   }
 }
