@@ -169,15 +169,17 @@ export class AuthService {
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByEmail(oauthUser.email);
 
-    if (user.platformId !== oauthUser.platformId)
-      throw new HttpException('Please check your login information.', HttpStatus.ACCEPTED);
-
-    if (!user)
+    if (user) {
+      if (user.platformId !== oauthUser.platformId) {
+        throw new HttpException('Please check your login information.', HttpStatus.ACCEPTED);
+      }
+    } else {
       user = await this.authRepository.saveUser({
         email: oauthUser.email,
         platform: oauthUser.platform,
         platformId: oauthUser.platformId,
       });
+    }
 
     return user;
   }

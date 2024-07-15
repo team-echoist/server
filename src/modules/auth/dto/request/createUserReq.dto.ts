@@ -27,9 +27,9 @@ export class CreateUserReqDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  platform: string;
+  platform?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  platformId: string;
+  platformId?: string;
 }

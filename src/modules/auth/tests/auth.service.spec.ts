@@ -7,6 +7,7 @@ import { NicknameService } from '../../nickname/nickname.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { HttpService } from '@nestjs/axios';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -19,6 +20,7 @@ jest.mock('../../utils/utils.service');
 jest.mock('../../mail/mail.service');
 jest.mock('../../nickname/nickname.service');
 jest.mock('@nestjs/config');
+jest.mock('@nestjs/axios');
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -36,6 +38,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const RedisInstance = jest.fn(() => mockRedis);
     const module: TestingModule = await Test.createTestingModule({
+      imports: [HttpService],
       providers: [
         AuthService,
         AuthRepository,
@@ -43,6 +46,7 @@ describe('AuthService', () => {
         MailService,
         NicknameService,
         ConfigService,
+        HttpService,
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
@@ -370,25 +374,10 @@ describe('AuthService', () => {
       expect(authRepository.findByEmail).toHaveBeenCalledWith(oauthUser.email);
       expect(authRepository.saveUser).toHaveBeenCalledWith({
         email: oauthUser.email,
-        oauthInfo: { googleId: oauthUser.platformId },
+        platform: oauthUser.platform,
+        platformId: oauthUser.platformId,
       });
       expect(result).toEqual(oauthUser);
-    });
-
-    it('should update existing user oauthInfo if it does not exist', async () => {
-      const oauthUser = { email: 'test@example.com', platform: 'google', platformId: '12345' };
-      const user = { id: 1, email: 'test@example.com', oauthInfo: null };
-
-      authRepository.findByEmail.mockResolvedValue(user as any);
-      authRepository.updateUserOauthInfo.mockResolvedValue();
-
-      const result = await authService.oauthLogin(oauthUser as any);
-
-      expect(authRepository.findByEmail).toHaveBeenCalledWith(oauthUser.email);
-      expect(authRepository.updateUserOauthInfo).toHaveBeenCalledWith(user.id, {
-        googleId: oauthUser.platformId,
-      });
-      expect(result).toEqual(user);
     });
   });
 });

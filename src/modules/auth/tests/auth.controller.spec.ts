@@ -12,6 +12,8 @@ import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { EmailReqDto } from '../dto/request/emailReq.dto';
 import { PasswordResetReqDto } from '../dto/request/passwordResetReq.dto';
 import { OauthMobileReqDto } from '../dto/request/OauthMobileReq.dto';
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { of } from 'rxjs';
 
 jest.mock('../auth.service');
 jest.mock('../../utils/utils.service');
@@ -23,9 +25,18 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [JwtModule.register({}), ConfigModule.forRoot()],
+      imports: [HttpModule, JwtModule.register({}), ConfigModule.forRoot()],
       controllers: [AuthController],
-      providers: [AuthService, UtilsService],
+      providers: [
+        AuthService,
+        UtilsService,
+        {
+          provide: HttpService,
+          useValue: {
+            get: jest.fn(() => of({ data: { kakao_account: { email: 'test@test.com' } } })),
+          },
+        },
+      ],
     })
       .overrideGuard(AuthGuard('jwt'))
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
@@ -185,7 +196,7 @@ describe('AuthController', () => {
 
   describe('androidGoogleLogin', () => {
     it('should call service validateGoogleUser method', async () => {
-      const dto: OauthMobileReqDto = { token: 'googleToken', id: 'googleId' };
+      const dto: OauthMobileReqDto = { token: 'googleToken', platformId: 'googleId' };
       const req: ExpressRequest = {} as any;
       const user = { id: 1, email: 'test@example.com' };
 
