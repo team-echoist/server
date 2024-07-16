@@ -814,4 +814,11 @@ export class AdminService {
 
     return this.utilsService.transformToDto(UpdatedHistoryResDto, history);
   }
+
+  async deleteUser(adminId: number, userId: number) {
+    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+    await this.userRepository.deleteAccount(userId, todayDate);
+  }
 }
