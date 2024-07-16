@@ -302,8 +302,8 @@ describe('UserService', () => {
   describe('requestDeactivation', () => {
     it('should request user deactivation', async () => {
       const userId = 1;
-      const data: DeactivateReqDto = { password: 'password', reasons: ['reason1', 'reason2'] };
-      const user = { id: userId, password: 'hashedPassword', deactivationDate: null } as User;
+      const data: DeactivateReqDto = { reasons: ['reason1', 'reason2'] };
+      const user = { id: userId, deactivationDate: null } as User;
 
       jest.spyOn(service, 'fetchUserEntityById').mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -312,7 +312,6 @@ describe('UserService', () => {
       await service.requestDeactivation(userId, data);
 
       expect(service.fetchUserEntityById).toHaveBeenCalledWith(userId);
-      expect(bcrypt.compare).toHaveBeenCalledWith(data.password, user.password);
       expect(userRepository.saveUser).toHaveBeenCalledWith(
         expect.objectContaining({ deactivationDate: expect.any(Date) }),
       );
@@ -321,8 +320,8 @@ describe('UserService', () => {
 
     it('should throw an error if password does not match', async () => {
       const userId = 1;
-      const data: DeactivateReqDto = { password: 'password', reasons: ['reason1', 'reason2'] };
-      const user = { id: userId, password: 'hashedPassword', deactivationDate: null } as User;
+      const data: DeactivateReqDto = { reasons: ['reason1', 'reason2'] };
+      const user = { id: userId, deactivationDate: null } as User;
 
       jest.spyOn(service, 'fetchUserEntityById').mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);

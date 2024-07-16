@@ -7,8 +7,4 @@ export class DeactivateReqDto {
   @IsString({ each: true })
   @IsOptional()
   reasons?: string[];
-
-  @ApiProperty()
-  @IsString()
-  password: string;
 }
