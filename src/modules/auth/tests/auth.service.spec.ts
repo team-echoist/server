@@ -109,14 +109,12 @@ describe('AuthService', () => {
 
       jest.spyOn(authService, 'isEmailOwned').mockResolvedValue();
       utilsService.generateVerifyToken.mockResolvedValue('token123');
-      // mockRedis.set = jest.fn().mockResolvedValue('OK');
       mailService.sendVerificationEmail.mockResolvedValue();
 
       await authService.signingUp(data);
 
       expect(authService.isEmailOwned).toHaveBeenCalledWith(data.email);
       expect(utilsService.generateVerifyToken).toHaveBeenCalled();
-      // expect(mockRedis.set).toHaveBeenCalledWith('token123', JSON.stringify(data), 'EX', 600);
       expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(data.email, 'token123');
     });
   });
@@ -217,7 +215,8 @@ describe('AuthService', () => {
     it('should return user if email and password match', async () => {
       const email = 'test@example.com';
       const password = 'password123';
-      const user = { id: 1, email, password: await bcrypt.hash(password, 10) };
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = { id: 1, email, password: hashedPassword, platformId: null, platform: null };
 
       authRepository.findByEmail.mockResolvedValue(user as any);
       const result = await authService.validateUser(email, password);
@@ -228,12 +227,32 @@ describe('AuthService', () => {
     it('should return null if email or password do not match', async () => {
       const email = 'test@example.com';
       const password = 'password123';
-      const user = { id: 1, email, password: await bcrypt.hash('differentPassword', 10) };
+      const hashedPassword = await bcrypt.hash('differentPassword', 10);
+      const user = { id: 1, email, password: hashedPassword, platformId: null, platform: null };
 
       authRepository.findByEmail.mockResolvedValue(user as any);
       const result = await authService.validateUser(email, password);
 
       expect(result).toBeNull();
+    });
+
+    it('should throw an exception if user is a social subscriber', async () => {
+      const email = 'test@example.com';
+      const password = 'password123';
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = {
+        id: 1,
+        email,
+        password: hashedPassword,
+        platformId: '123',
+        platform: 'google',
+      };
+
+      authRepository.findByEmail.mockResolvedValue(user as any);
+
+      await expect(authService.validateUser(email, password)).rejects.toThrow(
+        'This account is a social subscriber.',
+      );
     });
   });
 
