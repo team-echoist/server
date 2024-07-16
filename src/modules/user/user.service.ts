@@ -156,10 +156,6 @@ export class UserService {
   @Transactional()
   async requestDeactivation(userId: number, data: DeactivateReqDto) {
     const user = await this.fetchUserEntityById(userId);
-    const x = await bcrypt.compare(data.password, user.password);
-
-    if (!user && !(await bcrypt.compare(data.password, user.password)))
-      throw new HttpException('Password mismatch.', HttpStatus.FORBIDDEN);
 
     if (user.deactivationDate)
       throw new HttpException(
