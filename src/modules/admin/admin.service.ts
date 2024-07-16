@@ -817,7 +817,7 @@ export class AdminService {
 
   async deleteUser(adminId: number, userId: number) {
     if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
-    const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
     await this.userRepository.deleteAccount(userId, todayDate);
   }

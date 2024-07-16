@@ -367,7 +367,7 @@ describe('UserService', () => {
   describe('deleteAccount', () => {
     it('should delete user account', async () => {
       const userId = 1;
-      const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
       await service.deleteAccount(userId);
 

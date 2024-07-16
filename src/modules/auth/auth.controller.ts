@@ -207,9 +207,8 @@ export class AuthController {
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
-  5. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
-  6. 그 외의 경우, 웹사이트로 리디렉션합니다.
-
+	5. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+	
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
@@ -218,20 +217,22 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
-    const user = await this.authService.register(token);
+    req.user = await this.authService.register(token);
+    req.isFirst = req.user.isFirst;
 
-    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+    return;
 
-    let redirectUrl = 'https://linkedoutapp.com';
-    if (req.device === 'iPhone' || req.device === 'iPad') {
-      // todo
-      redirectUrl = 'todo 딥링크 linkedoutapp://블라블라';
-    }
-    if (req.device === 'Android') redirectUrl = 'intent://linkedout.com/SignUpComplete';
-
-    redirectUrl += `?token=${newJwt}`;
-
-    res.redirect(redirectUrl);
+    // const newJwt = this.utilsService.generateJWT(user.id, user.email);
+    //
+    // let redirectUrl = 'https://linkedoutapp.com';
+    // if (req.device === 'iPhone' || req.device === 'iPad') {
+    //   redirectUrl = 'todo 딥링크 linkedoutapp://블라블라';
+    // }
+    // if (req.device === 'Android') redirectUrl = 'intent://linkedout.com/SignUpComplete';
+    //
+    // redirectUrl += `?token=${newJwt}`;
+    //
+    // res.redirect(redirectUrl);
   }
 
   @Post('login')
@@ -248,7 +249,7 @@ export class AuthController {
   1. 제공된 이메일과 비밀번호로 사용자를 인증합니다.
   2. 인증에 실패하면 적절한 에러 메시지를 반환합니다.
   3. 사용자가 'BANNED' 상태인 경우, 403을 반환합니다.
-  4. 인증에 성공하면 사용자 정보를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 이메일과 비밀번호는 필수 항목입니다.
@@ -383,7 +384,7 @@ export class AuthController {
   1. 구글로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 사용자 정보를 기반으로 JWT 토큰을 생성하여 응답합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고, 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 유효하지 않은 구글 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -412,7 +413,7 @@ export class AuthController {
   1. 클라이언트로부터 구글 인증 토큰과 사용자 ID를 받습니다.
   2. 구글 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 추출된 사용자 정보를 기반으로 OAuth 로그인 처리를 합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 구글 인증 토큰이 유효하지 않으면 오류가 발생합니다.
@@ -455,7 +456,7 @@ export class AuthController {
   1. 카카오로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 사용자 정보를 기반으로 JWT 토큰을 생성하여 응답합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 유효하지 않은 카카오 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -484,7 +485,7 @@ export class AuthController {
   1. 클라이언트로부터 카카오 인증 토큰과 사용자 ID를 받습니다.
   2. 카카오 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 추출된 사용자 정보를 기반으로 OAuth 로그인 처리를 합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 카카오 인증 토큰이 유효하지 않으면 오류가 발생합니다.
@@ -526,7 +527,7 @@ export class AuthController {
   1. 네이버로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 사용자 정보를 기반으로 JWT 토큰을 생성하여 응답합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 유효하지 않은 네이버 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -555,7 +556,7 @@ export class AuthController {
   1. 클라이언트로부터 네이버 인증 토큰과 사용자 ID를 받습니다.
   2. 네이버 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 추출된 사용자 정보를 기반으로 OAuth 로그인 처리를 합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 네이버 인증 토큰이 유효하지 않으면 오류가 발생합니다.
