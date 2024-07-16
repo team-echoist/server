@@ -195,7 +195,7 @@ export class UserService {
   @Transactional()
   async deleteAccount(userId: number) {
     const userIds = [userId];
-    const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
     await this.userRepository.deleteAccount(userId, todayDate);
     await this.userQueue.add('updateEssayStatus', { userIds });
   }

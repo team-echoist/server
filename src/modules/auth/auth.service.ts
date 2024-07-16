@@ -110,6 +110,11 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
+
+    if (user.platformId !== null && user.platform !== null) {
+      throw new HttpException('This account is a social subscriber.', HttpStatus.BAD_REQUEST);
+    }
+
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
     }

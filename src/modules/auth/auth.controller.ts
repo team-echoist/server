@@ -20,11 +20,6 @@ export class AuthController {
     private readonly utilsService: UtilsService,
   ) {}
 
-  @Get('test')
-  async adroidTest(@Req() req: ExpressRequest) {
-    console.log(req.device);
-  }
-
   @Get('health-check')
   @ApiOperation({ summary: 'health check' })
   @ApiResponse({ status: 200 })
@@ -268,6 +263,7 @@ export class AuthController {
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
   async login(@Req() req: ExpressRequest) {
+    req.isFirst = req.user.isFirst;
     return;
   }
 
@@ -495,7 +491,7 @@ export class AuthController {
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 || 205 })
   async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() kakaoUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateKakaoUser(kakaoUserData);
     req.isFirst = req.user.isFirst;
@@ -536,7 +532,7 @@ export class AuthController {
   - 유효하지 않은 네이버 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200 || 205 })
   @UseGuards(AuthGuard('naver'))
   async naverCallback(@Req() req: ExpressRequest) {
     req.user = await this.authService.oauthLogin(req.user);
@@ -566,7 +562,7 @@ export class AuthController {
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 || 205 })
   async mobileNaverLogin(@Req() req: ExpressRequest, @Body() naverUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateNaverUser(naverUserData);
     req.isFirst = req.user.isFirst;
