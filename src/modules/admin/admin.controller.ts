@@ -1213,4 +1213,10 @@ export class AdminController {
   async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
     return this.adminService.getAdmin(adminId);
   }
+
+  @Delete('/users/:userId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
+    return this.adminService.deleteUser(req.user.id, userId);
+  }
 }
