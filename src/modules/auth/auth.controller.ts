@@ -291,7 +291,7 @@ export class AuthController {
     return this.authService.passwordResetReq(data.email);
   }
 
-  @Post('password/reset-verify')
+  @Get('password/reset-verify')
   @ApiOperation({
     summary: '비밀번호 재설정 검증',
     description: `
@@ -326,8 +326,6 @@ export class AuthController {
     }
 
     if (req.device === 'Android') {
-      console.log(req.device);
-      console.log('안드로이드맞음ㅇㅇ');
       redirectUrl = 'https://linkedoutapp.com/ResetPwPage?token=';
     }
 
