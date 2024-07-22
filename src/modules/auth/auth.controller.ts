@@ -326,8 +326,6 @@ export class AuthController {
     }
 
     if (req.device === 'Android') {
-      console.log(req.device);
-      console.log('안드로이드맞음ㅇㅇ');
       redirectUrl = 'https://linkedoutapp.com/ResetPwPage?token=';
     }
 
