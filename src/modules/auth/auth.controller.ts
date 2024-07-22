@@ -291,7 +291,7 @@ export class AuthController {
     return this.authService.passwordResetReq(data.email);
   }
 
-  @Post('password/reset-verify')
+  @Get('password/reset-verify')
   @ApiOperation({
     summary: '비밀번호 재설정 검증',
     description: `
