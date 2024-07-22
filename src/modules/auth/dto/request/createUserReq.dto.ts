@@ -25,7 +25,8 @@ export class CreateUserReqDto {
   @IsOptional()
   platformId?: string;
 
-  @ApiProperty({ required: true })
+  @ApiProperty({ required: false })
   @IsString()
-  nickname: string;
+  @IsOptional()
+  nickname?: string;
 }

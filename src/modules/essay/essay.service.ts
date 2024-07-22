@@ -229,7 +229,7 @@ export class EssayService {
 
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
-    if (userId !== essay.author.id) {
+    if (essay.author && userId !== essay.author.id) {
       await this.handleNonAuthorView(userId, essay);
     }
 
@@ -296,17 +296,24 @@ export class EssayService {
 
   private async updateTrendScoreOnView(essay: Essay) {
     const incrementAmount = 1;
-    const decayFactor = 0.99;
+    const decayFactor = 0.995;
 
     const currentDate = new Date();
     const createdDate = essay.createdDate;
     const daysSinceCreation =
       (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
 
-    let newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceCreation);
+    let newTrendScore: number;
 
-    newTrendScore = Math.floor(newTrendScore);
-    newTrendScore += incrementAmount;
+    if (daysSinceCreation <= 7) {
+      newTrendScore = essay.trendScore + incrementAmount;
+    } else {
+      const daysSinceDecay = daysSinceCreation - 7;
+      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
+      newTrendScore = Math.floor(newTrendScore);
+      newTrendScore += incrementAmount;
+    }
+
     newTrendScore = Math.max(newTrendScore, 0);
 
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
