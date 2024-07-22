@@ -324,7 +324,7 @@ export class AuthController {
       // todo
       redirectUrl = 'todo 딥링크';
     }
-    if (req.device === 'Android') redirectUrl = 'intent://linkedout.com/ResetPwPage?token=';
+    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/ResetPwPage?token=';
 
     redirectUrl += `?token=${newToken}`;
 
