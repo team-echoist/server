@@ -111,6 +111,8 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
 
+    if (!user) throw new HttpException('Invalid email or password.', HttpStatus.UNAUTHORIZED);
+
     if (user.platformId !== null && user.platform !== null) {
       throw new HttpException('This account is a social subscriber.', HttpStatus.BAD_REQUEST);
     }

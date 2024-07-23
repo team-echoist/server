@@ -3,39 +3,35 @@ import { Job } from 'bull';
 import { AdminService } from './admin.service';
 import { ProcessReqDto } from './dto/request/processReq.dto';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { DataSource } from 'typeorm';
 
 @Processor('admin')
 export class AdminProcessor {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  @Process('syncReportsProcessed')
+  @Process({ name: 'syncReportsProcessed', concurrency: 1 })
   async handleSyncReportsProcessed(
-    job: Job<{ reports: ReportQueue[]; adminId: number; data: ProcessReqDto }>,
+    job: Job<{ batch: ReportQueue[]; adminId: number; data: ProcessReqDto }>,
   ) {
     console.log('Processing syncReportsProcessed job:', job.id);
 
-    const { reports, adminId, data } = job.data;
-    console.log(`Job data: ${JSON.stringify(job.data)}`);
-    const batchSize = 10;
-    const delayBetweenBatches = 3000;
+    const { batch } = job.data;
 
-    for (let i = 0; i < reports.length; i += batchSize) {
-      const batch = reports.slice(i, i + batchSize);
-      console.log(`Processing batch: ${JSON.stringify(batch)}`);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.startTransaction();
 
-      try {
-        await this.adminService.processBatchReports(batch, adminId, data);
-      } catch (error) {
-        console.error('Error processing batch:', error);
-      }
-
-      if (i + batchSize < reports.length) {
-        await this.sleep(delayBetweenBatches);
-      }
+    try {
+      await this.adminService.processBatchReports(batch, job.data.adminId, job.data.data);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      console.error(`Batch failed: ${batch}`, error);
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

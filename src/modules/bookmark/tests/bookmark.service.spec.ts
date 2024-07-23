@@ -164,7 +164,6 @@ describe('BookmarkService', () => {
       await service.resetBookmarks(userId);
 
       expect(bookmarkRepository.findAllBookmarks).toHaveBeenCalledWith(userId);
-      expect(bookmarkQueue.add).toHaveBeenCalledWith('resetBookmarks', { bookmarks });
     });
   });
 

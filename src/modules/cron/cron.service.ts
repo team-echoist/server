@@ -60,7 +60,19 @@ export class CronService {
       const userIds = users.map((user) => user.id);
 
       if (userIds.length > 0) {
-        await this.cronQueue.add('updateEssayStatus', { userIds });
+        const batchSize = 10;
+        for (let i = 0; i < userIds.length; i += batchSize) {
+          const batch = userIds.slice(i, i + batchSize);
+          await this.cronQueue.add(
+            'updateEssayStatus',
+            { batch },
+            {
+              attempts: 5,
+              backoff: 5000,
+              delay: i * 3000,
+            },
+          );
+        }
       }
 
       await this.userRepository

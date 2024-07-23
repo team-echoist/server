@@ -193,6 +193,19 @@ export class UserService {
     const userIds = [userId];
     const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
     await this.userRepository.deleteAccount(userId, todayDate);
-    await this.userQueue.add('updateEssayStatus', { userIds });
+
+    const batchSize = 5;
+    for (let i = 0; i < userIds.length; i += batchSize) {
+      const batch = userIds.slice(i, i + batchSize);
+      await this.userQueue.add(
+        'deleteAccountEssaySync',
+        { batch },
+        {
+          attempts: 5,
+          backoff: 5000,
+          delay: i * 3000,
+        },
+      );
+    }
   }
 }
