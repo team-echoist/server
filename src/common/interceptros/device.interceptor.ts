@@ -14,6 +14,7 @@ export class DeviceInterceptor implements NestInterceptor {
     const agent = useragent.parse(userAgent);
 
     request.device = this.determineDevice(agent);
+    console.log(request.device);
 
     return next.handle().pipe(
       map((data) => {
