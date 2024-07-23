@@ -85,7 +85,20 @@ export class BookmarkService {
   async resetBookmarks(userId: number) {
     const bookmarks = await this.bookmarkRepository.findAllBookmarks(userId);
     console.log(`Adding resetBookmarks job for user ${userId} with ${bookmarks.length} bookmarks`);
-    await this.bookmarkQueue.add('resetBookmarks', { bookmarks });
+
+    const batchSize = 10;
+    for (let i = 0; i < bookmarks.length; i += batchSize) {
+      const batch = bookmarks.slice(i, i + batchSize);
+      await this.bookmarkQueue.add(
+        'resetBookmarks',
+        { batch },
+        {
+          attempts: 5,
+          backoff: 5000,
+          delay: i * 3000,
+        },
+      );
+    }
   }
 
   async handleResetBookmarks(bookmarks: Bookmark[]) {

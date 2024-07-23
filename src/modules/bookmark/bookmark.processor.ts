@@ -2,31 +2,33 @@ import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import { BookmarkService } from './bookmark.service';
 import { Bookmark } from '../../entities/bookmark.entity';
+import { DataSource } from 'typeorm';
 
 @Processor('bookmark')
 export class BookmarkProcessor {
-  constructor(private readonly bookmarkService: BookmarkService) {}
+  constructor(
+    private readonly bookmarkService: BookmarkService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  @Process('resetBookmarks')
-  async handleResetBookmarks(job: Job<{ bookmarks: Bookmark[] }>) {
+  @Process({ name: 'resetBookmarks', concurrency: 1 })
+  async handleResetBookmarks(job: Job<{ batch: Bookmark[] }>) {
     console.log('Processing resetBookmarks job:', job.id);
 
-    const { bookmarks } = job.data;
-    const batchSize = 10;
-    const delayBetweenBatches = 3000;
+    const { batch } = job.data;
 
-    for (let i = 0; i < bookmarks.length; i += batchSize) {
-      const batch = bookmarks.slice(i, i + batchSize);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.startTransaction();
 
+    try {
       await this.bookmarkService.handleResetBookmarks(batch);
-
-      if (i + batchSize < bookmarks.length) {
-        await this.sleep(delayBetweenBatches);
-      }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      console.error('Error processing batch:', error);
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

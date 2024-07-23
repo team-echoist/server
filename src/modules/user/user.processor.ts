@@ -2,32 +2,32 @@ import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { EssayService } from '../essay/essay.service';
 import { forwardRef, Inject } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 @Processor('user')
 export class UserProcessor {
   constructor(
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
+    private readonly dataSource: DataSource,
   ) {}
 
-  @Process('updateEssayStatus')
-  async handleUpdateEssayStatus(job: Job<{ userIds: number[] }>) {
-    console.log('Processing updateEssayStatus job:', job.id);
-    const { userIds } = job.data;
-    const batchSize = 10;
-    const delayBetweenBatches = 3000;
+  @Process({ name: 'deleteAccountEssaySync', concurrency: 1 })
+  async handleUpdateEssayStatusBatch(job: Job<{ batch: number[] }>) {
+    console.log('Processing deleteAccountEssaySync job:', job.id);
+    const { batch } = job.data;
 
-    for (let i = 0; i < userIds.length; i += batchSize) {
-      const batch = userIds.slice(i, i + batchSize);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.startTransaction();
 
+    try {
       await this.essayService.handleUpdateEssayStatus(batch);
-
-      if (i + batchSize < userIds.length) {
-        await this.sleep(delayBetweenBatches);
-      }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      console.error(`Batch failed: ${batch}`, error);
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

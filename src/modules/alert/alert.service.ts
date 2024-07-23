@@ -54,7 +54,19 @@ export class AlertService {
       `Adding createAndSendReportProcessedAlerts job: ${JSON.stringify({ reports, type })}`,
     );
 
-    await this.alertQueue.add(`createAndSendReportProcessedAlerts`, { reports, type });
+    const batchSize = 5;
+    for (let i = 0; i < reports.length; i += batchSize) {
+      const batch = reports.slice(i, i + batchSize);
+      await this.alertQueue.add(
+        'createAndSendReportProcessedAlerts',
+        { batch, type },
+        {
+          attempts: 5,
+          backoff: 5000,
+          delay: i * 3000,
+        },
+      );
+    }
   }
 
   async processReportAlerts(reports: ReportQueue[], type: ActionType) {

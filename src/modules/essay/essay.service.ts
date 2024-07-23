@@ -579,6 +579,7 @@ export class EssayService {
     return this.utilsService.transformToDto(WeeklyEssayCountResDto, weeklyEssayCounts);
   }
 
+  @Transactional()
   async handleUpdateEssayStatus(userIds: number[]) {
     await this.essayRepository.handleUpdateEssayStatus(userIds);
   }

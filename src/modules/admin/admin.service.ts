@@ -313,7 +313,19 @@ export class AdminService {
 
     console.log(`Adding to adminQueue: ${JSON.stringify(combinedReports)}`);
 
-    await this.adminQueue.add(`syncReportsProcessed`, { reports: combinedReports });
+    const batchSize = 5;
+    for (let i = 0; i < combinedReports.length; i += batchSize) {
+      const batch = combinedReports.slice(i, i + batchSize);
+      await this.adminQueue.add(
+        `syncReportsProcessed`,
+        { batch, adminId, data },
+        {
+          attempts: 5,
+          backoff: 5000,
+          delay: i * 3000,
+        },
+      );
+    }
 
     await this.alertService.createAndSendReportProcessedAlerts(reports, data.actionType);
   }
