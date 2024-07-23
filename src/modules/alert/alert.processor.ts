@@ -33,8 +33,4 @@ export class AlertProcessor {
       await queryRunner.release();
     }
   }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }
