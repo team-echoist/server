@@ -9,12 +9,10 @@ import * as useragent from 'useragent';
 export class DeviceInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    // const agent = useragent.lookup(request.headers['user-agent']);
     const userAgent = request.headers['user-agent'];
     const agent = useragent.parse(userAgent);
 
     request.device = this.determineDevice(agent);
-    console.log(request.device);
 
     return next.handle().pipe(
       map((data) => {
