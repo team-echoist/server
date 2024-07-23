@@ -326,7 +326,7 @@ export class AuthController {
     }
 
     if (req.device === 'Android') {
-      redirectUrl = 'https://linkedoutapp.com/ResetPwPage?token=';
+      redirectUrl = 'https://linkedoutapp.com/ResetPwPage';
     }
 
     redirectUrl += `?token=${newToken}`;
