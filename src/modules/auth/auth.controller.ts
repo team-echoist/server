@@ -136,7 +136,7 @@ export class AuthController {
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 이메일로 변경합니다.
   4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
-  5. 그 외의 경우, 웹사이트로 리디렉션합니다.
+  5. 그 외의 경우, 웹사이트로 리다이렉션합니다.
 
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
@@ -207,7 +207,7 @@ export class AuthController {
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
-	5. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+	5. 인증에 성공하면 헤더에 쿼리스트링에 JWT를 세팅하고 환경에 맞게 리다이렉션 합니다.
 	
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
@@ -247,7 +247,6 @@ export class AuthController {
   1. 제공된 이메일과 비밀번호로 사용자를 인증합니다.
   2. 인증에 실패하면 적절한 에러 메시지를 반환합니다.
   3. 사용자가 'BANNED' 상태인 경우, 403을 반환합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
 
   **주의 사항:**
   - 이메일과 비밀번호는 필수 항목입니다.
@@ -262,7 +261,6 @@ export class AuthController {
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
   async login(@Req() req: ExpressRequest) {
-    req.isFirst = req.user.isFirst;
     return;
   }
 
@@ -365,8 +363,8 @@ export class AuthController {
   사용자가 구글 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 구글 로그인 버튼을 클릭하면, 구글 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 구글 계정으로 인증을 완료하면, 구글 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 구글 로그인 버튼을 클릭하면, 구글 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 구글 계정으로 인증을 완료하면, 구글 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })
@@ -385,7 +383,7 @@ export class AuthController {
   1. 구글로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고, 최초접속자인 경우 상태코드 205를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
 
   **주의 사항:**
   - 유효하지 않은 구글 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -395,7 +393,6 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: ExpressRequest) {
     req.user = await this.authService.oauthLogin(req.user);
-    req.isFirst = req.user.isFirst;
 
     return;
   }
@@ -414,7 +411,7 @@ export class AuthController {
   1. 클라이언트로부터 구글 인증 토큰과 사용자 ID를 받습니다.
   2. 구글 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
 
   **주의 사항:**
   - 구글 인증 토큰이 유효하지 않으면 오류가 발생합니다.
@@ -425,7 +422,6 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   async androidGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateGoogleUser(googleUserData);
-    req.isFirst = req.user.isFirst;
 
     return;
   }
@@ -457,7 +453,7 @@ export class AuthController {
   1. 카카오로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
 
   **주의 사항:**
   - 유효하지 않은 카카오 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -467,7 +463,6 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao'))
   async kakaoCallback(@Req() req: ExpressRequest) {
     req.user = await this.authService.oauthLogin(req.user);
-    req.isFirst = req.user.isFirst;
 
     return;
   }
@@ -486,17 +481,16 @@ export class AuthController {
   1. 클라이언트로부터 카카오 인증 토큰과 사용자 ID를 받습니다.
   2. 카카오 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
 
   **주의 사항:**
   - 카카오 인증 토큰이 유효하지 않으면 오류가 발생합니다.
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 201 || 205 })
+  @ApiResponse({ status: 201 })
   async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() kakaoUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateKakaoUser(kakaoUserData);
-    req.isFirst = req.user.isFirst;
 
     return;
   }
@@ -528,17 +522,16 @@ export class AuthController {
   1. 네이버로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
 
   **주의 사항:**
   - 유효하지 않은 네이버 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200 || 205 })
+  @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('naver'))
   async naverCallback(@Req() req: ExpressRequest) {
     req.user = await this.authService.oauthLogin(req.user);
-    req.isFirst = req.user.isFirst;
 
     return;
   }
@@ -557,17 +550,16 @@ export class AuthController {
   1. 클라이언트로부터 네이버 인증 토큰과 사용자 ID를 받습니다.
   2. 네이버 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 최초접속자인 경우 상태코드 205를 반환합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
 
   **주의 사항:**
   - 네이버 인증 토큰이 유효하지 않으면 오류가 발생합니다.
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 201 || 205 })
+  @ApiResponse({ status: 201 })
   async mobileNaverLogin(@Req() req: ExpressRequest, @Body() naverUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateNaverUser(naverUserData);
-    req.isFirst = req.user.isFirst;
 
     return;
   }
