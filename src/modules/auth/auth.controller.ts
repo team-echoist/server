@@ -221,7 +221,7 @@ export class AuthController {
 
     const newJwt = this.utilsService.generateJWT(user.id, user.email);
 
-    let redirectUrl = 'http://localhost:3000/linkedout/login';
+    let redirectUrl = 'http://localhost:3000/web/login';
     if (req.device === 'iPhone' || req.device === 'iPad') {
       // todo
       redirectUrl = '';
