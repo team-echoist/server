@@ -79,7 +79,7 @@ export class AppModule implements OnModuleInit, NestModule {
 
   async onModuleInit() {
     await this.cronService.userDeletionCronJobs();
-    // await this.cronService.updateNextGuleroquis();
+    await this.cronService.updateNextGuleroquis();
 
     if (process.env.INITIALIZE === 'true') {
       await this.seederService.initializeAdmin();
