@@ -159,7 +159,7 @@ export class AuthController {
       // todo
       redirectUrl = 'todo 딥링크';
     }
-    if (req.device === 'Android') redirectUrl = 'intent://linkedout.com/AccountPage';
+    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/AccountPage';
 
     res.redirect(redirectUrl);
   }
@@ -207,7 +207,7 @@ export class AuthController {
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
-	5. 인증에 성공하면 헤더에 쿼리스트링에 JWT를 세팅하고 환경에 맞게 리다이렉션 합니다.
+	5. 인증에 성공하면 쿼리스트링에 JWT를 세팅하고 환경에 맞게 리다이렉션 합니다.
 	
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
@@ -383,7 +383,7 @@ export class AuthController {
   1. 구글로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+  4. 인증에 성공하면 쿼리스트링에 JWT를 세팅하고 리다이렉션 합니다.
 
   **주의 사항:**
   - 유효하지 않은 구글 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -391,10 +391,15 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req: ExpressRequest) {
-    req.user = await this.authService.oauthLogin(req.user);
+  async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
+    const user = await this.authService.oauthLogin(req.user);
 
-    return;
+    let redirectUrl = 'http://localhost:3000/web/login';
+    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+
+    redirectUrl += `?token=${newJwt}`;
+
+    res.redirect(redirectUrl);
   }
 
   @Post('google/mobile')
@@ -453,7 +458,7 @@ export class AuthController {
   1. 카카오로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+  4. 인증에 성공하면 쿼리스트링에 JWT를 세팅하고 리다이렉션 합니다.
 
   **주의 사항:**
   - 유효하지 않은 카카오 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -461,10 +466,15 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('kakao'))
-  async kakaoCallback(@Req() req: ExpressRequest) {
-    req.user = await this.authService.oauthLogin(req.user);
+  async kakaoCallback(@Req() req: ExpressRequest, @Res() res: Response) {
+    const user = await this.authService.oauthLogin(req.user);
 
-    return;
+    let redirectUrl = 'http://localhost:3000/web/login';
+    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+
+    redirectUrl += `?token=${newJwt}`;
+
+    res.redirect(redirectUrl);
   }
 
   @Post('kakao/mobile')
@@ -522,7 +532,7 @@ export class AuthController {
   1. 네이버로부터 전달된 사용자 정보를 검증합니다.
   2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
   3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+  4. 인증에 성공하면 쿼리스트링에 JWT를 세팅하고 리다이렉션 합니다.
 
   **주의 사항:**
   - 유효하지 않은 네이버 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
@@ -530,10 +540,15 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('naver'))
-  async naverCallback(@Req() req: ExpressRequest) {
-    req.user = await this.authService.oauthLogin(req.user);
+  async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
+    const user = await this.authService.oauthLogin(req.user);
 
-    return;
+    let redirectUrl = 'http://localhost:3000/web/login';
+    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+
+    redirectUrl += `?token=${newJwt}`;
+
+    res.redirect(redirectUrl);
   }
 
   @Post('naver/mobile')

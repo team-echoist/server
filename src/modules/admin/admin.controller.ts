@@ -11,6 +11,7 @@ import {
   Query,
   Req,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -38,7 +39,7 @@ import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
 import { ProfileImageReqDto } from '../user/dto/request/profileImageReq.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AdminResDto } from './dto/response/adminRes.dto';
 import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
 import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
@@ -1218,5 +1219,40 @@ export class AdminController {
   @UseGuards(AuthGuard('admin-jwt'))
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
+  }
+
+  @Get('/crons/logs')
+  @UseGuards(AuthGuard('admin-jwt'))
+  async getCronLogs(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getCronLogs(req.user.id, page, limit);
+  }
+
+  @Post('guleroquis')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: 'Guleroquis 이미지 업로드',
+    description: `
+    여러 개의 이미지를 업로드하여 guleroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+
+    **요청 본문:**
+    - \`images\`: 업로드할 이미지 파일들 (form-data)
+
+    **동작 과정:**
+    1. 이미지 파일들을 받아 S3에 업로드합니다.
+    2. 업로드된 이미지들의 URL을 반환합니다.
+
+    **주의 사항:**
+    - 이미지 파일들은 multipart/form-data 형식으로 전송되어야 합니다.
+    - 최대 30개의 파일을 등록할 수 있습니다.
+    `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseInterceptors(FilesInterceptor('images', 30))
+  async saveGuleroquisImages(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.adminService.saveGuleroquisImages(files);
   }
 }

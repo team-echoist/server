@@ -22,6 +22,19 @@ export class AwsService {
     });
   }
 
+  async guleroquisUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
+    const command = new PutObjectCommand({
+      Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
+      Key: fileName,
+      Body: file.buffer,
+      ACL: 'public-read',
+      ContentType: `image/${ext}`,
+    });
+
+    await this.s3Client.send(command);
+    return `https://${this.configService.get('AWS_CLOUD_FRONT')}/${fileName}`;
+  }
+
   async imageUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
     const command = new PutObjectCommand({
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),

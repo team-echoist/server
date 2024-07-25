@@ -9,10 +9,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { EssayModule } from '../essay/essay.module';
 import { CronProcessor } from './cron.processor';
+import { Guleroquis } from '../../entities/guleroguis.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Essay, CronLog, DeactivationReason]),
+    TypeOrmModule.forFeature([User, Essay, CronLog, DeactivationReason, Guleroquis]),
+    ScheduleModule.forRoot(),
     BullModule.registerQueueAsync({
       name: 'cron',
       useFactory: async (configService: ConfigService) => ({
