@@ -856,4 +856,16 @@ export class AdminService {
     const savePromises = imageUrls.map((url) => this.guleroquisService.saveGuleroquis(url));
     await Promise.all(savePromises);
   }
+
+  async getGuleroquis(page: number, limit: number) {
+    return this.guleroquisService.getGuleroquis(page, limit);
+  }
+
+  async getGuleroquisCount() {
+    return this.guleroquisService.getGuleroquisCount();
+  }
+
+  async changeTomorrowGuleroquis(guleroquisId: number) {
+    return this.guleroquisService.changeTomorrowGuleroquis(guleroquisId);
+  }
 }

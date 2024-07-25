@@ -7,6 +7,10 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Guleroquis } from '../../entities/guleroguis.entity';
 import { Cron } from '@nestjs/schedule';
+import { UtilsService } from '../utils/utils.service';
+import { CronLogResDto } from './dto/response/cronLogRes.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class CronService {
@@ -20,6 +24,10 @@ export class CronService {
     @InjectRepository(Guleroquis)
     private readonly guleroquisRepository: Repository<Guleroquis>,
     @InjectQueue('cron') private readonly cronQueue: Queue,
+
+    @InjectRedis() private readonly redis: Redis,
+
+    private readonly utilsService: UtilsService,
   ) {}
 
   async getCronLogs(page: number, limit: number) {
@@ -28,7 +36,9 @@ export class CronService {
       take: limit,
       order: { id: 'DESC' },
     });
-    return { logs, total };
+
+    const cronLogsDto = this.utilsService.transformToDto(CronLogResDto, logs);
+    return { cronLogsDto, total, page };
   }
 
   private async logStart(taskName: string): Promise<number> {
@@ -137,6 +147,10 @@ export class CronService {
           await this.guleroquisRepository.save(nextImageInOrder);
         }
       }
+      const cacheKey = `today_guleroquis`;
+      const todayGuleroquis = await this.guleroquisRepository.findOne({ where: { current: true } });
+      await this.redis.set(cacheKey, JSON.stringify(todayGuleroquis.url), 'EX', 24 * 60 * 60);
+
       await this.logEnd(logId, 'completed', 'Next Guleroguis updated successfully.');
       this.logger.log('Next Guleroguis updated successfully.');
     } catch (error) {
