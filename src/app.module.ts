@@ -31,6 +31,7 @@ import { CronModule } from './modules/cron/cron.module';
 import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
 import { GuleroquisModule } from './modules/guleroquis/guleroquis.module';
+import { HomeModule } from './modules/home/home.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { GuleroquisModule } from './modules/guleroquis/guleroquis.module';
     SupportModule,
     AlertModule,
     GuleroquisModule,
+    HomeModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },

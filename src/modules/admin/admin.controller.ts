@@ -54,6 +54,9 @@ import { UpdateHistoryReqDto } from './dto/request/updateHistoryReq.dto';
 import { InquiriesSummaryResDto } from '../support/dto/response/inquiriesSummaryRes.dto';
 import { UpdatedHistoriesResDto } from '../support/dto/response/updatedHistoriesRes.dto';
 import { AdminsResDto } from './dto/response/adminsRes.dto';
+import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
+import { GuleroquisResDto } from '../guleroquis/dto/response/guleroquisRes.dto';
+import { GuleroquisCountResDto } from '../guleroquis/dto/response/guleroquisCountRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -1165,7 +1168,7 @@ export class AdminController {
     description: `
   어드민의 활성화 상태를 변경합니다. 이 기능은 루트 관리자가 사용합니다.
 
-  **경로 파라미터:**
+	**경로 파라미터:**
   - \`adminId\`: 활성화 상태를 변경할 어드민의 ID
   
   **쿼리 파라미터:**
@@ -1190,6 +1193,25 @@ export class AdminController {
     @Query('activated', ParseBoolPipe) activated: boolean,
   ) {
     return this.adminService.activationSettings(req.user.id, adminId, activated);
+  }
+
+  @Get('guleroquis')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({ summary: '글로키 리스트' })
+  @ApiResponse({ status: 200, type: GuleroquisResDto })
+  async getGuleroquis(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getGuleroquis(page, limit);
+  }
+
+  @Get('guleroquis/count')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({ summary: '총 글로키 / 사용가능 글로키 카운트' })
+  @ApiResponse({ status: 200, type: GuleroquisCountResDto })
+  async getGuleroquisCount() {
+    return this.adminService.getGuleroquisCount();
   }
 
   @Get(':adminId')
@@ -1223,6 +1245,8 @@ export class AdminController {
 
   @Get('/crons/logs')
   @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({ summary: '크론 로그 조회' })
+  @ApiResponse({ type: CronLogsResDto })
   async getCronLogs(
     @Req() req: ExpressRequest,
     @Query('page', new PagingParseIntPipe(1)) page: number,
@@ -1236,23 +1260,46 @@ export class AdminController {
   @ApiOperation({
     summary: 'Guleroquis 이미지 업로드',
     description: `
-    여러 개의 이미지를 업로드하여 guleroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+  여러 개의 이미지를 업로드하여 guleroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
 
-    **요청 본문:**
-    - \`images\`: 업로드할 이미지 파일들 (form-data)
+  **요청 본문:**
+	- \`images\`: 업로드할 이미지 파일들 (form-data)
 
-    **동작 과정:**
-    1. 이미지 파일들을 받아 S3에 업로드합니다.
-    2. 업로드된 이미지들의 URL을 반환합니다.
+  **동작 과정:**
+  1. 이미지 파일들을 받아 S3에 업로드합니다.
+  2. 업로드된 이미지들의 URL을 반환합니다.
 
-    **주의 사항:**
-    - 이미지 파일들은 multipart/form-data 형식으로 전송되어야 합니다.
-    - 최대 30개의 파일을 등록할 수 있습니다.
-    `,
+  **주의 사항:**
+  - 이미지 파일들은 multipart/form-data 형식으로 전송되어야 합니다.
+  - 최대 30개의 파일을 등록할 수 있습니다.
+  `,
   })
   @ApiResponse({ status: 200 })
   @UseInterceptors(FilesInterceptor('images', 30))
   async saveGuleroquisImages(@UploadedFiles() files: Express.Multer.File[]) {
     return this.adminService.saveGuleroquisImages(files);
+  }
+
+  @Put('guleroquis/:guleroquisId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '다음 글로키 지정하기',
+    description: `
+  여러 개의 이미지를 업로드하여 guleroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+
+  **매개 변수:**
+  - \`guleroquisId\`: 다음 제공할 글로키 아이디.
+
+  **동작 과정:**
+  1. 데이터베이스에 다음으로 제공할 글로키가 존재하는지 조회하고 무효화합니다.
+  2. 매개변수로 제공받은 아이디에 해당하는 글로키를 다음 글로키로 지정합니다.
+
+  **주의 사항:**
+  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  `,
+  })
+  @ApiResponse({})
+  async changeTomorrowGuleroquis(@Param('guleroquisId', ParseIntPipe) guleroquisId: number) {
+    return this.adminService.changeTomorrowGuleroquis(guleroquisId);
   }
 }

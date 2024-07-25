@@ -11,6 +11,7 @@ import { EssayModule } from '../essay/essay.module';
 import { CronProcessor } from './cron.processor';
 import { Guleroquis } from '../../entities/guleroguis.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     ConfigModule,
     EssayModule,
+    UtilsModule,
   ],
   providers: [CronService, CronProcessor],
   exports: [CronService],
