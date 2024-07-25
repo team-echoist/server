@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as cron from 'node-cron';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { CronLog } from '../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { Guleroquis } from '../../entities/guleroguis.entity';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronService {
@@ -16,34 +17,44 @@ export class CronService {
     private readonly cronLogRepository: Repository<CronLog>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Guleroquis)
+    private readonly guleroquisRepository: Repository<Guleroquis>,
     @InjectQueue('cron') private readonly cronQueue: Queue,
   ) {}
 
-  async logStart(taskName: string): Promise<number> {
+  async getCronLogs(page: number, limit: number) {
+    const [logs, total] = await this.cronLogRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'DESC' },
+    });
+    return { logs, total };
+  }
+
+  private async logStart(taskName: string): Promise<number> {
     const log = this.cronLogRepository.create({ taskName, status: 'started' });
     const savedLog = await this.cronLogRepository.save(log);
     return savedLog.id;
   }
 
-  async logEnd(id: number, status: string, message: string): Promise<void> {
+  private async logEnd(id: number, status: string, message: string): Promise<void> {
     await this.cronLogRepository.update(id, { endTime: new Date(), status, message });
   }
 
-  async startCronJobs() {
-    cron.schedule('0 5 * * *', async () => {
-      const logId = await this.logStart('deactivate_users_and_update_essays');
-      try {
-        await this.deactivateUsersAndQueueEssays();
-        await this.logEnd(logId, 'completed', 'Batch processing completed successfully.');
-        this.logger.log('Batch processing completed successfully.');
-      } catch (error) {
-        await this.logEnd(logId, 'failed', error.message);
-        this.logger.error('Batch processing failed.', error);
-      }
-    });
+  @Cron('0 4 * * *')
+  async userDeletionCronJobs() {
+    const logId = await this.logStart('deactivate_users_and_update_essays');
+    try {
+      await this.deactivateUsersAndQueueEssays();
+      await this.logEnd(logId, 'completed', 'Batch processing completed successfully.');
+      this.logger.log('Batch processing completed successfully.');
+    } catch (error) {
+      await this.logEnd(logId, 'failed', error.message);
+      this.logger.error('Batch processing failed.', error);
+    }
   }
 
-  async deactivateUsersAndQueueEssays() {
+  private async deactivateUsersAndQueueEssays() {
     const logId = await this.logStart('deactivate_users_and_queue_essays');
     try {
       const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
@@ -74,27 +85,63 @@ export class CronService {
           );
         }
       }
+      if (userIds.length > 0) {
+        await this.userRepository
+          .createQueryBuilder()
+          .update(User)
+          .set({
+            email: () => `CONCAT('${todayDate}_', email)`,
+            nickname: null,
+            deletedDate: () => `NOW()`,
+          })
+          .where('id IN (:...userIds)', { userIds })
+          .execute();
 
-      await this.userRepository
-        .createQueryBuilder()
-        .update(User)
-        .set({
-          email: () => `CONCAT('${todayDate}_', email)`,
-          nickname: null,
-          deletedDate: () => `NOW()`,
-        })
-        .where('id IN (:...userIds)', { userIds })
-        .execute();
-
-      await this.logEnd(
-        logId,
-        'completed',
-        'Users deactivated and essays queued for status update.',
-      );
-      this.logger.log('Users deactivated and essays queued for status update.');
+        await this.logEnd(
+          logId,
+          'completed',
+          'Users deactivated and essays queued for status update.',
+        );
+        this.logger.log('Users deactivated and essays queued for status update.');
+      }
     } catch (error) {
       await this.logEnd(logId, 'failed', error.message);
       this.logger.error('Failed to deactivate users and queue essays for status update.', error);
+    }
+  }
+
+  @Cron('0 0 * * *')
+  async updateNextGuleroquis() {
+    const logId = await this.logStart('update_next_guleroguis');
+    try {
+      const currentImage = await this.guleroquisRepository.findOne({ where: { current: true } });
+      if (currentImage) {
+        currentImage.provided = true;
+        currentImage.providedDate = new Date();
+        currentImage.current = false;
+        await this.guleroquisRepository.save(currentImage);
+      }
+
+      const nextImage = await this.guleroquisRepository.findOne({ where: { next: true } });
+      if (nextImage) {
+        nextImage.current = true;
+        nextImage.next = false;
+        await this.guleroquisRepository.save(nextImage);
+      } else {
+        const nextImageInOrder = await this.guleroquisRepository.findOne({
+          where: { provided: false },
+          order: { id: 'ASC' },
+        });
+        if (nextImageInOrder) {
+          nextImageInOrder.current = true;
+          await this.guleroquisRepository.save(nextImageInOrder);
+        }
+      }
+      await this.logEnd(logId, 'completed', 'Next Guleroguis updated successfully.');
+      this.logger.log('Next Guleroguis updated successfully.');
+    } catch (error) {
+      await this.logEnd(logId, 'failed', error.message);
+      this.logger.error('Failed to update next Guleroguis.', error);
     }
   }
 }

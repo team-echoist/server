@@ -51,6 +51,8 @@ import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../alert/alert.service';
+import { CronService } from '../cron/cron.service';
+import { GuleroquisService } from '../guleroquis/guleroquis.service';
 
 @Injectable()
 export class AdminService {
@@ -65,6 +67,8 @@ export class AdminService {
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
+    private readonly cronService: CronService,
+    private readonly guleroquisService: GuleroquisService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
@@ -832,5 +836,24 @@ export class AdminService {
     const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
     await this.userRepository.deleteAccount(userId, todayDate);
+  }
+
+  async getCronLogs(adminId: number, page: number, limit: number) {
+    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    return await this.cronService.getCronLogs(page, limit);
+  }
+
+  async saveGuleroquisImages(files: Express.Multer.File[]) {
+    const uploadPromises = files.map(async (file) => {
+      const newExt = file.originalname.split('.').pop();
+      const imageName = this.utilsService.getUUID();
+      const fileName = `guleroquis/${imageName}.${newExt}`;
+      return await this.awsService.guleroquisUploadToS3(fileName, file, newExt);
+    });
+
+    const imageUrls = await Promise.all(uploadPromises);
+
+    const savePromises = imageUrls.map((url) => this.guleroquisService.saveGuleroquis(url));
+    await Promise.all(savePromises);
   }
 }

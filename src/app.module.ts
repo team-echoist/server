@@ -30,6 +30,7 @@ import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
+import { GuleroquisModule } from './modules/guleroquis/guleroquis.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { AlertModule } from './modules/alert/alert.module';
     CronModule,
     SupportModule,
     AlertModule,
+    GuleroquisModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
@@ -74,7 +76,9 @@ export class AppModule implements OnModuleInit, NestModule {
   ) {}
 
   async onModuleInit() {
-    await this.cronService.startCronJobs();
+    await this.cronService.userDeletionCronJobs();
+    // await this.cronService.updateNextGuleroquis();
+
     if (process.env.INITIALIZE === 'true') {
       await this.seederService.initializeAdmin();
       await this.seederService.initializeNicknames();

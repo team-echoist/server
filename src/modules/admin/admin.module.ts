@@ -26,6 +26,8 @@ import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { AdminProcessor } from './admin.processor';
 import { AlertModule } from '../alert/alert.module';
+import { CronModule } from '../cron/cron.module';
+import { GuleroquisModule } from '../guleroquis/guleroquis.module';
 
 @Module({
   imports: [
@@ -63,6 +65,8 @@ import { AlertModule } from '../alert/alert.module';
     AwsModule,
     SupportModule,
     AlertModule,
+    CronModule,
+    GuleroquisModule,
   ],
   controllers: [AdminController],
   providers: [

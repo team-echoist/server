@@ -14,7 +14,7 @@ export class UtilsService {
 
   generateJWT(id: number, email: string) {
     const secretKey = this.configService.get('JWT_SECRET');
-    const options = { expiresIn: '1d' };
+    const options = { expiresIn: '30d' };
     return jwt.sign({ id: id, email: email }, secretKey, options);
   }
 

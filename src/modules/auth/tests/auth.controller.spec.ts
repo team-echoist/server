@@ -188,11 +188,12 @@ describe('AuthController', () => {
   describe('googleCallback', () => {
     it('should call service oauthLogin method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
+      const res: Response = { redirect: jest.fn() } as any;
       const user = { id: 1 };
 
       authService.oauthLogin.mockResolvedValue(user as any);
 
-      await controller.googleCallback(req);
+      await controller.googleCallback(req, res);
       expect(authService.oauthLogin).toHaveBeenCalledWith(req.user);
     });
   });
