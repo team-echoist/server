@@ -15,6 +15,8 @@ import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
 import { CreateAdminDto } from '../dto/createAdmin.dto';
 import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { AdminResDto } from '../dto/response/adminRes.dto';
+import { GuleroquisService } from '../../guleroquis/guleroquis.service';
+import { CronService } from '../../cron/cron.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -33,6 +35,8 @@ jest.mock('../../mail/mail.service');
 jest.mock('../../support/support.service');
 jest.mock('../../alert/alert.service');
 jest.mock('../../fcm/fcm.service');
+jest.mock('../../guleroquis/guleroquis.service');
+jest.mock('../../cron/cron.service');
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -46,6 +50,8 @@ describe('AdminService', () => {
   let mailService: jest.Mocked<MailService>;
   let supportService: jest.Mocked<SupportService>;
   let alertService: jest.Mocked<AlertService>;
+  let guleroquisService: jest.Mocked<GuleroquisService>;
+  let cronService: jest.Mocked<CronService>;
 
   const mockRedis = {
     get: jest.fn(),
@@ -70,6 +76,8 @@ describe('AdminService', () => {
         SupportService,
         SupportRepository,
         AlertService,
+        GuleroquisService,
+        CronService,
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
         {
           provide: 'BullQueue_admin',
