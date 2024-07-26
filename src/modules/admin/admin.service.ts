@@ -51,8 +51,8 @@ import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../alert/alert.service';
-import { CronService } from '../cron/cron.service';
 import { GuleroquisService } from '../guleroquis/guleroquis.service';
+import { CronService } from '../cron/cron.service';
 
 @Injectable()
 export class AdminService {
@@ -67,8 +67,8 @@ export class AdminService {
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
-    private readonly cronService: CronService,
     private readonly guleroquisService: GuleroquisService,
+    private readonly cronService: CronService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
@@ -579,12 +579,12 @@ export class AdminService {
     return null;
   }
 
-  async validatePayload(email: string) {
-    const cacheKey = `admin_${email}`;
+  async validatePayload(id: number) {
+    const cacheKey = `admin_${id}`;
     const cachedAdmin = await this.redis.get(cacheKey);
     let admin = cachedAdmin ? JSON.parse(cachedAdmin) : null;
     if (!admin) {
-      admin = await this.adminRepository.findByEmail(email);
+      admin = await this.adminRepository.findAdmin(id);
       if (admin) {
         await this.redis.set(cacheKey, JSON.stringify(admin), 'EX', 600);
         return admin;
