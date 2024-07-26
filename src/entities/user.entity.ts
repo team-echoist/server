@@ -44,7 +44,7 @@ export class User {
   nickname: string;
 
   @Index()
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email: string;
 
   @Column({ nullable: true })

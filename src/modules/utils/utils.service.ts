@@ -12,10 +12,10 @@ export class UtilsService {
     return v4();
   }
 
-  generateJWT(id: number, email: string) {
+  generateJWT(id: number) {
     const secretKey = this.configService.get('JWT_SECRET');
     const options = { expiresIn: '30d' };
-    return jwt.sign({ id: id, email: email }, secretKey, options);
+    return jwt.sign({ id: id }, secretKey, options);
   }
 
   async generateVerifyToken() {

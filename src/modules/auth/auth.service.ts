@@ -175,7 +175,8 @@ export class AuthService {
   // ----------------- OAuth ---------------------
 
   async oauthLogin(oauthUser: OauthDto) {
-    let user = await this.authRepository.findByEmail(oauthUser.email);
+    let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
+
     if (user !== null) {
       if (user.platformId !== oauthUser.platformId) {
         throw new HttpException('Please check your login information.', HttpStatus.UNAUTHORIZED);
@@ -183,7 +184,7 @@ export class AuthService {
     } else {
       const nickname = await this.nicknameService.generateUniqueNickname();
       user = await this.authRepository.saveUser({
-        email: oauthUser.email,
+        email: oauthUser.email || null,
         platform: oauthUser.platform,
         platformId: oauthUser.platformId,
         nickname: nickname,

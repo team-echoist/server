@@ -24,4 +24,8 @@ export class AuthRepository {
   async saveUser(createUserDto: CreateUserReqDto) {
     return this.userRepository.save(createUserDto);
   }
+
+  async findByPlatformId(platform: string, platformId: string) {
+    return this.userRepository.findOne({ where: { platform: platform, platformId: platformId } });
+  }
 }
