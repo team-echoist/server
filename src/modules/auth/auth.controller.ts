@@ -219,7 +219,7 @@ export class AuthController {
   async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.register(token);
 
-    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+    const newJwt = this.utilsService.generateJWT(user.id);
 
     let redirectUrl = 'http://localhost:3000/web/login';
     if (req.device === 'iPhone' || req.device === 'iPad') {
@@ -395,7 +395,7 @@ export class AuthController {
     const user = await this.authService.oauthLogin(req.user);
 
     let redirectUrl = 'http://localhost:3000/web/login';
-    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+    const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
 
@@ -425,7 +425,7 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200 })
-  async androidGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: OauthMobileReqDto) {
+  async mobileGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: OauthMobileReqDto) {
     req.user = await this.authService.validateGoogleUser(googleUserData);
 
     return;
@@ -470,7 +470,7 @@ export class AuthController {
     const user = await this.authService.oauthLogin(req.user);
 
     let redirectUrl = 'http://localhost:3000/web/login';
-    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+    const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
 
@@ -544,7 +544,7 @@ export class AuthController {
     const user = await this.authService.oauthLogin(req.user);
 
     let redirectUrl = 'http://localhost:3000/web/login';
-    const newJwt = this.utilsService.generateJWT(user.id, user.email);
+    const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
 
@@ -577,5 +577,51 @@ export class AuthController {
     req.user = await this.authService.validateNaverUser(naverUserData);
 
     return;
+  }
+
+  @Get('apple')
+  @ApiOperation({
+    summary: 'OAuth-애플 로그인',
+    description: `
+  사용자가 애플 계정을 통해 로그인할 수 있도록 합니다.
+
+  **동작 과정:**
+  1. 사용자가 애플 로그인 버튼을 클릭하면, 애플 로그인 페이지로 리디렉션됩니다.
+  2. 사용자가 애플 계정으로 인증을 완료하면, 애플 콜백 URL로 리디렉션됩니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('apple'))
+  async appleAuthRedirect() {
+    return;
+  }
+
+  @Get('apple/callback')
+  @ApiOperation({
+    summary: 'OAuth-애플 콜백',
+    description: `
+  애플 로그인 후 콜백을 처리합니다. 사용자의 애플 정보를 검증하고, 새로운 사용자인 경우 계정을 생성합니다.
+
+  **동작 과정:**
+  1. 애플로부터 전달된 사용자 정보를 검증합니다.
+  2. 사용자가 처음 로그인하는 경우, 새로운 계정을 생성합니다.
+  3. 기존 사용자라면, 로그인 정보를 업데이트합니다.
+  4. 인증에 성공하면 쿼리스트링에 JWT를 세팅하고 리다이렉션 합니다.
+
+  **주의 사항:**
+  - 유효하지 않은 네이버 사용자 정보가 전달될 경우, 인증이 실패할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AuthGuard('apple'))
+  async appleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
+    const user = await this.authService.oauthLogin(req.user);
+
+    let redirectUrl = 'http://localhost:3000/web/login';
+    const newJwt = this.utilsService.generateJWT(user.id);
+
+    redirectUrl += `?token=${newJwt}`;
+
+    res.redirect(redirectUrl);
   }
 }

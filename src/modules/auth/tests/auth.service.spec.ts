@@ -383,14 +383,17 @@ describe('AuthService', () => {
   });
 
   describe('oauthLogin', () => {
-    it('should create a new user if email does not exist', async () => {
+    it('should create a new user if platform does not exist', async () => {
       const oauthUser = { email: 'test@example.com', platform: 'google', platformId: '12345' };
-      authRepository.findByEmail.mockResolvedValue(null);
+      authRepository.findByPlatformId.mockResolvedValue(null);
       authRepository.saveUser.mockResolvedValue(oauthUser as any);
 
       const result = await authService.oauthLogin(oauthUser as any);
 
-      expect(authRepository.findByEmail).toHaveBeenCalledWith(oauthUser.email);
+      expect(authRepository.findByPlatformId).toHaveBeenCalledWith(
+        oauthUser.platform,
+        oauthUser.platformId,
+      );
       expect(authRepository.saveUser).toHaveBeenCalledWith({
         email: oauthUser.email,
         platform: oauthUser.platform,

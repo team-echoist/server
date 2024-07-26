@@ -206,7 +206,7 @@ describe('AuthController', () => {
 
       authService.validateGoogleUser.mockResolvedValue(user);
 
-      const result = await controller.androidGoogleLogin(req, dto);
+      const result = await controller.mobileGoogleLogin(req, dto);
       expect(authService.validateGoogleUser).toHaveBeenCalledWith(dto);
       // expect(result).toEqual(undefined);
     });
