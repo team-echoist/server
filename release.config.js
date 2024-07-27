@@ -13,4 +13,16 @@ module.exports = {
       },
     ],
   ],
+  preset: 'angular',
+  releaseRules: [
+    { type: 'fix', release: 'patch' },
+    { type: 'perf', release: 'patch' },
+    { type: 'refactor', release: 'patch' },
+    { type: 'feat', release: 'minor' },
+    { type: 'BREAKING CHANGE', release: 'major' },
+    { type: 'docs', release: false },
+    { type: 'style', release: false },
+    { type: 'test', release: false },
+    { type: 'chore', release: false },
+  ],
 };

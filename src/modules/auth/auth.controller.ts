@@ -596,7 +596,7 @@ export class AuthController {
     return;
   }
 
-  @Get('apple/callback')
+  @Post('apple/callback')
   @ApiOperation({
     summary: 'OAuth-애플 콜백',
     description: `
