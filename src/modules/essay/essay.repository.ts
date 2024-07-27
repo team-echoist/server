@@ -325,23 +325,39 @@ export class EssayRepository {
   }
 
   async findFullEssays(page: number, limit: number) {
-    const [essays, total] = await this.essayRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      order: {
-        createdDate: 'DESC',
-      },
-      relations: ['author', 'story', 'reports', 'reviews'],
-    });
+    const queryBuilder = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.story', 'story')
+      .leftJoinAndSelect('essay.reports', 'reports')
+      .leftJoinAndSelect('essay.reviews', 'reviews')
+      .leftJoinAndSelect(
+        'essay.author',
+        'author',
+        'author.deletedDate IS NOT NULL OR author.deletedDate IS NULL',
+      )
+      .orderBy('essay.createdDate', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [essays, total] = await queryBuilder.withDeleted().getManyAndCount();
 
     return { essays, total };
   }
 
   async findFullEssay(essayId: number) {
-    return this.essayRepository.findOne({
-      where: { id: essayId },
-      relations: ['author', 'story', 'reports', 'reviews'],
-    });
+    const queryBuilder = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.story', 'story')
+      .leftJoinAndSelect('essay.reports', 'reports')
+      .leftJoinAndSelect('essay.reviews', 'reviews')
+      .leftJoinAndSelect(
+        'essay.author',
+        'author',
+        'author.deletedDate IS NOT NULL OR author.deletedDate IS NULL',
+      )
+      .where('essay.id = :essayId', { essayId });
+
+    return await queryBuilder.withDeleted().getOne();
   }
 
   async deleteAllEssay(userId: number) {
