@@ -15,14 +15,6 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
     });
   }
 
-  //   const { id, emails } = profile;
-  // const user = {
-  //   platform: 'google',
-  //   platformId: id,
-  //   email: emails[0].value,
-  //   accessToken,
-  // };
-
   async validate(
     accessToken: string,
     refreshToken: string,

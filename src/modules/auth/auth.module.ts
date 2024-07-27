@@ -20,6 +20,7 @@ import * as strategies from '../../common/guards/strategies';
     strategies.GoogleStrategy,
     strategies.KakaoStrategy,
     strategies.NaverStrategy,
+    strategies.AppleStrategy,
   ],
   exports: [AuthService, AuthRepository],
 })
