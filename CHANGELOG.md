@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/team-echoist/server/compare/v1.0.1...v1.0.2) (2024-07-27)
+
+
+### Bug Fixes
+
+* resolved a typo that made me want to crawl into a hole and die ([#295](https://github.com/team-echoist/server/issues/295)) ([56d95c7](https://github.com/team-echoist/server/commit/56d95c7625656be96b910b7612f8617f4d1ffcf7))
+
 ## [1.0.1](https://github.com/team-echoist/server/compare/v1.0.0...v1.0.1) (2024-07-27)
 
 
