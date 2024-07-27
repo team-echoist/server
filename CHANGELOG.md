@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/team-echoist/server/compare/v1.0.0...v1.0.1) (2024-07-27)
+
+
+### Bug Fixes
+
+* Update apple login callback method to post ([#293](https://github.com/team-echoist/server/issues/293)) ([7dd5adc](https://github.com/team-echoist/server/commit/7dd5adc936575e100ac0712fed30fada176ab33c))
+
 # 1.0.0 (2024-07-27)
 
 
