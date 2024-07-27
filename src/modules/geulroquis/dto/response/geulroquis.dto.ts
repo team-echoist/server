@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 
-export class GuleroquisDto {
+export class GeulroquisDto {
   @ApiProperty()
   @IsNumber()
   @Expose()

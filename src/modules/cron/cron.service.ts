@@ -5,7 +5,7 @@ import { User } from '../../entities/user.entity';
 import { CronLog } from '../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Guleroquis } from '../../entities/guleroguis.entity';
+import { Geulroquis } from '../../entities/geulroguis.entity';
 import { Cron } from '@nestjs/schedule';
 import { UtilsService } from '../utils/utils.service';
 import { CronLogResDto } from './dto/response/cronLogRes.dto';
@@ -21,8 +21,8 @@ export class CronService {
     private readonly cronLogRepository: Repository<CronLog>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Guleroquis)
-    private readonly guleroquisRepository: Repository<Guleroquis>,
+    @InjectRepository(Geulroquis)
+    private readonly geulroquisRepository: Repository<Geulroquis>,
     @InjectQueue('cron') private readonly cronQueue: Queue,
 
     @InjectRedis() private readonly redis: Redis,
@@ -121,41 +121,41 @@ export class CronService {
   }
 
   @Cron('0 0 * * *')
-  async updateNextGuleroquis() {
-    const logId = await this.logStart('update_next_guleroguis');
+  async updateNextGeulroquis() {
+    const logId = await this.logStart('update_next_geulroguis');
     try {
-      const currentImage = await this.guleroquisRepository.findOne({ where: { current: true } });
+      const currentImage = await this.geulroquisRepository.findOne({ where: { current: true } });
       if (currentImage) {
         currentImage.provided = true;
         currentImage.providedDate = new Date();
         currentImage.current = false;
-        await this.guleroquisRepository.save(currentImage);
+        await this.geulroquisRepository.save(currentImage);
       }
 
-      const nextImage = await this.guleroquisRepository.findOne({ where: { next: true } });
+      const nextImage = await this.geulroquisRepository.findOne({ where: { next: true } });
       if (nextImage) {
         nextImage.current = true;
         nextImage.next = false;
-        await this.guleroquisRepository.save(nextImage);
+        await this.geulroquisRepository.save(nextImage);
       } else {
-        const nextImageInOrder = await this.guleroquisRepository.findOne({
+        const nextImageInOrder = await this.geulroquisRepository.findOne({
           where: { provided: false },
           order: { id: 'ASC' },
         });
         if (nextImageInOrder) {
           nextImageInOrder.current = true;
-          await this.guleroquisRepository.save(nextImageInOrder);
+          await this.geulroquisRepository.save(nextImageInOrder);
         }
       }
-      const cacheKey = `today_guleroquis`;
-      const todayGuleroquis = await this.guleroquisRepository.findOne({ where: { current: true } });
-      await this.redis.set(cacheKey, JSON.stringify(todayGuleroquis.url), 'EX', 24 * 60 * 60);
+      const cacheKey = `today_geulroquis`;
+      const todayGeulroquis = await this.geulroquisRepository.findOne({ where: { current: true } });
+      await this.redis.set(cacheKey, JSON.stringify(todayGeulroquis.url), 'EX', 24 * 60 * 60);
 
-      await this.logEnd(logId, 'completed', 'Next Guleroguis updated successfully.');
-      this.logger.log('Next Guleroguis updated successfully.');
+      await this.logEnd(logId, 'completed', 'Next Geulroguis updated successfully.');
+      this.logger.log('Next Geulroguis updated successfully.');
     } catch (error) {
       await this.logEnd(logId, 'failed', error.message);
-      this.logger.error('Failed to update next Guleroguis.', error);
+      this.logger.error('Failed to update next Geulroguis.', error);
     }
   }
 }

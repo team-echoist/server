@@ -27,7 +27,7 @@ import { ConfigService } from '@nestjs/config';
 import { AdminProcessor } from './admin.processor';
 import { AlertModule } from '../alert/alert.module';
 import { CronModule } from '../cron/cron.module';
-import { GuleroquisModule } from '../guleroquis/guleroquis.module';
+import { GeulroquisModule } from '../geulroquis/geulroquis.module';
 
 @Module({
   imports: [
@@ -66,7 +66,7 @@ import { GuleroquisModule } from '../guleroquis/guleroquis.module';
     SupportModule,
     AlertModule,
     CronModule,
-    GuleroquisModule,
+    GeulroquisModule,
   ],
   controllers: [AdminController],
   providers: [

@@ -22,7 +22,7 @@ export class AwsService {
     });
   }
 
-  async guleroquisUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
+  async geulroquisUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
     const command = new PutObjectCommand({
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
       Key: fileName,

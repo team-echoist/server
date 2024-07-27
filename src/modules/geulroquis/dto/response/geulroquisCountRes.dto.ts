@@ -1,13 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GuleroquisDto } from './guleroquis.dto';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
 
-export class GuleroquisResDto {
-  @ApiProperty({ type: [GuleroquisDto] })
-  @Expose()
-  guleroquis: GuleroquisDto[];
-
+export class GeulroquisCountResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()
@@ -16,5 +11,5 @@ export class GuleroquisResDto {
   @ApiProperty()
   @IsNumber()
   @Expose()
-  page: number;
+  available: number;
 }
