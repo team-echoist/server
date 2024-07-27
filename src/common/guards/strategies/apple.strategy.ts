@@ -19,15 +19,19 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
   async validate(
     accessToken: string,
     refreshToken: string,
+    idToken: string,
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
     try {
-      const decodedProfile = jwt.decode(profile) as any;
+      console.log('Access Token:', accessToken);
+      console.log('ID Token:', idToken);
 
-      console.log('Decoded Profile:', decodedProfile);
+      const decodedToken = jwt.decode(idToken) as any;
 
-      const { sub: id, email } = decodedProfile;
+      const { sub: id, email } = decodedToken;
+
+      console.log('Decoded Token:', decodedToken);
 
       const user = {
         platform: 'apple',
