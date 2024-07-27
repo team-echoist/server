@@ -5,4 +5,4 @@ export * from './kakao.strategy';
 export * from './naver.strategy';
 export * from './adminLocal.strategy';
 export * from './adminJwt.strategy';
-// export * from './apple.strategy';
+export * from './apple.strategy';
