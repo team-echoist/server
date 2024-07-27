@@ -43,6 +43,11 @@ footer
 - Move : 이동
 - Rename : 이름 변경
 
+### semantic-release
+- fix: 수 버전(patch) 증가 (버그 수정)
+- feat: 부 버전(minor) 증가 (새로운 기능 추가)
+- BREAKING CHANGE: 주 버전(major) 증가 (호환되지 않는 변경 사항)
+
 <br />
 
 ## Naming Convention

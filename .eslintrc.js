@@ -21,6 +21,7 @@ module.exports = {
     'webpack-hmr.config.js',
     'typeorm-transactional.ts',
     'jest.config.js',
+    'release.config.js',
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
