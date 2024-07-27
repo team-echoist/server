@@ -13,7 +13,7 @@ export class AlertSettings {
   report: boolean;
 
   @Index()
-  @Column({ name: 'device_id', unique: true })
+  @Column({ name: 'device_id', unique: false })
   deviceId: string;
 
   @OneToOne(() => User, (user) => user.alertSettings, { onDelete: 'CASCADE' })
