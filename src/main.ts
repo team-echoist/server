@@ -32,6 +32,7 @@ async function bootstrap() {
     'https://linkedout-umber.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://appleid.apple.com',
   ];
 
   app.enableCors({
