@@ -624,4 +624,31 @@ export class AuthController {
 
     res.redirect(redirectUrl);
   }
+
+  @Post('apple/mobile')
+  @ApiOperation({
+    summary: 'OAuth-애플 모바일 로그인',
+    description: `
+  모바일 기기에서 애플 OAuth를 통해 로그인합니다.
+
+  **요청 본문:**
+  - \`token\`: 애플 인증 토큰
+  - \`platformId\`: 사용자의 고유 ID
+
+  **동작 과정:**
+  1. 클라이언트로부터 애플 인증 토큰과 사용자 ID를 받습니다.
+  2. 애플 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
+  3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
+  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+
+  **주의 사항:**
+  - 애플 인증 토큰이 유효하지 않으면 오류가 발생합니다.
+  `,
+  })
+  @ApiBody({ type: OauthMobileReqDto })
+  @ApiResponse({ status: 201 })
+  async mobileAppleLogin(@Req() req: ExpressRequest, @Body() appleUserData: OauthMobileReqDto) {
+    req.user = await this.authService.validateAppleUser(appleUserData);
+    return;
+  }
 }

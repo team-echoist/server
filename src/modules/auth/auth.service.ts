@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { UtilsService } from '../utils/utils.service';
 import { MailService } from '../mail/mail.service';
@@ -254,5 +255,60 @@ export class AuthService {
     oauthDto.platformId = data.platformId;
 
     return await this.oauthLogin(oauthDto);
+  }
+
+  async validateAppleUser(data: OauthMobileReqDto) {
+    const clientSecret = this.generateClientSecret();
+    const tokenResponse = await firstValueFrom(
+      this.httpService.post('https://appleid.apple.com/auth/token', null, {
+        params: {
+          client_id: process.env.APPLE_CLIENT_ID,
+          client_secret: clientSecret,
+          code: data.token,
+          grant_type: 'authorization_code',
+        },
+      }),
+    );
+
+    const { id_token } = tokenResponse.data;
+
+    if (!id_token) {
+      throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
+    }
+
+    const userInfo = this.decodeIdToken(id_token);
+
+    if (!userInfo) {
+      throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
+    }
+
+    const oauthDto = new OauthDto();
+    oauthDto.platform = 'apple';
+    oauthDto.platformId = data.platformId;
+
+    return await this.oauthLogin(oauthDto);
+  }
+
+  private generateClientSecret() {
+    const claims = {
+      iss: process.env.APPLE_TEAM_ID,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      aud: 'https://appleid.apple.com',
+      sub: process.env.APPLE_CLIENT_ID,
+    };
+
+    return jwt.sign(claims, process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, '\n'), {
+      algorithm: 'ES256',
+      keyid: process.env.APPLE_KEY_ID,
+    });
+  }
+
+  private decodeIdToken(idToken: string) {
+    const decoded = jwt.decode(idToken, { complete: true });
+    if (!decoded) {
+      throw new HttpException('Invalid idToken', HttpStatus.BAD_REQUEST);
+    }
+    return decoded.payload;
   }
 }
