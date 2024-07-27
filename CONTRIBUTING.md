@@ -44,9 +44,24 @@ footer
 - Rename : 이름 변경
 
 ### semantic-release
-- fix: 수 버전(patch) 증가 (버그 수정)
-- feat: 부 버전(minor) 증가 (새로운 기능 추가)
-- BREAKING CHANGE: 주 버전(major) 증가 (호환되지 않는 변경 사항)
+#### Major Release (주 버전 증가)
+- BREAKING CHANGE: 커밋 메시지에 BREAKING CHANGE를 포함하는 경우 주 버전이 증가해. 이는 하위 호환성이 깨지는 변경 사항을 의미해.
+
+#### Minor Release (부 버전 증가)
+- feat: 새로운 기능을 추가하는 경우 부 버전이 증가. 예: feat: add new user login feature
+
+#### Patch Release (수 버전 증가)
+- fix: 버그를 수정하는 경우 수 버전이 증가. 예: fix: correct minor typos in code
+- perf: 성능을 개선하는 경우 수 버전이 증가. 예: perf: improve query performance
+- refactor: 코드 리팩토링을 하는 경우 수 버전이 증가. 예: refactor: simplify login logic
+
+<br/>
+
+#### 증가하지 않는 경우
+- docs: 문서 업데이트. 예: docs: update README
+- style: 코드 스타일 변경. 예: style: format code
+- test: 테스트 추가 또는 수정. 예: test: add new test cases
+- chore: 빌드 작업이나 도구 업데이트. 예: chore: update dependencies
 
 <br />
 
