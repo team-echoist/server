@@ -55,8 +55,8 @@ import { InquiriesSummaryResDto } from '../support/dto/response/inquiriesSummary
 import { UpdatedHistoriesResDto } from '../support/dto/response/updatedHistoriesRes.dto';
 import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
-import { GuleroquisResDto } from '../guleroquis/dto/response/guleroquisRes.dto';
-import { GuleroquisCountResDto } from '../guleroquis/dto/response/guleroquisCountRes.dto';
+import { GeulroquisResDto } from '../geulroquis/dto/response/geulroquisRes.dto';
+import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -1195,23 +1195,23 @@ export class AdminController {
     return this.adminService.activationSettings(req.user.id, adminId, activated);
   }
 
-  @Get('guleroquis')
+  @Get('geulroquis')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '글로키 리스트' })
-  @ApiResponse({ status: 200, type: GuleroquisResDto })
-  async getGuleroquis(
+  @ApiResponse({ status: 200, type: GeulroquisResDto })
+  async getGeulroquis(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.adminService.getGuleroquis(page, limit);
+    return this.adminService.getGeulroquis(page, limit);
   }
 
-  @Get('guleroquis/count')
+  @Get('geulroquis/count')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '총 글로키 / 사용가능 글로키 카운트' })
-  @ApiResponse({ status: 200, type: GuleroquisCountResDto })
-  async getGuleroquisCount() {
-    return this.adminService.getGuleroquisCount();
+  @ApiResponse({ status: 200, type: GeulroquisCountResDto })
+  async getGeulroquisCount() {
+    return this.adminService.getGeulroquisCount();
   }
 
   @Get(':adminId')
@@ -1255,12 +1255,12 @@ export class AdminController {
     return this.adminService.getCronLogs(req.user.id, page, limit);
   }
 
-  @Post('guleroquis')
+  @Post('geulroquis')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: 'Guleroquis 이미지 업로드',
+    summary: 'Geulroquis 이미지 업로드',
     description: `
-  여러 개의 이미지를 업로드하여 guleroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
 
   **요청 본문:**
 	- \`images\`: 업로드할 이미지 파일들 (form-data)
@@ -1276,19 +1276,19 @@ export class AdminController {
   })
   @ApiResponse({ status: 200 })
   @UseInterceptors(FilesInterceptor('images', 30))
-  async saveGuleroquisImages(@UploadedFiles() files: Express.Multer.File[]) {
-    return this.adminService.saveGuleroquisImages(files);
+  async saveGeulroquisImages(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.adminService.saveGeulroquisImages(files);
   }
 
-  @Put('guleroquis/:guleroquisId')
+  @Put('geulroquis/:geulroquisId')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '다음 글로키 지정하기',
     description: `
-  여러 개의 이미지를 업로드하여 guleroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
 
   **매개 변수:**
-  - \`guleroquisId\`: 다음 제공할 글로키 아이디.
+  - \`geulroquisId\`: 다음 제공할 글로키 아이디.
 
   **동작 과정:**
   1. 데이터베이스에 다음으로 제공할 글로키가 존재하는지 조회하고 무효화합니다.
@@ -1299,7 +1299,7 @@ export class AdminController {
   `,
   })
   @ApiResponse({})
-  async changeTomorrowGuleroquis(@Param('guleroquisId', ParseIntPipe) guleroquisId: number) {
-    return this.adminService.changeTomorrowGuleroquis(guleroquisId);
+  async changeTomorrowGeulroquis(@Param('geulroquisId', ParseIntPipe) geulroquisId: number) {
+    return this.adminService.changeTomorrowGeulroquis(geulroquisId);
   }
 }

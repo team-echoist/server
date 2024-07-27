@@ -1,6 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Strategy, VerifyCallback } from 'passport-apple';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
@@ -22,11 +23,16 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
     done: VerifyCallback,
   ): Promise<any> {
     try {
-      console.log(profile);
-      const { id } = profile;
+      const decodedProfile = jwt.decode(profile) as any;
+
+      console.log('Decoded Profile:', decodedProfile);
+
+      const { sub: id, email } = decodedProfile;
+
       const user = {
         platform: 'apple',
         platformId: id,
+        email: email || null,
       };
       done(null, user);
     } catch (err) {

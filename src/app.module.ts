@@ -30,7 +30,7 @@ import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
-import { GuleroquisModule } from './modules/guleroquis/guleroquis.module';
+import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
 import { HomeModule } from './modules/home/home.module';
 
 @Module({
@@ -63,7 +63,7 @@ import { HomeModule } from './modules/home/home.module';
     CronModule,
     SupportModule,
     AlertModule,
-    GuleroquisModule,
+    GeulroquisModule,
     HomeModule,
   ],
   providers: [
@@ -79,7 +79,7 @@ export class AppModule implements OnModuleInit, NestModule {
 
   async onModuleInit() {
     await this.cronService.userDeletionCronJobs();
-    await this.cronService.updateNextGuleroquis();
+    await this.cronService.updateNextGeulroquis();
 
     if (process.env.INITIALIZE === 'true') {
       await this.seederService.initializeAdmin();

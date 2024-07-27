@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { HomeRepository } from './home.repository';
-import { GuleroquisService } from '../guleroquis/guleroquis.service';
+import { GeulroquisService } from '../geulroquis/geulroquis.service';
 
 @Injectable()
 export class HomeService {
   constructor(
     private readonly homeRepository: HomeRepository,
-    private readonly guleroquisService: GuleroquisService,
+    private readonly geulroquisService: GeulroquisService,
   ) {}
 
-  async todayGuleroquis() {
-    return this.guleroquisService.todayGuleroquis();
+  async todayGeulroquis() {
+    return this.geulroquisService.todayGeulroquis();
   }
 }

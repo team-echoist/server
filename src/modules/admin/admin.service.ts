@@ -51,7 +51,7 @@ import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../alert/alert.service';
-import { GuleroquisService } from '../guleroquis/guleroquis.service';
+import { GeulroquisService } from '../geulroquis/geulroquis.service';
 import { CronService } from '../cron/cron.service';
 
 @Injectable()
@@ -67,7 +67,7 @@ export class AdminService {
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
-    private readonly guleroquisService: GuleroquisService,
+    private readonly geulroquisService: GeulroquisService,
     private readonly cronService: CronService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
@@ -844,29 +844,29 @@ export class AdminService {
     return await this.cronService.getCronLogs(page, limit);
   }
 
-  async saveGuleroquisImages(files: Express.Multer.File[]) {
+  async saveGeulroquisImages(files: Express.Multer.File[]) {
     const uploadPromises = files.map(async (file) => {
       const newExt = file.originalname.split('.').pop();
       const imageName = this.utilsService.getUUID();
-      const fileName = `guleroquis/${imageName}.${newExt}`;
-      return await this.awsService.guleroquisUploadToS3(fileName, file, newExt);
+      const fileName = `geulroquis/${imageName}.${newExt}`;
+      return await this.awsService.geulroquisUploadToS3(fileName, file, newExt);
     });
 
     const imageUrls = await Promise.all(uploadPromises);
 
-    const savePromises = imageUrls.map((url) => this.guleroquisService.saveGuleroquis(url));
+    const savePromises = imageUrls.map((url) => this.geulroquisService.saveGeulroquis(url));
     await Promise.all(savePromises);
   }
 
-  async getGuleroquis(page: number, limit: number) {
-    return this.guleroquisService.getGuleroquis(page, limit);
+  async getGeulroquis(page: number, limit: number) {
+    return this.geulroquisService.getGeulroquis(page, limit);
   }
 
-  async getGuleroquisCount() {
-    return this.guleroquisService.getGuleroquisCount();
+  async getGeulroquisCount() {
+    return this.geulroquisService.getGeulroquisCount();
   }
 
-  async changeTomorrowGuleroquis(guleroquisId: number) {
-    return this.guleroquisService.changeTomorrowGuleroquis(guleroquisId);
+  async changeTomorrowGeulroquis(geulroquisId: number) {
+    return this.geulroquisService.changeTomorrowGeulroquis(geulroquisId);
   }
 }
