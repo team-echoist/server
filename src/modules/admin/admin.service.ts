@@ -509,6 +509,7 @@ export class AdminService {
   async getFullEssays(page: number, limit: number) {
     const { essays, total } = await this.essayRepository.findFullEssays(page, limit);
     const totalPage: number = Math.ceil(total / limit);
+
     const data = essays.map((essay) => ({
       ...essay,
       authorId: essay.author.id,
