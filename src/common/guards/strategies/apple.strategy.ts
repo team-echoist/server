@@ -10,7 +10,7 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
       teamID: process.env.APPLE_TEAM_ID,
       callbackURL: process.env.APPLE_CALLBACK_URL,
       keyID: process.env.APPLE_KEY_ID,
-      privateKeyString: process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/'/g, ''),
+      key: process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/'/g, ''),
       scope: ['name', 'email'],
     });
   }
