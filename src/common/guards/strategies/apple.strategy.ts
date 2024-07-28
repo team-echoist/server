@@ -1,8 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Strategy, VerifyCallback } from 'passport-apple';
-import * as jwt from 'jsonwebtoken';
-import axios from 'axios';
+import { Injectable } from '@nestjs/common';
+import { Strategy, Profile } from '@arendajaelu/nestjs-passport-apple';
 
 @Injectable()
 export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
@@ -17,32 +15,13 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    id_token: string,
-    profile: any,
-    done: VerifyCallback,
-  ): Promise<any> {
-    try {
-      console.log('id_token: ', id_token);
-
-      const appleKeys = await axios.get('https://appleid.apple.com/auth/keys');
-      const keys = appleKeys.data.keys;
-      const publicKey = keys[0];
-
-      const decodedIdToken = jwt.verify(id_token, publicKey, { algorithms: ['RS256'] });
-      console.log('첫 번째 공개키로 디코딩한것: ', decodedIdToken);
-      console.log('디코딩된것 sub: ', decodedIdToken.sub);
-
-      const user = {
-        platform: 'apple',
-        platformId: decodedIdToken.sub,
-        email: decodedIdToken || null,
-      };
-      done(null, user);
-    } catch (err) {
-      throw new UnauthorizedException();
-    }
+  async validate(_accessToken: string, _refreshToken: string, profile: Profile) {
+    console.log('profile: ', profile);
+    const user = {
+      email: profile.email ? profile.email : null,
+      platformId: profile.id,
+      platform: 'apple',
+    };
+    return user;
   }
 }
