@@ -34,7 +34,7 @@ jest.mock('../../aws/aws.service');
 jest.mock('../../mail/mail.service');
 jest.mock('../../support/support.service');
 jest.mock('../../alert/alert.service');
-jest.mock('../../fcm/fcm.service');
+jest.mock('../../firebase/firebase.service');
 jest.mock('../../geulroquis/geulroquis.service');
 jest.mock('../../cron/cron.service');
 

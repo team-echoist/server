@@ -3,7 +3,7 @@ import { AlertService } from '../alert.service';
 import { AlertRepository } from '../alert.repository';
 import { UtilsService } from '../../utils/utils.service';
 import { SupportService } from '../../support/support.service';
-import { FcmService } from '../../fcm/fcm.service';
+import { FirebaseService } from '../../firebase/firebase.service';
 import { UserService } from '../../user/user.service';
 import { User } from '../../../entities/user.entity';
 import { EssayStatus } from '../../../entities/essay.entity';
@@ -24,7 +24,7 @@ jest.mock('bull');
 jest.mock('../alert.repository');
 jest.mock('../../utils/utils.service');
 jest.mock('../../support/support.service');
-jest.mock('../../fcm/fcm.service');
+jest.mock('../../firebase/firebase.service');
 jest.mock('../../user/user.service');
 jest.mock('../../aws/aws.service');
 jest.mock('../../nickname/nickname.service');
@@ -36,7 +36,7 @@ describe('AlertService', () => {
   let alertRepository: jest.Mocked<AlertRepository>;
   let utilsService: jest.Mocked<UtilsService>;
   let supportService: jest.Mocked<SupportService>;
-  let fcmService: jest.Mocked<FcmService>;
+  let fcmService: jest.Mocked<FirebaseService>;
   const userService = {
     fetchUserEntityById: jest.fn(),
   };
@@ -56,7 +56,7 @@ describe('AlertService', () => {
         AlertRepository,
         UtilsService,
         SupportService,
-        FcmService,
+        FirebaseService,
         { provide: UserService, useValue: userService },
         { provide: AwsService, useValue: {} },
         { provide: NicknameService, useValue: {} },
@@ -76,7 +76,7 @@ describe('AlertService', () => {
     alertRepository = module.get(AlertRepository);
     utilsService = module.get(UtilsService);
     supportService = module.get(SupportService);
-    fcmService = module.get(FcmService);
+    fcmService = module.get(FirebaseService);
   });
 
   it('should be defined', () => {

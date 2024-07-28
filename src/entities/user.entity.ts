@@ -107,6 +107,12 @@ export class User {
   })
   deletedDate?: Date;
 
+  @Column({ name: 'location_consent', default: false })
+  locationConsent: boolean;
+
+  @Column({ name: 'marketing_consent', default: false })
+  marketingConsent: boolean;
+
   @Column({ name: 'is_first', default: true })
   isFirst: boolean;
 

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResDto {
@@ -69,4 +69,14 @@ export class UserResDto {
   @Expose()
   @IsDate()
   deactivationDate: Date;
+
+  @ApiProperty()
+  @IsBoolean()
+  @Expose()
+  marketingConsent: boolean;
+
+  @ApiProperty()
+  @IsBoolean()
+  @Expose()
+  locationConsent: boolean;
 }
