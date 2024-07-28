@@ -410,7 +410,6 @@ export class AuthController {
 
   **요청 본문:**
   - \`token\`: 구글 인증 토큰
-  - \`platformId\`: 사용자의 고유 ID
 
   **동작 과정:**
   1. 클라이언트로부터 구글 인증 토큰과 사용자 ID를 받습니다.
@@ -425,8 +424,8 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200 })
-  async mobileGoogleLogin(@Req() req: ExpressRequest, @Body() googleUserData: OauthMobileReqDto) {
-    req.user = await this.authService.validateGoogleUser(googleUserData);
+  async mobileGoogleLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
+    req.user = await this.authService.validateGoogleUser(oauthData.token);
 
     return;
   }
@@ -485,7 +484,6 @@ export class AuthController {
 
   **요청 본문:**
   - \`token\`: 카카오 인증 토큰
-  - \`platformId\`: 사용자의 고유 ID
 
   **동작 과정:**
   1. 클라이언트로부터 카카오 인증 토큰과 사용자 ID를 받습니다.
@@ -499,8 +497,8 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201 })
-  async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() kakaoUserData: OauthMobileReqDto) {
-    req.user = await this.authService.validateKakaoUser(kakaoUserData);
+  async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
+    req.user = await this.authService.validateKakaoUser(oauthData.token);
 
     return;
   }
@@ -559,7 +557,6 @@ export class AuthController {
 
   **요청 본문:**
   - \`token\`: 네이버 인증 토큰
-  - \`platformId\`: 사용자의 고유 ID
 
   **동작 과정:**
   1. 클라이언트로부터 네이버 인증 토큰과 사용자 ID를 받습니다.
@@ -573,8 +570,8 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201 })
-  async mobileNaverLogin(@Req() req: ExpressRequest, @Body() naverUserData: OauthMobileReqDto) {
-    req.user = await this.authService.validateNaverUser(naverUserData);
+  async mobileNaverLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
+    req.user = await this.authService.validateNaverUser(oauthData.token);
 
     return;
   }
@@ -632,8 +629,7 @@ export class AuthController {
   모바일 기기에서 애플 OAuth를 통해 로그인합니다.
 
   **요청 본문:**
-  - \`token\`: 애플 인증 토큰
-  - \`platformId\`: 사용자의 고유 ID
+  - \`token\`: 애플 인증 토큰(id_token)
 
   **동작 과정:**
   1. 모바일 환경에서 애플 로그인을 통해 받은 userToken을 디코딩합니다.
@@ -647,8 +643,8 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201 })
-  async mobileAppleLogin(@Req() req: ExpressRequest, @Body('token') token: string) {
-    req.user = await this.authService.validateAppleUser(token);
+  async mobileAppleLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
+    req.user = await this.authService.validateAppleUser(oauthData.token);
     return;
   }
 }

@@ -6,9 +6,4 @@ export class OauthMobileReqDto {
   @IsString()
   @IsNotEmpty()
   token: string;
-
-  @ApiProperty({ description: '플랫폼이 제공하는 사용자의 고유 ID', nullable: false })
-  @IsString()
-  @IsNotEmpty()
-  platformId: string;
 }
