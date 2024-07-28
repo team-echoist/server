@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/team-echoist/server/compare/v1.1.0...v1.1.1) (2024-07-28)
+
+
+### Bug Fixes
+
+* Update userReqDto ([#304](https://github.com/team-echoist/server/issues/304)) ([86c265d](https://github.com/team-echoist/server/commit/86c265da84fbab0354eb036b5021377208f9f166))
+
 # [1.1.0](https://github.com/team-echoist/server/compare/v1.0.2...v1.1.0) (2024-07-28)
 
 
