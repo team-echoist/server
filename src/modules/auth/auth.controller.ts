@@ -647,8 +647,8 @@ export class AuthController {
   })
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201 })
-  async mobileAppleLogin(@Req() req: ExpressRequest, @Body() appleUserData: OauthMobileReqDto) {
-    req.user = await this.authService.validateAppleUser(appleUserData);
+  async mobileAppleLogin(@Req() req: ExpressRequest, @Body('token') token: string) {
+    req.user = await this.authService.validateAppleUser(token);
     return;
   }
 }

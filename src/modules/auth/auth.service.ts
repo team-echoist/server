@@ -258,8 +258,8 @@ export class AuthService {
     return await this.oauthLogin(oauthDto);
   }
 
-  async validateAppleUser(data: OauthMobileReqDto) {
-    const decodedIdToken = await this.verifyAppleIdToken(data.token);
+  async validateAppleUser(token: string) {
+    const decodedIdToken = await this.verifyAppleIdToken(token);
 
     console.log('decodedIdToken: ', decodedIdToken);
     console.log('sub: ', decodedIdToken.sub);
@@ -274,11 +274,14 @@ export class AuthService {
 
   async verifyAppleIdToken(idToken: string): Promise<any> {
     const decodedHeader: any = jwt.decode(idToken, { complete: true });
+    console.log('decodedHeader: ', decodedHeader);
     if (!decodedHeader || !decodedHeader.header) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }
 
     const publicKey = await this.getApplePublicKey(decodedHeader.header.kid);
+    console.log('publicKey: ', publicKey);
+
     return new Promise((resolve, reject) => {
       jwt.verify(idToken, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
         if (err) {
