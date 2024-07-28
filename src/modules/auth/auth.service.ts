@@ -15,9 +15,8 @@ import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { Transactional } from 'typeorm-transactional';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
-import { User } from '../../entities/user.entity';
+import * as jwksClient from 'jwks-rsa';
 
 @Injectable()
 export class AuthService {
@@ -260,16 +259,42 @@ export class AuthService {
   }
 
   async validateAppleUser(data: OauthMobileReqDto) {
-    const decodedToken = jwt.decode(data.token);
+    const decodedIdToken = await this.verifyAppleIdToken(data.token);
 
-    console.log('decodedToken: ', decodedToken);
+    console.log('decodedIdToken: ', decodedIdToken);
+    console.log('sub: ', decodedIdToken.sub);
 
-    // const oauthDto = new OauthDto();
-    // oauthDto.platform = 'apple';
-    // oauthDto.platformId = decodedIdToken.id;
-    // oauthDto.email = decodedIdToken.email || null;
-    //
-    // return await this.oauthLogin(oauthDto);
-    return new User();
+    const oauthDto = new OauthDto();
+    oauthDto.platform = 'apple';
+    oauthDto.platformId = decodedIdToken.sub;
+    oauthDto.email = decodedIdToken.email || null;
+
+    return await this.oauthLogin(oauthDto);
+  }
+
+  async verifyAppleIdToken(idToken: string): Promise<any> {
+    const decodedHeader: any = jwt.decode(idToken, { complete: true });
+    if (!decodedHeader || !decodedHeader.header) {
+      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+    }
+
+    const publicKey = await this.getApplePublicKey(decodedHeader.header.kid);
+    return new Promise((resolve, reject) => {
+      jwt.verify(idToken, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
+        if (err) {
+          return reject(new HttpException('Token verification failed', HttpStatus.UNAUTHORIZED));
+        }
+        resolve(decoded);
+      });
+    });
+  }
+
+  private client = jwksClient({
+    jwksUri: 'https://appleid.apple.com/auth/keys',
+  });
+
+  async getApplePublicKey(kid: string): Promise<string> {
+    const key = await this.client.getSigningKey(kid);
+    return key.getPublicKey();
   }
 }
