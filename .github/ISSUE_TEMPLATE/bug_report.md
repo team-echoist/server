@@ -12,11 +12,6 @@ assignees: 'daechan-jo'
 
 <br />
 
-## **To Reproduce**
-
-
-<br />
-
 ## **Expected behavior**
 
 <br />
@@ -30,7 +25,7 @@ assignees: 'daechan-jo'
 
 - Device
 - [ ] Desktop
-- [ ] Smartphone
+- [ ] Mobile
 
  - OS
 - [ ] macOS
