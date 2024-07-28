@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { AwsService } from '../aws/aws.service';
 
 @Injectable()
-export class FcmService {
+export class FirebaseService {
   constructor(private readonly awsService: AwsService) {}
 
   async onModuleInit() {
@@ -34,4 +34,12 @@ export class FcmService {
       console.error('Error sending message:', error);
     }
   }
+
+  // async verifyUserToken(userToken: string): Promise<admin.auth.DecodedIdToken> {
+  //   try {
+  //     return await admin.auth().verifyIdToken(userToken);
+  //   } catch (error) {
+  //     throw new UnauthorizedException('Invalid Firebase token');
+  //   }
+  // }
 }

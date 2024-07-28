@@ -6,7 +6,7 @@ import { AlertService } from './alert.service';
 import { AlertRepository } from './alert.repository';
 import { User } from '../../entities/user.entity';
 import { UtilsModule } from '../utils/utils.module';
-import { FcmService } from '../fcm/fcm.service';
+import { FirebaseService } from '../firebase/firebase.service';
 import { SupportModule } from '../support/support.module';
 import { AwsModule } from '../aws/aws.module';
 import { BullModule } from '@nestjs/bull';
@@ -37,7 +37,7 @@ import { DeactivationReason } from '../../entities/deactivationReason.entity';
     UserModule,
   ],
   controllers: [AlertController],
-  providers: [AlertService, AlertRepository, FcmService, AlertProcessor],
+  providers: [AlertService, AlertRepository, FirebaseService, AlertProcessor],
   exports: [AlertService, AlertRepository],
 })
 export class AlertModule {}

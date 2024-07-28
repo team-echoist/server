@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserSummaryResDto {
@@ -27,4 +27,14 @@ export class UserSummaryResDto {
   @Expose()
   @IsDate()
   createdDate: Date;
+
+  @ApiProperty()
+  @IsBoolean()
+  @Expose()
+  marketingConsent: boolean;
+
+  @ApiProperty()
+  @IsBoolean()
+  @Expose()
+  locationConsent: boolean;
 }

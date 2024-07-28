@@ -5,7 +5,7 @@ import { Alert, AlertType } from '../../entities/alert.entity';
 import { UtilsService } from '../utils/utils.service';
 import { AlertResDto } from './dto/response/alertRes.dto';
 import { SupportService } from '../support/support.service';
-import { FcmService } from '../fcm/fcm.service';
+import { FirebaseService } from '../firebase/firebase.service';
 import { ActionType } from '../../entities/processedHistory.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -20,7 +20,7 @@ export class AlertService {
     private readonly alertRepository: AlertRepository,
     private readonly utilsService: UtilsService,
     private readonly supportService: SupportService,
-    private readonly fcmService: FcmService,
+    private readonly fcmService: FirebaseService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectQueue('alert') private readonly alertQueue: Queue,
   ) {}

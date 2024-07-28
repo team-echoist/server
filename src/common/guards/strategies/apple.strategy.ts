@@ -16,7 +16,6 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
   }
 
   async validate(_accessToken: string, _refreshToken: string, profile: Profile) {
-    console.log('profile: ', profile);
     const user = {
       email: profile.email ? profile.email : null,
       platformId: profile.id,
