@@ -179,12 +179,13 @@ export class AuthService {
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
     if (oauthUser.email !== null) {
-      const user = await this.authRepository.findByEmail(oauthUser.email);
-      if (user !== null)
+      const emailUser = await this.authRepository.findByEmail(oauthUser.email);
+      if (emailUser !== null) {
         throw new HttpException(
           'The email registered to your account is already in use for the service.',
           HttpStatus.CONFLICT,
         );
+      }
     }
 
     if (user !== null) {
