@@ -7,7 +7,6 @@ import { MailService } from '../mail/mail.service';
 import { NicknameService } from '../nickname/nickname.service';
 import { AuthRepository } from './auth.repository';
 import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import { OauthMobileReqDto } from './dto/request/OauthMobileReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
@@ -179,6 +178,15 @@ export class AuthService {
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
+    if (oauthUser.email !== null) {
+      const user = await this.authRepository.findByEmail(oauthUser.email);
+      if (user !== null)
+        throw new HttpException(
+          'The email registered to your account is already in use for the service.',
+          HttpStatus.CONFLICT,
+        );
+    }
+
     if (user !== null) {
       if (user.platformId !== oauthUser.platformId) {
         throw new HttpException('Please check your login information.', HttpStatus.UNAUTHORIZED);
@@ -196,9 +204,9 @@ export class AuthService {
     return user;
   }
 
-  async validateGoogleUser(data: OauthMobileReqDto) {
+  async validateGoogleUser(token: string) {
     const ticket = await this.oauthClient.verifyIdToken({
-      idToken: data.token,
+      idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
@@ -211,15 +219,15 @@ export class AuthService {
     const oauthDto = new OauthDto();
     oauthDto.platform = 'google';
     oauthDto.email = payload.email;
-    oauthDto.platformId = data.platformId;
+    oauthDto.platformId = payload.sub;
 
     return await this.oauthLogin(oauthDto);
   }
 
-  async validateKakaoUser(data: OauthMobileReqDto) {
+  async validateKakaoUser(token: string) {
     const response = await firstValueFrom(
       this.httpService.post('https://kapi.kakao.com/v2/user/me', null, {
-        headers: { Authorization: `Bearer ${data.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       }),
     );
 
@@ -232,15 +240,15 @@ export class AuthService {
     const oauthDto = new OauthDto();
     oauthDto.platform = 'kakao';
     oauthDto.email = payload.kakao_account.email;
-    oauthDto.platformId = data.platformId;
+    oauthDto.platformId = payload.platformId;
 
     return await this.oauthLogin(oauthDto);
   }
 
-  async validateNaverUser(data: OauthMobileReqDto) {
+  async validateNaverUser(token: string) {
     const response = await firstValueFrom(
       this.httpService.get('https://openapi.naver.com/v1/nid/me', {
-        headers: { Authorization: `Bearer ${data.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       }),
     );
 
@@ -253,16 +261,13 @@ export class AuthService {
     const oauthDto = new OauthDto();
     oauthDto.platform = 'naver';
     oauthDto.email = payload.email;
-    oauthDto.platformId = data.platformId;
+    oauthDto.platformId = payload.platformId;
 
     return await this.oauthLogin(oauthDto);
   }
 
   async validateAppleUser(token: string) {
     const decodedIdToken = await this.verifyAppleIdToken(token);
-
-    console.log('decodedIdToken: ', decodedIdToken);
-    console.log('sub: ', decodedIdToken.sub);
 
     const oauthDto = new OauthDto();
     oauthDto.platform = 'apple';
@@ -274,13 +279,12 @@ export class AuthService {
 
   async verifyAppleIdToken(idToken: string): Promise<any> {
     const decodedHeader: any = jwt.decode(idToken, { complete: true });
-    console.log('decodedHeader: ', decodedHeader);
+
     if (!decodedHeader || !decodedHeader.header) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }
 
     const publicKey = await this.getApplePublicKey(decodedHeader.header.kid);
-    console.log('publicKey: ', publicKey);
 
     return new Promise((resolve, reject) => {
       jwt.verify(idToken, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
