@@ -178,21 +178,20 @@ export class AuthService {
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
-    if (oauthUser.email !== null) {
-      const emailUser = await this.authRepository.findByEmail(oauthUser.email);
-      if (emailUser !== null) {
-        throw new HttpException(
-          'The email registered to your account is already in use for the service.',
-          HttpStatus.CONFLICT,
-        );
-      }
-    }
-
     if (user !== null) {
       if (user.platformId !== oauthUser.platformId) {
         throw new HttpException('Please check your login information.', HttpStatus.UNAUTHORIZED);
       }
     } else {
+      if (oauthUser.email !== null) {
+        const emailUser = await this.authRepository.findByEmail(oauthUser.email);
+        if (emailUser !== null) {
+          throw new HttpException(
+            'The email registered to your account is already in use for the service.',
+            HttpStatus.CONFLICT,
+          );
+        }
+      }
       const nickname = await this.nicknameService.generateUniqueNickname();
       user = await this.authRepository.saveUser({
         email: oauthUser.email || null,
