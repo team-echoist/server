@@ -492,7 +492,7 @@ export class EssayService {
         ? (essay.content = this.utilsService.extractFirstSentences(essay.content, 10, 50))
         : (essay.content = this.utilsService.extractEndSentences(essay.content, 10, 50));
     });
-    const essayDtos = this.utilsService.transformToDto(SentenceEssayResDto, essays);
+    const essayDtos = this.utilsService.transformToDto(SentenceEssayResDto, selectedEssays);
 
     return { essays: essayDtos };
   }
