@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/team-echoist/server/compare/v1.1.1...v1.1.2) (2024-07-29)
+
+
+### Bug Fixes
+
+* type mismatch in platform ID verification ([#311](https://github.com/team-echoist/server/issues/311)) ([bb3d45d](https://github.com/team-echoist/server/commit/bb3d45d652fa04d25776afc85290440c953013d1))
+
 ## [1.1.1](https://github.com/team-echoist/server/compare/v1.1.0...v1.1.1) (2024-07-28)
 
 
