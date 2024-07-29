@@ -175,11 +175,12 @@ export class AuthService {
 
   // ----------------- OAuth ---------------------
 
+  @Transactional()
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
     if (user !== null) {
-      if (user.platformId !== oauthUser.platformId) {
+      if (String(user.platformId) !== String(oauthUser.platformId)) {
         throw new HttpException('Please check your login information.', HttpStatus.UNAUTHORIZED);
       }
     } else {
