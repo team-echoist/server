@@ -3,7 +3,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { EssayModule } from './modules/essay/essay.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -75,9 +75,11 @@ export class AppModule implements OnModuleInit, NestModule {
   constructor(
     private readonly seederService: SeederService,
     private readonly cronService: CronService,
+    private readonly configService: ConfigService,
   ) {}
 
   async onModuleInit() {
+    this.configService.set('APP_INITIALIZING', true);
     await this.cronService.userDeletionCronJobs();
     await this.cronService.updateNextGeulroquis();
 
