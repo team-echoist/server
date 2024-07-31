@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/team-echoist/server/compare/v1.1.2...v1.1.3) (2024-07-31)
+
+
+### Bug Fixes
+
+* swagger bearer token settings ([#314](https://github.com/team-echoist/server/issues/314)) ([838d17c](https://github.com/team-echoist/server/commit/838d17c46a6d1ebb7a5b6a8338e00158598ebd88))
+
 ## [1.1.2](https://github.com/team-echoist/server/compare/v1.1.1...v1.1.2) (2024-07-29)
 
 
