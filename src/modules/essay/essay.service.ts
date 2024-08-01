@@ -368,18 +368,18 @@ export class EssayService {
   }
 
   private async getFileName(essayId?: number): Promise<string> {
+    const uuid = this.utilsService.getUUID();
     if (!essayId) {
-      return this.utilsService.getUUID();
+      return `images/${uuid}`;
     }
 
     const essay = await this.essayRepository.findEssayById(essayId);
 
-    if (essay.thumbnail) {
+    if (essay !== null && essay.thumbnail) {
       const urlParts = essay.thumbnail.split('/').pop();
       return `images/${urlParts}`;
     } else {
-      const imageName = this.utilsService.getUUID();
-      return `images/${imageName}`;
+      return `images/${uuid}`;
     }
   }
 
