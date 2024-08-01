@@ -75,6 +75,7 @@ export class SupportService {
   async getSettings(userId: number, deviceId: string) {
     if (deviceId === '' && !deviceId)
       throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
+
     let settings = await this.supportRepository.findSettings(userId, deviceId);
 
     if (!settings) {

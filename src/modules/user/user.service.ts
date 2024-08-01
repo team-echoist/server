@@ -208,4 +208,10 @@ export class UserService {
       );
     }
   }
+
+  async getLocationConsent(userId: number) {
+    const user = await this.fetchUserEntityById(userId);
+
+    return user.locationConsent;
+  }
 }

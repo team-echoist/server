@@ -12,6 +12,9 @@ export class AlertSettings {
   @Column({ default: false })
   report: boolean;
 
+  @Column({ default: false })
+  marketing: boolean;
+
   @Index()
   @Column({ name: 'device_id', unique: false })
   deviceId: string;

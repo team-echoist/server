@@ -184,8 +184,9 @@ export class SupportController {
   - \`deviceId\` (string, required): 업데이트할 디바이스의 고유 ID
 
   **요청 본문:**
-  - \`viewed\`: 링크드아웃한 글 조회 알림 (boolean)
+  - \`viewed\`: 발행 또는 링크드아웃 한 글 최초 조회 알림 (boolean)
   - \`report\`: 신고 완료 알림 (boolean)
+  - \`marketing\`: 광고성 마케팅 알림 (boolean)
 
   **동작 과정:**
   1. 현재 로그인된 사용자의 알림 설정을 업데이트합니다.
