@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateAlertSettingsReqDto {
@@ -11,4 +11,9 @@ export class UpdateAlertSettingsReqDto {
   @IsOptional()
   @IsBoolean()
   report?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  marketing: boolean;
 }

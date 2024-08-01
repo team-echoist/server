@@ -186,6 +186,7 @@ export class SupportController {
   **요청 본문:**
   - \`viewed\`: 링크드아웃한 글 조회 알림 (boolean)
   - \`report\`: 신고 완료 알림 (boolean)
+  - \`marketing\`: 마케팅 알림 (boolean)
 
   **동작 과정:**
   1. 현재 로그인된 사용자의 알림 설정을 업데이트합니다.
