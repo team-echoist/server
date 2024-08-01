@@ -182,6 +182,7 @@ export class UserController {
   - \`profileImage\` (선택적): 프로필 이미지를 설정합니다.
   - \`birthDate\` (선택적): 생년월일을 설정합니다.
   - \`isFirst\` (선택적): 최초접속 여부를 설정합니다.
+  - \`locationConsent:\` (선택적): 위치기반서비스 동의 여부를 설정합니다.
 
   **동작 과정:**
   1. 사용자 ID를 기반으로 사용자의 기존 정보를 조회합니다.
