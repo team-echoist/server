@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/team-echoist/server/compare/v1.1.3...v1.2.0) (2024-08-01)
+
+
+### Features
+
+* consent to receive location-based services and marketing ([#315](https://github.com/team-echoist/server/issues/315)) ([b18d323](https://github.com/team-echoist/server/commit/b18d3235014d99255a9a3ac0f05262897cbf704a))
+
 ## [1.1.3](https://github.com/team-echoist/server/compare/v1.1.2...v1.1.3) (2024-07-31)
 
 
