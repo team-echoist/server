@@ -12,6 +12,8 @@ import { CronLogResDto } from './dto/response/cronLogRes.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
+import { SupportService } from '../support/support.service';
+import { Device } from '../../entities/device.entity';
 
 @Injectable()
 export class CronService {
@@ -24,6 +26,9 @@ export class CronService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Geulroquis)
     private readonly geulroquisRepository: Repository<Geulroquis>,
+    @InjectRepository(Device)
+    private readonly deviceReposiotry: Repository<Device>,
+
     @InjectQueue('cron') private readonly cronQueue: Queue,
 
     @InjectRedis() private readonly redis: Redis,
@@ -107,6 +112,15 @@ export class CronService {
             deletedDate: () => `NOW()`,
           })
           .where('id IN (:...userIds)', { userIds })
+          .execute();
+
+        await this.deviceReposiotry
+          .createQueryBuilder()
+          .update(Device)
+          .set({
+            deviceId: () => `CONCAT('${todayDate}_', device_id)`,
+          })
+          .where('id In (:...userIds)', { userIds })
           .execute();
 
         await this.logEnd(

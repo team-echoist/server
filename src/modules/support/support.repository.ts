@@ -144,4 +144,15 @@ export class SupportRepository {
   async findDevices(userId: number) {
     return this.deviceRepository.find({ where: { user: { id: userId } } });
   }
+
+  async deleteDevice(userId: number, todayDate: string) {
+    return this.deviceRepository
+      .createQueryBuilder()
+      .update(Device)
+      .set({
+        deviceId: () => `CONCAT('${todayDate}_', device_id)`,
+      })
+      .where('user_id = :userId', { userId })
+      .execute();
+  }
 }
