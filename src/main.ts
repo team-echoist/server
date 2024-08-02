@@ -32,6 +32,7 @@ async function bootstrap() {
     'https://linkedout-umber.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
+    'http://localhost:8888',
     'https://appleid.apple.com',
   ];
 
@@ -97,11 +98,40 @@ async function bootstrap() {
     helmet.contentSecurityPolicy({
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'http://localhost:3000', 'http://localhost:5173'],
-        styleSrc: ["'self'", "'unsafe-inline'", 'http://localhost:3000', 'http://localhost:5173'],
-        imgSrc: ["'self'", 'data:', 'http://localhost:3000', 'http://localhost:5173'],
-        connectSrc: ["'self'", 'api.trusted.com', 'http://localhost:3000', 'http://localhost:5173'],
-        fontSrc: ["'self'", 'fonts.gstatic.com', 'http://localhost:3000', 'http://localhost:5173'],
+        scriptSrc: [
+          "'self'",
+          'http://localhost:3000',
+          'http://localhost:5173',
+          'http://localhost:8888',
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'http://localhost:3000',
+          'http://localhost:5173',
+          'http://localhost:8888',
+        ],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'http://localhost:3000',
+          'http://localhost:5173',
+          'http://localhost:8888',
+        ],
+        connectSrc: [
+          "'self'",
+          'api.trusted.com',
+          'http://localhost:3000',
+          'http://localhost:5173',
+          'http://localhost:8888',
+        ],
+        fontSrc: [
+          "'self'",
+          'fonts.gstatic.com',
+          'http://localhost:3000',
+          'http://localhost:5173',
+          'http://localhost:8888',
+        ],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       },
