@@ -11,11 +11,13 @@ import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
 import { UtilsService } from '../utils/utils.service';
 import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
+    private readonly configService: ConfigService,
     private readonly authService: AuthService,
     private readonly utilsService: UtilsService,
   ) {}
@@ -154,12 +156,13 @@ export class AuthController {
     await this.authService.updateEmail(token);
 
     // todo 리다이렉션
-    let redirectUrl = 'https://linkedoutapp.com';
+    let redirectUrl = this.configService.get<string>('WEB_CHANGE_EMAIL_REDIRECT');
     if (req.device === 'iPhone' || req.device === 'iPad') {
       // todo
-      redirectUrl = 'todo 딥링크';
+      redirectUrl = this.configService.get<string>('IOS_CHANGE_EMAIL_REDIRECT');
     }
-    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/AccountPage';
+    if (req.device === 'Android')
+      redirectUrl = this.configService.get<string>('AOS_CHANGE_EMAIL_REDIRECT');
 
     res.redirect(redirectUrl);
   }
@@ -221,12 +224,13 @@ export class AuthController {
 
     const newJwt = this.utilsService.generateJWT(user.id);
 
-    let redirectUrl = 'http://localhost:3000/web/login';
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     if (req.device === 'iPhone' || req.device === 'iPad') {
       // todo
-      redirectUrl = '';
+      redirectUrl = this.configService.get<string>('IOS_REGISTER_REDIRECT');
     }
-    if (req.device === 'Android') redirectUrl = 'https://linkedout.com/SignUpComplete';
+    if (req.device === 'Android')
+      redirectUrl = this.configService.get<string>('AOS_REGISTER_REDIRECT');
 
     redirectUrl += `?token=${newJwt}`;
 
@@ -315,14 +319,14 @@ export class AuthController {
   ) {
     const newToken = await this.authService.passwordResetVerify(token);
 
-    let redirectUrl = 'https://linkedout.com';
+    let redirectUrl = this.configService.get<string>('WEB_PASSWORD_RESET_REDIRECT');
     if (req.device === 'iPhone' || req.device === 'iPad') {
       // todo
-      redirectUrl = 'todo 딥링크';
+      redirectUrl = this.configService.get<string>('IOS_PASSWORD_RESET_REDIRECT');
     }
 
     if (req.device === 'Android') {
-      redirectUrl = 'https://linkedout.com/ResetPwPage';
+      redirectUrl = this.configService.get<string>('AOS_PASSWORD_RESET_REDIRECT');
     }
 
     redirectUrl += `?token=${newToken}`;
@@ -394,7 +398,7 @@ export class AuthController {
   async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:8888/web/login';
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
@@ -468,7 +472,7 @@ export class AuthController {
   async kakaoCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:8888/web/login';
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
@@ -541,7 +545,7 @@ export class AuthController {
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:8888/web/login';
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
@@ -614,7 +618,7 @@ export class AuthController {
   async appleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:8888/web/login';
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;

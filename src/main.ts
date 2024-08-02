@@ -71,7 +71,7 @@ async function bootstrap() {
   });
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.url === '/favicon.ico') {
+    if (req.url === '/favicon.png') {
       res.status(204).end();
     } else {
       next();
@@ -148,7 +148,7 @@ async function bootstrap() {
 
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../src/common/images', 'seedimage.jpeg'));
+    res.sendFile(join(__dirname, '../src/common/static', '404.html'));
   });
 
   if (process.env.SWAGGER === 'true') {
