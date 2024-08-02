@@ -21,9 +21,10 @@ import { ProfileImageReqDto } from './dto/request/profileImageReq.dto';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { UserResDto } from './dto/response/userRes.dto';
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
-import { UsersSummaryWithStatsResDto } from './dto/response/usersSummaryWithStatsRes.dto';
+import { UserSummaryWithStatsResDto } from './dto/response/userSummaryWithStatsRes.dto';
 import { UserSummaryWithCountResDto } from './dto/response/userSummaryWithCountRes.dto';
 import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
+import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
@@ -255,9 +256,47 @@ export class UserController {
     return this.userService.getLocationConsent(req.user.id);
   }
 
-  @Get(':userId')
+  @Get('info')
   @ApiOperation({
-    summary: '유저 프로필',
+    summary: '본인 기본정보',
+    description: `
+  본인 아이디, 닉네임, 프로필이미지, 생성일, 위치기반서비스 동의 여부를 조회합니다.
+
+  **동작 과정:**
+  1. 사용자의 ID를 기반으로 해당 사용자의 기본 정보를 조회합니다.
+
+  **주의 사항:**
+  - 유효한 사용자 ID가 제공되어야 합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UserSummaryResDto })
+  async getMyInfo(@Req() req: ExpressRequest) {
+    return this.userService.getUserInfo(req.user.id);
+  }
+
+  @Get('profile/my')
+  @ApiOperation({
+    summary: '본인 프로필 조회',
+    description: `
+  본인 프로필 정보를 조회합니다. 이 API는 사용자의 기본 정보와 에세이 통계를 반환합니다.
+
+  **동작 과정:**
+  1. 사용자의 ID를 기반으로 해당 사용자의 기본 정보를 조회합니다.
+  2. 사용자의 에세이 통계를 조회합니다.
+  3. 조회된 정보를 합쳐서 반환합니다.
+
+  **주의 사항:**
+  - 유효한 사용자 ID가 제공되어야 합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UserSummaryWithStatsResDto })
+  async getMyProfile(@Req() req: ExpressRequest) {
+    return this.userService.getUserProfile(req.user.id);
+  }
+
+  @Get('profile/:userId')
+  @ApiOperation({
+    summary: '타겟 유저 프로필',
     description: `
   특정 사용자의 프로필 정보를 조회합니다. 이 API는 사용자의 기본 정보와 에세이 통계를 반환합니다.
 
@@ -273,8 +312,8 @@ export class UserController {
   - 유효한 사용자 ID가 제공되어야 합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UsersSummaryWithStatsResDto })
-  async getUserInfo(@Param('userId', ParseIntPipe) userId: number) {
-    return this.userService.getUserInfo(userId);
+  @ApiResponse({ status: 200, type: UserSummaryWithStatsResDto })
+  async getUserProfile(@Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.getUserProfile(userId);
   }
 }

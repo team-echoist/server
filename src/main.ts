@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import { NextFunction, Request, Response } from 'express';
 import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
 import { ResponseTransformInterceptor } from './common/interceptros/responseTransform.interceptor';

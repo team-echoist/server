@@ -31,10 +31,5 @@ export class UserSummaryResDto {
   @ApiProperty()
   @IsBoolean()
   @Expose()
-  marketingConsent: boolean;
-
-  @ApiProperty()
-  @IsBoolean()
-  @Expose()
   locationConsent: boolean;
 }

@@ -125,7 +125,7 @@ export class UserService {
     return this.utilsService.transformToDto(UserSummaryResDto, user);
   }
 
-  async getUserInfo(userId: number) {
+  async getUserProfile(userId: number) {
     const user = await this.getUserSummaryById(userId);
     const essayStats = await this.essayService.essayStatsByUserId(userId);
 
@@ -213,5 +213,11 @@ export class UserService {
     const user = await this.fetchUserEntityById(userId);
 
     return user.locationConsent;
+  }
+
+  async getUserInfo(userId: number) {
+    const user = await this.fetchUserEntityById(userId);
+
+    return this.utilsService.transformToDto(UserSummaryResDto, user);
   }
 }
