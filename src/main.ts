@@ -155,13 +155,7 @@ async function bootstrap() {
     res.sendFile(join(__dirname, '../src/common/static', 'store.html'));
   });
 
-  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'), {
-    setHeaders: (res, path) => {
-      if (path.endsWith('.png')) {
-        res.setHeader('Content-Type', 'image/png');
-      }
-    },
-  });
+  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
