@@ -151,15 +151,11 @@ async function bootstrap() {
   server.get('/', (req: Request, res: Response) => {
     res.sendFile(join(__dirname, '../src/common/static', '404.html'));
   });
-
-  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'), {
-    prefix: '/sorry',
-    setHeaders: (res, path) => {
-      if (path.endsWith('.png')) {
-        res.setHeader('Content-Type', 'image/png');
-      }
-    },
+  server.get('/store', (req: Request, res: Response) => {
+    res.sendFile(join(__dirname, '../src/common/static', 'store.html'));
   });
+
+  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
