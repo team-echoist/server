@@ -91,7 +91,7 @@ export class SupportService {
 
   @Transactional()
   async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
-    if (deviceId === '' && !deviceId && deviceId === null)
+    if (deviceId === '' || !deviceId)
       throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
 
     const settings = await this.supportRepository.findSettings(userId, deviceId);

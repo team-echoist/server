@@ -50,5 +50,5 @@ export class UpdateUserReqDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  locationConsent: boolean;
+  locationConsent?: boolean;
 }
