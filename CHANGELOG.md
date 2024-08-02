@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/team-echoist/server/compare/v1.2.1...v1.3.0) (2024-08-02)
+
+
+### Features
+
+* Add user information API and modify profile API ([#321](https://github.com/team-echoist/server/issues/321)) ([72d4c29](https://github.com/team-echoist/server/commit/72d4c2982fb2511b79c52071ae86b63dacb51bbe))
+
 ## [1.2.1](https://github.com/team-echoist/server/compare/v1.2.0...v1.2.1) (2024-08-02)
 
 
