@@ -3,6 +3,7 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
 import { NextFunction, Request, Response } from 'express';
 import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { HttpExceptionFilter } from './common/filters/httpExceiption.filter';
 import { ResponseTransformInterceptor } from './common/interceptros/responseTransform.interceptor';
 import { LoggingInterceptor } from './common/interceptros/logging.interceptor';
@@ -25,7 +26,7 @@ async function bootstrap() {
   const configService = new ConfigService();
   const utilsService = new UtilsService(configService);
 
-  const app: INestApplication = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const allowedOrigins = [
     'https://linkedoutapp.com',
@@ -150,6 +151,8 @@ async function bootstrap() {
   server.get('/', (req: Request, res: Response) => {
     res.sendFile(join(__dirname, '../src/common/static', '404.html'));
   });
+
+  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
