@@ -137,9 +137,7 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should return undefined', async () => {
-      const req: ExpressRequest = { user: { id: 1 } } as any;
-
-      const result = await controller.login(req);
+      const result = await controller.login();
       expect(result).toBeUndefined();
     });
   });
@@ -200,14 +198,14 @@ describe('AuthController', () => {
 
   describe('androidGoogleLogin', () => {
     it('should call service validateGoogleUser method', async () => {
-      const dto: OauthMobileReqDto = { token: 'googleToken', platformId: 'googleId' };
+      const dto: OauthMobileReqDto = { token: 'googleToken' };
       const req: ExpressRequest = {} as any;
       const user = { id: 1, email: 'test@example.com' } as User;
 
       authService.validateGoogleUser.mockResolvedValue(user);
 
       const result = await controller.mobileGoogleLogin(req, dto);
-      expect(authService.validateGoogleUser).toHaveBeenCalledWith(dto);
+      expect(authService.validateGoogleUser).toHaveBeenCalledWith(dto.token);
       // expect(result).toEqual(undefined);
     });
   });

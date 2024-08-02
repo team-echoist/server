@@ -101,7 +101,7 @@ describe('UserController', () => {
     });
   });
 
-  describe('getUserInfo', () => {
+  describe('getUserProfile', () => {
     it('should call service getUserInfo method', async () => {
       const userId = 1;
       const userInfo = {
@@ -109,10 +109,10 @@ describe('UserController', () => {
         essayStats: {},
       };
 
-      service.getUserInfo.mockResolvedValue(userInfo as any);
+      service.getUserProfile.mockResolvedValue(userInfo as any);
 
-      const response = await controller.getUserInfo(userId);
-      expect(service.getUserInfo).toHaveBeenCalledWith(userId);
+      const response = await controller.getUserProfile(userId);
+      expect(service.getUserProfile).toHaveBeenCalledWith(userId);
       expect(response).toEqual(userInfo);
     });
   });

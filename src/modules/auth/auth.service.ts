@@ -179,14 +179,10 @@ export class AuthService {
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
-    if (user !== null) {
-      if (String(user.platformId) !== String(oauthUser.platformId)) {
-        throw new HttpException('Please check your login information.', HttpStatus.UNAUTHORIZED);
-      }
-    } else {
-      if (oauthUser.email !== null) {
+    if (!user) {
+      if (oauthUser.email) {
         const emailUser = await this.authRepository.findByEmail(oauthUser.email);
-        if (emailUser !== null) {
+        if (emailUser) {
           throw new HttpException(
             'The email registered to your account is already in use for the service.',
             HttpStatus.CONFLICT,

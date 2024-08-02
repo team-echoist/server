@@ -229,7 +229,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('getUserInfo', () => {
+  describe('getUserProfile', () => {
     it('should get user info including essay stats', async () => {
       const userId = 1;
       const user = { id: userId, name: 'test' } as any;
@@ -237,7 +237,7 @@ describe('UserService', () => {
       jest.spyOn(service, 'getUserSummaryById').mockResolvedValue(user);
       essayService.essayStatsByUserId.mockResolvedValue(essayStats);
 
-      const result = await service.getUserInfo(userId);
+      const result = await service.getUserProfile(userId);
 
       expect(service.getUserSummaryById).toHaveBeenCalledWith(userId);
       expect(essayService.essayStatsByUserId).toHaveBeenCalledWith(userId);

@@ -4,7 +4,6 @@ import { SupportRepository } from '../support.repository';
 import { UtilsService } from '../../utils/utils.service';
 import { UserService } from '../../user/user.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
 import { InquiryReqDto } from '../dto/request/inquiryReq.dto';
 
 jest.mock('typeorm-transactional', () => ({
@@ -212,7 +211,7 @@ describe('SupportService', () => {
     it('should update existing settings', async () => {
       const userId = 1;
       const deviceId = 'device1';
-      const settingsData = { alertsEnabled: true } as UpdateAlertSettingsReqDto;
+      const settingsData = { alertsEnabled: true } as any;
       const settings = { id: 1, user: { id: userId }, deviceId } as any;
 
       supportRepository.findSettings.mockResolvedValue(settings);
@@ -228,7 +227,7 @@ describe('SupportService', () => {
     it('should create new settings if not found', async () => {
       const userId = 1;
       const deviceId = 'device1';
-      const settingsData = { alertsEnabled: true } as UpdateAlertSettingsReqDto;
+      const settingsData = { alertsEnabled: true } as any;
       const newSettings = { id: 1, user: { id: userId }, deviceId } as any;
 
       supportRepository.findSettings.mockResolvedValue(null);
@@ -245,7 +244,7 @@ describe('SupportService', () => {
     it('should throw an error if deviceId is missing', async () => {
       const userId = 1;
       const deviceId = '';
-      const settingsData = { alertsEnabled: true } as UpdateAlertSettingsReqDto;
+      const settingsData = { alertsEnabled: true } as any;
 
       await expect(service.updateSettings(userId, settingsData, deviceId)).rejects.toThrow(
         new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST),

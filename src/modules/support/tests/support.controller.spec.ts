@@ -131,7 +131,7 @@ describe('SupportController', () => {
     it('should call service getSettings method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
       const deviceId = 'device123';
-      const settings: AlertSettingsResDto = { viewed: true, report: false };
+      const settings: AlertSettingsResDto = { viewed: true, report: false, marketing: false };
 
       service.getSettings.mockResolvedValue(settings);
 
@@ -145,7 +145,7 @@ describe('SupportController', () => {
     it('should call service updateSettings method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
       const deviceId = 'device123';
-      const data: UpdateAlertSettingsReqDto = { viewed: true, report: false };
+      const data: UpdateAlertSettingsReqDto = { viewed: true, report: false, marketing: false };
 
       await controller.updateSettings(req, deviceId, data);
       expect(service.updateSettings).toHaveBeenCalledWith(req.user.id, data, deviceId);
