@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/team-echoist/server/compare/v1.2.0...v1.2.1) (2024-08-02)
+
+
+### Bug Fixes
+
+* invalidation of registered devices upon user logical deletion ([#317](https://github.com/team-echoist/server/issues/317)) ([2eeb77f](https://github.com/team-echoist/server/commit/2eeb77fe0b9e7c70d69b1f9e8e6d48a9243db8fc))
+
 # [1.2.0](https://github.com/team-echoist/server/compare/v1.1.3...v1.2.0) (2024-08-01)
 
 
