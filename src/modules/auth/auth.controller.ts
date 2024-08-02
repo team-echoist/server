@@ -260,7 +260,7 @@ export class AuthController {
   @ApiResponse({ status: 403, description: '정지 계정' })
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
-  async login(@Req() req: ExpressRequest) {
+  async login() {
     return;
   }
 
@@ -394,7 +394,7 @@ export class AuthController {
   async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:3000/web/login';
+    let redirectUrl = 'http://localhost:8888/web/login';
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
@@ -468,7 +468,7 @@ export class AuthController {
   async kakaoCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:3000/web/login';
+    let redirectUrl = 'http://localhost:8888/web/login';
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
@@ -541,7 +541,7 @@ export class AuthController {
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:3000/web/login';
+    let redirectUrl = 'http://localhost:8888/web/login';
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
@@ -614,7 +614,7 @@ export class AuthController {
   async appleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
 
-    let redirectUrl = 'http://localhost:3000/web/login';
+    let redirectUrl = 'http://localhost:8888/web/login';
     const newJwt = this.utilsService.generateJWT(user.id);
 
     redirectUrl += `?token=${newJwt}`;
