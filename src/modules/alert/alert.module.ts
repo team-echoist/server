@@ -18,8 +18,7 @@ import { DeactivationReason } from '../../entities/deactivationReason.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Alert, User]),
-    TypeOrmModule.forFeature([User, Essay, DeactivationReason]),
+    TypeOrmModule.forFeature([Alert, User, Essay, DeactivationReason]),
     BullModule.registerQueueAsync({
       name: 'alert',
       useFactory: async (configService: ConfigService) => ({

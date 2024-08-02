@@ -123,4 +123,9 @@ export class SupportService {
   async getDevices(userId: number) {
     return await this.supportRepository.findDevices(userId);
   }
+
+  @Transactional()
+  async deleteDevice(userId: number, todayDate: string) {
+    return await this.supportRepository.deleteDevice(userId, todayDate);
+  }
 }

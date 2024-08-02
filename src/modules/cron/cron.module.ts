@@ -12,10 +12,11 @@ import { CronProcessor } from './cron.processor';
 import { Geulroquis } from '../../entities/geulroguis.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UtilsModule } from '../utils/utils.module';
+import { Device } from '../../entities/device.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Essay, CronLog, DeactivationReason, Geulroquis]),
+    TypeOrmModule.forFeature([User, Essay, CronLog, DeactivationReason, Geulroquis, Device]),
     ScheduleModule.forRoot(),
     BullModule.registerQueueAsync({
       name: 'cron',
