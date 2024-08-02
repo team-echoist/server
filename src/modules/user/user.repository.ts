@@ -59,6 +59,7 @@ export class UserRepository {
           skip: (page - 1) * limit,
           take: limit,
           order: { createdDate: 'DESC' },
+          withDeleted: true,
         });
         break;
       case 'activeSubscription':
@@ -67,6 +68,7 @@ export class UserRepository {
           skip: (page - 1) * limit,
           take: limit,
           order: { createdDate: 'DESC' },
+          withDeleted: true,
         });
         break;
       default:
@@ -74,6 +76,7 @@ export class UserRepository {
           skip: (page - 1) * limit,
           take: limit,
           order: { createdDate: 'DESC' },
+          withDeleted: true,
         });
         break;
     }

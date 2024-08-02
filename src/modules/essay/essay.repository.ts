@@ -335,6 +335,7 @@ export class EssayRepository {
         'author',
         'author.deletedDate IS NOT NULL OR author.deletedDate IS NULL',
       )
+      .withDeleted()
       .orderBy('essay.createdDate', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);

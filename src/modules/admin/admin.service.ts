@@ -467,14 +467,24 @@ export class AdminService {
     const today = new Date();
     const { users, total } = await this.userRepository.findUsers(today, filter, page, limit);
 
+    const processedUsers = users.map((user) => {
+      if (user.deletedDate) {
+        user.nickname = 'deleted_user';
+      }
+      return user;
+    });
+
     const totalPage: number = Math.ceil(total / limit);
-    const userDtos = this.utilsService.transformToDto(FullUserResDto, users);
+    const userDtos = this.utilsService.transformToDto(FullUserResDto, processedUsers);
 
     return { users: userDtos, totalPage, page, total };
   }
 
   async getUser(userId: number) {
     const user = await this.userRepository.findUserDetailById(userId);
+
+    if (user.deletedDate) user.nickname = 'deleted_user';
+
     const data = {
       ...user,
       reportCount: user.reports.length,
@@ -524,6 +534,9 @@ export class AdminService {
 
   async getFullEssay(essayId: number) {
     const essay = await this.essayRepository.findFullEssay(essayId);
+    if (essay.author.deletedDate) {
+      essay.author.nickname = 'deleted_user';
+    }
     return this.utilsService.transformToDto(FullEssayResDto, essay);
   }
 
