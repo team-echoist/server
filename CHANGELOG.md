@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/team-echoist/server/compare/v1.3.1...v1.3.2) (2024-08-02)
+
+
+### Bug Fixes
+
+* favicon type and store path ([#323](https://github.com/team-echoist/server/issues/323)) ([315fb7d](https://github.com/team-echoist/server/commit/315fb7d6482df2bcb949d0a8b082d37730f7ff8d))
+
 ## [1.3.1](https://github.com/team-echoist/server/compare/v1.3.0...v1.3.1) (2024-08-02)
 
 # [1.3.0](https://github.com/team-echoist/server/compare/v1.2.1...v1.3.0) (2024-08-02)
