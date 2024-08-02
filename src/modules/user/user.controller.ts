@@ -215,34 +215,11 @@ export class UserController {
     return this.userService.getUserSummary(req.user.id);
   }
 
-  @Get('policies/location')
-  @ApiOperation({
-    summary: '이용자의 위치기반서비스 동의 현황을 조회합니다.',
-    description: `
-  로그인한 사용자의 위치기반서비스 동의 현황을 조회합니다.
-
-  **요청 헤더:**
-  - \`Authorization\`: Bearer {token}
-
-  **동작 과정:**
-  1. 요청 헤더의 인증 토큰을 사용하여 사용자를 식별합니다.
-  2. 사용자의 정보 중 위치기반서비스 필드의 boolean을 반환합니다.
-
-  **주의 사항:**
-  - 인증 토큰이 유효하지 않거나 제공되지 않으면 \`401 Unauthorized\` 에러가 발생합니다.
-  - 요청이 성공하면 \`200 OK\` 상태를 반환합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: Boolean })
-  async getLocationConsent(@Req() req: ExpressRequest) {
-    return this.userService.getLocationConsent(req.user.id);
-  }
-
   @Get('info')
   @ApiOperation({
     summary: '본인 기본정보',
     description: `
-  본인 아이디, 닉네임, 프로필이미지, 생성일, 위치기반서비스 동의 여부를 조회합니다.
+  본인 아이디, 닉네임, 프로필이미지, 생성일, 최초접속여부 ,위치기반서비스동의여부 등을 조회합니다.
 
   **동작 과정:**
   1. 사용자의 ID를 기반으로 해당 사용자의 기본 정보를 조회합니다.
