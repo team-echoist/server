@@ -12,7 +12,6 @@ import { CronLogResDto } from './dto/response/cronLogRes.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
-import { SupportService } from '../support/support.service';
 import { Device } from '../../entities/device.entity';
 
 @Injectable()
