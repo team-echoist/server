@@ -82,9 +82,9 @@ export class UserDto {
   deletedDate: Date;
 
   @ApiProperty()
-  @IsBoolean()
   @Expose()
-  marketingConsent: boolean;
+  @IsBoolean()
+  isFirst: boolean;
 
   @ApiProperty()
   @IsBoolean()

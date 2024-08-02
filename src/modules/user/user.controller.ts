@@ -32,24 +32,6 @@ import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('check-first')
-  @ApiOperation({
-    summary: '최초 접속 여부 조회',
-    description: `
-		사용자의 최조 접속 여부를 조회합니다.
-		
-		**동작 과정:**
-		1. 사용자가 최초 접속일 경우 \`true\`를 반환합니다.
-		
-		**주의 사항:**
-		- 최초 접속 처리 후 사용자의 \`isFirst\` 필드를 \`false\`로 업데이트 해야합니다.
-		`,
-  })
-  @ApiResponse({ status: 200, type: Boolean })
-  async checkFirst(@Req() req: ExpressRequest) {
-    return req.user.isFirst;
-  }
-
   @Post('deactivate')
   @ApiOperation({
     summary: '회원탈퇴 요청',

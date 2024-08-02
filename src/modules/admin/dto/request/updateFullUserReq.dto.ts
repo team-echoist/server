@@ -78,10 +78,5 @@ export class UpdateFullUserReqDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  marketingConsent: boolean;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsBoolean()
   locationConsent: boolean;
 }

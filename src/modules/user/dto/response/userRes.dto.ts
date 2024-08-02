@@ -71,9 +71,9 @@ export class UserResDto {
   deactivationDate: Date;
 
   @ApiProperty()
-  @IsBoolean()
   @Expose()
-  marketingConsent: boolean;
+  @IsBoolean()
+  isFirst: boolean;
 
   @ApiProperty()
   @IsBoolean()

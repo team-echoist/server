@@ -29,6 +29,11 @@ export class UserSummaryResDto {
   createdDate: Date;
 
   @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  isFirst: boolean;
+
+  @ApiProperty()
   @IsBoolean()
   @Expose()
   locationConsent: boolean;
