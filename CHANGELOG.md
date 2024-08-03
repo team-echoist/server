@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/team-echoist/server/compare/v1.3.2...v1.3.3) (2024-08-02)
+
+
+### Bug Fixes
+
+* Add values to required properties when searching for logically deleted objects during administrator functions ([#324](https://github.com/team-echoist/server/issues/324)) ([d093cbe](https://github.com/team-echoist/server/commit/d093cbe86e1dbb84c9de70c86b61ed895c4110f6))
+
 ## [1.3.2](https://github.com/team-echoist/server/compare/v1.3.1...v1.3.2) (2024-08-02)
 
 
