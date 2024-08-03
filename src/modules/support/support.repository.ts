@@ -114,8 +114,12 @@ export class SupportRepository {
     return { histories, total };
   }
 
-  async createAlertSettings(data: UpdateAlertSettingsReqDto, userId: number) {
-    return this.alertSettingsRepository.create({ ...data, user: { id: userId } });
+  async createAlertSettings(data: UpdateAlertSettingsReqDto, userId: number, deviceId: string) {
+    return this.alertSettingsRepository.create({
+      ...data,
+      user: { id: userId },
+      deviceId: deviceId,
+    });
   }
 
   async findSettings(userId: number, deviceId: string) {

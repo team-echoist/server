@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, Index, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity('alert_settings')
@@ -19,7 +19,7 @@ export class AlertSettings {
   @Column({ name: 'device_id', unique: false })
   deviceId: string;
 
-  @OneToOne(() => User, (user) => user.alertSettings, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.alertSettings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

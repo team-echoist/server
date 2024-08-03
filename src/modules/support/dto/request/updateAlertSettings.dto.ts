@@ -15,5 +15,5 @@ export class UpdateAlertSettingsReqDto {
   @ApiProperty()
   @IsOptional()
   @IsBoolean()
-  marketing: boolean;
+  marketing?: boolean;
 }

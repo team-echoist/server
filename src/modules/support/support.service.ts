@@ -99,7 +99,11 @@ export class SupportService {
       Object.assign(settings, settingsData);
       await this.supportRepository.saveSettings(settings);
     } else {
-      const newSettings = await this.supportRepository.createAlertSettings(settingsData, userId);
+      const newSettings = await this.supportRepository.createAlertSettings(
+        settingsData,
+        userId,
+        deviceId,
+      );
       await this.supportRepository.saveSettings(newSettings);
     }
   }
