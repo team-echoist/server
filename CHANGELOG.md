@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/team-echoist/server/compare/v1.3.4...v1.3.5) (2024-08-03)
+
+
+### Bug Fixes
+
+* missing device id when creating new notification settings ([#328](https://github.com/team-echoist/server/issues/328)) ([ad016bf](https://github.com/team-echoist/server/commit/ad016bf4cc73c514c92774f59a89ee4a85ad55e5))
+
 ## [1.3.4](https://github.com/team-echoist/server/compare/v1.3.3...v1.3.4) (2024-08-03)
 
 
