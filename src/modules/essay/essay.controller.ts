@@ -30,7 +30,7 @@ import { ThumbnailReqDto } from './dto/request/ThumbnailReq.dto';
 import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
-import { EssayWithPreviousEssayResDto } from './dto/response/essayWithPreviousEssayRes.dto';
+import { EssayWithAnotherEssayResDto } from './dto/response/essayWithAnotherEssayRes.dto';
 
 @ApiTags('Essay')
 @UseGuards(AuthGuard('jwt'))
@@ -405,7 +405,7 @@ export class EssayController {
   - 에세이 ID는 유효한 숫자여야 합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: EssayWithPreviousEssayResDto })
+  @ApiResponse({ status: 200, type: EssayWithAnotherEssayResDto })
   async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
     return this.essayService.getEssay(req.user.id, essayId);
   }

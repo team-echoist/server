@@ -127,7 +127,7 @@ export class EssayRepository {
     const tagWeight = 0.2;
     const trendWeight = 0.3;
     const reputationWeight = 0.3;
-    const largerPoolLimit = 1000;
+    const largerPoolLimit = 500;
 
     recentTags = recentTags || [];
 
