@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/team-echoist/server/compare/v1.3.3...v1.3.4) (2024-08-03)
+
+
+### Bug Fixes
+
+* Add missing query ([#326](https://github.com/team-echoist/server/issues/326)) ([45b5c48](https://github.com/team-echoist/server/commit/45b5c48a5017c6dc39ce9d54037445d4dac838e2))
+
 ## [1.3.3](https://github.com/team-echoist/server/compare/v1.3.2...v1.3.3) (2024-08-02)
 
 
