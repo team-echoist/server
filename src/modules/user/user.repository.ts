@@ -116,6 +116,7 @@ export class UserRepository {
       .set({
         email: () => `CONCAT('${todayDate}_', email)`,
         nickname: null,
+        status: UserStatus.DEACTIVATED,
         deletedDate: () => `NOW()`,
       })
       .where('id = :userId', { userId })

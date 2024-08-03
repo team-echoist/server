@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../entities/user.entity';
+import { User, UserStatus } from '../../entities/user.entity';
 import { CronLog } from '../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -108,6 +108,7 @@ export class CronService {
           .set({
             email: () => `CONCAT('${todayDate}_', email)`,
             nickname: null,
+            status: UserStatus.DEACTIVATED,
             deletedDate: () => `NOW()`,
           })
           .where('id IN (:...userIds)', { userIds })
