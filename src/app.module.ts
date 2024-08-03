@@ -1,6 +1,12 @@
 import { redisConfig } from './config/redis.config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  OnModuleInit,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -32,6 +38,7 @@ import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
 import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
 import { HomeModule } from './modules/home/home.module';
+import { NextFunction } from 'express';
 
 @Module({
   imports: [
@@ -93,5 +100,13 @@ export class AppModule implements OnModuleInit, NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(TimezoneMiddleware).forRoutes('*');
     consumer.apply(BlockPhpRequestsMiddleware).forRoutes('*');
+    //   consumer
+    //     .apply((req: any, res: Response, next: NextFunction) => {
+    //       if (req.url === '/api/.well-known/assetlinks.json') {
+    //         req.originalUrl = req.url = req.url.replace('/api', '');
+    //       }
+    //       next();
+    //     })
+    //     .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }
