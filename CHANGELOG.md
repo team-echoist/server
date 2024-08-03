@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/team-echoist/server/compare/v1.4.0...v1.4.1) (2024-08-03)
+
+
+### Bug Fixes
+
+* assetlinks.json authentication path ([#331](https://github.com/team-echoist/server/issues/331)) ([7eac843](https://github.com/team-echoist/server/commit/7eac84333ed94669a1e826ad1eaefc359b5a7fc6))
+
 # [1.4.0](https://github.com/team-echoist/server/compare/v1.3.6...v1.4.0) (2024-08-03)
 
 
