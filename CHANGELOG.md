@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/team-echoist/server/compare/v1.3.6...v1.4.0) (2024-08-03)
+
+
+### Features
+
+* assetlinks.json authentication path ([#330](https://github.com/team-echoist/server/issues/330)) ([3b293dd](https://github.com/team-echoist/server/commit/3b293ddebef67a791b3cd99c28b89d0d0445d490))
+
 ## [1.3.6](https://github.com/team-echoist/server/compare/v1.3.5...v1.3.6) (2024-08-03)
 
 
