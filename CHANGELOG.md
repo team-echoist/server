@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/team-echoist/server/compare/v1.3.5...v1.3.6) (2024-08-03)
+
+
+### Bug Fixes
+
+* random recommendation essay pool limit lowering adjustment and dto modification ([#329](https://github.com/team-echoist/server/issues/329)) ([f7e3956](https://github.com/team-echoist/server/commit/f7e395657c4926616d1982f7320b06c9128845a6))
+
 ## [1.3.5](https://github.com/team-echoist/server/compare/v1.3.4...v1.3.5) (2024-08-03)
 
 
