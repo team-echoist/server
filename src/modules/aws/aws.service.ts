@@ -79,4 +79,24 @@ export class AwsService {
       throw new Error('Service account key file is empty or not found');
     }
   }
+
+  async getAssetLinksJson(bucketName: string, key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    });
+
+    const response = await this.s3Client.send(command);
+    const stream = response.Body as Readable;
+    return await this.streamToString(stream);
+  }
+
+  private async streamToString(stream: Readable): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const chunks: any[] = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('error', reject);
+      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+    });
+  }
 }
