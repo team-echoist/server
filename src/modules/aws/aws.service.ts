@@ -80,10 +80,10 @@ export class AwsService {
     }
   }
 
-  async getAssetLinksJson(bucketName: string, key: string): Promise<string> {
+  async getAssetLinksJson(): Promise<string> {
     const command = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: key,
+      Bucket: this.configService.get('AWS_S3_PRIVATE_BUCKET_NAME'),
+      Key: this.configService.get('SERVICE_ACCOUNT_KEY_FILE'),
     });
 
     const response = await this.s3Client.send(command);

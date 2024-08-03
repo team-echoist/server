@@ -21,10 +21,7 @@ export class WellKnownController {
   @Get('assetlinks.json')
   async getAssetLinks(@Res() res: Response) {
     try {
-      const data = await this.awsService.getAssetLinksJson(
-        'your-bucket-name',
-        'path/to/assetlinks.json',
-      );
+      const data = await this.awsService.getAssetLinksJson();
       res.setHeader('Content-Type', 'application/json');
       res.send(data);
     } catch (error) {
