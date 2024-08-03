@@ -37,6 +37,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const errorStack = exception.stack;
 
+    // todo joke
+    if (status === 404) {
+      response.redirect('https://linkedoutapp.com');
+    }
+
     if (status >= 500) {
       this.logger.error(
         `${message} Request Body: ${JSON.stringify(request.body)} Request Params: ${JSON.stringify(params)} Request Query: ${JSON.stringify(query)} Response: ${JSON.stringify(originalError)} Stack Trace: ${JSON.stringify(errorStack)}`,
