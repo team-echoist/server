@@ -156,8 +156,8 @@ export class User {
   inquiries: Inquiry[];
 
   @JoinColumn({ name: 'alert_settings_id' })
-  @OneToOne(() => AlertSettings, (settings) => settings.user)
-  alertSettings: AlertSettings;
+  @OneToMany(() => AlertSettings, (settings) => settings.user)
+  alertSettings: AlertSettings[];
 
   @OneToMany(() => Device, (device) => device.user)
   devices: Device[];
