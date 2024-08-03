@@ -12,6 +12,26 @@ import { UtilsService } from '../utils/utils.service';
 import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
+import { AwsService } from '../aws/aws.service';
+
+@Controller('.well-known')
+export class WellKnownController {
+  constructor(private readonly awsService: AwsService) {}
+
+  @Get('assetlinks.json')
+  async getAssetLinks(@Res() res: Response) {
+    try {
+      const data = await this.awsService.getAssetLinksJson(
+        'your-bucket-name',
+        'path/to/assetlinks.json',
+      );
+      res.setHeader('Content-Type', 'application/json');
+      res.send(data);
+    } catch (error) {
+      res.status(500).send('Error fetching assetlinks.json');
+    }
+  }
+}
 
 @ApiTags('Auth')
 @Controller('auth')

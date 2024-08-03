@@ -10,6 +10,7 @@ import { User } from '../../entities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import * as strategies from '../../common/guards/strategies';
 import { ConfigModule } from '@nestjs/config';
+import { AwsModule } from '../aws/aws.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ConfigModule } from '@nestjs/config';
     UtilsModule,
     NicknameModule,
     ConfigModule,
+    AwsModule,
   ],
   controllers: [AuthController],
   providers: [
