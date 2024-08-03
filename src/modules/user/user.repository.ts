@@ -87,6 +87,7 @@ export class UserRepository {
   async findUserDetailById(userId: number) {
     return this.userRepository.findOne({
       where: { id: userId },
+      withDeleted: true,
       relations: ['essays', 'reports', 'reviews', 'alertSettings'],
     });
   }
