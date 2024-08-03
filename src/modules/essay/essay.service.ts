@@ -233,7 +233,7 @@ export class EssayService {
       await this.handleNonAuthorView(userId, essay);
     }
 
-    const previousEssays = await this.getRecommendEssays(userId, 6);
+    const anotherEssays = await this.getRecommendEssays(userId, 6);
 
     // todo 구독서비스 개시 후
     // const previousEssaysOrRecommendations =
@@ -248,7 +248,7 @@ export class EssayService {
     };
     const essayDto = this.utilsService.transformToDto(EssayResDto, newEssayData);
 
-    return { essay: essayDto, previousEssays: previousEssays };
+    return { essay: essayDto, anotherEssays: anotherEssays };
   }
 
   private async handleNonAuthorView(userId: number, essay: Essay) {

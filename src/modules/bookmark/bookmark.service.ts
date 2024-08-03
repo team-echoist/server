@@ -46,7 +46,7 @@ export class BookmarkService {
     const user = await this.userService.fetchUserEntityById(userId);
     const essay = await this.essayService.getEssayById(essayId);
 
-    if (essay.status === EssayStatus.PRIVATE)
+    if (essay.status === EssayStatus.PRIVATE || essay.author.id === userId)
       throw new HttpException('Bad request.', HttpStatus.BAD_REQUEST);
 
     const existingBookmark = await this.bookmarkRepository.findBookmark(user, essay);

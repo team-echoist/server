@@ -3,12 +3,12 @@ import { SummaryEssayResDto } from './summaryEssayRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class EssayWithPreviousEssayResDto {
+export class EssayWithAnotherEssayResDto {
   @ApiProperty({ type: EssayResDto })
   @Expose()
   essay: EssayResDto;
 
   @ApiProperty({ type: SummaryEssayResDto })
   @Expose()
-  previousEssays: SummaryEssayResDto[];
+  anotherEssays: SummaryEssayResDto[];
 }
