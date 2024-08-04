@@ -179,6 +179,7 @@ export class AuthService {
   async oauthLogin(oauthUser: OauthDto) {
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
+    console.log('플랫폼 아이디로 조회한 유저: ', user);
     if (!user) {
       if (oauthUser.email) {
         const emailUser = await this.authRepository.findByEmail(oauthUser.email);
@@ -222,6 +223,7 @@ export class AuthService {
   }
 
   async validateKakaoUser(token: string) {
+    console.log('요청으로 들어온 토큰: ', token);
     const response = await firstValueFrom(
       this.httpService.post('https://kapi.kakao.com/v2/user/me', null, {
         headers: { Authorization: `Bearer ${token}` },
@@ -238,6 +240,8 @@ export class AuthService {
     oauthDto.platform = 'kakao';
     oauthDto.email = payload.kakao_account.email;
     oauthDto.platformId = payload.platformId;
+
+    console.log('토큰으로 조회한 플랫폼유저 정보: ', oauthDto);
 
     return await this.oauthLogin(oauthDto);
   }
