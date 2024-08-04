@@ -10,6 +10,7 @@ export class HomeService {
   ) {}
 
   async todayGeulroquis() {
-    return this.geulroquisService.todayGeulroquis();
+    const url = await this.geulroquisService.todayGeulroquis();
+    return { url: url };
   }
 }
