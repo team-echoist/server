@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/team-echoist/server/compare/v1.5.0...v1.5.1) (2024-08-04)
+
+
+### Bug Fixes
+
+* Update geulroquis response structure and added Kakao login test ([#335](https://github.com/team-echoist/server/issues/335)) ([4850284](https://github.com/team-echoist/server/commit/48502847f4c165003eedbfbbb4fdd24c38a79478))
+
 # [1.5.0](https://github.com/team-echoist/server/compare/v1.4.2...v1.5.0) (2024-08-04)
 
 

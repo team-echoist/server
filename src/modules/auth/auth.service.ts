@@ -248,6 +248,8 @@ export class AuthService {
 
     console.log('토큰으로 조회한 플랫폼유저 정보: ', oauthDto);
 
+    console.log('토큰으로 조회한 플랫폼유저 정보: ', oauthDto);
+
     return await this.oauthLogin(oauthDto);
   }
 
