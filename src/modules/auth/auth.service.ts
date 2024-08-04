@@ -177,6 +177,9 @@ export class AuthService {
 
   @Transactional()
   async oauthLogin(oauthUser: OauthDto) {
+    if (oauthUser.platformId === undefined || oauthUser.platform === null)
+      throw new HttpException('Platform information is incorrect.', HttpStatus.BAD_REQUEST);
+
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
     console.log('플랫폼 아이디로 조회한 유저: ', user);
@@ -232,6 +235,8 @@ export class AuthService {
 
     const payload = response.data;
 
+    console.log(payload);
+
     if (!payload) {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
     }
@@ -239,7 +244,9 @@ export class AuthService {
     const oauthDto = new OauthDto();
     oauthDto.platform = 'kakao';
     oauthDto.email = payload.kakao_account.email;
-    oauthDto.platformId = payload.platformId;
+    oauthDto.platformId = payload.id;
+
+    console.log('토큰으로 조회한 플랫폼유저 정보: ', oauthDto);
 
     console.log('토큰으로 조회한 플랫폼유저 정보: ', oauthDto);
 
