@@ -238,6 +238,7 @@ export class EssayService {
         ? await this.getRecommendEssays(userId, 6)
         : await this.previousEssay(essay.author.id, essay);
 
+    console.log(anotherEssays);
     const newEssayData = {
       ...essay,
       author: essay.status === EssayStatus.LINKEDOUT ? undefined : essay.author,
@@ -327,7 +328,8 @@ export class EssayService {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
 
-    return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+    const essays = this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+    return { essays: essays };
   }
 
   @Transactional()
