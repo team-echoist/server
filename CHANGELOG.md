@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/team-echoist/server/compare/v1.4.2...v1.5.0) (2024-08-04)
+
+
+### Features
+
+* Add another essay branch of getEssay ([#333](https://github.com/team-echoist/server/issues/333)) ([325de7e](https://github.com/team-echoist/server/commit/325de7e4f81e417b4f66df6c02d7d45cff78423c))
+
 ## [1.4.2](https://github.com/team-echoist/server/compare/v1.4.1...v1.4.2) (2024-08-03)
 
 
