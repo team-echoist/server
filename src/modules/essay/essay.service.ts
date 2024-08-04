@@ -327,7 +327,8 @@ export class EssayService {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
 
-    return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+    const essays = this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+    return { essays: essays };
   }
 
   @Transactional()
