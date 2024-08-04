@@ -393,21 +393,28 @@ export class EssayController {
 
   **경로 파라미터:**
   - \`essayId\` (number, required): 조회할 에세이의 ID
+  
+  **쿼리 파라미터:**
+  - \`type\` (string, required): 현재 페이지의 타입을 지정합니다. 'community' 또는 'profile' 을 사용할 수 있습니다.
 
   **동작 과정:**
   1. 요청된 에세이 ID로 에세이를 조회합니다.
   2. 요청한 사용자가 에세이의 작성자가 아닌 경우, 에세이 상태가 PRIVATE일 때 조회가 거부됩니다.
   3. 조회에 성공한 경우 조회수를 증가시킵니다.
-  4. 이전에 작성된 에세이를 함께 조회합니다.
-  5. 조회된 에세이와 이전 에세이를 반환합니다.
+  4. 요청된 페이지 타입에 따라 다른 에세이 목록을 조회합니다.
+  5. 조회된 에세이와 추가 에세이 목록을 반환합니다.
 
   **주의 사항:**
   - 에세이 ID는 유효한 숫자여야 합니다.
   `,
   })
   @ApiResponse({ status: 200, type: EssayWithAnotherEssayResDto })
-  async getEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
-    return this.essayService.getEssay(req.user.id, essayId);
+  async getEssay(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+    @Query('type') type: string,
+  ) {
+    return this.essayService.getEssay(req.user.id, essayId, type);
   }
 
   @Delete(':essayId')

@@ -220,7 +220,7 @@ export class EssayService {
   }
 
   @Transactional()
-  async getEssay(userId: number, essayId: number) {
+  async getEssay(userId: number, essayId: number, type: string) {
     const user = await this.userService.fetchUserEntityById(userId);
 
     const essay = await this.essayRepository.findEssayById(essayId);
@@ -233,13 +233,10 @@ export class EssayService {
       await this.handleNonAuthorView(userId, essay);
     }
 
-    const anotherEssays = await this.getRecommendEssays(userId, 6);
-
-    // todo 구독서비스 개시 후
-    // const previousEssaysOrRecommendations =
-    //   essay.status === EssayStatus.LINKEDOUT
-    //     ? await this.getRecommendEssays(userId, 6)
-    //     : await this.previousEssay(essay.author.id, essay);
+    const anotherEssays =
+      type === 'community'
+        ? await this.getRecommendEssays(userId, 6)
+        : await this.previousEssay(essay.author.id, essay);
 
     const newEssayData = {
       ...essay,
@@ -319,19 +316,19 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  // private async previousEssay(userId: number, essay: Essay) {
-  //   let previousEssay: Essay[];
-  //
-  //   userId === essay.author.id
-  //     ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
-  //     : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
-  //
-  //   previousEssay.forEach((essay) => {
-  //     essay.content = this.utilsService.extractPartContent(essay.content);
-  //   });
-  //
-  //   return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
-  // }
+  private async previousEssay(userId: number, essay: Essay) {
+    let previousEssay: Essay[];
+
+    userId === essay.author.id
+      ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
+      : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
+
+    previousEssay.forEach((essay) => {
+      essay.content = this.utilsService.extractPartContent(essay.content);
+    });
+
+    return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+  }
 
   @Transactional()
   async deleteEssay(userId: number, essayId: number) {

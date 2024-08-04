@@ -237,7 +237,11 @@ describe('SupportService', () => {
       await service.updateSettings(userId, settingsData, deviceId);
 
       expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
-      expect(supportRepository.createAlertSettings).toHaveBeenCalledWith(settingsData, userId);
+      expect(supportRepository.createAlertSettings).toHaveBeenCalledWith(
+        settingsData,
+        userId,
+        deviceId,
+      );
       expect(supportRepository.saveSettings).toHaveBeenCalledWith(newSettings);
     });
 
