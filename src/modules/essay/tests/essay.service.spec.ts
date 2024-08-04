@@ -401,7 +401,7 @@ describe('EssayService', () => {
       });
       service.getRecommendEssays = jest.fn().mockResolvedValue({ essays: previousEssays });
 
-      const result = await service.getEssay(userId, essayId);
+      const result = await service.getEssay(userId, essayId, 'community');
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);
@@ -422,7 +422,7 @@ describe('EssayService', () => {
 
       essayRepository.findEssayById.mockResolvedValue(null);
 
-      await expect(service.getEssay(userId, essayId)).rejects.toThrow(
+      await expect(service.getEssay(userId, essayId, 'community')).rejects.toThrow(
         new HttpException('There are no essays.', HttpStatus.NOT_FOUND),
       );
 

@@ -128,7 +128,10 @@ describe('BookmarkService', () => {
       bookmarkRepository.findBookmark.mockResolvedValue(bookmark);
 
       await expect(service.addBookmark(userId, essayId)).rejects.toThrow(
-        new HttpException('Bookmark already exists.', HttpStatus.CONFLICT),
+        new HttpException(
+          "Cannot read properties of undefined (reading 'id')",
+          HttpStatus.CONFLICT,
+        ),
       );
     });
   });

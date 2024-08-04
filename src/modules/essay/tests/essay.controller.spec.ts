@@ -205,8 +205,8 @@ describe('EssayController', () => {
 
       service.getEssay.mockResolvedValue(result as any);
 
-      const response = await controller.getEssay(req, essayId);
-      expect(service.getEssay).toHaveBeenCalledWith(req.user.id, essayId);
+      const response = await controller.getEssay(req, essayId, 'community');
+      expect(service.getEssay).toHaveBeenCalledWith(req.user.id, essayId, 'community');
       expect(response).toEqual(result);
     });
   });
