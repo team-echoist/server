@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/team-echoist/server/compare/v1.5.1...v1.5.2) (2024-08-04)
+
+
+### Bug Fixes
+
+* Add platform ID verification ([#336](https://github.com/team-echoist/server/issues/336)) ([80fac4c](https://github.com/team-echoist/server/commit/80fac4c65b2d3b88151592d90ef69ceff5b77084))
+
 ## [1.5.1](https://github.com/team-echoist/server/compare/v1.5.0...v1.5.1) (2024-08-04)
 
 
