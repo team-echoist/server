@@ -36,7 +36,7 @@ export class Essay {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'text' })
   content: string;
 
   @Column({ name: 'linked_out_gauge', nullable: false, default: 0 })
