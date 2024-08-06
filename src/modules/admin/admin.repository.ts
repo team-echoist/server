@@ -7,6 +7,7 @@ import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { Admin } from '../../entities/admin.entity';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
+import { Server } from '../../entities/server.entity';
 
 export class AdminRepository {
   constructor(
@@ -17,6 +18,8 @@ export class AdminRepository {
     @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>,
     @InjectRepository(ProcessedHistory)
     private readonly processedRepository: Repository<ProcessedHistory>,
+    @InjectRepository(Server)
+    private readonly serverRepository: Repository<Server>,
   ) {}
 
   async totalSubscriberCount(today: Date) {
@@ -197,5 +200,13 @@ export class AdminRepository {
 
   async saveAdmin(admin: Admin | CreateAdminDto) {
     return this.adminRepository.save(admin);
+  }
+
+  async getCurrentServerStatus() {
+    return this.serverRepository.findOne({ where: { id: 1 } });
+  }
+
+  async saveServer(server: Server) {
+    return this.serverRepository.save(server);
   }
 }

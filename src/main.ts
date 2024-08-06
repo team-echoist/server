@@ -11,13 +11,11 @@ import { AppModule } from './app.module';
 import { swaggerConfig } from './config/swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
-import * as express from 'express';
 import { writeFileSync } from 'fs';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
 import { ConfigService } from '@nestjs/config';
-import { AwsService } from './modules/aws/aws.service';
 
 dotenv.config();
 
@@ -150,6 +148,10 @@ async function bootstrap() {
   );
 
   const server = app.getHttpAdapter().getInstance();
+
+  server.get('/health-check', (req: Request, res: Response) => {
+    res.status(200).send('OK');
+  });
   server.get('/', (req: Request, res: Response) => {
     res.sendFile(join(__dirname, '../src/common/static', '404.html'));
   });
@@ -158,17 +160,6 @@ async function bootstrap() {
   });
 
   app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
-
-  const awsService = app.get(AwsService);
-  server.get('/.well-known/assetlinks.json', async (req, res) => {
-    try {
-      const data = await awsService.getAssetLinksJson();
-      res.setHeader('Content-Type', 'application/json');
-      res.send(data);
-    } catch (error) {
-      res.status(500).send('Error fetching assetlinks.json');
-    }
-  });
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);

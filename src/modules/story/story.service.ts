@@ -48,7 +48,6 @@ export class StoryService {
 
     if (data.essayIds && data.essayIds.length > 0) {
       const essays = await this.essayService.getEssaysByIds(userId, data.essayIds);
-      console.log(essays);
       essays.forEach((essay) => {
         essay.story = savedStory;
       });

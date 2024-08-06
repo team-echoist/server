@@ -56,13 +56,6 @@ describe('AuthController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('healthCheck', () => {
-    it('should return "up"', async () => {
-      const result = await controller.healthCheck();
-      expect(result).toEqual('up');
-    });
-  });
-
   describe('checkEmail', () => {
     it('should call service checkEmail method', async () => {
       const dto: CheckEmailReqDto = { email: 'test@example.com' };

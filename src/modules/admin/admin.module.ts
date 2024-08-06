@@ -28,6 +28,7 @@ import { AdminProcessor } from './admin.processor';
 import { AlertModule } from '../alert/alert.module';
 import { CronModule } from '../cron/cron.module';
 import { GeulroquisModule } from '../geulroquis/geulroquis.module';
+import { Server } from '../../entities/server.entity';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { GeulroquisModule } from '../geulroquis/geulroquis.module';
       Inquiry,
       Notice,
       UpdatedHistory,
+      Server,
     ]),
     BullModule.registerQueueAsync({
       name: 'admin',
