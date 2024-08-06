@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/team-echoist/server/compare/v1.6.0...v1.6.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* update server state ([#342](https://github.com/team-echoist/server/issues/342)) ([34e86e3](https://github.com/team-echoist/server/commit/34e86e38c68299f96d5137b4f81ad27353bff840))
+
 # [1.6.0](https://github.com/team-echoist/server/compare/v1.5.2...v1.6.0) (2024-08-06)
 
 
