@@ -59,7 +59,9 @@ export class SeederService {
       newAdmin.password = hashedPassword;
       newAdmin.activated = true;
       await this.adminRepository.save(newAdmin);
-      console.log('Admin created successfully');
+      console.log('Root Admin created successfully');
+    } else {
+      console.log('Root Admin already exists');
     }
     return;
   }
@@ -70,7 +72,9 @@ export class SeederService {
       const newServer = new Server();
       newServer.status = ServerStatus.OPEN;
       await this.serverRepository.save(newServer);
-      console.log('Server created successfully');
+      console.log('Server status created successfully');
+    } else {
+      console.log('Server state already exists');
     }
     return;
   }
