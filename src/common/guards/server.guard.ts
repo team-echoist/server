@@ -29,7 +29,6 @@ export class ServerGuard extends AuthGuard('admin-pass') {
     } catch (err) {}
 
     const currentStatus = await this.adminService.getServerStatus();
-    console.log('가드에 도착한 캐시: ', currentStatus);
 
     const rootAdminId = 1;
 
