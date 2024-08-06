@@ -57,11 +57,11 @@ export class ServerGuard extends AuthGuard('admin-pass') {
           HttpStatus.SERVICE_UNAVAILABLE,
         );
 
-      default:
-        throw new HttpException(
-          'Unexpected server status. Please contact support.',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+      // default:
+      //   throw new HttpException(
+      //     'Unexpected server status. Please contact support.',
+      //     HttpStatus.INTERNAL_SERVER_ERROR,
+      //   );
     }
   }
 }
