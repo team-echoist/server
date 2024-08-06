@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/team-echoist/server/compare/v1.5.2...v1.6.0) (2024-08-06)
+
+
+### Features
+
+* check server status and add server guard ([#341](https://github.com/team-echoist/server/issues/341)) ([7f06a2b](https://github.com/team-echoist/server/commit/7f06a2bbf328d75a8775f316c0c29c3384602769))
+
 ## [1.5.2](https://github.com/team-echoist/server/compare/v1.5.1...v1.5.2) (2024-08-04)
 
 
