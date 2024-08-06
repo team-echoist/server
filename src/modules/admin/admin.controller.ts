@@ -1302,4 +1302,26 @@ export class AdminController {
   async changeTomorrowGeulroquis(@Param('geulroquisId', ParseIntPipe) geulroquisId: number) {
     return this.adminService.changeTomorrowGeulroquis(geulroquisId);
   }
+
+  @Get('server/status')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '서버 상태 조회',
+    description: '현재 서버의 상태를 조회합니다.',
+  })
+  @ApiResponse({ status: 200, description: '서버 상태 반환' })
+  async getServerStatus() {
+    return this.adminService.getServerStatus();
+  }
+
+  @Post('server/status')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '서버 상태 업데이트',
+    description: '서버의 상태를 업데이트합니다.',
+  })
+  @ApiResponse({ status: 200, type: '' })
+  async saveServerStatus(@Body('status') status: string) {
+    return await this.adminService.saveServerStatus(status);
+  }
 }

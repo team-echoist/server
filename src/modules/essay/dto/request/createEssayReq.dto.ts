@@ -20,10 +20,10 @@ export class CreateEssayReqDto {
   @Length(1, 30)
   title: string;
 
-  @ApiProperty({ description: '4000자 제한' })
+  @ApiProperty({ description: '10000자 제한' })
   @IsString()
   @IsNotEmpty()
-  @Length(10, 4000)
+  @Length(10, 10000)
   content: string;
 
   @ApiProperty({ required: false })

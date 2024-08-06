@@ -23,14 +23,3 @@ export class AdminLocalStrategy extends PassportStrategy(Strategy, 'admin-local'
     return admin;
   }
 }
-
-// if (!user) {
-//       throw new HttpException('Invalid email or password.', HttpStatus.UNAUTHORIZED);
-//     }
-//     if (user.status === UserStatus.BANNED) {
-//       throw new HttpException(
-//         'Your account has been banned. Please contact support for more information.',
-//         HttpStatus.UNAUTHORIZED,
-//       );
-//     }
-//     return user;

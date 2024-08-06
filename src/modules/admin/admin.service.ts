@@ -73,6 +73,11 @@ export class AdminService {
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
 
+  private async adminCacheKey(id: number) {
+    return `admin_${id}`;
+  }
+  private readonly serverCacheKey = 'server_status';
+
   @Transactional()
   async dashboard() {
     const today = new Date();
@@ -594,7 +599,7 @@ export class AdminService {
   }
 
   async validatePayload(id: number) {
-    const cacheKey = `admin_${id}`;
+    const cacheKey = await this.adminCacheKey(id);
     const cachedAdmin = await this.redis.get(cacheKey);
     let admin = cachedAdmin ? JSON.parse(cachedAdmin) : null;
     if (!admin) {
@@ -881,5 +886,29 @@ export class AdminService {
 
   async changeTomorrowGeulroquis(geulroquisId: number) {
     return this.geulroquisService.changeTomorrowGeulroquis(geulroquisId);
+  }
+
+  async getServerStatus() {
+    const cacheKey = this.serverCacheKey;
+    const cachedServerStatus = await this.redis.get(cacheKey);
+    let status = cachedServerStatus ? JSON.parse(cachedServerStatus) : null;
+    if (!status) {
+      status = status = await this.adminRepository.getCurrentServerStatus();
+      if (!status) throw new HttpException('Server status not found.', HttpStatus.NOT_FOUND);
+      await this.redis.set(cacheKey, JSON.stringify(status), 'EX', 3600);
+    }
+
+    return status.status;
+  }
+
+  async saveServerStatus(newStatus: string) {
+    const server = await this.adminRepository.getCurrentServerStatus();
+    server.status = newStatus;
+
+    const updatedServer = await this.adminRepository.saveServer(server);
+
+    await this.redis.del(this.serverCacheKey);
+
+    return updatedServer.status;
   }
 }

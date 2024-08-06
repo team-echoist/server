@@ -32,7 +32,6 @@ import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
 import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
 import { HomeModule } from './modules/home/home.module';
-import { NextFunction } from 'express';
 
 @Module({
   imports: [
@@ -85,9 +84,9 @@ export class AppModule implements OnModuleInit, NestModule {
     await this.cronService.updateNextGeulroquis();
 
     if (process.env.INITIALIZE === 'true') {
-      await this.seederService.initializeAdmin();
-      await this.seederService.initializeNicknames();
-      await this.seederService.initializeAll();
+      await this.seederService.initializeServer();
+      // await this.seederService.initializeAdmin();
+      // await this.seederService.initializeNicknames();
     }
   }
 
