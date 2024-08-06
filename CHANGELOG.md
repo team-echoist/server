@@ -1,3 +1,10 @@
+## [1.6.4](https://github.com/team-echoist/server/compare/v1.6.3...v1.6.4) (2024-08-06)
+
+
+### Bug Fixes
+
+* Why not? ([#345](https://github.com/team-echoist/server/issues/345)) ([5f10683](https://github.com/team-echoist/server/commit/5f106832f6f116a9ef85373d7cbc1d30db3495e3))
+
 ## [1.6.3](https://github.com/team-echoist/server/compare/v1.6.2...v1.6.3) (2024-08-06)
 
 
