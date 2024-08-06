@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/team-echoist/server/compare/v1.6.2...v1.6.3) (2024-08-06)
+
+
+### Bug Fixes
+
+* developer sleeps here ([#344](https://github.com/team-echoist/server/issues/344)) ([98cde17](https://github.com/team-echoist/server/commit/98cde1794ef993219e0ab3d2bda42d9ee6565950))
+
 ## [1.6.2](https://github.com/team-echoist/server/compare/v1.6.1...v1.6.2) (2024-08-06)
 
 
