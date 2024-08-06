@@ -5,8 +5,9 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
-import { Device } from '../../entities/device.entity';
+import { Device, DeviceType, UserOS } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
+import { DeviceDto } from './dto/device.dto';
 
 export class SupportRepository {
   constructor(
@@ -137,8 +138,16 @@ export class SupportRepository {
     return this.deviceRepository.findOne({ where: { deviceId: deviceId } });
   }
 
-  async createDevice(user: User, deviceId: string, deviceToken: string) {
-    return this.deviceRepository.create({ user, deviceId, deviceToken });
+  async createDevice(user: User, device: DeviceDto, deviceId?: string, deviceToken?: string) {
+    const newDevice = new Device();
+    newDevice.user = user;
+    newDevice.deviceId = deviceId ? deviceId : null;
+    newDevice.deviceToken = deviceToken ? deviceToken : null;
+    newDevice.os = device.os as UserOS;
+    newDevice.type = device.type as DeviceType;
+    newDevice.model = device.model;
+
+    return newDevice;
   }
 
   async saveDevice(device: Device) {

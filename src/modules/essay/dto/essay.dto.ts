@@ -66,8 +66,4 @@ export class EssayDto {
   @IsString()
   @Expose()
   location: string;
-
-  @Expose()
-  @IsString()
-  device: string;
 }

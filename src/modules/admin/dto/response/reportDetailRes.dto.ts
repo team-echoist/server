@@ -59,7 +59,17 @@ export class ReportDetailResDto {
   @ApiProperty()
   @IsString()
   @Expose()
-  device: string;
+  deviceOS: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  deviceType: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  deviceModel: string;
 
   @ApiProperty()
   @IsNumber()

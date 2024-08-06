@@ -22,6 +22,8 @@ import { WeeklyEssayCountResDto } from '../dto/response/weeklyEssayCountRes.dto'
 import { ThumbnailResDto } from '../dto/response/ThumbnailRes.dto';
 import { EssayStatsDto } from '../dto/essayStats.dto';
 import { Story } from '../../../entities/story.entity';
+import { SupportService } from '../../support/support.service';
+import { SupportRepository } from '../../support/support.repository';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -42,6 +44,7 @@ jest.mock('../../badge/badge.service');
 jest.mock('../../view/view.service');
 jest.mock('../../bookmark/bookmark.service');
 jest.mock('../../alert/alert.service');
+jest.mock('../../support/support.service');
 
 describe('EssayService', () => {
   let service: EssayService;
@@ -57,6 +60,7 @@ describe('EssayService', () => {
   let viewService: jest.Mocked<ViewService>;
   let bookmarkService: jest.Mocked<BookmarkService>;
   let alertService: jest.Mocked<AlertService>;
+  let supportService: jest.Mocked<SupportService>;
 
   const redis = {
     get: jest.fn(),
@@ -83,6 +87,11 @@ describe('EssayService', () => {
         ViewService,
         BookmarkService,
         AlertService,
+        SupportService,
+        {
+          provide: SupportRepository,
+          useValue: { findDevice: jest.fn() },
+        },
         {
           provide: getQueueToken('bookmark'),
           useValue: { add: jest.fn() },
@@ -104,6 +113,7 @@ describe('EssayService', () => {
     viewService = module.get(ViewService);
     bookmarkService = module.get(BookmarkService);
     alertService = module.get(AlertService);
+    supportService = module.get(SupportService);
   });
 
   afterEach(() => {
@@ -154,7 +164,7 @@ describe('EssayService', () => {
   describe('saveEssay', () => {
     it('should save a new essay', async () => {
       const requester = { id: 1, status: UserStatus.ACTIVATED } as Express.User;
-      const device = 'web';
+      const device = 'web' as any;
       const data = { title: 'test', content: 'test content', tags: [1] } as any;
       const user = { id: requester.id } as User;
       const tags = [{ id: 1 }] as any[];
@@ -164,6 +174,7 @@ describe('EssayService', () => {
       tagService.getTags.mockResolvedValue(tags);
       essayRepository.saveEssay.mockResolvedValue(savedEssay);
       utilsService.transformToDto.mockReturnValue(savedEssay);
+      supportService.findDevice.mockReturnValue(device);
 
       const result = await service.saveEssay(requester, device, data);
 
@@ -183,7 +194,7 @@ describe('EssayService', () => {
 
     it('should handle monitored user', async () => {
       const requester = { id: 1, status: UserStatus.MONITORED } as Express.User;
-      const device = 'web';
+      const device = 'web' as any;
       const data = {
         title: 'test',
         content: 'test content',
@@ -203,6 +214,7 @@ describe('EssayService', () => {
       alertService.createReviewAlerts.mockResolvedValue(undefined);
       alertService.sendPushReviewAlert.mockResolvedValue(undefined);
       utilsService.transformToDto.mockReturnValue(finalSavedEssay);
+      supportService.findDevice.mockReturnValue(device);
 
       const result = await service.saveEssay(requester, device, data);
 

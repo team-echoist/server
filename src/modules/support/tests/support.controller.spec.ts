@@ -157,12 +157,11 @@ describe('SupportController', () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
       const data: RegisterDeviceReqDto = { deviceId: 'device123', deviceToken: 'token123' };
 
+      jest.spyOn(service, 'registerDevice').mockResolvedValue({} as any);
+
       await controller.registerDevice(req, data);
-      expect(service.registerDevice).toHaveBeenCalledWith(
-        req.user.id,
-        data.deviceId,
-        data.deviceToken,
-      );
+
+      expect(service.registerDevice).toHaveBeenCalledWith(req, data.deviceId, data.deviceToken);
     });
   });
 });

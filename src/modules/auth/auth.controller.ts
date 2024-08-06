@@ -12,6 +12,7 @@ import { UtilsService } from '../utils/utils.service';
 import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
+import { DeviceType, UserOS } from '../../entities/device.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -148,13 +149,17 @@ export class AuthController {
   ) {
     await this.authService.updateEmail(token);
 
-    // todo 리다이렉션
     let redirectUrl = this.configService.get<string>('WEB_CHANGE_EMAIL_REDIRECT');
-    if (req.device === 'iPhone' || req.device === 'iPad') {
-      // todo
+    if (
+      req.device.os === UserOS.IOS &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('IOS_CHANGE_EMAIL_REDIRECT');
     }
-    if (req.device === 'Android')
+    if (
+      req.device.os === UserOS.ANDROID &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    )
       redirectUrl = this.configService.get<string>('AOS_CHANGE_EMAIL_REDIRECT');
 
     res.redirect(redirectUrl);
@@ -218,11 +223,16 @@ export class AuthController {
     const newJwt = this.utilsService.generateJWT(user.id);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    if (req.device === 'iPhone' || req.device === 'iPad') {
-      // todo
+    if (
+      req.device.os === UserOS.IOS &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('IOS_REGISTER_REDIRECT');
     }
-    if (req.device === 'Android')
+    if (
+      req.device.os === UserOS.ANDROID &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    )
       redirectUrl = this.configService.get<string>('AOS_REGISTER_REDIRECT');
 
     redirectUrl += `?token=${newJwt}`;
@@ -313,12 +323,18 @@ export class AuthController {
     const newToken = await this.authService.passwordResetVerify(token);
 
     let redirectUrl = this.configService.get<string>('WEB_PASSWORD_RESET_REDIRECT');
-    if (req.device === 'iPhone' || req.device === 'iPad') {
+    if (
+      req.device.os === UserOS.IOS &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       // todo
       redirectUrl = this.configService.get<string>('IOS_PASSWORD_RESET_REDIRECT');
     }
 
-    if (req.device === 'Android') {
+    if (
+      req.device.os === UserOS.ANDROID &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('AOS_PASSWORD_RESET_REDIRECT');
     }
 

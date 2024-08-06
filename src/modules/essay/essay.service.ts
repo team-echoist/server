@@ -33,6 +33,8 @@ import { SummaryEssayResDto } from './dto/response/summaryEssayRes.dto';
 import { SentenceEssayResDto } from './dto/response/sentenceEssayRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
+import { DeviceDto } from '../support/dto/device.dto';
+import { SupportService } from '../support/support.service';
 
 @Injectable()
 export class EssayService {
@@ -48,6 +50,7 @@ export class EssayService {
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
     private readonly alertService: AlertService,
+    private readonly supportService: SupportService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -58,9 +61,15 @@ export class EssayService {
   }
 
   @Transactional()
-  async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
+  async saveEssay(requester: Express.User, deviceDto: DeviceDto, data: CreateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
     const tags = await this.tagService.getTags(data.tags);
+
+    let device = await this.supportService.findDevice(user, deviceDto);
+
+    if (!device) {
+      device = await this.supportService.newCreateDevice(user, deviceDto);
+    }
 
     const essayData = {
       ...data,

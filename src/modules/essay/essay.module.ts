@@ -27,6 +27,7 @@ import { BookmarkModule } from '../bookmark/bookmark.module';
 import { ConfigModule } from '@nestjs/config';
 import { ViewRecord } from '../../entities/viewRecord.entity';
 import { AlertModule } from '../alert/alert.module';
+import { SupportModule } from '../support/support.module';
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ dotenv.config();
     BadgeModule,
     ViewModule,
     AlertModule,
+    SupportModule,
     forwardRef(() => BookmarkModule),
     forwardRef(() => UserModule),
   ],

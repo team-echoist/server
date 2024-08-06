@@ -1,5 +1,6 @@
 import { Request as ExpressRequest } from 'express';
 import { UserStatus } from '../../entities/user.entity';
+import { DeviceType, UserOS } from '../../entities/device.entity';
 
 declare global {
   namespace Express {
@@ -20,10 +21,16 @@ declare global {
       isFirst?: boolean;
     }
 
+    export interface DeviceDto {
+      os: UserOS;
+      type: DeviceType;
+      model: string;
+    }
+
     export interface Request {
       user?: User;
       token?: string;
-      device?: string;
+      device: DeviceDto;
       platform?: string;
       platformId?: string;
       accessToken?: string;
