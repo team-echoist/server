@@ -601,6 +601,7 @@ export class AdminService {
   async validatePayload(id: number) {
     const cacheKey = await this.adminCacheKey(id);
     const cachedAdmin = await this.redis.get(cacheKey);
+
     let admin = cachedAdmin ? JSON.parse(cachedAdmin) : null;
     if (!admin) {
       admin = await this.adminRepository.findAdmin(id);
@@ -609,6 +610,7 @@ export class AdminService {
         return admin;
       }
     }
+
     return !admin ? null : admin;
   }
 

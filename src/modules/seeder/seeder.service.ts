@@ -51,19 +51,27 @@ export class SeederService {
   }
 
   async initializeAdmin() {
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-    const admin = new Admin();
-    admin.email = 'root@linkedoutapp.com';
-    admin.password = hashedPassword;
-    admin.activated = true;
-    await this.adminRepository.save(admin);
-    console.log('Admin created successfully');
+    const admin = await this.adminRepository.findOne({ where: { id: 1 } });
+    if (!admin) {
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+      const newAdmin = new Admin();
+      newAdmin.email = 'root@linkedoutapp.com';
+      newAdmin.password = hashedPassword;
+      newAdmin.activated = true;
+      await this.adminRepository.save(newAdmin);
+      console.log('Admin created successfully');
+    }
+    return;
   }
 
   async initializeServer() {
-    const server = new Server();
-    server.status = ServerStatus.OPEN;
-    await this.serverRepository.save(server);
-    console.log('Server created successfully');
+    const server = await this.serverRepository.find();
+    if (!server) {
+      const newServer = new Server();
+      newServer.status = ServerStatus.OPEN;
+      await this.serverRepository.save(newServer);
+      console.log('Server created successfully');
+    }
+    return;
   }
 }

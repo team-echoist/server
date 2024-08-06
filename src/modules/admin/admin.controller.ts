@@ -57,6 +57,7 @@ import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
 import { GeulroquisResDto } from '../geulroquis/dto/response/geulroquisRes.dto';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
+import { ServerStatus } from '../../entities/server.entity';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -1307,9 +1308,18 @@ export class AdminController {
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '서버 상태 조회',
-    description: '현재 서버의 상태를 조회합니다.',
+    description: `
+    현재 서버의 상태를 조회합니다.
+    
+  - \`open\`: 모든 요청을 허용하는 상태입니다.
+  - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
+  - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 관리자기능에 접근할 수 있습니다.
+  `,
   })
-  @ApiResponse({ status: 200, description: '서버 상태 반환' })
+  @ApiResponse({
+    status: 200,
+    type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
+  })
   async getServerStatus() {
     return this.adminService.getServerStatus();
   }
@@ -1320,7 +1330,11 @@ export class AdminController {
     summary: '서버 상태 업데이트',
     description: '서버의 상태를 업데이트합니다.',
   })
-  @ApiResponse({ status: 200, type: '' })
+  @ApiBody({ type: '' })
+  @ApiResponse({
+    status: 200,
+    type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
+  })
   async saveServerStatus(@Body('status') status: string) {
     return await this.adminService.saveServerStatus(status);
   }

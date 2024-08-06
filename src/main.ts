@@ -148,6 +148,10 @@ async function bootstrap() {
   );
 
   const server = app.getHttpAdapter().getInstance();
+
+  server.get('/health-check', (req: Request, res: Response) => {
+    res.status(200).send('OK');
+  });
   server.get('/', (req: Request, res: Response) => {
     res.sendFile(join(__dirname, '../src/common/static', '404.html'));
   });

@@ -22,13 +22,6 @@ export class AuthController {
     private readonly utilsService: UtilsService,
   ) {}
 
-  @Get('health-check')
-  @ApiOperation({ summary: 'health check' })
-  @ApiResponse({ status: 200 })
-  async healthCheck() {
-    return 'up';
-  }
-
   @Post('check/email')
   @ApiOperation({
     summary: '이메일 중복 검사',

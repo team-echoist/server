@@ -22,6 +22,17 @@ export class UpdateContentColumnAndFunction1722867638807 implements MigrationInt
       END;
       $$ LANGUAGE plpgsql;
     `);
+
+    // migration table에 중복 확인 후 삽입 (pseudo-code example)
+    await queryRunner.query(`
+      DO $$
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM migrations WHERE timestamp = 1722867638807 AND name = 'UpdateContentColumnAndFunction1722867638807') THEN
+              INSERT INTO migrations (timestamp, name) VALUES (1722867638807, 'UpdateContentColumnAndFunction1722867638807');
+          END IF;
+      END
+      $$;
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

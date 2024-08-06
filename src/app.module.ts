@@ -1,5 +1,5 @@
 import { redisConfig } from './config/redis.config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
@@ -32,6 +32,8 @@ import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
 import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
 import { HomeModule } from './modules/home/home.module';
+import { ServerGuard } from './common/guards/server.guard';
+import * as strategies from './common/guards/strategies';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { HomeModule } from './modules/home/home.module';
   providers: [
     { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
     { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
+    { provide: APP_GUARD, useClass: ServerGuard },
+    strategies.AdminPassStrategy,
   ],
 })
 export class AppModule implements OnModuleInit, NestModule {
@@ -83,9 +87,9 @@ export class AppModule implements OnModuleInit, NestModule {
     await this.cronService.userDeletionCronJobs();
     await this.cronService.updateNextGeulroquis();
 
-    if (process.env.INITIALIZE === 'true') {
+    if (process.env.SEED === 'true') {
       await this.seederService.initializeServer();
-      // await this.seederService.initializeAdmin();
+      await this.seederService.initializeAdmin();
       // await this.seederService.initializeNicknames();
     }
   }
