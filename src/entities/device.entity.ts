@@ -12,7 +12,7 @@ import {
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
 
-export enum UserOS {
+export enum DeviceOS {
   WINDOW = 'Window',
   MAC = 'Mac',
   ANDROID = 'Android',
@@ -43,10 +43,10 @@ export class Device {
 
   @Column({
     type: 'enum',
-    enum: UserOS,
-    default: UserOS.UNKNOWN,
+    enum: DeviceOS,
+    default: DeviceOS.UNKNOWN,
   })
-  os: UserOS;
+  os: DeviceOS;
 
   @Column({
     type: 'enum',

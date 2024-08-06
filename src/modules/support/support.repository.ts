@@ -5,7 +5,7 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
-import { Device, DeviceType, UserOS } from '../../entities/device.entity';
+import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
 
@@ -143,7 +143,7 @@ export class SupportRepository {
     newDevice.user = user;
     newDevice.deviceId = deviceId ? deviceId : null;
     newDevice.deviceToken = deviceToken ? deviceToken : null;
-    newDevice.os = device.os as UserOS;
+    newDevice.os = device.os as DeviceOS;
     newDevice.type = device.type as DeviceType;
     newDevice.model = device.model;
 

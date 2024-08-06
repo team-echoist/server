@@ -1,6 +1,6 @@
 import { Request as ExpressRequest } from 'express';
 import { UserStatus } from '../../entities/user.entity';
-import { DeviceType, UserOS } from '../../entities/device.entity';
+import { DeviceType, DeviceOS } from '../../entities/device.entity';
 
 declare global {
   namespace Express {
@@ -22,7 +22,7 @@ declare global {
     }
 
     export interface DeviceDto {
-      os: UserOS;
+      os: DeviceOS;
       type: DeviceType;
       model: string;
     }

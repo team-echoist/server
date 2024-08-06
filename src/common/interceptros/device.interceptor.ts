@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as useragent from 'useragent';
-import { DeviceType, UserOS } from '../../entities/device.entity';
+import { DeviceType, DeviceOS } from '../../entities/device.entity';
 import { SupportService } from '../../modules/support/support.service';
 import { UserService } from '../../modules/user/user.service';
 
@@ -37,25 +37,25 @@ export class DeviceInterceptor implements NestInterceptor {
     let type: string;
 
     if (osFamily.includes('windows')) {
-      os = UserOS.WINDOW;
+      os = DeviceOS.WINDOW;
       type = DeviceType.DESKTOP;
     } else if (osFamily.includes('mac os x')) {
-      os = UserOS.MAC;
+      os = DeviceOS.MAC;
       type = DeviceType.DESKTOP;
     } else if (osFamily.includes('android')) {
-      os = UserOS.ANDROID;
+      os = DeviceOS.ANDROID;
       type = DeviceType.MOBILE;
       if (deviceFamily.includes('tablet')) {
         type = DeviceType.TABLET;
       }
     } else if (osFamily.includes('ios')) {
-      os = UserOS.IOS;
+      os = DeviceOS.IOS;
       type = deviceFamily.includes('ipad') ? DeviceType.TABLET : DeviceType.MOBILE;
     } else if (osFamily.includes('linux')) {
-      os = UserOS.LINUX;
+      os = DeviceOS.LINUX;
       type = DeviceType.DESKTOP;
     } else {
-      os = UserOS.UNKNOWN;
+      os = DeviceOS.UNKNOWN;
       type = DeviceType.UNKNOWN;
     }
 

@@ -1,9 +1,9 @@
 import { IsEnum, IsString } from 'class-validator';
-import { DeviceType, UserOS } from '../../../entities/device.entity';
+import { DeviceType, DeviceOS } from '../../../entities/device.entity';
 
 export class DeviceDto {
-  @IsEnum(UserOS)
-  os: UserOS;
+  @IsEnum(DeviceOS)
+  os: DeviceOS;
 
   @IsEnum(DeviceType)
   type: DeviceType;

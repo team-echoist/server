@@ -14,9 +14,11 @@ import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { Transactional } from 'typeorm-transactional';
 import { Request as ExpressRequest } from 'express';
-import { Device, DeviceType, UserOS } from '../../entities/device.entity';
+import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class SupportService {
@@ -24,6 +26,7 @@ export class SupportService {
     private readonly utilsService: UtilsService,
     private readonly supportRepository: SupportRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getNotices(page: number, limit: number) {
@@ -129,7 +132,7 @@ export class SupportService {
       device = await this.supportRepository.createDevice(
         user,
         {
-          os: req.device.os as UserOS,
+          os: req.device.os as DeviceOS,
           type: req.device.type as DeviceType,
           model: req.device.model,
         },
@@ -138,7 +141,8 @@ export class SupportService {
       );
     }
 
-    return await this.supportRepository.saveDevice(device);
+    await this.supportRepository.saveDevice(device);
+    await this.redis.del(`user:${req.user.id}`);
   }
 
   async findDevice(user: User, reqDevice: DeviceDto) {
@@ -152,7 +156,7 @@ export class SupportService {
 
   async newCreateDevice(user: User, device: DeviceDto) {
     const newDevice = await this.supportRepository.createDevice(user, {
-      os: device.os as UserOS,
+      os: device.os as DeviceOS,
       type: device.type as DeviceType,
       model: device.model,
     });

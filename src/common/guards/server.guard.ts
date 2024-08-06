@@ -29,7 +29,6 @@ export class ServerGuard extends AuthGuard('admin-pass') {
     } catch (err) {}
 
     const currentStatus = await this.adminService.getServerStatus();
-    console.log('가드에 도착한 캐시: ', currentStatus);
 
     const rootAdminId = 1;
 
@@ -57,12 +56,6 @@ export class ServerGuard extends AuthGuard('admin-pass') {
           'The server is currently closed. Access is restricted.',
           HttpStatus.SERVICE_UNAVAILABLE,
         );
-
-      // default:
-      //   throw new HttpException(
-      //     'Unexpected server status. Please contact support.',
-      //     HttpStatus.INTERNAL_SERVER_ERROR,
-      //   );
     }
   }
 }

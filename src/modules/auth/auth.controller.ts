@@ -12,7 +12,7 @@ import { UtilsService } from '../utils/utils.service';
 import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
-import { DeviceType, UserOS } from '../../entities/device.entity';
+import { DeviceType, DeviceOS } from '../../entities/device.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -151,13 +151,13 @@ export class AuthController {
 
     let redirectUrl = this.configService.get<string>('WEB_CHANGE_EMAIL_REDIRECT');
     if (
-      req.device.os === UserOS.IOS &&
+      req.device.os === DeviceOS.IOS &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     ) {
       redirectUrl = this.configService.get<string>('IOS_CHANGE_EMAIL_REDIRECT');
     }
     if (
-      req.device.os === UserOS.ANDROID &&
+      req.device.os === DeviceOS.ANDROID &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     )
       redirectUrl = this.configService.get<string>('AOS_CHANGE_EMAIL_REDIRECT');
@@ -224,13 +224,13 @@ export class AuthController {
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     if (
-      req.device.os === UserOS.IOS &&
+      req.device.os === DeviceOS.IOS &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     ) {
       redirectUrl = this.configService.get<string>('IOS_REGISTER_REDIRECT');
     }
     if (
-      req.device.os === UserOS.ANDROID &&
+      req.device.os === DeviceOS.ANDROID &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     )
       redirectUrl = this.configService.get<string>('AOS_REGISTER_REDIRECT');
@@ -324,7 +324,7 @@ export class AuthController {
 
     let redirectUrl = this.configService.get<string>('WEB_PASSWORD_RESET_REDIRECT');
     if (
-      req.device.os === UserOS.IOS &&
+      req.device.os === DeviceOS.IOS &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     ) {
       // todo
@@ -332,7 +332,7 @@ export class AuthController {
     }
 
     if (
-      req.device.os === UserOS.ANDROID &&
+      req.device.os === DeviceOS.ANDROID &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     ) {
       redirectUrl = this.configService.get<string>('AOS_PASSWORD_RESET_REDIRECT');
