@@ -10,10 +10,7 @@ import { UserService } from '../../modules/user/user.service';
 
 @Injectable()
 export class DeviceInterceptor implements NestInterceptor {
-  constructor(
-    private readonly supportService: SupportService,
-    private readonly userService: UserService,
-  ) {}
+  constructor() {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
