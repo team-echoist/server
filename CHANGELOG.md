@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/team-echoist/server/compare/v1.6.1...v1.6.2) (2024-08-06)
+
+
+### Bug Fixes
+
+* branch error when checking server status ([#343](https://github.com/team-echoist/server/issues/343)) ([8d28e68](https://github.com/team-echoist/server/commit/8d28e68fecfc0bf04898b3650b280211255c9a37))
+
 ## [1.6.1](https://github.com/team-echoist/server/compare/v1.6.0...v1.6.1) (2024-08-06)
 
 
