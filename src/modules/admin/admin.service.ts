@@ -897,7 +897,6 @@ export class AdminService {
     let status = cachedServerStatus ? JSON.parse(cachedServerStatus) : null;
     if (!status) {
       status = status = await this.adminRepository.getCurrentServerStatus();
-      if (!status) throw new HttpException('Server status not found.', HttpStatus.NOT_FOUND);
       await this.redis.set(cacheKey, JSON.stringify(status), 'EX', 3600);
     }
 
