@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../../modules/auth/auth.service';
 import * as dotenv from 'dotenv';
+import { UserStatus } from '../../../entities/user.entity';
 
 dotenv.config();
 
@@ -25,6 +26,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
+    if (user.status === UserStatus.BANNED) {
+      throw new HttpException(
+        'Your account has been banned. Please contact support for more information.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
     return user;
   }
 }

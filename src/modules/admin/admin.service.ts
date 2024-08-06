@@ -896,24 +896,24 @@ export class AdminService {
     const cachedServerStatus = await this.redis.get(cacheKey);
     let status = cachedServerStatus ? JSON.parse(cachedServerStatus) : null;
     if (!status) {
-      status = status = await this.adminRepository.getCurrentServerStatus();
-      await this.redis.set(cacheKey, JSON.stringify(status), 'EX', 3600);
+      const serverStatus = await this.adminRepository.getCurrentServerStatus();
+      await this.redis.set(cacheKey, JSON.stringify(serverStatus.status), 'EX', 3600);
+      status = serverStatus.status;
     }
-
-    return status.status;
+    return status;
   }
 
   async saveServerStatus(adminId: number, newStatus: string) {
     if (adminId !== 1)
       throw new HttpException('This is a root manager function.', HttpStatus.FORBIDDEN);
 
-    let server = await this.adminRepository.getCurrentServerStatus();
-    if (!server) {
-      server = new Server();
+    let serverStatus = await this.adminRepository.getCurrentServerStatus();
+    if (!serverStatus) {
+      serverStatus = new Server();
     }
-    server.status = newStatus;
+    serverStatus.status = newStatus;
 
-    const updatedServer = await this.adminRepository.saveServer(server);
+    const updatedServer = await this.adminRepository.saveServer(serverStatus);
 
     await this.redis.del(this.serverCacheKey);
 
