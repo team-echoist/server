@@ -45,7 +45,7 @@ export class ServerGuard extends AuthGuard('admin-pass') {
         }
         throw new HttpException(
           'The server is currently under maintenance. Please try again later.',
-          HttpStatus.SERVICE_UNAVAILABLE,
+          423,
         );
 
       case ServerStatus.CLOSED:
@@ -54,7 +54,7 @@ export class ServerGuard extends AuthGuard('admin-pass') {
         }
         throw new HttpException(
           'The server is currently closed. Access is restricted.',
-          HttpStatus.FORBIDDEN,
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
 
       default:
