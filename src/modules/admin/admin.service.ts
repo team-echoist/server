@@ -893,13 +893,17 @@ export class AdminService {
 
   async getServerStatus() {
     const cacheKey = this.serverCacheKey;
-    const cachedServerStatus = await this.redis.get(cacheKey);
-    let status = cachedServerStatus ? JSON.parse(cachedServerStatus) : null;
+
+    let status = await this.redis.get(cacheKey);
+    console.log('캐시상태: ', status);
     if (!status) {
-      const serverStatus = await this.adminRepository.getCurrentServerStatus();
-      await this.redis.set(cacheKey, JSON.stringify(serverStatus.status), 'EX', 3600);
-      status = serverStatus.status;
+      const currentStatus = await this.adminRepository.getCurrentServerStatus();
+      console.log('캐시없어서 찾아옴: ', currentStatus);
+      await this.redis.set(cacheKey, currentStatus.status, 'EX', 3600);
+      status = currentStatus.status;
     }
+
+    console.log('가드로 보냄: ', status);
     return status;
   }
 
