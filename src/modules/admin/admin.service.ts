@@ -903,7 +903,10 @@ export class AdminService {
     return status.status;
   }
 
-  async saveServerStatus(newStatus: string) {
+  async saveServerStatus(adminId: number, newStatus: string) {
+    if (adminId !== 1)
+      throw new HttpException('This is a root manager function.', HttpStatus.FORBIDDEN);
+
     const server = await this.adminRepository.getCurrentServerStatus();
     server.status = newStatus;
 

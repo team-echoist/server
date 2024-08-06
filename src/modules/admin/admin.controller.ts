@@ -1327,15 +1327,22 @@ export class AdminController {
   @Post('server/status')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '서버 상태 업데이트',
-    description: '서버의 상태를 업데이트합니다.',
+    summary: '[루트관리자] 서버 상태 업데이트',
+    description: `
+  서버의 상태를 업데이트합니다.
+  
+  - \`open\`: 모든 요청을 허용하는 상태입니다.
+  - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
+  - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 접근할 수 있습니다.
+  
+  `,
   })
   @ApiBody({ type: '' })
   @ApiResponse({
     status: 200,
     type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
   })
-  async saveServerStatus(@Body('status') status: string) {
-    return await this.adminService.saveServerStatus(status);
+  async saveServerStatus(@Req() req: ExpressRequest, @Body('status') status: string) {
+    return await this.adminService.saveServerStatus(req.user.id, status);
   }
 }
