@@ -7,7 +7,7 @@ import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { Admin } from '../../entities/admin.entity';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
-import { Server, ServerStatus } from '../../entities/server.entity';
+import { Server } from '../../entities/server.entity';
 
 export class AdminRepository {
   constructor(
