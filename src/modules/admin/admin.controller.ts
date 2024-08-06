@@ -1309,8 +1309,8 @@ export class AdminController {
   @ApiOperation({
     summary: '서버 상태 조회',
     description: `
-    현재 서버의 상태를 조회합니다.
-    
+  현재 서버의 상태를 조회합니다.
+   
   - \`open\`: 모든 요청을 허용하는 상태입니다.
   - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
   - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 관리자기능에 접근할 수 있습니다.
@@ -1331,13 +1331,14 @@ export class AdminController {
     description: `
   서버의 상태를 업데이트합니다.
   
+  **요청 본문: status**
   - \`open\`: 모든 요청을 허용하는 상태입니다.
   - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
   - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 접근할 수 있습니다.
   
   `,
   })
-  @ApiBody({ type: '' })
+  @ApiBody({ type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE })
   @ApiResponse({
     status: 200,
     type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
