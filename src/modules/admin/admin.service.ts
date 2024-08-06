@@ -53,6 +53,7 @@ import { Queue } from 'bull';
 import { AlertService } from '../alert/alert.service';
 import { GeulroquisService } from '../geulroquis/geulroquis.service';
 import { CronService } from '../cron/cron.service';
+import { Server } from '../../entities/server.entity';
 
 @Injectable()
 export class AdminService {
@@ -907,7 +908,10 @@ export class AdminService {
     if (adminId !== 1)
       throw new HttpException('This is a root manager function.', HttpStatus.FORBIDDEN);
 
-    const server = await this.adminRepository.getCurrentServerStatus();
+    let server = await this.adminRepository.getCurrentServerStatus();
+    if (!server) {
+      server = new Server();
+    }
     server.status = newStatus;
 
     const updatedServer = await this.adminRepository.saveServer(server);
