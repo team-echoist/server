@@ -211,7 +211,6 @@ export class UserService {
 
   async getUserInfo(userId: number) {
     const user = await this.fetchUserEntityById(userId);
-    console.log(user);
 
     return this.utilsService.transformToDto(UserSummaryResDto, user);
   }
