@@ -90,6 +90,7 @@ export class AppModule implements OnModuleInit, NestModule {
     if (process.env.SEED === 'true') {
       await this.seederService.initializeServer();
       await this.seederService.initializeAdmin();
+      await this.seederService.initializeAppVersions();
       // await this.seederService.initializeNicknames();
     }
   }

@@ -19,6 +19,8 @@ import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class SupportService {
@@ -129,16 +131,30 @@ export class SupportService {
       device.deviceId = deviceId;
       device.deviceToken = deviceToken;
     } else {
-      device = await this.supportRepository.createDevice(
-        user,
-        {
-          os: req.device.os as DeviceOS,
-          type: req.device.type as DeviceType,
-          model: req.device.model,
-        },
-        deviceId,
-        deviceToken,
-      );
+      try {
+        device = await this.supportRepository.createDevice(
+          user,
+          {
+            os: req.device.os as DeviceOS,
+            type: req.device.type as DeviceType,
+            model: req.device.model,
+          },
+          deviceId,
+          deviceToken,
+        );
+      } catch (error) {
+        if (
+          error instanceof QueryFailedError &&
+          error.message.includes('duplicate key value violates unique constraint')
+        ) {
+          throw new HttpException(
+            'Device with this ID already exists. Please use a different deviceId.',
+            HttpStatus.CONFLICT,
+          );
+        } else {
+          throw error;
+        }
+      }
     }
 
     await this.supportRepository.saveDevice(device);
@@ -171,5 +187,32 @@ export class SupportService {
   @Transactional()
   async deleteDevice(userId: number, todayDate: string) {
     return await this.supportRepository.deleteDevice(userId, todayDate);
+  }
+
+  async findAllVersions() {
+    return await this.supportRepository.findAllVersions();
+  }
+
+  async getVersions() {
+    const foundVersions = await this.findAllVersions();
+
+    const versionMap = foundVersions.reduce((map, version) => {
+      map[version.appType] = version.version;
+      return map;
+    }, {});
+
+    const versions = this.utilsService.transformToDto(VersionsSummaryResDto, versionMap);
+    return { versions: versions };
+  }
+
+  @Transactional()
+  async updateAppVersion(versionId: number, version: string) {
+    const foundVersion = await this.supportRepository.findVersion(versionId);
+    if (!foundVersion)
+      throw new HttpException('Please check the version ID', HttpStatus.BAD_REQUEST);
+
+    foundVersion.version = version;
+
+    await this.supportRepository.saveVersion(foundVersion);
   }
 }

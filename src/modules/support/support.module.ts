@@ -14,13 +14,22 @@ import { UserModule } from '../user/user.module';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { Device } from '../../entities/device.entity';
+import { AppVersions } from '../../entities/appVersions.entity';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
-    TypeOrmModule.forFeature([User, Notice, Inquiry, UpdatedHistory, AlertSettings, Device]),
+    TypeOrmModule.forFeature([
+      User,
+      Notice,
+      Inquiry,
+      UpdatedHistory,
+      AlertSettings,
+      Device,
+      AppVersions,
+    ]),
     AuthModule,
     UtilsModule,
     UserModule,

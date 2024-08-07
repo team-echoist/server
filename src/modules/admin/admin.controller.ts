@@ -58,6 +58,8 @@ import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
 import { GeulroquisResDto } from '../geulroquis/dto/response/geulroquisRes.dto';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
 import { ServerStatus } from '../../entities/server.entity';
+import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
+import { UpdateVersionReqDto } from '../support/dto/request/updateVersionReq.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -1119,7 +1121,7 @@ export class AdminController {
   @Get('updated-histories')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '전체 업데이트 히스토리 조회 (관리자용)',
+    summary: '전체 업데이트 히스토리 조회',
     description: `
   관리자가 모든 업데이트 히스토리를 조회합니다.
 
@@ -1146,9 +1148,9 @@ export class AdminController {
   @Get('updated-histories/:historyId')
   @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
-    summary: '특정 업데이트 히스토리 조회 (관리자용)',
+    summary: '타겟 업데이트 히스토리 조회',
     description: `
-  관리자가 특정 업데이트 히스토리를 조회합니다.
+  관리자가 타겟 업데이트 히스토리를 조회합니다.
 
   **경로 파라미터:**
   - \`historyId\`: 조회할 업데이트 히스토리 아이디
@@ -1236,12 +1238,6 @@ export class AdminController {
   @ApiResponse({ status: 200, type: AdminResDto })
   async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
     return this.adminService.getAdmin(adminId);
-  }
-
-  @Delete('/users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
-  async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
-    return this.adminService.deleteUser(req.user.id, userId);
   }
 
   @Get('/crons/logs')
@@ -1345,5 +1341,75 @@ export class AdminController {
   })
   async saveServerStatus(@Req() req: ExpressRequest, @Body('status') status: string) {
     return await this.adminService.saveServerStatus(req.user.id, status);
+  }
+
+  @Get('app/versions')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '앱 버전 조회',
+    description: `
+  각 앱들의 현재 최신 버전과 상세정보를 조회합니다.
+  
+  **앱 타입:**
+  - \`android_mobile\`
+  - \`android_tablet\`
+  - \`ios_mobile\`
+  - \`ios_tablet\`
+  - \`desktop_mac\`
+  - \`desktop_windows\`
+  
+  `,
+  })
+  @ApiResponse({ status: 200, type: VersionsResDto })
+  async getAppVersions() {
+    return this.adminService.getAppVersions();
+  }
+
+  @Post('app/versions/:versionId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  @ApiOperation({
+    summary: '앱 버전 변경',
+    description: `
+  각 앱들의 현재 최신 버전과 상세정보를 조회합니다.
+  
+  **앱 타입:**
+  - \`android_mobile\`
+  - \`android_tablet\`
+  - \`ios_mobile\`
+  - \`ios_tablet\`
+  - \`desktop_mac\`
+  - \`desktop_windows\`
+  
+  **경로 파라미터:**
+  - \`versionId\`: 변경할 버전의 ID
+  
+  **요청 본문:**
+  - \`version\`: 변경할 앱의 버젼
+  
+  `,
+  })
+  @ApiResponse({ status: 200, type: VersionsResDto })
+  @ApiBody({ type: UpdateVersionReqDto })
+  async updateAppVersion(
+    @Param('versionId', ParseIntPipe) versionId: number,
+    @Body() data: UpdateVersionReqDto,
+  ) {
+    return this.adminService.updateAppVersion(versionId, data.version);
+  }
+
+  // ===========================================================
+  // ===================== danger zone =========================
+  // ===========================================================
+
+  @Delete('danger/users/:userId')
+  @UseGuards(AuthGuard('admin-jwt'))
+  async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
+    return this.adminService.deleteUser(req.user.id, userId);
+  }
+
+  @Delete('danger/device')
+  @UseGuards(AuthGuard('admin-jwt'))
+  async deleteAllDevice(@Req() req: ExpressRequest) {
+    return this.adminService.deleteAllDevice(req.user.id);
   }
 }

@@ -6,6 +6,7 @@ import { UtilsService } from '../utils/utils.service';
 import { Admin } from '../../entities/admin.entity';
 import { BasicNickname } from '../../entities/basicNickname.entity';
 import { Server, ServerStatus } from '../../entities/server.entity';
+import { AppType, AppVersions } from '../../entities/appVersions.entity';
 
 @Injectable()
 export class SeederService {
@@ -16,6 +17,9 @@ export class SeederService {
     private readonly basicNicknameRepository: Repository<BasicNickname>,
     @InjectRepository(Server)
     private readonly serverRepository: Repository<Server>,
+    @InjectRepository(AppVersions)
+    private readonly appVersionsRepository: Repository<AppVersions>,
+
     private readonly utilsService: UtilsService,
   ) {}
 
@@ -77,5 +81,26 @@ export class SeederService {
       console.log('Server state already exists');
     }
     return;
+  }
+
+  async initializeAppVersions() {
+    const versions = await this.appVersionsRepository.find();
+
+    if (versions.length === 6) {
+      console.log('The app version exists normally.');
+      return;
+    }
+
+    const initialVersions = [
+      { appType: AppType.ANDROID_MOBILE, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.ANDROID_TABLET, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.IOS_MOBILE, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.IOS_TABLET, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.DESCKTOP_MAC, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.DESCKTOP_WINDOWS, version: '0.0.0', releaseDate: new Date() },
+    ];
+
+    await this.appVersionsRepository.save(initialVersions);
+    console.log('New app version has been created.');
   }
 }

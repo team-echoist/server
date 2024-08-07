@@ -216,8 +216,8 @@ export class UtilsService {
 
   highlightKeywordSnippet(text: string, keyword: string) {
     const snippetLength = 100;
-    const cleandText = this.cleanText(text);
-    const keywordIndex = cleandText.toLowerCase().indexOf(keyword.toLowerCase());
+    const cleanedText = this.cleanText(text);
+    const keywordIndex = cleanedText.toLowerCase().indexOf(keyword.toLowerCase());
 
     if (keywordIndex === -1) {
       return text.slice(0, snippetLength);
@@ -226,7 +226,7 @@ export class UtilsService {
     const start = Math.max(0, keywordIndex - Math.floor((snippetLength - keyword.length) / 2));
     const end = keywordIndex + keyword.length + 70;
 
-    return cleandText.slice(start, end).trim();
+    return cleanedText.slice(start, end).trim();
   }
 
   async batchProcess<T>(
