@@ -3,8 +3,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as useragent from 'useragent';
 import { DeviceType, DeviceOS } from '../../entities/device.entity';
-import { SupportService } from '../../modules/support/support.service';
-import { UserService } from '../../modules/user/user.service';
 
 // default import를 사용하면 useragent의 lookup 및 parse 멤버를 인식 못함
 
