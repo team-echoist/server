@@ -158,7 +158,7 @@ export class User {
   @OneToMany(() => AlertSettings, (settings) => settings.user)
   alertSettings: AlertSettings[];
 
-  @OneToMany(() => Device, (device) => device.user)
+  @OneToMany(() => Device, (device) => device.user, { onDelete: 'SET NULL' })
   devices: Device[];
 
   @OneToMany(() => Alert, (alert) => alert.user)
