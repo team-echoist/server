@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/team-echoist/server/compare/v1.6.5...v1.7.0) (2024-08-07)
+
+
+### Features
+
+* Add version management API ([#348](https://github.com/team-echoist/server/issues/348)) ([f5609d6](https://github.com/team-echoist/server/commit/f5609d6b5b2205dfe70e07f620f6236abdc4f60e))
+
 ## [1.6.5](https://github.com/team-echoist/server/compare/v1.6.4...v1.6.5) (2024-08-07)
 
 ## [1.6.4](https://github.com/team-echoist/server/compare/v1.6.3...v1.6.4) (2024-08-06)
