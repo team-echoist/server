@@ -21,6 +21,10 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     if (!admin) {
       throw new UnauthorizedException();
     }
+    if (!admin.activated) {
+      throw new UnauthorizedException('Admin account is not activated');
+    }
+
     return admin;
   }
 }

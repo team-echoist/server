@@ -15,6 +15,7 @@ import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { Device } from '../../entities/device.entity';
 import { AppVersions } from '../../entities/appVersions.entity';
+import { SeenNotice } from '../../entities/seenNotice.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AppVersions } from '../../entities/appVersions.entity';
       AlertSettings,
       Device,
       AppVersions,
+      SeenNotice,
     ]),
     AuthModule,
     UtilsModule,

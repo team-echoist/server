@@ -46,7 +46,6 @@ export class Inquiry {
   @ManyToOne(() => User, (user) => user.inquiries, { onDelete: 'CASCADE' })
   user: User;
 
-  @JoinColumn({ name: 'processed_history_id' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.inquiry)
   processedHistory: ProcessedHistory;
 }

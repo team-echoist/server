@@ -60,13 +60,17 @@ import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCoun
 import { ServerStatus } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { UpdateVersionReqDto } from '../support/dto/request/updateVersionReq.dto';
+import { AdminGuard } from '../../common/guards/admin.guard';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Admin')
 @Controller('admin')
+@UseGuards(AdminGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('register')
+  @Public()
   @ApiOperation({
     summary: '어드민 회원가입',
     description: `
@@ -94,6 +98,7 @@ export class AdminController {
   }
 
   @Post('login')
+  @Public()
   @UseGuards(AuthGuard('admin-local'))
   @ApiOperation({
     summary: '어드민 로그인',
@@ -110,7 +115,6 @@ export class AdminController {
   }
 
   @Put()
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 본인 정보 수정',
     description: `
@@ -138,7 +142,6 @@ export class AdminController {
   }
 
   @Post('images')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 프로필 이미지 업로드',
     description: `
@@ -163,7 +166,6 @@ export class AdminController {
   }
 
   @Delete('images')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 프로필 이미지 삭제',
     description: `
@@ -185,7 +187,6 @@ export class AdminController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 리스트',
     description: `
@@ -209,7 +210,6 @@ export class AdminController {
   }
 
   @Post('produce')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '[루트 관리자용] 관리자생성',
     description: `
@@ -234,7 +234,6 @@ export class AdminController {
   }
 
   @Get('dashboard')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: 'Dashboard',
     description: `
@@ -255,7 +254,6 @@ export class AdminController {
   }
 
   @Get('statistics/essays/daily')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '월간 일별 에세이 작성 카운트',
     description: `
@@ -293,7 +291,6 @@ export class AdminController {
   }
 
   @Get('statistics/essays/monthly')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '년간 월별 에세이 작성 카운트',
     description: `
@@ -326,7 +323,6 @@ export class AdminController {
   }
 
   @Get('statistics/users/daily')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '월간 일별 유저 유입 통계',
     description: `
@@ -363,7 +359,6 @@ export class AdminController {
   }
 
   @Get('statistics/users/monthly')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '년간 월별 유저 유입 통계',
     description: `
@@ -395,7 +390,6 @@ export class AdminController {
   }
 
   @Get('statistics/payments/daily')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '월간 일별 구독 가입 통계',
     description: `
@@ -432,7 +426,6 @@ export class AdminController {
   }
 
   @Get('statistics/payments/monthly')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '년간 월별 구독 가입 통계',
     description: `
@@ -464,7 +457,6 @@ export class AdminController {
   }
 
   @Get('reports')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리포트 리스트',
     description: `
@@ -498,7 +490,6 @@ export class AdminController {
   }
 
   @Get('reports/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리포트 상세 조회',
     description: `
@@ -522,7 +513,6 @@ export class AdminController {
   }
 
   @Post('reports/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리포트 처리',
     description: `
@@ -557,7 +547,6 @@ export class AdminController {
   }
 
   @Get('reviews')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리뷰 리스트',
     description: `
@@ -586,7 +575,6 @@ export class AdminController {
   }
 
   @Get('reviews/:reviewId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리뷰 상세',
     description: `
@@ -609,7 +597,6 @@ export class AdminController {
   }
 
   @Post('review/:reviewId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리뷰 처리',
     description: `
@@ -644,7 +631,6 @@ export class AdminController {
   }
 
   @Get('users')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '유저 리스트 조회',
     description: `
@@ -677,7 +663,6 @@ export class AdminController {
   }
 
   @Get('users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '유저 상세 조회',
     description: `
@@ -700,7 +685,6 @@ export class AdminController {
   }
 
   @Put('users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '유저 정보 수정',
     description: `
@@ -729,7 +713,6 @@ export class AdminController {
   }
 
   @Get('essays')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '에세이 리스트 조회',
     description: `
@@ -758,7 +741,6 @@ export class AdminController {
   }
 
   @Get('essays/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '에세이 상세 데이터 조회',
     description: `
@@ -781,7 +763,6 @@ export class AdminController {
   }
 
   @Put('essays/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '에세이 상태 수정',
     description: `
@@ -813,7 +794,6 @@ export class AdminController {
   }
 
   @Get('histories')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '관리자 처리 기록',
     description: `
@@ -867,7 +847,6 @@ export class AdminController {
   }
 
   @Post('notices')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 생성',
     description: `
@@ -889,7 +868,6 @@ export class AdminController {
   }
 
   @Put('notices/:noticeId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 수정',
     description: `
@@ -918,7 +896,6 @@ export class AdminController {
   }
 
   @Delete('notices/:noticeId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 삭제',
     description: `
@@ -940,7 +917,6 @@ export class AdminController {
   }
 
   @Get('notices')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 목록 조회',
     description: `
@@ -963,7 +939,6 @@ export class AdminController {
   }
 
   @Get('notices/:noticeId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 상세 조회',
     description: `
@@ -982,7 +957,6 @@ export class AdminController {
   }
 
   @Get('inquiries')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '처리되지 않은 모든 고객 문의 또는 전체 조회',
     description: `
@@ -1011,7 +985,6 @@ export class AdminController {
   }
 
   @Get('inquiries/:inquiryId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '특정 고객 문의 상세 조회',
     description: `
@@ -1034,7 +1007,6 @@ export class AdminController {
   }
 
   @Post('inquiries/:inquiryId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '고객 문의 답변 작성 및 수정',
     description: `
@@ -1066,7 +1038,6 @@ export class AdminController {
   }
 
   @Post('updated-histories')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '업데이트 히스토리 생성',
     description: `
@@ -1091,7 +1062,6 @@ export class AdminController {
   }
 
   @Put('updated-histories/:historyId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '업데이트 히스토리 수정',
     description: `
@@ -1119,7 +1089,6 @@ export class AdminController {
   }
 
   @Get('updated-histories')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '전체 업데이트 히스토리 조회',
     description: `
@@ -1146,7 +1115,6 @@ export class AdminController {
   }
 
   @Get('updated-histories/:historyId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '타겟 업데이트 히스토리 조회',
     description: `
@@ -1165,7 +1133,6 @@ export class AdminController {
   }
 
   @Put(':adminId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '[루트관리자용] 어드민 활성화 상태 변경',
     description: `
@@ -1199,7 +1166,6 @@ export class AdminController {
   }
 
   @Get('geulroquis')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '글로키 리스트' })
   @ApiResponse({ status: 200, type: GeulroquisResDto })
   async getGeulroquis(
@@ -1210,7 +1176,6 @@ export class AdminController {
   }
 
   @Get('geulroquis/count')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '총 글로키 / 사용가능 글로키 카운트' })
   @ApiResponse({ status: 200, type: GeulroquisCountResDto })
   async getGeulroquisCount() {
@@ -1218,7 +1183,6 @@ export class AdminController {
   }
 
   @Get(':adminId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 상세조회',
     description: `
@@ -1241,7 +1205,6 @@ export class AdminController {
   }
 
   @Get('/crons/logs')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({ summary: '크론 로그 조회' })
   @ApiResponse({ type: CronLogsResDto })
   async getCronLogs(
@@ -1253,7 +1216,6 @@ export class AdminController {
   }
 
   @Post('geulroquis')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: 'Geulroquis 이미지 업로드',
     description: `
@@ -1278,7 +1240,6 @@ export class AdminController {
   }
 
   @Put('geulroquis/:geulroquisId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '다음 글로키 지정하기',
     description: `
@@ -1301,7 +1262,6 @@ export class AdminController {
   }
 
   @Get('server/status')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '서버 상태 조회',
     description: `
@@ -1321,7 +1281,6 @@ export class AdminController {
   }
 
   @Post('server/status')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '[루트관리자] 서버 상태 업데이트',
     description: `
@@ -1344,7 +1303,6 @@ export class AdminController {
   }
 
   @Get('app/versions')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '앱 버전 조회',
     description: `
@@ -1366,7 +1324,6 @@ export class AdminController {
   }
 
   @Post('app/versions/:versionId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '앱 버전 변경',
     description: `
@@ -1402,13 +1359,11 @@ export class AdminController {
   // ===========================================================
 
   @Delete('danger/users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
   @Delete('danger/device')
-  @UseGuards(AuthGuard('admin-jwt'))
   async deleteAllDevice(@Req() req: ExpressRequest) {
     return this.adminService.deleteAllDevice(req.user.id);
   }

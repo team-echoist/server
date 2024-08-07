@@ -24,7 +24,6 @@ export class Tag {
   @ManyToMany(() => Essay, (essay) => essay.tags)
   essays: Essay[];
 
-  @JoinColumn({ name: 'tag_exps' })
   @OneToMany(() => TagExp, (tagExp) => tagExp.tag)
   tagExps: TagExp[];
 }

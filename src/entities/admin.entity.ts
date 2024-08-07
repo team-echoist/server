@@ -40,11 +40,9 @@ export class Admin {
   @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.processor)
   processedHistories: ProcessedHistory[];
 
-  @JoinColumn({ name: 'updated_histories' })
   @OneToMany(() => UpdatedHistory, (updatedHistory) => updatedHistory.processor)
   updatedHistories: UpdatedHistory[];
 

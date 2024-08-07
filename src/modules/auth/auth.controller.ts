@@ -13,8 +13,11 @@ import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
 import { DeviceType, DeviceOS } from '../../entities/device.entity';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Auth')
+@UseGuards(JwtAuthGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -24,6 +27,7 @@ export class AuthController {
   ) {}
 
   @Post('check/email')
+  @Public()
   @ApiOperation({
     summary: '이메일 중복 검사',
     description: `
@@ -55,6 +59,7 @@ export class AuthController {
   }
 
   @Post('check/nickname')
+  @Public()
   @ApiOperation({
     summary: '닉네임 중복 검사',
     description: `
@@ -90,7 +95,6 @@ export class AuthController {
   }
 
   @Post('verify/email')
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({
     summary: '이메일 변경을 위한 이메일 인증 요청',
     description: `
@@ -166,6 +170,7 @@ export class AuthController {
   }
 
   @Post('verify')
+  @Public()
   @ApiOperation({
     summary: '회원가입을 위한 이메일 인증 요청',
     description: `
@@ -195,6 +200,7 @@ export class AuthController {
   }
 
   @Get('register')
+  @Public()
   @ApiOperation({
     summary: '회원등록',
     description: `
@@ -241,6 +247,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @ApiOperation({
     summary: '로그인',
     description: `
@@ -272,6 +279,7 @@ export class AuthController {
   }
 
   @Post('password/reset-req')
+  @Public()
   @ApiOperation({
     summary: '비밀번호 재설정 요청',
     description: `
@@ -295,6 +303,7 @@ export class AuthController {
   }
 
   @Get('password/reset-verify')
+  @Public()
   @ApiOperation({
     summary: '비밀번호 재설정 검증',
     description: `
@@ -327,7 +336,6 @@ export class AuthController {
       req.device.os === DeviceOS.IOS &&
       (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
     ) {
-      // todo
       redirectUrl = this.configService.get<string>('IOS_PASSWORD_RESET_REDIRECT');
     }
 
@@ -344,6 +352,7 @@ export class AuthController {
   }
 
   @Post('password/reset')
+  @Public()
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: `
@@ -370,6 +379,7 @@ export class AuthController {
 
   //-------------------------------------------------------OAuth
   @Get('google')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-구글 로그인',
     description: `
@@ -387,6 +397,7 @@ export class AuthController {
   }
 
   @Get('google/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-구글 콜백',
     description: `
@@ -416,6 +427,7 @@ export class AuthController {
   }
 
   @Post('google/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-구글 모바일 로그인',
     description: `
@@ -444,6 +456,7 @@ export class AuthController {
   }
 
   @Get('kakao')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-카카오 로그인',
     description: `
@@ -461,6 +474,7 @@ export class AuthController {
   }
 
   @Get('kakao/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-카카오 콜백',
     description: `
@@ -490,6 +504,7 @@ export class AuthController {
   }
 
   @Post('kakao/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-카카오 모바일 로그인',
     description: `
@@ -517,6 +532,7 @@ export class AuthController {
   }
 
   @Get('naver')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-네이버 로그인',
     description: `
@@ -534,6 +550,7 @@ export class AuthController {
   }
 
   @Get('naver/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-네이버 콜백',
     description: `
@@ -563,6 +580,7 @@ export class AuthController {
   }
 
   @Post('naver/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-네이버 모바일 로그인',
     description: `
@@ -590,6 +608,7 @@ export class AuthController {
   }
 
   @Get('apple')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-애플 로그인',
     description: `
@@ -607,6 +626,7 @@ export class AuthController {
   }
 
   @Post('apple/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-애플 콜백',
     description: `
@@ -636,6 +656,7 @@ export class AuthController {
   }
 
   @Post('apple/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-애플 모바일 로그인',
     description: `

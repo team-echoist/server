@@ -50,7 +50,6 @@ export class ReviewQueue {
   @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE' })
   user: User;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.report)
   processedHistories: ProcessedHistory[];
 }

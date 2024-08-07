@@ -24,12 +24,39 @@ import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
 import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Support')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @Controller('support')
 export class SupportController {
   constructor(private readonly supportService: SupportService) {}
+
+  @Get('notices/latest')
+  @ApiOperation({
+    summary: '새로운 공지 알림',
+    description: `
+  사용자에게 알리지 않은 최신 공지사항이 있는지 확인합니다.
+
+  이 엔드포인트는 사용자에게 마지막으로 알린 이후에 새로 게시된 공지사항이 있는지 확인하며, 만약 새로운 공지사항이 있다면 \`true\`를 반환합니다. 사용자에게 이미 최신 공지사항을 알렸다면 \`null\`을 반환합니다.
+
+  **사용 시나리오:**
+  - 사용자가 앱에 접속할 때마다 새로운 공지가 있는지 확인할 수 있습니다.
+  - 새로운 공지가 있다면 사용자에게 이를 알릴 수 있습니다.
+
+  **응답 형식:**
+  - \`newNotice: true\`: 새로운 공지가 있을 경우
+  - \`newNotice: null\`: 새로운 공지가 없을 경우
+  
+  **주의 사항:**
+  - 해당 api는 새로운 공지가 있을 경우 한 번만 true를 응답합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: Boolean })
+  async checkLatestNotice(@Req() req: ExpressRequest) {
+    return this.supportService.checkNewNotices(req.user.id);
+  }
 
   @Get('notices')
   @ApiOperation({
@@ -94,7 +121,7 @@ export class SupportController {
   @ApiOperation({
     summary: '고객 문의 목록 조회',
     description: `
-  사용자가 작성한 모든 고객 문의를 조회합니다.
+  사용자가 작성한 모든 문의를 조회합니다.
   
   **동작 과정:**
   1. 사용자가 작성한 모든 문의를 조회합니다.
@@ -233,6 +260,7 @@ export class SupportController {
   }
 
   @Get('versions')
+  @Public()
   @ApiOperation({
     summary: '앱 버전 조회',
     description: `
