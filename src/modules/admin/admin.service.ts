@@ -54,6 +54,7 @@ import { AlertService } from '../alert/alert.service';
 import { GeulroquisService } from '../geulroquis/geulroquis.service';
 import { CronService } from '../cron/cron.service';
 import { Server } from '../../entities/server.entity';
+import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -919,5 +920,20 @@ export class AdminService {
     await this.redis.del(this.serverCacheKey);
 
     return updatedServer.status;
+  }
+
+  async getAppVersions() {
+    const versions = await this.supportService.findAllVersions();
+
+    return this.utilsService.transformToDto(VersionsResDto, versions);
+  }
+
+  async deleteAllDevice(adminId: number) {
+    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    return this.supportRepository.deleteAllDevice();
+  }
+
+  async updateAppVersion(versionId: number, version: string) {
+    await this.supportService.updateAppVersion(versionId, version);
   }
 }

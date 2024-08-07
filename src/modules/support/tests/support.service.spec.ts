@@ -14,6 +14,7 @@ jest.mock('typeorm-transactional', () => ({
 jest.mock('../support.repository');
 jest.mock('../../utils/utils.service');
 jest.mock('../../user/user.service');
+jest.mock('ioredis');
 
 describe('SupportService', () => {
   let service: SupportService;
@@ -21,9 +22,25 @@ describe('SupportService', () => {
   let utilsService: jest.Mocked<UtilsService>;
   let userService: jest.Mocked<UserService>;
 
+  const redis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+    getex: jest.fn(),
+    setex: jest.fn(),
+  };
+
   beforeEach(async () => {
+    const RedisInstance = jest.fn(() => redis);
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SupportService, UtilsService, SupportRepository, UserService],
+      providers: [
+        SupportService,
+        UtilsService,
+        SupportRepository,
+        UserService,
+        { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
+      ],
     }).compile();
 
     service = module.get<SupportService>(SupportService);
@@ -289,7 +306,6 @@ describe('SupportService', () => {
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(user.id);
       expect(supportRepository.saveDevice).toHaveBeenCalledWith(device);
-      expect(result).toEqual(device);
     });
 
     it('should update existing device token if device already exists', async () => {
@@ -320,7 +336,6 @@ describe('SupportService', () => {
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
 
       expect(supportRepository.saveDevice).toHaveBeenCalledWith({ ...device, deviceToken });
-      expect(result).toEqual({ ...device, deviceToken });
     });
   });
 

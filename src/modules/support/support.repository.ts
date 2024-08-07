@@ -8,6 +8,7 @@ import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto
 import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
+import { AppVersions } from '../../entities/appVersions.entity';
 
 export class SupportRepository {
   constructor(
@@ -19,6 +20,8 @@ export class SupportRepository {
     private readonly alertSettingsRepository: Repository<AlertSettings>,
     @InjectRepository(Device)
     private readonly deviceRepository: Repository<Device>,
+    @InjectRepository(AppVersions)
+    private readonly appVersionsRepository: Repository<AppVersions>,
   ) {}
 
   async saveNotice(newNotice: Notice) {
@@ -167,5 +170,21 @@ export class SupportRepository {
       })
       .where('user_id = :userId', { userId })
       .execute();
+  }
+
+  async findAllVersions() {
+    return this.appVersionsRepository.find();
+  }
+
+  async deleteAllDevice() {
+    return this.deviceRepository.clear();
+  }
+
+  async findVersion(versionId: number) {
+    return this.appVersionsRepository.findOne({ where: { id: versionId } });
+  }
+
+  async saveVersion(version: AppVersions) {
+    return this.appVersionsRepository.save(version);
   }
 }

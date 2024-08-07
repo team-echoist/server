@@ -23,6 +23,7 @@ import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
+import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
 
 @ApiTags('Support')
 @UseGuards(AuthGuard('jwt'))
@@ -229,5 +230,25 @@ export class SupportController {
   @ApiBody({ type: RegisterDeviceReqDto })
   async registerDevice(@Req() req: ExpressRequest, @Body() body: RegisterDeviceReqDto) {
     return this.supportService.registerDevice(req, body.deviceId, body.deviceToken);
+  }
+
+  @Get('versions')
+  @ApiOperation({
+    summary: '앱 버전 조회',
+    description: `
+  각 앱들의 현재 최신 버전을 조회합니다.
+  
+  **앱 타입:**
+  - \`android_mobile\`
+  - \`android_tablet\`
+  - \`ios_mobile\`
+  - \`ios_tablet\`
+  - \`desktop_mac\`
+  - \`desktop_windows\`
+  `,
+  })
+  @ApiResponse({ status: 200, type: VersionsSummaryResDto })
+  async getVersions() {
+    return this.supportService.getVersions();
   }
 }
