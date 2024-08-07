@@ -90,7 +90,10 @@ describe('AuthController', () => {
   describe('updateEmail', () => {
     it('should call service updateEmail method', async () => {
       const token = 'testToken';
-      const req: ExpressRequest = { user: { id: 1 } } as any;
+      const req: ExpressRequest = {
+        user: { id: 1 },
+        device: { os: 'any', type: 'any', model: 'any' },
+      } as any;
       const res: Response = { redirect: jest.fn() } as any;
 
       await controller.updateEmail(req, res, token);

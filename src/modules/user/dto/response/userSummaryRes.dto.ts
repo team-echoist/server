@@ -1,6 +1,7 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { DeviceResDto } from '../../../support/dto/response/deviceRes.dto';
 
 export class UserSummaryResDto {
   @ApiProperty()
@@ -37,4 +38,9 @@ export class UserSummaryResDto {
   @IsBoolean()
   @Expose()
   locationConsent: boolean;
+
+  @ApiProperty({ type: [DeviceResDto] })
+  @Type(() => DeviceResDto)
+  @Expose()
+  devices: DeviceResDto[];
 }

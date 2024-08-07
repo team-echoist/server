@@ -68,7 +68,7 @@ export class SeederService {
 
   async initializeServer() {
     const server = await this.serverRepository.find();
-    if (!server) {
+    if (server.length === 0) {
       const newServer = new Server();
       newServer.status = ServerStatus.OPEN;
       await this.serverRepository.save(newServer);

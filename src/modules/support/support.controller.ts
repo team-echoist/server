@@ -228,7 +228,6 @@ export class SupportController {
   @ApiResponse({ status: 201 })
   @ApiBody({ type: RegisterDeviceReqDto })
   async registerDevice(@Req() req: ExpressRequest, @Body() body: RegisterDeviceReqDto) {
-    const userId = req.user.id;
-    return this.supportService.registerDevice(userId, body.deviceId, body.deviceToken);
+    return this.supportService.registerDevice(req, body.deviceId, body.deviceToken);
   }
 }

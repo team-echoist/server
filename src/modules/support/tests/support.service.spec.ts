@@ -23,7 +23,7 @@ describe('SupportService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SupportService, SupportRepository, UtilsService, UserService],
+      providers: [SupportService, UtilsService, SupportRepository, UserService],
     }).compile();
 
     service = module.get<SupportService>(SupportService);
@@ -276,19 +276,18 @@ describe('SupportService', () => {
       const userId = 1;
       const deviceId = 'device1';
       const deviceToken = 'token1';
-      const user = { id: userId } as any;
+      const user = { id: userId, devices: [] } as any;
       const device = { id: 1, deviceId, deviceToken } as any;
+      const req = { user, device: { os: 'iOS', type: 'mobile', model: 'iPhone' } } as any;
 
       userService.fetchUserEntityById.mockResolvedValue(user);
       supportRepository.findDevice.mockResolvedValue(null);
       supportRepository.createDevice.mockResolvedValue(device);
       supportRepository.saveDevice.mockResolvedValue(device);
 
-      const result = await service.registerDevice(userId, deviceId, deviceToken);
+      const result = await service.registerDevice(req, deviceId, deviceToken);
 
-      expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
-      expect(supportRepository.findDevice).toHaveBeenCalledWith(deviceId);
-      expect(supportRepository.createDevice).toHaveBeenCalledWith(user, deviceId, deviceToken);
+      expect(userService.fetchUserEntityById).toHaveBeenCalledWith(user.id);
       expect(supportRepository.saveDevice).toHaveBeenCalledWith(device);
       expect(result).toEqual(device);
     });
@@ -297,17 +296,29 @@ describe('SupportService', () => {
       const userId = 1;
       const deviceId = 'device1';
       const deviceToken = 'token1';
-      const user = { id: userId } as any;
-      const device = { id: 1, deviceId, deviceToken: 'oldToken' } as any;
+      const device = {
+        id: 1,
+        deviceId,
+        deviceToken: 'oldToken',
+        os: 'iOS',
+        type: 'mobile',
+        model: 'iPhone',
+      } as any;
+      const user = { id: userId, devices: [device] } as any;
+
+      const req = {
+        user: { id: userId },
+        device: { os: 'iOS', type: 'mobile', model: 'iPhone' },
+      } as any;
 
       userService.fetchUserEntityById.mockResolvedValue(user);
       supportRepository.findDevice.mockResolvedValue(device);
       supportRepository.saveDevice.mockResolvedValue({ ...device, deviceToken });
 
-      const result = await service.registerDevice(userId, deviceId, deviceToken);
+      const result = await service.registerDevice(req, deviceId, deviceToken);
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
-      expect(supportRepository.findDevice).toHaveBeenCalledWith(deviceId);
+
       expect(supportRepository.saveDevice).toHaveBeenCalledWith({ ...device, deviceToken });
       expect(result).toEqual({ ...device, deviceToken });
     });

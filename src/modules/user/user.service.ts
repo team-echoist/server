@@ -40,7 +40,7 @@ export class UserService {
     @InjectQueue('user') private readonly userQueue: Queue,
   ) {}
 
-  async fetchUserEntityById(userId: number) {
+  async fetchUserEntityById(userId: number): Promise<User> {
     const cacheKey = `user:${userId}`;
     const cachedUser = await this.redis.get(cacheKey);
 

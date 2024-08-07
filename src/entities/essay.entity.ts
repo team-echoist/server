@@ -21,6 +21,7 @@ import { Tag } from './tag.entity';
 import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 import { Alert } from './alert.entity';
+import { Device } from './device.entity';
 
 export enum EssayStatus {
   PRIVATE = 'private',
@@ -86,9 +87,8 @@ export class Essay {
   })
   status: EssayStatus;
 
-  @Index()
-  @Column({ nullable: true, name: 'device_info' })
-  device: string;
+  @ManyToOne(() => Device, (device) => device.essays)
+  device: Device;
 
   @JoinTable({ name: 'essay_tags' })
   @ManyToMany(() => Tag, (tag) => tag.essays, { onDelete: 'CASCADE' })

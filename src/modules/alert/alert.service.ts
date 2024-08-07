@@ -79,16 +79,19 @@ export class AlertService {
       if (!devices && devices.length === 0) return;
 
       for (const device of devices) {
-        const alertSettings = await this.supportService.fetchSettingEntityById(
-          report.reporter.id,
-          device.deviceId,
-        );
-        if (alertSettings.report)
-          await this.fcmService.sendPushAlert(
-            user.deviceToken,
-            '신고 결과를 알려드릴려고 왔어요!',
-            '요청하신 지원에 대한 업데이트가 있어요.',
+        if (device.deviceId !== null && device.deviceToken !== null) {
+          const alertSettings = await this.supportService.fetchSettingEntityById(
+            report.reporter.id,
+            device.deviceId,
           );
+          if (alertSettings.report) {
+            await this.fcmService.sendPushAlert(
+              device.deviceToken,
+              '신고 결과를 알려드릴려고 왔어요!',
+              '요청하신 지원에 대한 업데이트가 있어요.',
+            );
+          }
+        }
       }
     }
   }
@@ -167,16 +170,18 @@ export class AlertService {
     if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.deviceId,
-      );
-      if (alertSettings.report)
-        await this.fcmService.sendPushAlert(
-          device.deviceToken,
-          `$작성하신 글에 대한 업데이트가 있어요.`,
-          `발행하신 글이 검토 후 비공개 상태로 전환됐어요.`,
+      if (device.deviceId !== null && device.deviceToken !== null) {
+        const alertSettings = await this.supportService.fetchSettingEntityById(
+          essay.author.id,
+          device.deviceId,
         );
+        if (alertSettings.report)
+          await this.fcmService.sendPushAlert(
+            device.deviceToken,
+            `$작성하신 글에 대한 업데이트가 있어요.`,
+            `발행하신 글이 검토 후 비공개 상태로 전환됐어요.`,
+          );
+      }
     }
   }
 
@@ -198,22 +203,23 @@ export class AlertService {
     if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.deviceId,
-      );
-      if (alertSettings.report)
-        await this.fcmService.sendPushAlert(
-          device.deviceToken,
-          '작성하신 글에 대한 업데이트가 있어요.',
-          `발행 또는 링크드아웃하신 글이 검토 후 공개될 예정이에요.`,
+      if (device.deviceId !== null && device.deviceToken !== null) {
+        const alertSettings = await this.supportService.fetchSettingEntityById(
+          essay.author.id,
+          device.deviceId,
         );
+        if (alertSettings.report)
+          await this.fcmService.sendPushAlert(
+            device.deviceToken,
+            '작성하신 글에 대한 업데이트가 있어요.',
+            `발행 또는 링크드아웃하신 글이 검토 후 공개될 예정이에요.`,
+          );
+      }
     }
   }
 
   async createReviewResultAlert(review: ReviewQueue, actionType: string) {
     const alert = new Alert();
-    const req = review.type === 'published' ? '발행' : '링크드아웃';
     const koreanDate = this.utilsService.formatDateToKorean(review.essay.createdDate);
 
     alert.user = await this.userService.fetchUserEntityById(review.user.id);
@@ -239,16 +245,18 @@ export class AlertService {
     const body = `발행 또는 링크드아웃하신 글이 검토 후 ${result} 상태로 전환됐어요.`;
 
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        userId,
-        device.deviceId,
-      );
-      if (alertSettings.report)
-        await this.fcmService.sendPushAlert(
-          device.deviceToken,
-          `작성하신 글에 대한 업데이트가 있어요.`,
-          body,
+      if (device.deviceId !== null && device.deviceToken !== null) {
+        const alertSettings = await this.supportService.fetchSettingEntityById(
+          userId,
+          device.deviceId,
         );
+        if (alertSettings.report)
+          await this.fcmService.sendPushAlert(
+            device.deviceToken,
+            `작성하신 글에 대한 업데이트가 있어요.`,
+            body,
+          );
+      }
     }
   }
 
@@ -277,16 +285,18 @@ export class AlertService {
     if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.deviceId,
-      );
-      if (alertSettings.viewed)
-        await this.fcmService.sendPushAlert(
-          device.deviceToken,
-          `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 발견!`,
-          `사람들이 ${essay.author.nickname} 아무개님의 이야기를 읽기 시작했어요!`,
+      if (device.deviceId !== null && device.deviceToken !== null) {
+        const alertSettings = await this.supportService.fetchSettingEntityById(
+          essay.author.id,
+          device.deviceId,
         );
+        if (alertSettings.viewed)
+          await this.fcmService.sendPushAlert(
+            device.deviceToken,
+            `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 발견!`,
+            `사람들이 ${essay.author.nickname} 아무개님의 이야기를 읽기 시작했어요!`,
+          );
+      }
     }
   }
 }

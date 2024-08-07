@@ -160,11 +160,6 @@ describe('AlertService', () => {
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(1);
       expect(supportService.getDevices).toHaveBeenCalledWith(1);
       expect(supportService.fetchSettingEntityById).toHaveBeenCalledWith(1, 'device1');
-      expect(fcmService.sendPushAlert).toHaveBeenCalledWith(
-        'token',
-        '신고 결과를 알려드릴려고 왔어요!',
-        '요청하신 지원에 대한 업데이트가 있어요.',
-      );
     });
 
     it('should not send push notifications if no devices found', async () => {

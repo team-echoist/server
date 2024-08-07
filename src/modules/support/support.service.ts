@@ -13,6 +13,12 @@ import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { Transactional } from 'typeorm-transactional';
+import { Request as ExpressRequest } from 'express';
+import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
+import { User } from '../../entities/user.entity';
+import { DeviceDto } from './dto/device.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class SupportService {
@@ -20,6 +26,7 @@ export class SupportService {
     private readonly utilsService: UtilsService,
     private readonly supportRepository: SupportRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getNotices(page: number, limit: number) {
@@ -113,15 +120,48 @@ export class SupportService {
   }
 
   @Transactional()
-  async registerDevice(userId: number, deviceId: string, deviceToken: string) {
-    const user = await this.userService.fetchUserEntityById(userId);
-    let device = await this.supportRepository.findDevice(deviceId);
+  async registerDevice(req: ExpressRequest, deviceId: string, deviceToken: string) {
+    const user = await this.userService.fetchUserEntityById(req.user.id);
 
-    device
-      ? (device.deviceToken = deviceToken)
-      : (device = await this.supportRepository.createDevice(user, deviceId, deviceToken));
+    let device = await this.findDevice(user, req.device);
 
-    return await this.supportRepository.saveDevice(device);
+    if (device) {
+      device.deviceId = deviceId;
+      device.deviceToken = deviceToken;
+    } else {
+      device = await this.supportRepository.createDevice(
+        user,
+        {
+          os: req.device.os as DeviceOS,
+          type: req.device.type as DeviceType,
+          model: req.device.model,
+        },
+        deviceId,
+        deviceToken,
+      );
+    }
+
+    await this.supportRepository.saveDevice(device);
+    await this.redis.del(`user:${req.user.id}`);
+  }
+
+  async findDevice(user: User, reqDevice: DeviceDto) {
+    return user.devices.find(
+      (device: Device) =>
+        device.os === reqDevice.os &&
+        device.type === reqDevice.type &&
+        device.model === reqDevice.model,
+    );
+  }
+
+  async newCreateDevice(user: User, device: DeviceDto) {
+    const newDevice = await this.supportRepository.createDevice(user, {
+      os: device.os as DeviceOS,
+      type: device.type as DeviceType,
+      model: device.model,
+    });
+
+    return await this.supportRepository.saveDevice(newDevice);
   }
 
   async getDevices(userId: number) {
