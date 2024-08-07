@@ -12,7 +12,6 @@ import {
 import { Request as ExpressRequest } from 'express';
 import { SupportService } from './support.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { NoticeResDto } from './dto/response/noticeRes.dto';
 import { NoticesSummaryResDto } from './dto/response/noticesSummaryRes.dto';
