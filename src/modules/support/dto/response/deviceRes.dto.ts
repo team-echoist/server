@@ -1,6 +1,6 @@
 import { DeviceOS, DeviceType } from '../../../../entities/device.entity';
 import { IsEnum, IsNumber, IsString } from 'class-validator';
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class DeviceResDto {

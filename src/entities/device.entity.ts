@@ -35,7 +35,7 @@ export class Device {
   id: number;
 
   @Index()
-  @Column({ name: 'device_id', nullable: true, unique: false })
+  @Column({ name: 'device_id', nullable: true, unique: true })
   deviceId: string;
 
   @Column({ name: 'device_token', nullable: true })
