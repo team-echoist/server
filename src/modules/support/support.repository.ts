@@ -9,6 +9,7 @@ import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
 import { AppVersions } from '../../entities/appVersions.entity';
+import { SeenNotice } from '../../entities/seenNotice.entity';
 
 export class SupportRepository {
   constructor(
@@ -22,6 +23,8 @@ export class SupportRepository {
     private readonly deviceRepository: Repository<Device>,
     @InjectRepository(AppVersions)
     private readonly appVersionsRepository: Repository<AppVersions>,
+    @InjectRepository(SeenNotice)
+    private readonly seenNoticeRepository: Repository<SeenNotice>,
   ) {}
 
   async saveNotice(newNotice: Notice) {
@@ -186,5 +189,32 @@ export class SupportRepository {
 
   async saveVersion(version: AppVersions) {
     return this.appVersionsRepository.save(version);
+  }
+
+  async findLatestNotice() {
+    const notices = await this.noticeRepository.find({
+      order: { createdDate: 'DESC' },
+      take: 1,
+    });
+
+    return notices.length > 0 ? notices[0] : null;
+  }
+
+  async findSeenNotice(userId: number) {
+    return this.seenNoticeRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['notice'],
+    });
+  }
+
+  async createSeenNotice(userId: number, latestNotice: Notice) {
+    return this.seenNoticeRepository.create({
+      user: { id: userId },
+      notice: latestNotice,
+    });
+  }
+
+  async saveSeenNotice(seenNotice: SeenNotice) {
+    return this.seenNoticeRepository.save(seenNotice);
   }
 }

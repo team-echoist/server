@@ -42,7 +42,6 @@ export class ReportQueue {
   @ManyToOne(() => Essay, (essay) => essay.reports)
   essay: Essay;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.report)
   processedHistories: ProcessedHistory[];
 }

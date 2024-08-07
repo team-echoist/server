@@ -4,7 +4,6 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  JoinColumn,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -25,6 +24,7 @@ import { Inquiry } from './inquiry.entity';
 import { AlertSettings } from './alertSettings.entity';
 import { Device } from './device.entity';
 import { Alert } from './alert.entity';
+import { SeenNotice } from './seenNotice.entity';
 
 export enum UserStatus {
   ACTIVATED = 'activated',
@@ -154,7 +154,6 @@ export class User {
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
   inquiries: Inquiry[];
 
-  @JoinColumn({ name: 'alert_settings_id' })
   @OneToMany(() => AlertSettings, (settings) => settings.user)
   alertSettings: AlertSettings[];
 
@@ -163,4 +162,7 @@ export class User {
 
   @OneToMany(() => Alert, (alert) => alert.user)
   alerts: Alert[];
+
+  @OneToMany(() => SeenNotice, (seenNotice) => seenNotice.user)
+  seenNotices: SeenNotice[];
 }

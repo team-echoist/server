@@ -215,4 +215,25 @@ export class SupportService {
 
     await this.supportRepository.saveVersion(foundVersion);
   }
+
+  @Transactional()
+  async checkNewNotices(userId: number) {
+    const latestNotice = await this.supportRepository.findLatestNotice();
+
+    if (!latestNotice) return { newNotice: null };
+
+    let seenNotice = await this.supportRepository.findSeenNotice(userId);
+
+    if (!seenNotice) {
+      seenNotice = await this.supportRepository.createSeenNotice(userId, latestNotice);
+      await this.supportRepository.saveSeenNotice(seenNotice);
+      return { newNotice: true };
+    } else if (seenNotice.notice.id < latestNotice.id) {
+      seenNotice.notice = latestNotice;
+      await this.supportRepository.saveSeenNotice(seenNotice);
+      return { newNotice: true };
+    }
+
+    return { newNotice: null };
+  }
 }

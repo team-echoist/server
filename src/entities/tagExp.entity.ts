@@ -12,15 +12,15 @@ export class TagExp {
   @Column({ default: false })
   used: boolean;
 
-  @ManyToOne(() => User, (user) => user.tagExps, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, (user) => user.tagExps, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Tag, (tag) => tag.tagExps)
   @JoinColumn({ name: 'tag_id' })
+  @ManyToOne(() => Tag, (tag) => tag.tagExps)
   tag: Tag;
 
-  @ManyToOne(() => Badge, (badge) => badge.tagExps)
   @JoinColumn({ name: 'badge' })
+  @ManyToOne(() => Badge, (badge) => badge.tagExps)
   badge: Badge;
 }

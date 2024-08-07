@@ -1,11 +1,11 @@
-import { Injectable, ExecutionContext, CanActivate } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { Observable } from 'rxjs';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
-export class AdminGuard extends AuthGuard('admin-jwt') implements CanActivate {
+export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
   constructor(private reflector: Reflector) {
     super();
   }
