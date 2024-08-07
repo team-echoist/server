@@ -237,6 +237,7 @@ export class SupportController {
     summary: '앱 버전 조회',
     description: `
   각 앱들의 현재 최신 버전을 조회합니다.
+  { 타입 : 버전 } 의 형식으로 응답됩니다.
   
   **앱 타입:**
   - \`android_mobile\`

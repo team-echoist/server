@@ -87,7 +87,7 @@ export class Essay {
   })
   status: EssayStatus;
 
-  @ManyToOne(() => Device, (device) => device.essays)
+  @ManyToOne(() => Device, (device) => device.essays, { onDelete: 'SET NULL' })
   device: Device;
 
   @JoinTable({ name: 'essay_tags' })

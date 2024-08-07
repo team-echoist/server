@@ -177,7 +177,7 @@ export class SupportRepository {
   }
 
   async deleteAllDevice() {
-    return this.deviceRepository.clear();
+    return this.deviceRepository.delete({});
   }
 
   async findVersion(versionId: number) {
