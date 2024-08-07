@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/team-echoist/server/compare/v1.7.0...v1.7.1) (2024-08-07)
+
+
+### Bug Fixes
+
+* Update device user and essay foreign key constraints ([#349](https://github.com/team-echoist/server/issues/349)) ([780bac0](https://github.com/team-echoist/server/commit/780bac07ade5a4c7d1ede1afefc36948a128f98c))
+
 # [1.7.0](https://github.com/team-echoist/server/compare/v1.6.5...v1.7.0) (2024-08-07)
 
 
