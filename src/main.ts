@@ -149,13 +149,13 @@ async function bootstrap() {
 
   const server = app.getHttpAdapter().getInstance();
 
-  server.get('/api/health-check', (req: Request, res: Response) => {
+  server.get('/health-check', (req: Request, res: Response) => {
     res.status(200).send('OK');
   });
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('/api/doc', app, document);
+    SwaggerModule.setup('/api-doc', app, document);
     writeFileSync(join(process.cwd(), 'swagger.json'), JSON.stringify(document));
   }
 
