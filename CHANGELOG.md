@@ -1,3 +1,10 @@
+## [1.8.5](https://github.com/team-echoist/server/compare/v1.8.4...v1.8.5) (2024-08-08)
+
+
+### Bug Fixes
+
+* prefix ([#357](https://github.com/team-echoist/server/issues/357)) ([f1d67d8](https://github.com/team-echoist/server/commit/f1d67d8cecc7e39799b241b61f8f0555faaa9de7))
+
 ## [1.8.4](https://github.com/team-echoist/server/compare/v1.8.3...v1.8.4) (2024-08-08)
 
 
