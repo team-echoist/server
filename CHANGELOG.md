@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/team-echoist/server/compare/v1.8.2...v1.8.3) (2024-08-08)
+
+
+### Bug Fixes
+
+* invalidate root path for homepage distribution ([#355](https://github.com/team-echoist/server/issues/355)) ([b301b95](https://github.com/team-echoist/server/commit/b301b953d3982a6a32eb16cc7cd8e84295e5eec3))
+
 ## [1.8.2](https://github.com/team-echoist/server/compare/v1.8.1...v1.8.2) (2024-08-08)
 
 
