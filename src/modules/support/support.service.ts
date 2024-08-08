@@ -81,80 +81,79 @@ export class SupportService {
   }
 
   @Transactional()
-  async getSettings(userId: number, deviceId: string) {
-    if (deviceId === '' && !deviceId)
-      throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
+  async getSettings(req: ExpressRequest) {
+    const user = await this.userService.fetchUserEntityById(req.user.id);
+    const currentDevice = await this.findDevice(user, req.device);
 
-    let settings = await this.supportRepository.findSettings(userId, deviceId);
+    if (!currentDevice)
+      throw new HttpException(
+        '등록된 디바이스가 없습니다. 디바이스 등록을 진행해주세요.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    let settings = await this.supportRepository.findSettings(user.id, currentDevice.id);
 
     if (!settings) {
       settings = new AlertSettings();
-      settings.user = await this.userService.fetchUserEntityById(userId);
-      settings.deviceId = deviceId;
+      settings.user = user;
+      settings.device = currentDevice;
 
-      await this.supportRepository.saveSettings(settings);
+      settings = await this.supportRepository.saveSettings(settings);
     }
 
     return this.utilsService.transformToDto(AlertSettingsResDto, settings);
   }
 
   @Transactional()
-  async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
-    if (deviceId === '' || !deviceId)
-      throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
+  async updateSettings(req: ExpressRequest, settingsData: UpdateAlertSettingsReqDto) {
+    const user = await this.userService.fetchUserEntityById(req.user.id);
+    const currentDevice = await this.findDevice(user, req.device);
 
-    const settings = await this.supportRepository.findSettings(userId, deviceId);
+    if (!currentDevice)
+      throw new HttpException(
+        '등록된 디바이스가 없습니다. 디바이스 등록을 진행해주세요.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const settings = await this.supportRepository.findSettings(user.id, currentDevice.id);
+
     if (settings) {
       Object.assign(settings, settingsData);
       await this.supportRepository.saveSettings(settings);
     } else {
       const newSettings = await this.supportRepository.createAlertSettings(
         settingsData,
-        userId,
-        deviceId,
+        user.id,
+        currentDevice.id,
       );
       await this.supportRepository.saveSettings(newSettings);
     }
   }
 
-  async fetchSettingEntityById(userId: number, deviceId: string) {
+  async fetchSettingEntityById(userId: number, deviceId: number) {
     return await this.supportRepository.findSettings(userId, deviceId);
   }
 
   @Transactional()
-  async registerDevice(req: ExpressRequest, deviceId: string, deviceToken: string) {
+  async registerDevice(req: ExpressRequest, uid: string, fcmToken: string) {
     const user = await this.userService.fetchUserEntityById(req.user.id);
 
     let device = await this.findDevice(user, req.device);
 
     if (device) {
-      device.deviceId = deviceId;
-      device.deviceToken = deviceToken;
+      device.uid = uid;
+      device.fcmToken = fcmToken;
     } else {
-      try {
-        device = await this.supportRepository.createDevice(
-          user,
-          {
-            os: req.device.os as DeviceOS,
-            type: req.device.type as DeviceType,
-            model: req.device.model,
-          },
-          deviceId,
-          deviceToken,
-        );
-      } catch (error) {
-        if (
-          error instanceof QueryFailedError &&
-          error.message.includes('duplicate key value violates unique constraint')
-        ) {
-          throw new HttpException(
-            'Device with this ID already exists. Please use a different deviceId.',
-            HttpStatus.CONFLICT,
-          );
-        } else {
-          throw error;
-        }
-      }
+      device = await this.supportRepository.createDevice(
+        user,
+        {
+          os: req.device.os as DeviceOS,
+          type: req.device.type as DeviceType,
+          model: req.device.model,
+        },
+        uid,
+        fcmToken,
+      );
     }
 
     await this.supportRepository.saveDevice(device);
@@ -162,12 +161,14 @@ export class SupportService {
   }
 
   async findDevice(user: User, reqDevice: DeviceDto) {
-    return user.devices.find(
-      (device: Device) =>
-        device.os === reqDevice.os &&
-        device.type === reqDevice.type &&
-        device.model === reqDevice.model,
-    );
+    return user.devices.length === 0
+      ? null
+      : user.devices.find(
+          (device: Device) =>
+            device.os === reqDevice.os &&
+            device.type === reqDevice.type &&
+            device.model === reqDevice.model,
+        );
   }
 
   async newCreateDevice(user: User, device: DeviceDto) {
@@ -180,13 +181,13 @@ export class SupportService {
     return await this.supportRepository.saveDevice(newDevice);
   }
 
-  async getDevices(userId: number) {
+  async getDevicesByUserId(userId: number) {
     return await this.supportRepository.findDevices(userId);
   }
 
   @Transactional()
-  async deleteDevice(userId: number, todayDate: string) {
-    return await this.supportRepository.deleteDevice(userId, todayDate);
+  async deleteDevice(userId: number) {
+    return await this.supportRepository.deleteDevice(userId);
   }
 
   async findAllVersions() {

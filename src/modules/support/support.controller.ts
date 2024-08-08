@@ -179,36 +179,33 @@ export class SupportController {
     return this.supportService.getUserUpdateHistories(page, limit);
   }
 
-  @Get('settings/:deviceId')
+  @Get('settings')
   @ApiOperation({
     summary: '사용자의 알림 설정 조회',
     description: `
   사용자가 자신의 알림 설정을 조회합니다.
-  
-  **경로 파라미터:**
-  - \`deviceId\` (string, required): 조회할 디바이스의 고유 ID
 
   **동작 과정:**
-  1. 현재 로그인된 사용자의 알림 설정을 조회합니다.
+  1. 현재 로그인된 사용자의 요청을 분석해 디바이스 정보를 추출합니다.
+  2. 해당 디바이스로 설정된 알림을 조회합니다.
   2. 알림 설정이 없는 경우 기본 값을 생성하여 반환합니다.
 
   **주의 사항:**
+  - 선행으로 디바이스 등록 과정이 필요합니다. 등록된 디바이스가 없을 경우 400코드를 반환합니다.
   - 사용자는 인증이 필요합니다.
   `,
   })
   @ApiResponse({ status: 200, type: AlertSettingsResDto })
-  async getSettings(@Req() req: ExpressRequest, @Param('deviceId') deviceId: string) {
-    return this.supportService.getSettings(req.user.id, deviceId);
+  async getSettings(@Req() req: ExpressRequest) {
+    return this.supportService.getSettings(req);
   }
 
-  @Post('settings/:deviceId')
+  @Post('settings')
   @ApiOperation({
     summary: '사용자의 알림 설정 업데이트',
     description: `
   사용자가 자신의 알림 설정을 업데이트합니다.
 
-  **경로 파라미터:**
-  - \`deviceId\` (string, required): 업데이트할 디바이스의 고유 ID
 
   **요청 본문:**
   - \`viewed\`: 발행 또는 링크드아웃 한 글 최초 조회 알림 (boolean)
@@ -216,21 +213,19 @@ export class SupportController {
   - \`marketing\`: 광고성 마케팅 알림 (boolean)
 
   **동작 과정:**
-  1. 현재 로그인된 사용자의 알림 설정을 업데이트합니다.
-  2. 설정이 없으면 새로 생성하여 저장합니다.
+  1. 현재 로그인된 사용자 요청에서 디바이스 정보를 추출합니다.
+  2. 디바이스 정보와 일치하는 등록된 디바이스가 있을 경우 알림 설정을 업데이트합니다.
+  2. 설정이 없으면 현재 디바이스 정보로 새로 생성하여 저장합니다.
 
   **주의 사항:**
+  - 선행으로 디바이스 등록 과정이 필요합니다. 등록된 디바이스가 없을 경우 400코드를 반환합니다.
   - 사용자는 인증이 필요합니다.
   `,
   })
   @ApiResponse({ status: 200 })
   @ApiBody({ type: UpdateAlertSettingsReqDto })
-  async updateSettings(
-    @Req() req: ExpressRequest,
-    @Param('deviceId') deviceId: string,
-    @Body() data: UpdateAlertSettingsReqDto,
-  ) {
-    return this.supportService.updateSettings(req.user.id, data, deviceId);
+  async updateSettings(@Req() req: ExpressRequest, @Body() data: UpdateAlertSettingsReqDto) {
+    return this.supportService.updateSettings(req, data);
   }
 
   @Post('devices/register')
@@ -240,8 +235,8 @@ export class SupportController {
   사용자의 디바이스를 등록합니다. 
 
   **요청 본문:**
-  - \`deviceId\` (string, required): 디바이스 고유 식별자
-  - \`deviceToken\` (string, required): FCM에서 발급한 디바이스 토큰
+  - \`uid\` (string, required): 디바이스 고유 식별자. 불변성의 성질이 강할수록 좋습니다. 해당 식별자는 기기별 알림 설정, 기기간 동기화 서비스 등에서 사용됩니다.
+  - \`fcmToken\` (string, required): FCM에서 발급한 디바이스 토큰
 
   **동작 과정:**
   1. 클라이언트에서 디바이스 고유 식별자와 FCM 디바이스 토큰을 서버로 전송합니다.
@@ -255,7 +250,7 @@ export class SupportController {
   @ApiResponse({ status: 201 })
   @ApiBody({ type: RegisterDeviceReqDto })
   async registerDevice(@Req() req: ExpressRequest, @Body() body: RegisterDeviceReqDto) {
-    return this.supportService.registerDevice(req, body.deviceId, body.deviceToken);
+    return this.supportService.registerDevice(req, body.uid, body.fcmToken);
   }
 
   @Get('versions')

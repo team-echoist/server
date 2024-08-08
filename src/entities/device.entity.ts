@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
+import { AlertSettings } from './alertSettings.entity';
 
 export enum DeviceOS {
   WINDOW = 'Window',
@@ -35,11 +36,11 @@ export class Device {
   id: number;
 
   @Index()
-  @Column({ name: 'device_id', nullable: true, unique: true })
-  deviceId: string;
+  @Column({ nullable: true, unique: false })
+  uid: string;
 
-  @Column({ name: 'device_token', nullable: true })
-  deviceToken: string;
+  @Column({ name: 'fcm_token', nullable: true })
+  fcmToken: string;
 
   @Column({
     type: 'enum',
@@ -76,4 +77,7 @@ export class Device {
 
   @OneToMany(() => Essay, (essay) => essay.device, { onDelete: 'CASCADE' })
   essays: Essay[];
+
+  @OneToMany(() => AlertSettings, (alertSettings) => alertSettings.device, { onDelete: 'CASCADE' })
+  alertSettings: AlertSettings[];
 }

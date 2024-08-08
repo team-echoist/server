@@ -121,18 +121,18 @@ export class SupportRepository {
     return { histories, total };
   }
 
-  async createAlertSettings(data: UpdateAlertSettingsReqDto, userId: number, deviceId: string) {
+  async createAlertSettings(data: UpdateAlertSettingsReqDto, userId: number, deviceId: number) {
     return this.alertSettingsRepository.create({
       ...data,
       user: { id: userId },
-      deviceId: deviceId,
+      device: { id: deviceId },
     });
   }
 
-  async findSettings(userId: number, deviceId: string) {
+  async findSettings(userId: number, deviceId: number) {
     return this.alertSettingsRepository.findOne({
-      where: { user: { id: userId }, deviceId: deviceId },
-      relations: ['user'],
+      where: { user: { id: userId }, device: { id: deviceId } },
+      relations: ['user', 'device'],
     });
   }
 
@@ -140,18 +140,18 @@ export class SupportRepository {
     return this.alertSettingsRepository.save(settings);
   }
 
-  async findDevice(deviceId: string) {
-    return this.deviceRepository.findOne({ where: { deviceId: deviceId } });
+  async findDevice(deviceId: number) {
+    return this.deviceRepository.findOne({ where: { id: deviceId } });
   }
 
-  async createDevice(user: User, device: DeviceDto, deviceId?: string, deviceToken?: string) {
+  async createDevice(user: User, currentDevice: DeviceDto, uid?: string, fcmToken?: string) {
     const newDevice = new Device();
     newDevice.user = user;
-    newDevice.deviceId = deviceId ? deviceId : null;
-    newDevice.deviceToken = deviceToken ? deviceToken : null;
-    newDevice.os = device.os as DeviceOS;
-    newDevice.type = device.type as DeviceType;
-    newDevice.model = device.model;
+    newDevice.uid = uid ? uid : null;
+    newDevice.fcmToken = fcmToken ? fcmToken : null;
+    newDevice.os = currentDevice.os as DeviceOS;
+    newDevice.type = currentDevice.type as DeviceType;
+    newDevice.model = currentDevice.model;
 
     return newDevice;
   }
@@ -164,13 +164,10 @@ export class SupportRepository {
     return this.deviceRepository.find({ where: { user: { id: userId } } });
   }
 
-  async deleteDevice(userId: number, todayDate: string) {
+  async deleteDevice(userId: number) {
     return this.deviceRepository
       .createQueryBuilder()
       .update(Device)
-      .set({
-        deviceId: () => `CONCAT('${todayDate}_', device_id)`,
-      })
       .where('user_id = :userId', { userId })
       .execute();
   }

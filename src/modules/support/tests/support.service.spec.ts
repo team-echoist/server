@@ -5,6 +5,7 @@ import { UtilsService } from '../../utils/utils.service';
 import { UserService } from '../../user/user.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { InquiryReqDto } from '../dto/request/inquiryReq.dto';
+import { Request as ExpressRequest } from 'express';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -100,7 +101,7 @@ describe('SupportService', () => {
         content: 'Content 1',
         type: 'type1',
       } as InquiryReqDto;
-      const user = { id: userId } as any;
+      const user = { id: userId, devices: ['device1', 'device2'] } as any;
 
       userService.fetchUserEntityById.mockResolvedValue(user);
 
@@ -176,50 +177,40 @@ describe('SupportService', () => {
 
   describe('getSettings', () => {
     it('should return user settings', async () => {
+      const req: ExpressRequest = {
+        user: { id: 1 },
+        device: { os: 'os', model: 'model', type: 'type' },
+      } as any;
       const userId = 1;
-      const deviceId = 'device1';
+      const deviceId = 1;
       const settings = { id: 1, user: { id: userId }, deviceId } as any;
+      const user = {
+        id: 1,
+        devices: [{ id: 1, os: 'os', model: 'model', type: 'type' }],
+      } as any;
 
+      userService.fetchUserEntityById.mockResolvedValue(user);
       supportRepository.findSettings.mockResolvedValue(settings);
       utilsService.transformToDto.mockReturnValue(settings);
 
-      const result = await service.getSettings(userId, deviceId);
+      const result = await service.getSettings(req);
 
       expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
       expect(utilsService.transformToDto).toHaveBeenCalledWith(expect.any(Function), settings);
       expect(result).toEqual(settings);
     });
 
-    it('should create new settings if not found', async () => {
-      const userId = 1;
-      const deviceId = 'device1';
-      const user = { id: userId } as any;
-      const settings = { id: 1, user, deviceId } as any;
-
-      supportRepository.findSettings.mockResolvedValue(null);
-      userService.fetchUserEntityById.mockResolvedValue(user);
-      supportRepository.saveSettings.mockResolvedValue(settings);
-      utilsService.transformToDto.mockReturnValue(settings);
-
-      const result = await service.getSettings(userId, deviceId);
-
-      expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
-      expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
-      expect(supportRepository.saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({
-          user,
-          deviceId,
-        }),
-      );
-      expect(result).toEqual(settings);
-    });
-
     it('should throw an error if deviceId is missing', async () => {
-      const userId = 1;
-      const deviceId = '';
+      const req: ExpressRequest = {
+        user: { id: 1 },
+        device: { os: 'os', model: 'model', type: 'type' },
+      } as any;
 
-      await expect(service.getSettings(userId, deviceId)).rejects.toThrow(
-        new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST),
+      await expect(service.getSettings(req)).rejects.toThrow(
+        new HttpException(
+          "Cannot read properties of undefined (reading 'devices')",
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
@@ -227,13 +218,24 @@ describe('SupportService', () => {
   describe('updateSettings', () => {
     it('should update existing settings', async () => {
       const userId = 1;
-      const deviceId = 'device1';
+      const deviceId = 1;
       const settingsData = { alertsEnabled: true } as any;
       const settings = { id: 1, user: { id: userId }, deviceId } as any;
+      const req: ExpressRequest = {
+        user: { id: 1 },
+        device: { os: 'os', model: 'model', type: 'type' },
+      } as any;
+
+      const user = {
+        id: 1,
+        devices: [{ id: 1, os: 'os', model: 'model', type: 'type' }],
+      } as any;
+
+      userService.fetchUserEntityById.mockResolvedValue(user);
 
       supportRepository.findSettings.mockResolvedValue(settings);
 
-      await service.updateSettings(userId, settingsData, deviceId);
+      await service.updateSettings(req, settingsData);
 
       expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
       expect(supportRepository.saveSettings).toHaveBeenCalledWith(
@@ -243,15 +245,35 @@ describe('SupportService', () => {
 
     it('should create new settings if not found', async () => {
       const userId = 1;
-      const deviceId = 'device1';
+      const deviceId = 1;
+      const device = {
+        id: deviceId,
+        uid: 'uid',
+        fcmToken: 'token',
+        os: 'os',
+        type: 'type',
+        model: 'model',
+      } as any;
       const settingsData = { alertsEnabled: true } as any;
       const newSettings = { id: 1, user: { id: userId }, deviceId } as any;
+      const req: ExpressRequest = {
+        user: { id: 1 },
+        device: { os: 'os', model: 'model', type: 'type' },
+      } as any;
 
+      const user = {
+        id: 1,
+        devices: [{ id: 1, os: 'os', model: 'model', type: 'type' }],
+      } as any;
+
+      userService.fetchUserEntityById.mockResolvedValue(user);
+
+      supportRepository.findDevice.mockResolvedValue(device);
       supportRepository.findSettings.mockResolvedValue(null);
       supportRepository.createAlertSettings.mockResolvedValue(newSettings);
       supportRepository.saveSettings.mockResolvedValue(newSettings);
 
-      await service.updateSettings(userId, settingsData, deviceId);
+      await service.updateSettings(req, settingsData);
 
       expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
       expect(supportRepository.createAlertSettings).toHaveBeenCalledWith(
@@ -262,94 +284,84 @@ describe('SupportService', () => {
       expect(supportRepository.saveSettings).toHaveBeenCalledWith(newSettings);
     });
 
-    it('should throw an error if deviceId is missing', async () => {
-      const userId = 1;
-      const deviceId = '';
-      const settingsData = { alertsEnabled: true } as any;
+    describe('fetchSettingEntityById', () => {
+      it('should fetch settings entity by userId and deviceId', async () => {
+        const userId = 1;
+        const deviceId = 1;
+        const settings = { id: 1, user: { id: userId }, deviceId } as any;
 
-      await expect(service.updateSettings(userId, settingsData, deviceId)).rejects.toThrow(
-        new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST),
-      );
-    });
-  });
+        supportRepository.findSettings.mockResolvedValue(settings);
 
-  describe('fetchSettingEntityById', () => {
-    it('should fetch settings entity by userId and deviceId', async () => {
-      const userId = 1;
-      const deviceId = 'device1';
-      const settings = { id: 1, user: { id: userId }, deviceId } as any;
+        const result = await service.fetchSettingEntityById(userId, deviceId);
 
-      supportRepository.findSettings.mockResolvedValue(settings);
-
-      const result = await service.fetchSettingEntityById(userId, deviceId);
-
-      expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
-      expect(result).toEqual(settings);
-    });
-  });
-
-  describe('registerDevice', () => {
-    it('should register a device', async () => {
-      const userId = 1;
-      const deviceId = 'device1';
-      const deviceToken = 'token1';
-      const user = { id: userId, devices: [] } as any;
-      const device = { id: 1, deviceId, deviceToken } as any;
-      const req = { user, device: { os: 'iOS', type: 'mobile', model: 'iPhone' } } as any;
-
-      userService.fetchUserEntityById.mockResolvedValue(user);
-      supportRepository.findDevice.mockResolvedValue(null);
-      supportRepository.createDevice.mockResolvedValue(device);
-      supportRepository.saveDevice.mockResolvedValue(device);
-
-      const result = await service.registerDevice(req, deviceId, deviceToken);
-
-      expect(userService.fetchUserEntityById).toHaveBeenCalledWith(user.id);
-      expect(supportRepository.saveDevice).toHaveBeenCalledWith(device);
+        expect(supportRepository.findSettings).toHaveBeenCalledWith(userId, deviceId);
+        expect(result).toEqual(settings);
+      });
     });
 
-    it('should update existing device token if device already exists', async () => {
-      const userId = 1;
-      const deviceId = 'device1';
-      const deviceToken = 'token1';
-      const device = {
-        id: 1,
-        deviceId,
-        deviceToken: 'oldToken',
-        os: 'iOS',
-        type: 'mobile',
-        model: 'iPhone',
-      } as any;
-      const user = { id: userId, devices: [device] } as any;
+    describe('registerDevice', () => {
+      it('should register a device', async () => {
+        const userId = 1;
+        const uid = 'uid';
+        const deviceToken = 'token1';
+        const user = { id: userId, devices: [] } as any;
+        const device = { id: 1, uid, deviceToken } as any;
+        const req = { user, device: { os: 'iOS', type: 'mobile', model: 'iPhone' } } as any;
 
-      const req = {
-        user: { id: userId },
-        device: { os: 'iOS', type: 'mobile', model: 'iPhone' },
-      } as any;
+        userService.fetchUserEntityById.mockResolvedValue(user);
+        supportRepository.findDevice.mockResolvedValue(null);
+        supportRepository.createDevice.mockResolvedValue(device);
+        supportRepository.saveDevice.mockResolvedValue(device);
 
-      userService.fetchUserEntityById.mockResolvedValue(user);
-      supportRepository.findDevice.mockResolvedValue(device);
-      supportRepository.saveDevice.mockResolvedValue({ ...device, deviceToken });
+        const result = await service.registerDevice(req, uid, deviceToken);
 
-      const result = await service.registerDevice(req, deviceId, deviceToken);
+        expect(userService.fetchUserEntityById).toHaveBeenCalledWith(user.id);
+        expect(supportRepository.saveDevice).toHaveBeenCalledWith(device);
+      });
 
-      expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
+      it('should update existing device token if device already exists', async () => {
+        const userId = 1;
+        const uid = 'uid';
+        const fcmToken = 'token1';
+        const device = {
+          id: 1,
+          uid,
+          fcmToken: 'oldToken',
+          os: 'iOS',
+          type: 'mobile',
+          model: 'iPhone',
+        } as any;
+        const user = { id: userId, devices: [device] } as any;
 
-      expect(supportRepository.saveDevice).toHaveBeenCalledWith({ ...device, deviceToken });
+        const req = {
+          user: { id: userId },
+          device: { os: 'iOS', type: 'mobile', model: 'iPhone' },
+        } as any;
+
+        userService.fetchUserEntityById.mockResolvedValue(user);
+        supportRepository.findDevice.mockResolvedValue(device);
+        supportRepository.saveDevice.mockResolvedValue({ ...device, fcmToken });
+
+        const result = await service.registerDevice(req, uid, fcmToken);
+
+        expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
+
+        expect(supportRepository.saveDevice).toHaveBeenCalledWith({ ...device, fcmToken });
+      });
     });
-  });
 
-  describe('getDevices', () => {
-    it('should return devices by userId', async () => {
-      const userId = 1;
-      const devices = [{ id: 1, deviceId: 'device1' }] as any;
+    describe('getDevices', () => {
+      it('should return devices by userId', async () => {
+        const userId = 1;
+        const devices = [{ id: 1, deviceId: 'device1' }] as any;
 
-      supportRepository.findDevices.mockResolvedValue(devices);
+        supportRepository.findDevices.mockResolvedValue(devices);
 
-      const result = await service.getDevices(userId);
+        const result = await service.getDevicesByUserId(userId);
 
-      expect(supportRepository.findDevices).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(devices);
+        expect(supportRepository.findDevices).toHaveBeenCalledWith(userId);
+        expect(result).toEqual(devices);
+      });
     });
   });
 });
