@@ -158,10 +158,7 @@ export class UserService {
     const user = await this.fetchUserEntityById(userId);
 
     if (user.deactivationDate)
-      throw new HttpException(
-        'This account has already been requested to be deleted.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST);
 
     user.deactivationDate = new Date();
 
@@ -181,7 +178,7 @@ export class UserService {
     const user = await this.userRepository.findUserById(userId);
 
     if (!user.deactivationDate)
-      throw new HttpException('Account is not in deactivated status', HttpStatus.BAD_REQUEST);
+      throw new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST);
 
     user.deactivationDate = null;
 

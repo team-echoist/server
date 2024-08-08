@@ -358,7 +358,7 @@ describe('UserService', () => {
       userRepository.findUserById.mockResolvedValue(user);
 
       await expect(service.cancelDeactivation(userId)).rejects.toThrow(
-        new HttpException('Account is not in deactivated status', HttpStatus.BAD_REQUEST),
+        new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST),
       );
     });
   });

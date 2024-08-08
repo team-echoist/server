@@ -228,11 +228,11 @@ export class BadgeService {
   async levelUpBadge(userId: number, badgeId: number) {
     const userBadge = await this.badgeRepository.findBadge(userId, badgeId);
     if (!userBadge) {
-      throw new HttpException('Badge not found for user.', HttpStatus.NOT_FOUND);
+      throw new HttpException('사용자의 뱃지를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     }
 
     if (userBadge.exp < 10) {
-      throw new HttpException('Not enough experience to level up.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('레벨업에 필요한 경험치가 부족합니다.', HttpStatus.BAD_REQUEST);
     }
 
     userBadge.exp -= 10;

@@ -43,7 +43,7 @@ export class AlertService {
   async markAlertAsRead(userId: number, alertId: number) {
     const alert = await this.alertRepository.findAlert(userId, alertId);
 
-    if (!alert) throw new HttpException('Alert not found', HttpStatus.NOT_FOUND);
+    if (!alert) throw new HttpException('알림을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     alert.read = true;
     await this.alertRepository.saveAlert(alert);

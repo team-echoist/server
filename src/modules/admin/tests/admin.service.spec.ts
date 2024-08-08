@@ -164,7 +164,7 @@ describe('AdminService', () => {
       };
 
       await expect(service.createAdmin(adminId, createAdminReqDto)).rejects.toThrowError(
-        'You are not authorized.',
+        '접근 권한이 없습니다.',
       );
     });
   });
@@ -320,7 +320,7 @@ describe('AdminService', () => {
       adminRepository.findByEmail.mockResolvedValue({ email: 'test@example.com' } as any);
 
       await expect(service.register(adminRegisterReqDto)).rejects.toThrowError(
-        'Email already in use.',
+        '이미 사용중인 이메일입니다.',
       );
     });
   });
@@ -348,7 +348,7 @@ describe('AdminService', () => {
       adminRepository.findAdmin.mockResolvedValue(nonRootAdmin as any);
 
       await expect(service.activationSettings(nonRootAdmin.id, 2, true)).rejects.toThrowError(
-        'Root administrator only',
+        '접근 권한이 없습니다.',
       );
     });
   });

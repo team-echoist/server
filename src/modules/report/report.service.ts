@@ -23,17 +23,17 @@ export class ReportService {
     const essay = await this.essayService.getEssayById(essayId);
 
     if (!essay) {
-      throw new HttpException('Essay not found.', HttpStatus.NOT_FOUND);
+      throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     }
 
     if (essay.status === 'private') {
-      throw new HttpException('Cannot report a private essay.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('비공개 에세이는 신고할 수 없습니다.', HttpStatus.BAD_REQUEST);
     }
 
     const existingReport = await this.reportRepository.findReportByReporter(userId, essayId);
 
     if (existingReport) {
-      throw new HttpException('You have already reported this essay.', HttpStatus.CONFLICT);
+      throw new HttpException('귀하는 이미 이 에세이를 신고했습니다.', HttpStatus.CONFLICT);
     }
 
     const report = new ReportQueue();

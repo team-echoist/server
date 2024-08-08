@@ -156,7 +156,7 @@ describe('EssayService', () => {
       essayRepository.findEssayById.mockResolvedValue(essay);
 
       await expect(service.deleteEssay(userId, essayId)).rejects.toThrow(
-        new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN),
+        new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN),
       );
     });
   });
@@ -318,10 +318,7 @@ describe('EssayService', () => {
       reviewService.findReviewByEssayId.mockResolvedValue({ id: 1 } as any);
 
       await expect(service.updateEssay(requester, essayId, data)).rejects.toThrow(
-        new HttpException(
-          'Update rejected: Essay is currently under review',
-          HttpStatus.BAD_REQUEST,
-        ),
+        new HttpException('업데이트 거부: 에세이가 현재 검토중입니다.', HttpStatus.BAD_REQUEST),
       );
 
       expect(reviewService.findReviewByEssayId).toHaveBeenCalledWith(essayId);
@@ -435,7 +432,7 @@ describe('EssayService', () => {
       essayRepository.findEssayById.mockResolvedValue(null);
 
       await expect(service.getEssay(userId, essayId, 'community')).rejects.toThrow(
-        new HttpException('There are no essays.', HttpStatus.NOT_FOUND),
+        new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
 
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);
@@ -469,7 +466,7 @@ describe('EssayService', () => {
       essayRepository.findEssayById.mockResolvedValue(essay);
 
       await expect(service.deleteEssayStory(userId, essayId)).rejects.toThrow(
-        new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN),
+        new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN),
       );
 
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);

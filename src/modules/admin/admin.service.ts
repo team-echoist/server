@@ -169,7 +169,7 @@ export class AdminService {
   }
 
   async createAdmin(adminId: number, data: CreateAdminReqDto) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminCheckDuplicates(data.email);
 
@@ -287,10 +287,10 @@ export class AdminService {
   @Transactional()
   async processReports(userId: number, essayId: number, data: ProcessReqDto) {
     const essay = await this.essayRepository.findPublishedEssayById(essayId);
-    if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
     if (essay.status === EssayStatus.PRIVATE)
-      throw new HttpException('The essay is private', HttpStatus.BAD_REQUEST);
+      throw new HttpException('비공개 에세이 입니다.', HttpStatus.BAD_REQUEST);
 
     if (data.actionType === 'approved') await this.handleApprovedAction(essay);
 
@@ -314,7 +314,7 @@ export class AdminService {
     const reports = await this.adminRepository.findReportByEssayId(essayId);
 
     if (!reports.length)
-      throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
+      throw new HttpException('이 에세이에 대한 신고를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     console.log(
       `Adding syncReportsProcessed job for essay ${essayId} with ${reports.length} reports`,
@@ -677,7 +677,7 @@ export class AdminService {
   async activationSettings(rootAdminId: number, adminId: number, activated: boolean) {
     const rootAdmin = await this.adminRepository.findAdmin(rootAdminId);
     if (rootAdmin.id !== 1) {
-      throw new HttpException('Root administrator only', HttpStatus.FORBIDDEN);
+      throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     }
     const admin = await this.adminRepository.findAdmin(adminId);
     admin.activated = activated;
@@ -707,7 +707,7 @@ export class AdminService {
   private async adminCheckDuplicates(email: string) {
     const result = await this.adminRepository.findByEmail(email);
     if (result) {
-      throw new HttpException('Email already in use.', HttpStatus.CONFLICT);
+      throw new HttpException('이미 사용중인 이메일입니다.', HttpStatus.CONFLICT);
     }
     return;
   }
@@ -855,14 +855,14 @@ export class AdminService {
   }
 
   async deleteUser(adminId: number, userId: number) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
     await this.userRepository.deleteAccount(userId, todayDate);
   }
 
   async getCronLogs(adminId: number, page: number, limit: number) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     return await this.cronService.getCronLogs(page, limit);
   }
 
@@ -906,8 +906,7 @@ export class AdminService {
   }
 
   async saveServerStatus(adminId: number, newStatus: string) {
-    if (adminId !== 1)
-      throw new HttpException('This is a root manager function.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     let serverStatus = await this.adminRepository.getCurrentServerStatus();
     if (!serverStatus) {
@@ -929,7 +928,7 @@ export class AdminService {
   }
 
   async deleteAllDevice(adminId: number) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     return this.supportRepository.deleteAllDevice();
   }
 

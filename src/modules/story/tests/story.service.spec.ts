@@ -66,7 +66,7 @@ describe('StoryService', () => {
       storyRepository.findStoryById.mockResolvedValue(null);
 
       await expect(service.getStoryById(user, storyId)).rejects.toThrow(
-        new HttpException('Story not found.', HttpStatus.BAD_REQUEST),
+        new HttpException('스토리를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST),
       );
 
       expect(storyRepository.findStoryById).toHaveBeenCalledWith(user.id, storyId);
@@ -172,7 +172,7 @@ describe('StoryService', () => {
       storyRepository.findStoryById.mockResolvedValue(null);
 
       await expect(service.deleteStory(userId, storyId)).rejects.toThrow(
-        new HttpException('Story not found or not owned by the user', HttpStatus.NOT_FOUND),
+        new HttpException('스토리를 찾을 수 없거나 사용자가 소유하지 않음', HttpStatus.NOT_FOUND),
       );
 
       expect(storyRepository.findStoryById).toHaveBeenCalledWith(userId, storyId);

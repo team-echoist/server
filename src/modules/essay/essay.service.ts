@@ -57,7 +57,7 @@ export class EssayService {
 
   async checkEssayPermissions(essay: Essay, userId: number) {
     if (essay.author.id !== userId)
-      throw new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN);
+      throw new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN);
   }
 
   @Transactional()
@@ -162,10 +162,7 @@ export class EssayService {
   private async checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
     const isUnderReview = await this.reviewService.findReviewByEssayId(essayId);
     if (isUnderReview && data.status !== EssayStatus.PRIVATE) {
-      throw new HttpException(
-        'Update rejected: Essay is currently under review',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('업데이트 거부: 에세이가 현재 검토중입니다.', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -234,7 +231,7 @@ export class EssayService {
 
     const essay = await this.essayRepository.findEssayById(essayId);
 
-    if (!essay) throw new HttpException('There are no essays.', HttpStatus.NOT_FOUND);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
@@ -259,7 +256,7 @@ export class EssayService {
 
   private async handleNonAuthorView(userId: number, essay: Essay) {
     if (essay.status === EssayStatus.PRIVATE) {
-      throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('잘못된 요청입니다.', HttpStatus.BAD_REQUEST);
     }
 
     const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
