@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     if (user.status === UserStatus.BANNED) {
       throw new HttpException(
-        'Your account has been banned. Please contact support for more information.',
+        '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
         HttpStatus.FORBIDDEN,
       );
     }

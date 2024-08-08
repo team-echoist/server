@@ -16,11 +16,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   async validate(email: string, password: string) {
     const user = await this.authService.validateUser(email, password);
 
-    if (!user) throw new HttpException('Invalid email or password.', HttpStatus.UNAUTHORIZED);
+    if (!user)
+      throw new HttpException('이메일 또는 비밀번호가 잘못되었습니다.', HttpStatus.UNAUTHORIZED);
 
     if (user.status === UserStatus.BANNED) {
       throw new HttpException(
-        'Your account has been banned. Please contact support for more information.',
+        '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
         HttpStatus.FORBIDDEN,
       );
     }

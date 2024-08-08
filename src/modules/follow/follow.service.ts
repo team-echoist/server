@@ -24,12 +24,12 @@ export class FollowService {
   @Transactional()
   async follow(followerId: number, followingId: number) {
     if (followerId === followingId) {
-      throw new HttpException('You cannot follow yourself', HttpStatus.CONFLICT);
+      throw new HttpException('너무 자애롭습니다.', HttpStatus.CONFLICT);
     }
 
     const followerRelation = await this.findFollowerRelation(followerId, followingId);
     if (followerRelation) {
-      throw new HttpException('You are already following', HttpStatus.CONFLICT);
+      throw new HttpException('이미 팔로우중입니다.', HttpStatus.CONFLICT);
     }
 
     const follower = await this.userService.fetchUserEntityById(followerId);

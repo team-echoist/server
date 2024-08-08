@@ -62,7 +62,7 @@ describe('FollowService', () => {
       const followingId = 1;
 
       await expect(service.follow(followerId, followingId)).rejects.toThrow(
-        new HttpException('You cannot follow yourself', HttpStatus.CONFLICT),
+        new HttpException('너무 자애롭습니다.', HttpStatus.CONFLICT),
       );
     });
 
@@ -74,7 +74,7 @@ describe('FollowService', () => {
       followRepository.findFollowerRelation.mockResolvedValue(followerRelation);
 
       await expect(service.follow(followerId, followingId)).rejects.toThrow(
-        new HttpException('You are already following', HttpStatus.CONFLICT),
+        new HttpException('이미 팔로우중입니다.', HttpStatus.CONFLICT),
       );
 
       expect(followRepository.findFollowerRelation).toHaveBeenCalledWith(followerId, followingId);
