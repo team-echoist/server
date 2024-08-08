@@ -147,19 +147,19 @@ async function bootstrap() {
     }),
   );
 
-  const server = app.getHttpAdapter().getInstance();
+  // const server = app.getHttpAdapter().getInstance();
 
-  server.get('/health-check', (req: Request, res: Response) => {
-    res.status(200).send('OK');
-  });
-  server.get('/', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../src/common/static', '404.html'));
-  });
-  server.get('/store', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../src/common/static', 'store.html'));
-  });
-
-  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
+  // server.get('/health-check', (req: Request, res: Response) => {
+  //   res.status(200).send('OK');
+  // });
+  // server.get('/', (req: Request, res: Response) => {
+  //   res.sendFile(join(__dirname, '../src/common/static', '404.html'));
+  // });
+  // server.get('/store', (req: Request, res: Response) => {
+  //   res.sendFile(join(__dirname, '../src/common/static', 'store.html'));
+  // });
+  //
+  // app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
 
   if (process.env.SWAGGER === 'true') {
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);

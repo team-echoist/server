@@ -20,7 +20,6 @@ import { DeviceDto } from './dto/device.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
-import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class SupportService {
