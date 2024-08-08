@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/team-echoist/server/compare/v1.7.1...v1.8.0) (2024-08-07)
+
+
+### Features
+
+* Add latest notice check API and other modifications ([#350](https://github.com/team-echoist/server/issues/350)) ([44b24d9](https://github.com/team-echoist/server/commit/44b24d9359c1b8039cc98a120265b06504d844dc))
+
 ## [1.7.1](https://github.com/team-echoist/server/compare/v1.7.0...v1.7.1) (2024-08-07)
 
 
