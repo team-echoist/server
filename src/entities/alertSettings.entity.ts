@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, Index, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
+import { Device } from './device.entity';
 
 @Entity('alert_settings')
 export class AlertSettings {
@@ -16,8 +17,9 @@ export class AlertSettings {
   marketing: boolean;
 
   @Index()
-  @Column({ name: 'device_id', unique: false })
-  deviceId: string;
+  @ManyToOne(() => Device, (device) => device.alertSettings, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'device_id' })
+  device: Device;
 
   @ManyToOne(() => User, (user) => user.alertSettings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

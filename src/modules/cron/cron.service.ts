@@ -117,9 +117,6 @@ export class CronService {
         await this.deviceReposiotry
           .createQueryBuilder()
           .update(Device)
-          .set({
-            deviceId: () => `CONCAT('${todayDate}_', device_id)`,
-          })
           .where('id In (:...userIds)', { userIds })
           .execute();
 

@@ -147,28 +147,27 @@ describe('AlertService', () => {
     it('should process report alerts and send push notifications', async () => {
       const reports = [{ id: 1, reporter: { id: 1 }, essay: { id: 1 } }] as any;
       const type = ActionType.APPROVED;
-      const mockUser = { id: 1, deviceToken: 'token' } as any;
-      const mockDevices = [{ deviceId: 'device1' }];
+      const mockUser = { id: 1, fcmToken: 'token' } as any;
+      const mockDevices = [{ uid: 'device1' }];
       const mockAlertSettings = { report: true };
 
       userService.fetchUserEntityById.mockResolvedValue(mockUser);
-      supportService.getDevices.mockResolvedValue(mockDevices as any);
+      supportService.getDevicesByUserId.mockResolvedValue(mockDevices as any);
       supportService.fetchSettingEntityById.mockResolvedValue(mockAlertSettings as any);
 
       await service.processReportAlerts(reports, type);
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(1);
-      expect(supportService.getDevices).toHaveBeenCalledWith(1);
-      expect(supportService.fetchSettingEntityById).toHaveBeenCalledWith(1, 'device1');
+      expect(supportService.getDevicesByUserId).toHaveBeenCalledWith(1);
     });
 
     it('should not send push notifications if no devices found', async () => {
       const reports = [{ id: 1, reporter: { id: 1 }, essay: { id: 1 } }] as any;
       const type = ActionType.APPROVED;
-      const mockUser = { id: 1, deviceToken: 'token' } as any;
+      const mockUser = { id: 1, fcmToken: 'token' } as any;
 
       userService.fetchUserEntityById.mockResolvedValue(mockUser);
-      supportService.getDevices.mockResolvedValue([]);
+      supportService.getDevicesByUserId.mockResolvedValue([]);
 
       await service.processReportAlerts(reports, type);
 
@@ -229,10 +228,10 @@ describe('AlertService', () => {
   describe('sendPushAlertReportProcessed', () => {
     it('should send push notifications for processed report alerts', async () => {
       const mockEssay = { id: 1, author: { id: 1 } } as any;
-      const mockDevices = [{ deviceId: 'device1', deviceToken: 'token1' }];
+      const mockDevices = [{ uid: 'device1', fcmToken: 'token1' }];
       const mockAlertSettings = { report: true };
 
-      supportService.getDevices.mockResolvedValue(mockDevices as any);
+      supportService.getDevicesByUserId.mockResolvedValue(mockDevices as any);
       supportService.fetchSettingEntityById.mockResolvedValue(mockAlertSettings as any);
 
       await service.sendPushAlertReportProcessed(mockEssay);
@@ -247,7 +246,7 @@ describe('AlertService', () => {
     it('should not send push notifications if no devices found', async () => {
       const mockEssay = { id: 1, author: { id: 1 } };
 
-      supportService.getDevices.mockResolvedValue([]);
+      supportService.getDevicesByUserId.mockResolvedValue([]);
 
       await service.sendPushAlertReportProcessed(mockEssay as any);
 
@@ -284,10 +283,10 @@ describe('AlertService', () => {
   describe('sendPushReviewAlert', () => {
     it('should send push notifications for review alerts', async () => {
       const mockEssay = { id: 1, author: { id: 1, nickname: 'nickname' } };
-      const mockDevices = [{ deviceId: 'device1', deviceToken: 'token1' }];
+      const mockDevices = [{ uid: 'device1', fcmToken: 'token1' }];
       const mockAlertSettings = { report: true };
 
-      supportService.getDevices.mockResolvedValue(mockDevices as any);
+      supportService.getDevicesByUserId.mockResolvedValue(mockDevices as any);
       supportService.fetchSettingEntityById.mockResolvedValue(mockAlertSettings as any);
 
       await service.sendPushReviewAlert(mockEssay as any);
@@ -302,7 +301,7 @@ describe('AlertService', () => {
     it('should not send push notifications if no devices found', async () => {
       const mockEssay = { author: { id: 1 } } as any;
 
-      supportService.getDevices.mockResolvedValue([]);
+      supportService.getDevicesByUserId.mockResolvedValue([]);
 
       await service.sendPushReviewAlert(mockEssay);
 
@@ -343,10 +342,10 @@ describe('AlertService', () => {
     it('should send push notifications for review result alerts', async () => {
       const userId = 1;
       const actionType = ActionType.APPROVED;
-      const mockDevices = [{ deviceId: 'device1', deviceToken: 'token1' }];
+      const mockDevices = [{ uid: 'device1', fcmToken: 'token1' }];
       const mockAlertSettings = { report: true };
 
-      supportService.getDevices.mockResolvedValue(mockDevices as any);
+      supportService.getDevicesByUserId.mockResolvedValue(mockDevices as any);
       supportService.fetchSettingEntityById.mockResolvedValue(mockAlertSettings as any);
 
       await service.sendPushReviewResultAlert(userId, actionType);
@@ -362,7 +361,7 @@ describe('AlertService', () => {
       const userId = 1;
       const actionType = ActionType.APPROVED;
 
-      supportService.getDevices.mockResolvedValue([]);
+      supportService.getDevicesByUserId.mockResolvedValue([]);
 
       await service.sendPushReviewResultAlert(userId, actionType);
 
@@ -401,10 +400,10 @@ describe('AlertService', () => {
   describe('sendPushAlertFirstView', () => {
     it('should send push notifications for first view alerts', async () => {
       const mockEssay = { id: 1, author: { id: 1, nickname: 'nickname' } } as any;
-      const mockDevices = [{ deviceId: 'device1', deviceToken: 'token1' }] as any;
+      const mockDevices = [{ uid: 'device1', fcmToken: 'token1' }] as any;
       const mockAlertSettings = { viewed: true } as any;
 
-      supportService.getDevices.mockResolvedValue(mockDevices);
+      supportService.getDevicesByUserId.mockResolvedValue(mockDevices);
       supportService.fetchSettingEntityById.mockResolvedValue(mockAlertSettings);
 
       await service.sendPushAlertFirstView(mockEssay);
@@ -418,7 +417,7 @@ describe('AlertService', () => {
 
     it('should not send push notifications if no devices found', async () => {
       const mockEssay = { author: { id: 1 } } as any;
-      supportService.getDevices.mockResolvedValue([]);
+      supportService.getDevicesByUserId.mockResolvedValue([]);
 
       await service.sendPushAlertFirstView(mockEssay);
 
