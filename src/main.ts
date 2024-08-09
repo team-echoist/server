@@ -11,6 +11,7 @@ import { AppModule } from './app.module';
 import { swaggerConfig } from './config/swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
+import * as express from 'express';
 import { writeFileSync } from 'fs';
 
 import { join } from 'path';
@@ -146,6 +147,8 @@ async function bootstrap() {
       preload: true,
     }),
   );
+
+  app.use('/.well-known', express.static(join(__dirname, '../.well-known')));
 
   const server = app.getHttpAdapter().getInstance();
 

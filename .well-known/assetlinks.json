@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.echoist.linkedout",
+    "sha256_cert_fingerprints":
+    ["C9:FC:E4:8D:6E:03:03:2A:6B:45:C6:9E:A1:B4:3F:AB:74:EB:79:32:33:24:72:E0:8F:94:88:A2:E5:27:7A:A3"]
+  }
+}]
