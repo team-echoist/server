@@ -227,11 +227,11 @@ export class SupportService {
     if (!seenNotice) {
       seenNotice = await this.supportRepository.createSeenNotice(userId, latestNotice);
       await this.supportRepository.saveSeenNotice(seenNotice);
-      return { newNotice: true };
+      return { newNotice: latestNotice.id };
     } else if (seenNotice.notice.id < latestNotice.id) {
       seenNotice.notice = latestNotice;
       await this.supportRepository.saveSeenNotice(seenNotice);
-      return { newNotice: true };
+      return { newNotice: latestNotice.id };
     }
 
     return { newNotice: null };
