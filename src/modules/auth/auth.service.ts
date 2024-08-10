@@ -277,7 +277,7 @@ export class AuthService {
 
     const payload = response.data.response;
 
-    if (!payload) {
+    if (!payload || !payload.platformId) {
       throw new HttpException(
         '플랫폼으로부터 올바른 데이터를 받지 못했습니다.',
         HttpStatus.BAD_REQUEST,

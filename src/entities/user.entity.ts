@@ -55,7 +55,7 @@ export class User {
   @Column({
     name: 'profile_image',
     nullable: true,
-    default: 'https://driqat77mj5du.cloudfront.net/service/profile_icon_01.png',
+    default: 'https://cdn.linkedoutapp.com/service/profile_icon_01.png',
   })
   profileImage: string;
 
