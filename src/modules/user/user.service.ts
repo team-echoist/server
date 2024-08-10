@@ -56,14 +56,6 @@ export class UserService {
   }
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
-    const requestDefaultProfileImage = this.utilsService.isDefaultProfileImage(file.originalname);
-
-    if (requestDefaultProfileImage)
-      throw new HttpException(
-        '기본 프로필 이미지로 변경할 경우 등록이 불필요합니다.',
-        HttpStatus.BAD_REQUEST,
-      );
-
     const user = await this.userRepository.findUserById(userId);
     const newExt = file.originalname.split('.').pop();
     const defaultProfileImage = this.utilsService.isDefaultProfileImage(user.profileImage);
