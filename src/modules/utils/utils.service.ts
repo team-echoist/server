@@ -254,4 +254,8 @@ export class UtilsService {
   preprocessKeyword(keyword: string) {
     return `%${keyword.trim()}%`;
   }
+
+  isDefaultProfileImage(profileImageUrl: string): boolean {
+    return profileImageUrl.includes('profile_icon_');
+  }
 }

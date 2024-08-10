@@ -58,14 +58,16 @@ export class UserService {
   async saveProfileImage(userId: number, file: Express.Multer.File) {
     const user = await this.userRepository.findUserById(userId);
     const newExt = file.originalname.split('.').pop();
+    const defaultProfileImage = this.utilsService.isDefaultProfileImage(user.profileImage);
 
     let fileName: any;
-    if (user.profileImage) {
-      const urlParts = user.profileImage.split('/').pop();
-      fileName = `profile/${urlParts}`;
-    } else {
+
+    if (defaultProfileImage) {
       const imageName = this.utilsService.getUUID();
       fileName = `profile/${imageName}`;
+    } else {
+      const urlParts = user.profileImage.split('/').pop();
+      fileName = `profile/${urlParts}`;
     }
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);

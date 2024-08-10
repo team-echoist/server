@@ -116,20 +116,51 @@ describe('UserService', () => {
   });
 
   describe('saveProfileImage', () => {
-    it('should save profile image', async () => {
+    it('should save user-defined profile image', async () => {
       const userId = 1;
-      const file = { originalname: 'test.png' } as Express.Multer.File;
-      const user = { id: userId, profileImage: null } as User;
-      const imageUrl = 'http://example.com/test.png';
+      const file = { originalname: 'user-uploaded.png' } as Express.Multer.File;
+      const user = { id: userId, profileImage: 'http://example.com/old_image.png' } as User;
+      const imageUrl = 'http://example.com/new_image.png';
 
       userRepository.findUserById.mockResolvedValue(user);
       awsService.imageUploadToS3.mockResolvedValue(imageUrl);
       utilsService.transformToDto.mockReturnValue({ imageUrl });
+      utilsService.getUUID.mockReturnValue('new-uuid');
 
       const result = await service.saveProfileImage(userId, file);
 
       expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
-      expect(awsService.imageUploadToS3).toHaveBeenCalledWith(expect.any(String), file, 'png');
+      expect(awsService.imageUploadToS3).toHaveBeenCalledWith(
+        expect.stringContaining('profile/'),
+        file,
+        'png',
+      );
+      expect(userRepository.saveUser).toHaveBeenCalledWith(
+        expect.objectContaining({ profileImage: imageUrl }),
+      );
+      expect(utilsService.transformToDto).toHaveBeenCalledWith(ProfileImageUrlResDto, { imageUrl });
+      expect(result).toEqual({ imageUrl });
+    });
+
+    it('should save new profile image when current profile is a default image', async () => {
+      const userId = 1;
+      const file = { originalname: 'user-uploaded.png' } as Express.Multer.File;
+      const user = {
+        id: userId,
+        profileImage: 'https://driqat77mj5du.cloudfront.net/service/profile_icon_01.png',
+      } as User;
+      const imageUrl = 'http://example.com/new_image.png';
+
+      userRepository.findUserById.mockResolvedValue(user);
+      awsService.imageUploadToS3.mockResolvedValue(imageUrl);
+      utilsService.transformToDto.mockReturnValue({ imageUrl });
+      utilsService.isDefaultProfileImage.mockReturnValue(true);
+      utilsService.getUUID.mockReturnValue('new-uuid');
+
+      const result = await service.saveProfileImage(userId, file);
+
+      expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
+      expect(awsService.imageUploadToS3).toHaveBeenCalledWith('profile/new-uuid', file, 'png');
       expect(userRepository.saveUser).toHaveBeenCalledWith(
         expect.objectContaining({ profileImage: imageUrl }),
       );
