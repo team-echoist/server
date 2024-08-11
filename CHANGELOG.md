@@ -1,3 +1,10 @@
+## [1.8.7](https://github.com/team-echoist/server/compare/v1.8.6...v1.8.7) (2024-08-11)
+
+
+### Bug Fixes
+
+* Add Swagger path authentication ([#363](https://github.com/team-echoist/server/issues/363)) ([d68877c](https://github.com/team-echoist/server/commit/d68877ca4b82888f287133f765a70c49cdd3cffc))
+
 ## [1.8.6](https://github.com/team-echoist/server/compare/v1.8.5...v1.8.6) (2024-08-10)
 
 
