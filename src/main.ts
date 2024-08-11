@@ -161,6 +161,7 @@ async function bootstrap() {
   const adminService = app.get(AdminService);
   if (process.env.SWAGGER === 'true') {
     app.use(
+      ['/api-doc', '/swagger.json'],
       basicAuth({
         authorizeAsync: true,
         authorizer: async (email, password, callback) => {
