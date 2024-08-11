@@ -594,10 +594,18 @@ export class AdminService {
 
   async validateAdmin(email: string, password: string) {
     const admin = await this.adminRepository.findByEmail(email);
-    if (admin && (await bcrypt.compare(password, admin.password))) {
+    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
       return admin;
     }
     return null;
+  }
+
+  async validateSwaager(name: string, password: string) {
+    const admin = await this.adminRepository.findByName(name);
+    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
+      return admin;
+    }
+    return false;
   }
 
   async validatePayload(id: number) {

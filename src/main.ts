@@ -12,11 +12,13 @@ import { swaggerConfig } from './config/swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 import * as express from 'express';
+import * as basicAuth from 'express-basic-auth';
 import { writeFileSync } from 'fs';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
 import { ConfigService } from '@nestjs/config';
+import { AdminService } from './modules/admin/admin.service';
 
 dotenv.config();
 
@@ -156,7 +158,22 @@ async function bootstrap() {
     res.status(200).send('OK');
   });
 
+  const adminService = app.get(AdminService);
   if (process.env.SWAGGER === 'true') {
+    app.use(
+      basicAuth({
+        authorizeAsync: true,
+        authorizer: async (email, password, callback) => {
+          const isValid = await adminService.validateSwaager(email, password);
+          if (isValid) {
+            return callback(null, true);
+          } else {
+            return callback(null, false);
+          }
+        },
+        challenge: true,
+      }),
+    );
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('/api-doc', app, document);
     writeFileSync(join(process.cwd(), 'swagger.json'), JSON.stringify(document));
