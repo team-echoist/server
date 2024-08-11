@@ -1,3 +1,10 @@
+## [1.8.6](https://github.com/team-echoist/server/compare/v1.8.5...v1.8.6) (2024-08-10)
+
+
+### Bug Fixes
+
+* Minor bug fixes for profile uploads ([#361](https://github.com/team-echoist/server/issues/361)) ([61833e8](https://github.com/team-echoist/server/commit/61833e8d0188641df629dd9e7b4b20d6378e018d))
+
 ## [1.8.5](https://github.com/team-echoist/server/compare/v1.8.4...v1.8.5) (2024-08-08)
 
 
