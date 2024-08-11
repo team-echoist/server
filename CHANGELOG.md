@@ -1,3 +1,10 @@
+## [1.8.8](https://github.com/team-echoist/server/compare/v1.8.7...v1.8.8) (2024-08-11)
+
+
+### Bug Fixes
+
+* basicAuth path ([#365](https://github.com/team-echoist/server/issues/365)) ([d19b6b6](https://github.com/team-echoist/server/commit/d19b6b662376e81a6523744837345ac6d8ec599a))
+
 ## [1.8.7](https://github.com/team-echoist/server/compare/v1.8.6...v1.8.7) (2024-08-11)
 
 
