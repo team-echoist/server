@@ -230,36 +230,46 @@ export class AdminRepository {
       'subscriptions',
     ];
 
-    const tables = await queryRunner.getTables([
-      'alert',
-      'alert_settings',
-      'badge',
-      'bookmark',
-      'cron_log',
-      'deactivation_reason',
-      'device',
-      'essay',
-      'essay_tags',
-      'follow',
-      'geulroquis',
-      'inquiry',
-      'notice',
-      'processed_history',
-      'report_queue',
-      'review_queue',
-      'seen_notice',
-      'story',
-      'tag',
-      'tag_exp',
-      'updated_history',
-      'user',
-      'view_record',
-    ]);
+    try {
+      const tables = await queryRunner.getTables([
+        'alert',
+        'alert_settings',
+        'badge',
+        'bookmark',
+        'cron_log',
+        'deactivation_reason',
+        'device',
+        'essay',
+        'essay_tags',
+        'follow',
+        'geulroquis',
+        'inquiry',
+        'notice',
+        'processed_history',
+        'report_queue',
+        'review_queue',
+        'seen_notice',
+        'story',
+        'tag',
+        'tag_exp',
+        'updated_history',
+        'user',
+        'view_record',
+      ]);
 
-    for (const table of tables) {
-      if (!tablesToKeep.includes(table.name)) {
-        await queryRunner.query(`DELETE FROM "${table.name}"`);
+      for (const table of tables) {
+        if (!tablesToKeep.includes(table.name)) {
+          await queryRunner.query(`DELETE
+																	 FROM "${table.name}"`);
+        }
       }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
   }
 }
