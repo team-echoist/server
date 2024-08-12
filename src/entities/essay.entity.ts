@@ -95,7 +95,7 @@ export class Essay {
   tags: Tag[];
 
   @JoinColumn({ name: 'story_id' })
-  @ManyToOne(() => Story, (story) => story.essays)
+  @ManyToOne(() => Story, (story) => story.essays, { onDelete: 'CASCADE' })
   story: Story;
 
   @Index()

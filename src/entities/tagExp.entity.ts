@@ -17,10 +17,10 @@ export class TagExp {
   user: User;
 
   @JoinColumn({ name: 'tag_id' })
-  @ManyToOne(() => Tag, (tag) => tag.tagExps)
+  @ManyToOne(() => Tag, (tag) => tag.tagExps, { onDelete: 'CASCADE' })
   tag: Tag;
 
   @JoinColumn({ name: 'badge' })
-  @ManyToOne(() => Badge, (badge) => badge.tagExps)
+  @ManyToOne(() => Badge, (badge) => badge.tagExps, { onDelete: 'CASCADE' })
   badge: Badge;
 }

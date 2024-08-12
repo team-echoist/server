@@ -163,6 +163,6 @@ export class User {
   @OneToMany(() => Alert, (alert) => alert.user)
   alerts: Alert[];
 
-  @OneToMany(() => SeenNotice, (seenNotice) => seenNotice.user, { onDelete: 'CASCADE' })
+  @OneToMany(() => SeenNotice, (seenNotice) => seenNotice.user)
   seenNotices: SeenNotice[];
 }

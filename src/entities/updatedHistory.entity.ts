@@ -24,6 +24,6 @@ export class UpdatedHistory {
   updatedDate: Date;
 
   @JoinColumn({ name: 'admin_id' })
-  @ManyToOne(() => Admin, (admin) => admin.updatedHistories)
+  @ManyToOne(() => Admin, (admin) => admin.updatedHistories, { onDelete: 'CASCADE' })
   processor: Admin;
 }
