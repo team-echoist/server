@@ -38,7 +38,7 @@ export class GeulroquisRepository {
     return this.geulroquisRepository.findOne({ where: { next: true } });
   }
 
-  async findNextGeulroquis(geulroquisId: number) {
+  async findOneGeulroquis(geulroquisId: number) {
     return this.geulroquisRepository.findOne({ where: { id: geulroquisId } });
   }
 }

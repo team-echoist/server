@@ -55,6 +55,7 @@ import { GeulroquisService } from '../geulroquis/geulroquis.service';
 import { CronService } from '../cron/cron.service';
 import { Server } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
+import { NicknameService } from '../nickname/nickname.service';
 
 @Injectable()
 export class AdminService {
@@ -71,6 +72,7 @@ export class AdminService {
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
     private readonly cronService: CronService,
+    private readonly nicknameService: NicknameService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
@@ -869,6 +871,11 @@ export class AdminService {
     await this.userRepository.deleteAccount(userId, todayDate);
   }
 
+  async deleteAllUser(adminId: number) {
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+    await this.userRepository.deleteAllAccount();
+  }
+
   async getCronLogs(adminId: number, page: number, limit: number) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     return await this.cronService.getCronLogs(page, limit);
@@ -942,5 +949,24 @@ export class AdminService {
 
   async updateAppVersion(versionId: number, version: string) {
     await this.supportService.updateAppVersion(versionId, version);
+  }
+
+  async clearDatabase(adminId: number) {
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    await this.adminRepository.clearDatabase();
+    await this.nicknameService.resetNickname();
+    await this.resetRootAdmin();
+  }
+
+  async resetRootAdmin() {
+    const root = await this.adminRepository.findAdmin(1);
+    const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 10);
+
+    root.email = process.env.ROOT_EMAIL;
+    root.name = process.env.ROOT_NAME;
+    root.password = hashedPassword;
+    root.activated = true;
+    await this.adminRepository.saveAdmin(root);
   }
 }

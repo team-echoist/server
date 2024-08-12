@@ -62,10 +62,18 @@ export class GeulroquisService {
     if (TomorrowGeulroquis) {
       TomorrowGeulroquis.next = false;
       await this.geulroquisRepository.saveGeulroquis(TomorrowGeulroquis);
+    } else {
+      const currentGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+      currentGeulroquis.current = true;
+      await this.geulroquisRepository.saveGeulroquis(currentGeulroquis);
+
+      return;
     }
 
-    const nextGeulroquis = await this.geulroquisRepository.findNextGeulroquis(geulroquisId);
+    const nextGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
     nextGeulroquis.next = true;
     await this.geulroquisRepository.saveGeulroquis(nextGeulroquis);
+
+    return;
   }
 }

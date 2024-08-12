@@ -36,4 +36,14 @@ export class NicknameService {
       await this.nicknameRepository.saveBasicNickname(basicNickname);
     }
   }
+
+  @Transactional()
+  async resetNickname() {
+    const nicknames = await this.nicknameRepository.findUsedNicknames();
+    nicknames.forEach((nickname) => {
+      nickname.isUsed = false;
+    });
+
+    await this.nicknameRepository.saveInitNickname(nicknames);
+  }
 }

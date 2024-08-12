@@ -126,4 +126,8 @@ export class UserRepository {
       .where('id = :userId', { userId })
       .execute();
   }
+
+  async deleteAllAccount() {
+    return this.userRepository.delete({});
+  }
 }
