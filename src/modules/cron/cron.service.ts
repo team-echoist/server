@@ -109,6 +109,7 @@ export class CronService {
             email: () => `CONCAT('${todayDate}_', email)`,
             nickname: null,
             status: UserStatus.DEACTIVATED,
+            profileImage: this.configService.get<string>('DEFAULT_PROFILE_IMG'),
             deletedDate: () => `NOW()`,
           })
           .where('id IN (:...userIds)', { userIds })
