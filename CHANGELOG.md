@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/team-echoist/server/compare/v1.8.9...v1.9.0) (2024-08-12)
+
+
+### Features
+
+* Added profile image invalidation when initializing database and deleting user ([#368](https://github.com/team-echoist/server/issues/368)) ([43cc446](https://github.com/team-echoist/server/commit/43cc446b42febe00f79c6c552ce40c208ca90b12))
+
 ## [1.8.9](https://github.com/team-echoist/server/compare/v1.8.8...v1.8.9) (2024-08-12)
 
 

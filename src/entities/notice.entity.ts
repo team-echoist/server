@@ -40,7 +40,7 @@ export class Notice {
   seenNotices: SeenNotice[];
 
   @JoinColumn({ name: 'admin_id' })
-  @ManyToOne(() => Admin, (admin) => admin.notice)
+  @ManyToOne(() => Admin, (admin) => admin.notice, { onDelete: 'CASCADE' })
   processor: Admin;
 
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.notice)

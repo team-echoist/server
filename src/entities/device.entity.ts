@@ -75,9 +75,9 @@ export class Device {
   @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
   user: User;
 
-  @OneToMany(() => Essay, (essay) => essay.device, { onDelete: 'CASCADE' })
+  @OneToMany(() => Essay, (essay) => essay.device)
   essays: Essay[];
 
-  @OneToMany(() => AlertSettings, (alertSettings) => alertSettings.device, { onDelete: 'CASCADE' })
+  @OneToMany(() => AlertSettings, (alertSettings) => alertSettings.device)
   alertSettings: AlertSettings[];
 }
