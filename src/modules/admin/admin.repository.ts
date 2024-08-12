@@ -217,6 +217,7 @@ export class AdminRepository {
     return this.serverRepository.save(server);
   }
 
+  @Transactional()
   async clearDatabase() {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -255,21 +256,10 @@ export class AdminRepository {
       'view_record',
     ]);
 
-    await queryRunner.startTransaction();
-
-    try {
-      for (const table of tables) {
-        if (!tablesToKeep.includes(table.name)) {
-          await queryRunner.query(`DELETE FROM "${table.name}"`);
-        }
+    for (const table of tables) {
+      if (!tablesToKeep.includes(table.name)) {
+        await queryRunner.query(`DELETE FROM "${table.name}"`);
       }
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
     }
   }
 }
