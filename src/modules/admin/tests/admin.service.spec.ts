@@ -17,6 +17,7 @@ import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { AdminResDto } from '../dto/response/adminRes.dto';
 import { GeulroquisService } from '../../geulroquis/geulroquis.service';
 import { CronService } from '../../cron/cron.service';
+import { NicknameService } from '../../nickname/nickname.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -37,6 +38,7 @@ jest.mock('../../alert/alert.service');
 jest.mock('../../firebase/firebase.service');
 jest.mock('../../geulroquis/geulroquis.service');
 jest.mock('../../cron/cron.service');
+jest.mock('../../nickname/nickname.service');
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -52,6 +54,7 @@ describe('AdminService', () => {
   let alertService: jest.Mocked<AlertService>;
   let geulroquisService: jest.Mocked<GeulroquisService>;
   let cronService: jest.Mocked<CronService>;
+  let nicknameService: jest.Mocked<NicknameService>;
 
   const mockRedis = {
     get: jest.fn(),
@@ -77,6 +80,7 @@ describe('AdminService', () => {
         SupportRepository,
         AlertService,
         GeulroquisService,
+        NicknameService,
         CronService,
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
         {

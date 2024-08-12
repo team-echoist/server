@@ -29,4 +29,12 @@ export class NicknameRepository {
   async saveBasicNickname(basicNickname: BasicNickname): Promise<void> {
     await this.nicknameRepository.save(basicNickname);
   }
+
+  async findUsedNicknames() {
+    return await this.nicknameRepository.find({ where: { isUsed: true } });
+  }
+
+  async saveInitNickname(nicknames: BasicNickname[]) {
+    return await this.nicknameRepository.save(nicknames);
+  }
 }

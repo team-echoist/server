@@ -10,7 +10,7 @@ export class SeenNotice {
   @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

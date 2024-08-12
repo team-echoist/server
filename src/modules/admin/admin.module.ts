@@ -29,6 +29,7 @@ import { AlertModule } from '../alert/alert.module';
 import { CronModule } from '../cron/cron.module';
 import { GeulroquisModule } from '../geulroquis/geulroquis.module';
 import { Server } from '../../entities/server.entity';
+import { NicknameModule } from '../nickname/nickname.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { Server } from '../../entities/server.entity';
     AlertModule,
     CronModule,
     GeulroquisModule,
+    NicknameModule,
   ],
   controllers: [AdminController],
   providers: [

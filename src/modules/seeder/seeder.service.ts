@@ -55,14 +55,15 @@ export class SeederService {
   }
 
   async initializeAdmin() {
-    const admin = await this.adminRepository.findOne({ where: { id: 1 } });
-    if (!admin) {
-      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-      const newAdmin = new Admin();
-      newAdmin.email = 'root@linkedoutapp.com';
-      newAdmin.password = hashedPassword;
-      newAdmin.activated = true;
-      await this.adminRepository.save(newAdmin);
+    const root = await this.adminRepository.findOne({ where: { id: 1 } });
+    if (!root) {
+      const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 10);
+      const newRoot = new Admin();
+      newRoot.email = process.env.ROOT_EMAIL;
+      newRoot.name = process.env.ROOT_NAME;
+      newRoot.password = hashedPassword;
+      newRoot.activated = true;
+      await this.adminRepository.save(newRoot);
       console.log('Root Admin created successfully');
     } else {
       console.log('Root Admin already exists');

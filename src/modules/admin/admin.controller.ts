@@ -1358,13 +1358,23 @@ export class AdminController {
   // ===================== danger zone =========================
   // ===========================================================
 
+  // @Delete('danger/users/all')
+  // async deleteAllUser(@Req() req: ExpressRequest) {
+  //   return this.adminService.deleteAllUser(req.user.id);
+  // }
+
+  // @Delete('danger/device/all')
+  // async deleteAllDevice(@Req() req: ExpressRequest) {
+  //   return this.adminService.deleteAllDevice(req.user.id);
+  // }
+
   @Delete('danger/users/:userId')
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
-  @Delete('danger/device')
-  async deleteAllDevice(@Req() req: ExpressRequest) {
-    return this.adminService.deleteAllDevice(req.user.id);
+  @Post('danger/super/init')
+  async clearDatabase(@Req() req: ExpressRequest) {
+    return this.adminService.clearDatabase(req.user.id);
   }
 }
