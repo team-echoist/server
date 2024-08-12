@@ -951,6 +951,7 @@ export class AdminService {
     await this.supportService.updateAppVersion(versionId, version);
   }
 
+  @Transactional()
   async clearDatabase(adminId: number) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 

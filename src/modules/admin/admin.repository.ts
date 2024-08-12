@@ -257,6 +257,8 @@ export class AdminRepository {
         'view_record',
       ]);
 
+      await queryRunner.startTransaction();
+
       for (const table of tables) {
         if (!tablesToKeep.includes(table.name)) {
           await queryRunner.query(`DELETE
