@@ -135,13 +135,13 @@ export class AuthController {
   1. 제공된 인증 토큰을 Redis에서 조회합니다.
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 이메일로 변경합니다.
-  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
+  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리다이렉션합니다.
   5. 그 외의 경우, 웹사이트로 리다이렉션합니다.
 
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리디렉션되며, 웹에서는 웹사이트로 리디렉션됩니다.
+  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 201 })
@@ -219,7 +219,7 @@ export class AuthController {
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리디렉션되며, 웹에서는 웹사이트로 리디렉션됩니다.
+  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 201 })
@@ -308,21 +308,21 @@ export class AuthController {
     summary: '비밀번호 재설정 검증',
     description: `
   이메일로 받은 비밀번호 재설정 토큰을 검증합니다. 
-  검증이 완료되면 새로운 토큰을 생성하여 리디렉션합니다.
+  검증이 완료되면 새로운 토큰을 생성하여 리다이렉션합니다.
 
   **쿼리 파라미터:**
   - \`token\`: 비밀번호 재설정 토큰
 
   **동작 과정:**
   1. 제공된 토큰을 검증합니다.
-  2. 유효한 토큰이면 새로운 토큰을 생성하고 리디렉션합니다.
+  2. 유효한 토큰이면 새로운 토큰을 생성하고 리다이렉션합니다.
 
   **주의 사항:**
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리디렉션됩니다.
+  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리다이렉션됩니다.
   `,
   })
-  @ApiResponse({ status: 302, description: '토큰 검증 및 리디렉션 성공' })
+  @ApiResponse({ status: 302, description: '토큰 검증 및 리다이렉션 성공' })
   @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
   async passwordResetVerify(
     @Query('token') token: string,
@@ -463,8 +463,8 @@ export class AuthController {
   사용자가 카카오 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 카카오 로그인 버튼을 클릭하면, 카카오 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 카카오 계정으로 인증을 완료하면, 카카오 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 카카오 로그인 버튼을 클릭하면, 카카오 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 카카오 계정으로 인증을 완료하면, 카카오 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })
@@ -539,8 +539,8 @@ export class AuthController {
   사용자가 네이버 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 네이버 로그인 버튼을 클릭하면, 네이버 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 네이버 계정으로 인증을 완료하면, 네이버 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 네이버 로그인 버튼을 클릭하면, 네이버 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 네이버 계정으로 인증을 완료하면, 네이버 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })
@@ -570,6 +570,7 @@ export class AuthController {
   @UseGuards(AuthGuard('naver'))
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
+    console.log(req.user);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     const newJwt = this.utilsService.generateJWT(user.id);
@@ -603,7 +604,6 @@ export class AuthController {
   @ApiResponse({ status: 201 })
   async mobileNaverLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
     req.user = await this.authService.validateNaverUser(oauthData.token);
-
     return;
   }
 
@@ -615,8 +615,8 @@ export class AuthController {
   사용자가 애플 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 애플 로그인 버튼을 클릭하면, 애플 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 애플 계정으로 인증을 완료하면, 애플 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 애플 로그인 버튼을 클릭하면, 애플 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 애플 계정으로 인증을 완료하면, 애플 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })

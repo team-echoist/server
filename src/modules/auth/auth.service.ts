@@ -269,7 +269,6 @@ export class AuthService {
   }
 
   async validateNaverUser(token: string) {
-    console.log('받은 토큰: ', token);
     const response = await firstValueFrom(
       this.httpService.get('https://openapi.naver.com/v1/nid/me', {
         headers: { Authorization: `Bearer ${token}` },
@@ -277,9 +276,7 @@ export class AuthService {
     );
 
     const payload = response.data.response;
-    console.log('토큰을 주고 받은 정보: ', payload);
-    console.log('토큰을 주고 받은 플랫폼 아이디: ', payload.platformId);
-    if (!payload || !payload.platformId) {
+    if (!payload || !payload.id) {
       throw new HttpException(
         '플랫폼으로부터 올바른 데이터를 받지 못했습니다.',
         HttpStatus.BAD_REQUEST,
@@ -289,7 +286,7 @@ export class AuthService {
     const oauthDto = new OauthDto();
     oauthDto.platform = 'naver';
     oauthDto.email = payload.email;
-    oauthDto.platformId = payload.platformId;
+    oauthDto.platformId = payload.id;
 
     return await this.oauthLogin(oauthDto);
   }
