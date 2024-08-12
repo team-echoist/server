@@ -1,3 +1,10 @@
+## [1.8.9](https://github.com/team-echoist/server/compare/v1.8.8...v1.8.9) (2024-08-12)
+
+
+### Bug Fixes
+
+* Change Naver payload reference property ([#366](https://github.com/team-echoist/server/issues/366)) ([c942858](https://github.com/team-echoist/server/commit/c9428586051a772b8e12622707dc236fa7b0be76))
+
 ## [1.8.8](https://github.com/team-echoist/server/compare/v1.8.7...v1.8.8) (2024-08-11)
 
 
