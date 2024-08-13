@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/team-echoist/server/compare/v1.10.0...v1.10.1) (2024-08-13)
+
+
+### Bug Fixes
+
+* Change to another essay type ([#371](https://github.com/team-echoist/server/issues/371)) ([7233300](https://github.com/team-echoist/server/commit/72333007a82622334c33f260581698b370a473a8))
+
 # [1.10.0](https://github.com/team-echoist/server/compare/v1.9.0...v1.10.0) (2024-08-13)
 
 
