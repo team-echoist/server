@@ -2,7 +2,7 @@ import { ReportDto } from '../report.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { EssayStatus } from '../../../../entities/essay.entity';
+import { EssayStatus } from '../../../../common/types/enum.types';
 
 export class ReportDetailResDto {
   @ApiProperty()

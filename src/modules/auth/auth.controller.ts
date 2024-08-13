@@ -12,9 +12,9 @@ import { UtilsService } from '../utils/utils.service';
 import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
-import { DeviceType, DeviceOS } from '../../entities/device.entity';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { Public } from '../../common/decorators/public.decorator';
+import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 
 @ApiTags('Auth')
 @UseGuards(JwtAuthGuard)

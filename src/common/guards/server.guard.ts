@@ -1,7 +1,7 @@
 import { ExecutionContext, Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ServerStatus } from '../../entities/server.entity';
 import { AdminService } from '../../modules/admin/admin.service';
+import { ServerStatus } from '../types/enum.types';
 
 @Injectable()
 export class ServerGuard extends AuthGuard('admin-pass') {

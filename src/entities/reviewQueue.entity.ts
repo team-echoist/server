@@ -11,11 +11,7 @@ import {
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
 import { ProcessedHistory } from './processedHistory.entity';
-
-export enum ReviewQueueType {
-  LINKEDOUT = 'linkedout',
-  PUBLISHED = 'published',
-}
+import { ReviewQueueType } from '../common/types/enum.types';
 
 @Entity('review_queue')
 export class ReviewQueue {

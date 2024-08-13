@@ -1,7 +1,7 @@
-import { AppType } from '../../../../entities/appVersions.entity';
 import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { AppType } from '../../../../common/types/enum.types';
 
 export class VersionsResDto {
   @ApiProperty()

@@ -5,11 +5,12 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UpdatedHistory } from '../../entities/updatedHistory.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
-import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
+import { Device } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
 import { AppVersions } from '../../entities/appVersions.entity';
 import { SeenNotice } from '../../entities/seenNotice.entity';
+import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 
 export class SupportRepository {
   constructor(

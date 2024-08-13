@@ -13,8 +13,8 @@ import { ViewService } from '../../view/view.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { AlertService } from '../../alert/alert.service';
 import { getQueueToken } from '@nestjs/bull';
-import { Essay, EssayStatus } from '../../../entities/essay.entity';
-import { User, UserStatus } from '../../../entities/user.entity';
+import { Essay } from '../../../entities/essay.entity';
+import { User } from '../../../entities/user.entity';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { EssayResDto } from '../dto/response/essayRes.dto';
 import { SummaryEssayResDto } from '../dto/response/summaryEssayRes.dto';
@@ -24,6 +24,7 @@ import { EssayStatsDto } from '../dto/essayStats.dto';
 import { Story } from '../../../entities/story.entity';
 import { SupportService } from '../../support/support.service';
 import { SupportRepository } from '../../support/support.repository';
+import { EssayStatus, UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

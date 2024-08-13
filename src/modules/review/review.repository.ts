@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReviewQueue, ReviewQueueType } from '../../entities/reviewQueue.entity';
+import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { Essay } from '../../entities/essay.entity';
+import { ReviewQueueType } from '../../common/types/enum.types';
 
 export class ReviewRepository {
   constructor(

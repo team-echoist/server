@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../../../modules/auth/auth.service';
-import { UserStatus } from '../../../entities/user.entity';
+import { UserStatus } from '../../types/enum.types';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {

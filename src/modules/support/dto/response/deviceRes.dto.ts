@@ -1,7 +1,7 @@
-import { DeviceOS, DeviceType } from '../../../../entities/device.entity';
 import { IsEnum, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { DeviceOS, DeviceType } from '../../../../common/types/enum.types';
 
 export class DeviceResDto {
   @ApiProperty()

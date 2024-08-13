@@ -15,7 +15,7 @@ import { StoryInfoDto } from '../../../story/dto/storyInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
 import { ReviewResDto } from './reviewRes.dto';
-import { EssayStatus } from '../../../../entities/essay.entity';
+import { EssayStatus } from '../../../../common/types/enum.types';
 
 export class FullEssayResDto {
   @ApiProperty()

@@ -25,13 +25,7 @@ import { AlertSettings } from './alertSettings.entity';
 import { Device } from './device.entity';
 import { Alert } from './alert.entity';
 import { SeenNotice } from './seenNotice.entity';
-
-export enum UserStatus {
-  ACTIVATED = 'activated',
-  MONITORED = 'monitored',
-  BANNED = 'banned',
-  DEACTIVATED = 'deactivated',
-}
+import { UserStatus } from '../common/types/enum.types';
 
 @Entity()
 export class User {

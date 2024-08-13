@@ -10,7 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { EssayStatus } from '../../../entities/essay.entity';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 export class EssayDto {
   @ApiProperty()

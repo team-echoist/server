@@ -1,7 +1,7 @@
-import { ReviewQueueType } from '../../../../entities/reviewQueue.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator';
+import { ReviewQueueType } from '../../../../common/types/enum.types';
 
 export class ReviewResDto {
   @ApiProperty()

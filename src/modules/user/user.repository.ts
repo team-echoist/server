@@ -1,9 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { MoreThan, Repository } from 'typeorm';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { ConfigService } from '@nestjs/config';
+import { UserStatus } from '../../common/types/enum.types';
 
 export class UserRepository {
   constructor(

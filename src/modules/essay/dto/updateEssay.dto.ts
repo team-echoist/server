@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Story } from '../../../entities/story.entity';
 import { Expose } from 'class-transformer';
-import { EssayStatus } from '../../../entities/essay.entity';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 export class UpdateEssayDto {
   @Expose()

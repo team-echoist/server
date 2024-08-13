@@ -1,10 +1,11 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Brackets, In, Repository } from 'typeorm';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { Essay } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { EssayStatus } from '../../common/types/enum.types';
 
 export class EssayRepository {
   constructor(
@@ -399,7 +400,8 @@ export class EssayRepository {
     const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.story', 'story')
-      .where('essay.author = :userId', { userId });
+      .where('essay.author = :userId', { userId })
+      .andWhere('essay.status != :status', { status: EssayStatus.LINKEDOUT });
 
     if (storyId) {
       queryBuilder.andWhere(

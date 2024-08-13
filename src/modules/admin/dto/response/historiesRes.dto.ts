@@ -5,10 +5,10 @@ import { ReportDto } from '../report.dto';
 import { ReviewResDto } from './reviewRes.dto';
 import { UserDto } from '../../../user/dto/user.dto';
 import { EssayDto } from '../../../essay/dto/essay.dto';
-import { ActionType } from '../../../../entities/processedHistory.entity';
 import { AdminResDto } from './adminRes.dto';
 import { NoticeResDto } from '../../../support/dto/response/noticeRes.dto';
 import { InquiryResDto } from '../../../support/dto/response/inquiryRes.dto';
+import { ActionType } from '../../../../common/types/enum.types';
 
 export class HistoriesResDto {
   @ApiProperty()
