@@ -225,18 +225,18 @@ export class EssayRepository {
     return { essays, total };
   }
 
-  async findPreviousMyEssay(authorId: number, createdDate: Date) {
+  async findPreviousPrivateEssay(authorId: number, createdDate: Date) {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author.id = :authorId', { authorId })
-      .andWhere('essay.status != :status', { status: EssayStatus.LINKEDOUT })
+      .andWhere('essay.status = :status', { status: EssayStatus.PRIVATE })
       .andWhere('essay.created_date < :createdDate', { createdDate })
       .orderBy('essay.created_date', 'DESC')
       .limit(6)
       .getMany();
   }
 
-  async findPreviousEssay(authorId: number, createdDate: Date) {
+  async findPreviousPublishEssay(authorId: number, createdDate: Date) {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author.id = :authorId', { authorId })
