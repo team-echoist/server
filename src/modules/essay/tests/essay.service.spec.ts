@@ -24,7 +24,7 @@ import { EssayStatsDto } from '../dto/essayStats.dto';
 import { Story } from '../../../entities/story.entity';
 import { SupportService } from '../../support/support.service';
 import { SupportRepository } from '../../support/support.repository';
-import { EssayStatus, UserStatus } from '../../../common/types/enum.types';
+import { AnotherEssayType, EssayStatus, UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -411,7 +411,7 @@ describe('EssayService', () => {
       });
       service.getRecommendEssays = jest.fn().mockResolvedValue({ essays: previousEssays });
 
-      const result = await service.getEssay(userId, essayId, 'community');
+      const result = await service.getEssay(userId, essayId, AnotherEssayType.RECOMMEND);
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);
@@ -432,7 +432,7 @@ describe('EssayService', () => {
 
       essayRepository.findEssayById.mockResolvedValue(null);
 
-      await expect(service.getEssay(userId, essayId, 'community')).rejects.toThrow(
+      await expect(service.getEssay(userId, essayId, AnotherEssayType.RECOMMEND)).rejects.toThrow(
         new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
 

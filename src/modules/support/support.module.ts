@@ -11,7 +11,7 @@ import { AuthModule } from '../auth/auth.module';
 import { User } from '../../entities/user.entity';
 import { UtilsModule } from '../utils/utils.module';
 import { UserModule } from '../user/user.module';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { Release } from '../../entities/release.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { Device } from '../../entities/device.entity';
 import { AppVersions } from '../../entities/appVersions.entity';
@@ -26,7 +26,7 @@ import { SeenNotice } from '../../entities/seenNotice.entity';
       User,
       Notice,
       Inquiry,
-      UpdatedHistory,
+      Release,
       AlertSettings,
       Device,
       AppVersions,

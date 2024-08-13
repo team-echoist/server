@@ -21,7 +21,7 @@ import { Admin } from '../../entities/admin.entity';
 import { Inquiry } from '../../entities/inquiry.entity';
 import { Notice } from '../../entities/notice.entity';
 import { SupportModule } from '../support/support.module';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { Release } from '../../entities/release.entity';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { AdminProcessor } from './admin.processor';
@@ -47,7 +47,7 @@ import { NicknameModule } from '../nickname/nickname.module';
       Admin,
       Inquiry,
       Notice,
-      UpdatedHistory,
+      Release,
       Server,
     ]),
     BullModule.registerQueueAsync({

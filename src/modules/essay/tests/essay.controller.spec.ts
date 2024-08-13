@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Request as ExpressRequest } from 'express';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { UpdateEssayReqDto } from '../dto/request/updateEssayReq.dto';
+import { AnotherEssayType } from '../../../common/types/enum.types';
 
 jest.mock('../essay.service');
 
@@ -205,8 +206,8 @@ describe('EssayController', () => {
 
       service.getEssay.mockResolvedValue(result as any);
 
-      const response = await controller.getEssay(req, essayId, 'community');
-      expect(service.getEssay).toHaveBeenCalledWith(req.user.id, essayId, 'community');
+      const response = await controller.getEssay(req, essayId, AnotherEssayType.RECOMMEND);
+      expect(service.getEssay).toHaveBeenCalledWith(req.user.id, essayId, 'recommend');
       expect(response).toEqual(result);
     });
   });

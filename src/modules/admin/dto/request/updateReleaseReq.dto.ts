@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class UpdateHistoryReqDto {
+export class UpdateReleaseReqDto {
   @ApiProperty()
   @IsString()
-  history: string;
+  content: string;
 }

@@ -218,7 +218,7 @@ export class UtilsService {
     const keywordIndex = cleanedText.toLowerCase().indexOf(keyword.toLowerCase());
 
     if (keywordIndex === -1) {
-      return text.slice(0, snippetLength);
+      return cleanedText.slice(0, snippetLength);
     }
 
     const start = Math.max(0, keywordIndex - Math.floor((snippetLength - keyword.length) / 2));

@@ -156,18 +156,18 @@ describe('SupportService', () => {
     it('should return user update histories', async () => {
       const page = 1;
       const limit = 10;
-      const histories = [{ id: 1, content: 'Update 1' }] as any;
-      const total = histories.length;
+      const releases = [{ id: 1, content: 'Update 1' }] as any;
+      const total = releases.length;
 
-      supportRepository.findUserUpdateHistories.mockResolvedValue({ histories, total });
-      utilsService.transformToDto.mockReturnValue(histories);
+      supportRepository.findUserReleases.mockResolvedValue({ releases, total });
+      utilsService.transformToDto.mockReturnValue(releases);
 
-      const result = await service.getUserUpdateHistories(page, limit);
+      const result = await service.getUserReleases(page, limit);
 
-      expect(supportRepository.findUserUpdateHistories).toHaveBeenCalledWith(page, limit);
-      expect(utilsService.transformToDto).toHaveBeenCalledWith(expect.any(Function), histories);
+      expect(supportRepository.findUserReleases).toHaveBeenCalledWith(page, limit);
+      expect(utilsService.transformToDto).toHaveBeenCalledWith(expect.any(Function), releases);
       expect(result).toEqual({
-        histories,
+        releases,
         total,
         page,
         totalPage: Math.ceil(total / limit),

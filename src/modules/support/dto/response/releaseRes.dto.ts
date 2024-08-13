@@ -3,7 +3,7 @@ import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-
 import { Expose, Type } from 'class-transformer';
 import { AdminResDto } from '../../../admin/dto/response/adminRes.dto';
 
-export class UpdatedHistoryResDto {
+export class ReleaseResDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
@@ -14,7 +14,7 @@ export class UpdatedHistoryResDto {
   @IsString()
   @IsNotEmpty()
   @Expose()
-  history: string;
+  content: string;
 
   @ApiProperty()
   @IsDateString()

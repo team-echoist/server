@@ -252,7 +252,7 @@ export class AdminRepository {
         'story',
         'tag',
         'tag_exp',
-        'updated_history',
+        'release',
         'user',
         'view_record',
       ]);

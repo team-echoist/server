@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Notice } from '../../entities/notice.entity';
 import { Repository } from 'typeorm';
 import { Inquiry } from '../../entities/inquiry.entity';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { Release } from '../../entities/release.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { Device } from '../../entities/device.entity';
@@ -16,8 +16,8 @@ export class SupportRepository {
   constructor(
     @InjectRepository(Inquiry) private readonly inquiryRepository: Repository<Inquiry>,
     @InjectRepository(Notice) private readonly noticeRepository: Repository<Notice>,
-    @InjectRepository(UpdatedHistory)
-    private readonly updatedHistoryRepository: Repository<UpdatedHistory>,
+    @InjectRepository(Release)
+    private readonly releaseRepository: Repository<Release>,
     @InjectRepository(AlertSettings)
     private readonly alertSettingsRepository: Repository<AlertSettings>,
     @InjectRepository(Device)
@@ -88,12 +88,16 @@ export class SupportRepository {
     return this.inquiryRepository.findOne({ where: { id: inquiryId }, relations: ['user'] });
   }
 
-  async saveUpdateHistory(updateHistory: UpdatedHistory) {
-    return this.updatedHistoryRepository.save(updateHistory);
+  async saveRelease(newRelease: Release) {
+    return this.releaseRepository.save(newRelease);
   }
 
-  async findAllUpdateHistories(page: number, limit: number) {
-    const [histories, total] = await this.updatedHistoryRepository.findAndCount({
+  async deleteRelease(releaseId: number) {
+    return this.releaseRepository.delete(releaseId);
+  }
+
+  async findReleases(page: number, limit: number) {
+    const [releases, total] = await this.releaseRepository.findAndCount({
       order: {
         createdDate: 'DESC',
       },
@@ -102,24 +106,24 @@ export class SupportRepository {
       relations: ['processor'],
     });
 
-    return { histories, total };
+    return { releases, total };
   }
 
-  async findUpdatedHistory(historyId: number) {
-    return this.updatedHistoryRepository
-      .createQueryBuilder('updated_history')
-      .leftJoinAndSelect('updated_history.processor', 'processor')
-      .where('updated_history.id = :id', { id: historyId })
+  async findRelease(releaseId: number) {
+    return this.releaseRepository
+      .createQueryBuilder('release')
+      .leftJoinAndSelect('release.processor', 'processor')
+      .where('release.id = :id', { id: releaseId })
       .getOne();
   }
 
-  async findUserUpdateHistories(page: number, limit: number) {
-    const [histories, total] = await this.updatedHistoryRepository.findAndCount({
+  async findUserReleases(page: number, limit: number) {
+    const [releases, total] = await this.releaseRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
     });
 
-    return { histories, total };
+    return { releases, total };
   }
 
   async createAlertSettings(data: UpdateAlertSettingsReqDto, userId: number, deviceId: number) {
