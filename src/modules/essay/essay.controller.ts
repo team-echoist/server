@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseEnumPipe,
   ParseIntPipe,
   Post,
   Put,
@@ -17,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { EssayService } from './essay.service';
 import { Request as ExpressRequest } from 'express';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
@@ -32,6 +32,7 @@ import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { EssayWithAnotherEssayResDto } from './dto/response/essayWithAnotherEssayRes.dto';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { AnotherEssayType } from '../../common/types/enum.types';
 
 @ApiTags('Essay')
 @UseGuards(JwtAuthGuard)
@@ -396,7 +397,7 @@ export class EssayController {
   - \`essayId\` (number, required): 조회할 에세이의 ID
   
   **쿼리 파라미터:**
-  - \`type\` (string, required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. 'private', 'published', 'recommend' 를 사용할 수 있으며 각각 '저장한 글', '발행한 글' 의 '이전 글'. 그리고 추천 에세이의 '다른 글'에 사용됩니다..
+  - \`type\` (string, required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. 'private', 'publish', 'recommend' 를 사용할 수 있으며 각각 '저장한 글', '발행한 글' 의 '이전 글'. 그리고 추천 에세이의 '다른 글'에 사용됩니다.
 
   **동작 과정:**
   1. 요청된 에세이 ID로 에세이를 조회합니다.
@@ -413,7 +414,7 @@ export class EssayController {
   async getEssay(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
-    @Query('type') type: string,
+    @Query('type', new ParseEnumPipe(AnotherEssayType)) type: AnotherEssayType,
   ) {
     return this.essayService.getEssay(req.user.id, essayId, type);
   }

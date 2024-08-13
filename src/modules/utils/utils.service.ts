@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { v4 } from 'uuid';
 import * as moment from 'moment-timezone';
+import * as sanitizeHtml from 'sanitize-html';
+
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 
 @Injectable()
@@ -168,16 +170,12 @@ export class UtilsService {
   }
 
   cleanText(text: string) {
-    return text
-      .replace(/<\/?[^>]+(>|$)/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return sanitizeHtml(text, { allowedTags: [], allowedAttributes: {} });
   }
 
   extractPartContent(text: string) {
     const cleanedText = this.cleanText(text);
-    const plainText = cleanedText.replace(/[\n\r]/g, '');
-    return plainText.slice(0, 100);
+    return cleanedText.slice(0, 100);
   }
 
   extractFirstSentences(text: string, minLength: number, maxLength: number) {

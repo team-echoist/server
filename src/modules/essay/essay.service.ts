@@ -35,7 +35,7 @@ import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
-import { EssayStatus, UserStatus } from '../../common/types/enum.types';
+import { AnotherEssayType, EssayStatus, UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class EssayService {
@@ -233,7 +233,7 @@ export class EssayService {
   }
 
   @Transactional()
-  async getEssay(userId: number, essayId: number, type: string) {
+  async getEssay(userId: number, essayId: number, type: AnotherEssayType) {
     const user = await this.userService.fetchUserEntityById(userId);
 
     const essay = await this.essayRepository.findEssayById(essayId);
@@ -247,9 +247,9 @@ export class EssayService {
     }
 
     const anotherEssays =
-      type === 'community'
+      type === AnotherEssayType.RECOMMEND
         ? await this.getRecommendEssays(userId, 6)
-        : await this.previousEssay(essay.author.id, essay);
+        : await this.previousEssay(userId, essay, type);
 
     const newEssayData = {
       ...essay,
@@ -329,12 +329,25 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  private async previousEssay(userId: number, essay: Essay) {
+  private async previousEssay(userId: number, essay: Essay, type: AnotherEssayType) {
     let previousEssay: Essay[];
 
-    userId === essay.author.id
-      ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
-      : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
+    if (type === AnotherEssayType.PUBLISH) {
+      previousEssay = await this.essayRepository.findPreviousPublishEssay(
+        userId,
+        essay.createdDate,
+      );
+    } else if (type === AnotherEssayType.PRIVATE) {
+      if (userId !== essay.author.id)
+        throw new HttpException(
+          '비공개 이전 글은 본인만 조회할 수 있습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      previousEssay = await this.essayRepository.findPreviousPrivateEssay(
+        userId,
+        essay.createdDate,
+      );
+    }
 
     previousEssay.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
