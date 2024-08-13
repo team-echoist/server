@@ -17,7 +17,7 @@ import { NoticeResDto } from './dto/response/noticeRes.dto';
 import { NoticesSummaryResDto } from './dto/response/noticesSummaryRes.dto';
 import { InquiryReqDto } from './dto/request/inquiryReq.dto';
 import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
-import { UpdatedHistoriesResDto } from './dto/response/updatedHistoriesRes.dto';
+import { ReleasesResDto } from './dto/response/releasesRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
@@ -153,11 +153,11 @@ export class SupportController {
     return this.supportService.getInquiry(req.user.id, inquiryId);
   }
 
-  @Get('updated-histories')
+  @Get('releases')
   @ApiOperation({
-    summary: '전체 업데이트 히스토리 조회 (유저용)',
+    summary: '전체 릴리즈 조회 (유저용)',
     description: `
-  유저가 모든 업데이트 히스토리를 조회합니다.
+  유저가 모든 릴리즈를 조회합니다.
 
   **쿼리 파라미터:**
   - \`page\`: 페이지 번호 (기본값: 1)
@@ -171,12 +171,12 @@ export class SupportController {
   - 유저 권한으로 접근할 수 있습니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
+  @ApiResponse({ status: 200, type: ReleasesResDto })
   async getUserUpdateHistories(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.supportService.getUserUpdateHistories(page, limit);
+    return this.supportService.getUserReleases(page, limit);
   }
 
   @Get('settings')

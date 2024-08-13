@@ -45,8 +45,8 @@ import { SupportService } from '../support/support.service';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
 import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
-import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
+import { Release } from '../../entities/release.entity';
+import { ReleaseResDto } from '../support/dto/response/releaseRes.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../alert/alert.service';
@@ -839,29 +839,48 @@ export class AdminService {
     await this.adminRepository.saveHistory(newHistory);
   }
 
-  async createUpdateHistory(adminId: number, history: string) {
+  async createRelease(adminId: number, content: string) {
     const processor = await this.adminRepository.findAdmin(adminId);
 
-    const newUpdateHistory = new UpdatedHistory();
-    newUpdateHistory.history = history;
-    newUpdateHistory.processor = processor;
+    const newRelease = new Release();
+    newRelease.content = content;
+    newRelease.processor = processor;
 
-    await this.supportRepository.saveUpdateHistory(newUpdateHistory);
+    await this.supportRepository.saveRelease(newRelease);
   }
 
-  async getAllUpdateHistories(page: number, limit: number) {
-    const { histories, total } = await this.supportRepository.findAllUpdateHistories(page, limit);
+  async updateRelease(adminId: number, releaseId: number, content: string) {
+    const processor = await this.adminRepository.findAdmin(adminId);
+
+    const release = await this.supportRepository.findRelease(releaseId);
+    release.content = content;
+    release.processor = processor;
+
+    await this.supportRepository.saveRelease(release);
+  }
+
+  async deleteRelease(adminId: number, releaseId: number) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+    const release = await this.supportRepository.findRelease(releaseId);
+    const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, admin);
+    await this.adminRepository.saveHistory(history);
+
+    return this.supportRepository.deleteRelease(releaseId);
+  }
+
+  async getReleases(page: number, limit: number) {
+    const { releases, total } = await this.supportRepository.findReleases(page, limit);
 
     const totalPage = Math.ceil(total / limit);
-    const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
+    const releasesDto = this.utilsService.transformToDto(ReleaseResDto, releases);
 
-    return { histories: historiesDto, total, page, totalPage };
+    return { releases: releasesDto, total, page, totalPage };
   }
 
-  async getUpdateHistory(historyId: number) {
-    const history = await this.supportRepository.findUpdatedHistory(historyId);
+  async getRelease(releaseId: number) {
+    const release = await this.supportRepository.findRelease(releaseId);
 
-    return this.utilsService.transformToDto(UpdatedHistoryResDto, history);
+    return this.utilsService.transformToDto(ReleaseResDto, release);
   }
 
   async deleteUser(adminId: number, userId: number) {

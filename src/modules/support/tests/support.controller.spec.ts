@@ -119,10 +119,10 @@ describe('SupportController', () => {
       const limit = 10;
       const histories = { items: [], total: 0 };
 
-      service.getUserUpdateHistories.mockResolvedValue(histories as any);
+      service.getUserReleases.mockResolvedValue(histories as any);
 
       const response = await controller.getUserUpdateHistories(page, limit);
-      expect(service.getUserUpdateHistories).toHaveBeenCalledWith(page, limit);
+      expect(service.getUserReleases).toHaveBeenCalledWith(page, limit);
       expect(response).toEqual(histories);
     });
   });

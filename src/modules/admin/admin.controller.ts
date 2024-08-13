@@ -50,9 +50,9 @@ import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes
 import { NoticesSummaryResDto } from '../support/dto/response/noticesSummaryRes.dto';
 import { InquiryAnswerReqDto } from './dto/request/inquiryAnswerReq.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
-import { UpdateHistoryReqDto } from './dto/request/updateHistoryReq.dto';
+import { UpdateReleaseReqDto } from './dto/request/updateReleaseReq.dto';
 import { InquiriesSummaryResDto } from '../support/dto/response/inquiriesSummaryRes.dto';
-import { UpdatedHistoriesResDto } from '../support/dto/response/updatedHistoriesRes.dto';
+import { ReleasesResDto } from '../support/dto/response/releasesRes.dto';
 import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
 import { GeulroquisResDto } from '../geulroquis/dto/response/geulroquisRes.dto';
@@ -1014,17 +1014,17 @@ export class AdminController {
     return this.adminService.createAnswer(req.user.id, inquiryId, data.answer);
   }
 
-  @Post('updated-histories')
+  @Post('release')
   @ApiOperation({
-    summary: '업데이트 히스토리 생성',
+    summary: '릴리즈 생성',
     description: `
-  관리자가 업데이트 히스토리를 생성합니다.
+  새로운 릴리즈를 생성합니다.
   
   **요청 본문:**
-  - \`history\`: 업데이트 히스토리 내용
+  - \`release\`: 릴리즈 내용
 
   **동작 과정:**
-  1. 관리자가 업데이트 히스토리 내용을 입력하여 요청을 보냅니다.
+  1. 관리자가 릴리즈 내용을 입력하여 요청을 보냅니다.
   2. 입력된 내용을 기반으로 새로운 업데이트 히스토리가 생성됩니다.
   3. 생성된 업데이트 히스토리가 데이터베이스에 저장됩니다.
 
@@ -1033,80 +1033,109 @@ export class AdminController {
   `,
   })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: UpdateHistoryReqDto })
-  async createUpdateHistory(@Req() req: ExpressRequest, @Body() data: UpdateHistoryReqDto) {
-    return this.adminService.createUpdateHistory(req.user.id, data.history);
+  @ApiBody({ type: UpdateReleaseReqDto })
+  async createRelease(@Req() req: ExpressRequest, @Body() data: UpdateReleaseReqDto) {
+    return this.adminService.createRelease(req.user.id, data.content);
   }
 
-  @Put('updated-histories/:historyId')
+  @Put('releases/:releaseId')
   @ApiOperation({
-    summary: '업데이트 히스토리 수정',
+    summary: '릴리즈 수정',
     description: `
-  관리자가 기존 업데이트 히스토리를 수정합니다.
+  기존 릴리즈를 수정합니다.
 
   **경로 파라미터:**
-  - \`historyId\`: 수정할 업데이트 히스토리의 ID
+  - \`releaseId\`: 수정할 릴리즈 ID
 
   **요청 본문:**
-  - \`history\`: 수정된 업데이트 히스토리 내용
+  - \`content\`: 수정된 릴리즈 내용
 
   **동작 과정:**
-  1. 관리자가 수정할 업데이트 히스토리의 ID와 내용을 입력하여 요청을 보냅니다.
-  2. 해당 ID의 업데이트 히스토리가 수정됩니다.
-  3. 수정된 업데이트 히스토리가 데이터베이스에 저장됩니다.
+  1. 관리자가 수정할 릴리즈의 ID와 내용을 입력하여 요청을 보냅니다.
+  2. 해당 ID의 릴리즈가 수정됩니다.
+  3. 수정된 릴리즈가 데이터베이스에 저장됩니다.
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: UpdateHistoryReqDto })
-  async modifyUpdateHistory(@Req() req: ExpressRequest, @Body() data: UpdateHistoryReqDto) {
-    return this.adminService.createUpdateHistory(req.user.id, data.history);
+  @ApiBody({ type: UpdateReleaseReqDto })
+  async updateRelease(
+    @Req() req: ExpressRequest,
+    @Param('releaseId', ParseIntPipe) releaseId: number,
+    @Body() data: UpdateReleaseReqDto,
+  ) {
+    return this.adminService.updateRelease(req.user.id, releaseId, data.content);
   }
 
-  @Get('updated-histories')
+  @Delete('releases/:releaseId')
   @ApiOperation({
-    summary: '전체 업데이트 히스토리 조회',
+    summary: '릴리즈 삭제',
     description: `
-  관리자가 모든 업데이트 히스토리를 조회합니다.
+  릴리즈를 삭제합니다.
+
+  **경로 파라미터:**
+  - \`releaseId\`: 삭제할 릴리즈 ID
+
+  **동작 과정:**
+  1. 관리자가 삭제할 릴리즈의 ID로 요청을 보냅니다.
+  2. 해당 ID의 릴리즈가 데이터베이스에서 삭제됩니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  async deleteRelease(
+    @Req() req: ExpressRequest,
+    @Param('releaseId', ParseIntPipe) releaseId: number,
+  ) {
+    return this.adminService.deleteRelease(req.user.id, releaseId);
+  }
+
+  @Get('releases')
+  @ApiOperation({
+    summary: '전체 릴리즈 조회',
+    description: `
+  모든 릴리즈를 조회합니다.
 
   **쿼리 파라미터:**
   - \`page\`: 페이지 번호 (기본값: 1)
   - \`limit\`: 페이지당 항목 수 (기본값: 10)
 
   **동작 과정:**
-  1. 모든 업데이트 히스토리를 페이지네이션하여 조회합니다.
-  2. 조회된 업데이트 히스토리 목록을 반환합니다.
+  1. 모든 릴리즈를 페이지네이션하여 조회합니다.
+  2. 조회된 릴리즈 목록을 반환합니다.
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
-  async getAllUpdateHistories(
+  @ApiResponse({ status: 200, type: ReleasesResDto })
+  async getReleases(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.adminService.getAllUpdateHistories(page, limit);
+    return this.adminService.getReleases(page, limit);
   }
 
-  @Get('updated-histories/:historyId')
+  @Get('releases/:releaseId')
   @ApiOperation({
-    summary: '타겟 업데이트 히스토리 조회',
+    summary: '타겟 릴리즈 조회',
     description: `
-  관리자가 타겟 업데이트 히스토리를 조회합니다.
+  타겟 릴리즈를 조회합니다.
 
   **경로 파라미터:**
-  - \`historyId\`: 조회할 업데이트 히스토리 아이디
+  - \`releaseId\`: 조회할 릴리즈 아이디
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
-  async getUpdateHistory(@Param('historyId', ParseIntPipe) historyId: number) {
-    return this.adminService.getUpdateHistory(historyId);
+  @ApiResponse({ status: 200, type: ReleasesResDto })
+  async getRelease(@Param('releaseId', ParseIntPipe) releaseId: number) {
+    return this.adminService.getRelease(releaseId);
   }
 
   @Get('geulroquis')

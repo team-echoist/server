@@ -8,7 +8,7 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UserService } from '../user/user.service';
 import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
-import { UpdatedHistoryResDto } from './dto/response/updatedHistoryRes.dto';
+import { ReleaseResDto } from './dto/response/releaseRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
@@ -71,13 +71,13 @@ export class SupportService {
   }
 
   @Transactional()
-  async getUserUpdateHistories(page: number, limit: number) {
-    const { histories, total } = await this.supportRepository.findUserUpdateHistories(page, limit);
+  async getUserReleases(page: number, limit: number) {
+    const { releases, total } = await this.supportRepository.findUserReleases(page, limit);
 
     const totalPage = Math.ceil(total / limit);
-    const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
+    const releasesDto = this.utilsService.transformToDto(ReleaseResDto, releases);
 
-    return { histories: historiesDto, total, page, totalPage };
+    return { releases: releasesDto, total, page, totalPage };
   }
 
   @Transactional()

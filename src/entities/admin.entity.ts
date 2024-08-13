@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Notice } from './notice.entity';
-import { UpdatedHistory } from './updatedHistory.entity';
+import { Release } from './release.entity';
 
 @Entity()
 export class Admin {
@@ -42,8 +42,8 @@ export class Admin {
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.processor)
   processedHistories: ProcessedHistory[];
 
-  @OneToMany(() => UpdatedHistory, (updatedHistory) => updatedHistory.processor)
-  updatedHistories: UpdatedHistory[];
+  @OneToMany(() => Release, (release) => release.processor)
+  releases: Release[];
 
   @OneToMany(() => Notice, (notice) => notice.processor)
   notice: Notice[];
