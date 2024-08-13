@@ -14,12 +14,13 @@ import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { Transactional } from 'typeorm-transactional';
 import { Request as ExpressRequest } from 'express';
-import { Device, DeviceType, DeviceOS } from '../../entities/device.entity';
+import { Device } from '../../entities/device.entity';
 import { User } from '../../entities/user.entity';
 import { DeviceDto } from './dto/device.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
+import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 
 @Injectable()
 export class SupportService {

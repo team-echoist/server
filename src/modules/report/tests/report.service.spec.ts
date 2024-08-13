@@ -4,8 +4,9 @@ import { ReportRepository } from '../report.repository';
 import { EssayService } from '../../essay/essay.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ReportQueue } from '../../../entities/reportQueue.entity';
-import { Essay, EssayStatus } from '../../../entities/essay.entity';
+import { Essay } from '../../../entities/essay.entity';
 import { CreateReportReqDto } from '../dto/request/createReportReq.dto';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

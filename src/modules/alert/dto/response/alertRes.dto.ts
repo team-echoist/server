@@ -1,8 +1,8 @@
-import { AlertType } from '../../../../entities/alert.entity';
 import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { EssayIdResDto } from '../../../essay/dto/response/essayIdRes.dto';
+import { AlertType } from '../../../../common/types/enum.types';
 
 export class AlertResDto {
   @ApiProperty()

@@ -22,12 +22,7 @@ import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 import { Alert } from './alert.entity';
 import { Device } from './device.entity';
-
-export enum EssayStatus {
-  PRIVATE = 'private',
-  PUBLISHED = 'published',
-  LINKEDOUT = 'linkedout',
-}
+import { EssayStatus } from '../common/types/enum.types';
 
 @Entity()
 export class Essay {

@@ -13,21 +13,7 @@ import { User } from './user.entity';
 import { Admin } from './admin.entity';
 import { Inquiry } from './inquiry.entity';
 import { Notice } from './notice.entity';
-
-export enum ActionType {
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  PENDING = 'pending',
-  UPDATED = 'updated',
-  DELETED = 'deleted',
-  UNPUBLISHED = 'unpublished',
-  UNLINKEDOUT = 'unlinkedout',
-  PUBLISHED = 'published',
-  LINKEDOUT = 'linkedout',
-  BANNED = 'banned',
-  MONITORED = 'monitored',
-  ANSWERED = 'answered',
-}
+import { ActionType } from '../common/types/enum.types';
 
 @Entity('processed_history')
 export class ProcessedHistory {

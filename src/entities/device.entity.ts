@@ -12,23 +12,7 @@ import {
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
 import { AlertSettings } from './alertSettings.entity';
-
-export enum DeviceOS {
-  WINDOW = 'Window',
-  MAC = 'Mac',
-  ANDROID = 'Android',
-  IOS = 'iOS',
-  LINUX = 'Linux',
-  UNKNOWN = 'Unknown',
-}
-
-export enum DeviceType {
-  DESKTOP = 'Desktop',
-  LAPTOP = 'Laptop',
-  MOBILE = 'Mobile',
-  TABLET = 'Tablet',
-  UNKNOWN = 'Unknown',
-}
+import { DeviceOS, DeviceType } from '../common/types/enum.types';
 
 @Entity()
 export class Device {

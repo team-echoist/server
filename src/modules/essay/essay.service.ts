@@ -9,10 +9,10 @@ import {
 import { Transactional } from 'typeorm-transactional';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { Essay } from '../../entities/essay.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Story } from '../../entities/story.entity';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { ReviewService } from '../review/review.service';
@@ -35,6 +35,7 @@ import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
+import { EssayStatus, UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class EssayService {

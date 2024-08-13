@@ -4,8 +4,8 @@ import { ReviewRepository } from '../review.repository';
 import { CreateEssayReqDto } from '../../essay/dto/request/createEssayReq.dto';
 import { UpdateEssayReqDto } from '../../essay/dto/request/updateEssayReq.dto';
 import { User } from '../../../entities/user.entity';
-import { Essay, EssayStatus } from '../../../entities/essay.entity';
-import { ReviewQueueType } from '../../../entities/reviewQueue.entity';
+import { Essay } from '../../../entities/essay.entity';
+import { EssayStatus, ReviewQueueType } from '../../../common/types/enum.types';
 
 jest.mock('../review.repository');
 

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { CronLog } from '../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -13,6 +13,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { Device } from '../../entities/device.entity';
+import { UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class CronService {

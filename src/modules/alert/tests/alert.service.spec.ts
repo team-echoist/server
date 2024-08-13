@@ -6,14 +6,12 @@ import { SupportService } from '../../support/support.service';
 import { FirebaseService } from '../../firebase/firebase.service';
 import { UserService } from '../../user/user.service';
 import { User } from '../../../entities/user.entity';
-import { EssayStatus } from '../../../entities/essay.entity';
-import { ActionType } from '../../../entities/processedHistory.entity';
-import { AlertType } from '../../../entities/alert.entity';
 import { HttpException } from '@nestjs/common';
 import { NicknameService } from '../../nickname/nickname.service';
 import { AwsService } from '../../aws/aws.service';
 import { AuthService } from '../../auth/auth.service';
 import { EssayService } from '../../essay/essay.service';
+import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

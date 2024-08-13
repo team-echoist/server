@@ -1,18 +1,18 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AlertRepository } from './alert.repository';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
-import { Alert, AlertType } from '../../entities/alert.entity';
+import { Essay } from '../../entities/essay.entity';
+import { Alert } from '../../entities/alert.entity';
 import { UtilsService } from '../utils/utils.service';
 import { AlertResDto } from './dto/response/alertRes.dto';
 import { SupportService } from '../support/support.service';
 import { FirebaseService } from '../firebase/firebase.service';
-import { ActionType } from '../../entities/processedHistory.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { UserService } from '../user/user.service';
 import { User } from '../../entities/user.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { ActionType, AlertType, EssayStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class AlertService {

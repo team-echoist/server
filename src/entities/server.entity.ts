@@ -1,10 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-
-export enum ServerStatus {
-  OPEN = 'open',
-  MAINTENANCE = 'maintenance',
-  CLOSED = 'closed',
-}
+import { ServerStatus } from '../common/types/enum.types';
 
 @Entity()
 export class Server {

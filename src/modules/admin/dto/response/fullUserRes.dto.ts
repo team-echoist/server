@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsDate, IsEmail, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { UserStatus } from '../../../../entities/user.entity';
+import { UserStatus } from '../../../../common/types/enum.types';
 
 export class FullUserResDto {
   @ApiProperty()

@@ -5,15 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-export enum AppType {
-  ANDROID_MOBILE = 'android_mobile',
-  ANDROID_TABLET = 'android_tablet',
-  IOS_MOBILE = 'ios_mobile',
-  IOS_TABLET = 'ios_tablet',
-  DESCKTOP_MAC = 'desktop_mac',
-  DESCKTOP_WINDOWS = 'desktop_windows',
-}
+import { AppType } from '../common/types/enum.types';
 
 @Entity('app_versions')
 export class AppVersions {

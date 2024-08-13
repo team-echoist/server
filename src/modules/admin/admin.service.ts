@@ -4,11 +4,10 @@ import { Transactional } from 'typeorm-transactional';
 import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { ActionType, ProcessedHistory } from '../../entities/processedHistory.entity';
+import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
-import { UserStatus } from '../../entities/user.entity';
+import { Essay } from '../../entities/essay.entity';
 import { Admin } from '../../entities/admin.entity';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
@@ -56,6 +55,7 @@ import { CronService } from '../cron/cron.service';
 import { Server } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { NicknameService } from '../nickname/nickname.service';
+import { ActionType, EssayStatus, UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class AdminService {

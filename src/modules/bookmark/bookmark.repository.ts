@@ -2,7 +2,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { User } from '../../entities/user.entity';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { Essay } from '../../entities/essay.entity';
+import { EssayStatus } from '../../common/types/enum.types';
 
 export class BookmarkRepository {
   constructor(

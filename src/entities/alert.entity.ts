@@ -8,12 +8,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Essay } from './essay.entity';
-
-export enum AlertType {
-  PUBLISHED = 'published',
-  LINKEDOUT = 'linkedout',
-  SUPPORT = 'support',
-}
+import { AlertType } from '../common/types/enum.types';
 
 @Entity()
 export class Alert {

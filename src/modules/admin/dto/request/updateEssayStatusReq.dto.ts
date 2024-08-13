@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
-import { EssayStatus } from '../../../../entities/essay.entity';
+import { EssayStatus } from '../../../../common/types/enum.types';
 
 export class UpdateEssayStatusReqDto {
   @ApiProperty({ description: 'private, published, linkedout' })

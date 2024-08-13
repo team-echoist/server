@@ -57,11 +57,12 @@ import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
 import { GeulroquisResDto } from '../geulroquis/dto/response/geulroquisRes.dto';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
-import { ServerStatus } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { UpdateVersionReqDto } from '../support/dto/request/updateVersionReq.dto';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { Public } from '../../common/decorators/public.decorator';
+import { ServerStatus } from '../../common/types/enum.types';
+import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -1218,7 +1219,7 @@ export class AdminController {
   })
   @ApiResponse({
     status: 200,
-    type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
+    type: ServerStatusResDto,
   })
   async getServerStatus() {
     return this.adminService.getServerStatus();

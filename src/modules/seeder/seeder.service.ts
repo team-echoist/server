@@ -5,8 +5,9 @@ import * as bcrypt from 'bcrypt';
 import { UtilsService } from '../utils/utils.service';
 import { Admin } from '../../entities/admin.entity';
 import { BasicNickname } from '../../entities/basicNickname.entity';
-import { Server, ServerStatus } from '../../entities/server.entity';
-import { AppType, AppVersions } from '../../entities/appVersions.entity';
+import { Server } from '../../entities/server.entity';
+import { AppVersions } from '../../entities/appVersions.entity';
+import { AppType, ServerStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class SeederService {

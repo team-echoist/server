@@ -1,5 +1,5 @@
 import { IsEnum, IsString } from 'class-validator';
-import { DeviceType, DeviceOS } from '../../../entities/device.entity';
+import { DeviceOS, DeviceType } from '../../../common/types/enum.types';
 
 export class DeviceDto {
   @IsEnum(DeviceOS)

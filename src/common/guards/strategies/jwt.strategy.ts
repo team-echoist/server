@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../../../modules/auth/auth.service';
 import * as dotenv from 'dotenv';
-import { UserStatus } from '../../../entities/user.entity';
+import { UserStatus } from '../../types/enum.types';
 
 dotenv.config();
 

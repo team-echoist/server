@@ -15,9 +15,7 @@ import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
 import { InquiryAnswerReqDto } from '../dto/request/inquiryAnswerReq.dto';
 import { UpdateHistoryReqDto } from '../dto/request/updateHistoryReq.dto';
 import { Request as ExpressRequest } from 'express';
-import { ActionType } from '../../../entities/processedHistory.entity';
-import { UserStatus } from '../../../entities/user.entity';
-import { EssayStatus } from '../../../entities/essay.entity';
+import { ActionType, EssayStatus, UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('../admin.service');
 
