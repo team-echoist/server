@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/team-echoist/server/compare/v1.9.0...v1.10.0) (2024-08-13)
+
+
+### Features
+
+* Add administrator management API ([#369](https://github.com/team-echoist/server/issues/369)) ([fa1ac77](https://github.com/team-echoist/server/commit/fa1ac7764536a7d71a75029c00b8e7afe330ac09))
+
 # [1.9.0](https://github.com/team-echoist/server/compare/v1.8.9...v1.9.0) (2024-08-12)
 
 
