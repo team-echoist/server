@@ -17,7 +17,6 @@ import {
 } from '@nestjs/common';
 import { EssayService } from './essay.service';
 import { Request as ExpressRequest } from 'express';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
