@@ -14,7 +14,7 @@ export class ReleaseResDto {
   @IsString()
   @IsNotEmpty()
   @Expose()
-  release: string;
+  content: string;
 
   @ApiProperty()
   @IsDateString()
