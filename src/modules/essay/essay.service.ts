@@ -60,6 +60,12 @@ export class EssayService {
       throw new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN);
   }
 
+  async testfn() {
+    const text =
+      '<p>긴내용234ㅇㅇㅇㅇㅇㅇㅇ ㅇ 아 ㅇㅇㅇㅇㅇㅇㅇㅇㅇ ㅇㅇㅇㅇㅇㅇㅇ  <b>ㅇㅇㅇㅇㅇㅇㅇㅇㅇ<u>ㅇㅇㅇㅇ <s>ㅇㅇㅇㅇㅇㅇㅇㅇ </s></u><s>ㅇㅇㅇㅇㅇㅇㅇ 이 이 ㅇㅇㅇㅇㅇㅇ</s>ㅇㅇㅇ  양 ㅇㅇㅇㅇㅇㅇ</b>ㅇ</p><p><s> ㅇㅇㅇㅇㅇㅇㅇㅇㅇ  </s>ㄹㄹㄹㄹㄹㄹㄹㄹ <span style="font-size: 16.0px;">ㄹㄹㄹㄹㄹㄹㄹ<span style="font-size: 17.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 18.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 19.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 20.0px;">ㄹㄹㄹ<span style="font-size: 22.0px;">ㄹㄹ<span style="font-size: 24.0px;">ㄹㄹ</span></span></span></span></span></span></span></p>';
+    return this.utilsService.cleanText(text);
+  }
+
   @Transactional()
   async saveEssay(requester: Express.User, deviceDto: DeviceDto, data: CreateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);

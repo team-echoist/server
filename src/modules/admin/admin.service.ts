@@ -951,9 +951,31 @@ export class AdminService {
     await this.supportService.updateAppVersion(versionId, version);
   }
 
-  @Transactional()
-  async clearDatabase(adminId: number) {
+  async requestClearDatabase(adminId: number) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    const admin = await this.adminRepository.findAdmin(adminId);
+
+    const token = await this.utilsService.generateVerifyToken();
+
+    const adminData = { email: admin.email, id: admin.id };
+
+    await this.redis.set(token, JSON.stringify(adminData), 'EX', 600);
+
+    await this.mailService.rootAuthenticationEmail(admin.email, token);
+  }
+
+  @Transactional()
+  async clearDatabase(token: string) {
+    const rootAdmin = await this.redis.get(token);
+
+    if (!rootAdmin)
+      throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
+
+    const { email, id } = JSON.parse(rootAdmin);
+    console.log(email, id);
+
+    if (id !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminRepository.clearDatabase();
     await this.nicknameService.resetNickname();

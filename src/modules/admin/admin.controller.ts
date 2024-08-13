@@ -1251,6 +1251,7 @@ export class AdminController {
   **동작 과정:**
   1. 데이터베이스에 다음으로 제공할 글로키가 존재하는지 조회하고 무효화합니다.
   2. 매개변수로 제공받은 아이디에 해당하는 글로키를 다음 글로키로 지정합니다.
+  3. (분기) 만약 다음으로 제공할 글로키가 없다면 매개변수로 제공받은 아이디에 해당하는 글로키를 현재 제공중인 상태로 변경합니다.
 
   **주의 사항:**
   - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
@@ -1373,8 +1374,14 @@ export class AdminController {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
-  @Post('danger/super/init')
-  async clearDatabase(@Req() req: ExpressRequest) {
-    return this.adminService.clearDatabase(req.user.id);
+  @Post('danger/super/verify')
+  async requestClearDatabase(@Req() req: ExpressRequest) {
+    return this.adminService.requestClearDatabase(req.user.id);
+  }
+
+  @Public()
+  @Get('danger/super/init')
+  async clearDatabase(@Query('token') token: string) {
+    return this.adminService.clearDatabase(token);
   }
 }
