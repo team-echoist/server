@@ -209,30 +209,6 @@ export class AdminController {
     return this.adminService.getAdmins(activated);
   }
 
-  @Post('produce')
-  @ApiOperation({
-    summary: '[루트 관리자용] 관리자생성',
-    description: `
-  루트 관리자가 새로운 관리자를 생성하는 API입니다. 이 API는 루트 관리자만 호출할 수 있습니다.
-    
-  **주의 사항:**
-  - 루트 관리자만 이 API를 호출할 수 있습니다. 루트 관리자 ID는 1로 고정되어 있습니다.
-  - 비밀번호는 저장 전에 해시 처리됩니다.
-    
-  **동작 과정:**
-  1. 요청을 보낸 관리자가 루트 관리자 인지 확인합니다.
-  2. 제공된 데이터로 새 관리자를 생성합니다.
-  3. 새 관리자의 비밀번호를 해시화합니다.
-  4. 새 관리자를 데이터베이스에 저장합니다.
-  5. 저장된 관리자 정보를 반환합니다.
-  `,
-  })
-  @ApiBody({ type: CreateAdminReqDto })
-  @ApiResponse({ status: 200, type: SavedAdminResDto })
-  async createAdmin(@Req() req: ExpressRequest, @Body() data: CreateAdminReqDto) {
-    return this.adminService.createAdmin(req.user.id, data);
-  }
-
   @Get('dashboard')
   @ApiOperation({
     summary: 'Dashboard',
@@ -1132,39 +1108,6 @@ export class AdminController {
     return this.adminService.getUpdateHistory(historyId);
   }
 
-  @Put(':adminId')
-  @ApiOperation({
-    summary: '[루트관리자용] 어드민 활성화 상태 변경',
-    description: `
-  어드민의 활성화 상태를 변경합니다. 이 기능은 루트 관리자가 사용합니다.
-
-	**경로 파라미터:**
-  - \`adminId\`: 활성화 상태를 변경할 어드민의 ID
-  
-  **쿼리 파라미터:**
-  - \`activated\`: 활성화 또는 비활성화 상태 (true 또는 false)
-
-  **동작 과정:**
-  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 활성화 상태를 조회합니다.
-  2. \`activated\` 파라미터를 통해 활성화 또는 비활성화 상태로 설정합니다.
-  3. \`activated\` 파라미터가 true라면 요청자 메일로 활성상태 알림이 전송됩니다.
-  4. 변경된 활성화 상태의 어드민 정보를 반환합니다.
-
-  **주의 사항:**
-  - 루트 관리자가 아닌 경우 \`403 Forbidden\` 오류가 발생합니다.
-  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: AdminResDto })
-  @ApiQuery({ name: 'activated', required: true })
-  async activationSettings(
-    @Req() req: ExpressRequest,
-    @Param('adminId', ParseIntPipe) adminId: number,
-    @Query('activated', ParseBoolPipe) activated: boolean,
-  ) {
-    return this.adminService.activationSettings(req.user.id, adminId, activated);
-  }
-
   @Get('geulroquis')
   @ApiOperation({ summary: '글로키 리스트' })
   @ApiResponse({ status: 200, type: GeulroquisResDto })
@@ -1251,6 +1194,7 @@ export class AdminController {
   **동작 과정:**
   1. 데이터베이스에 다음으로 제공할 글로키가 존재하는지 조회하고 무효화합니다.
   2. 매개변수로 제공받은 아이디에 해당하는 글로키를 다음 글로키로 지정합니다.
+  3. (분기) 만약 다음으로 제공할 글로키가 없다면 매개변수로 제공받은 아이디에 해당하는 글로키를 현재 제공중인 상태로 변경합니다.
 
   **주의 사항:**
   - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
@@ -1278,28 +1222,6 @@ export class AdminController {
   })
   async getServerStatus() {
     return this.adminService.getServerStatus();
-  }
-
-  @Post('server/status')
-  @ApiOperation({
-    summary: '[루트관리자] 서버 상태 업데이트',
-    description: `
-  서버의 상태를 업데이트합니다.
-  
-  **요청 본문: status**
-  - \`open\`: 모든 요청을 허용하는 상태입니다.
-  - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
-  - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 접근할 수 있습니다.
-  
-  `,
-  })
-  @ApiBody({ type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE })
-  @ApiResponse({
-    status: 200,
-    type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
-  })
-  async saveServerStatus(@Req() req: ExpressRequest, @Body('status') status: string) {
-    return await this.adminService.saveServerStatus(req.user.id, status);
   }
 
   @Get('app/versions')
@@ -1367,14 +1289,103 @@ export class AdminController {
   // async deleteAllDevice(@Req() req: ExpressRequest) {
   //   return this.adminService.deleteAllDevice(req.user.id);
   // }
+  @Post('root/produce')
+  @ApiOperation({
+    summary: '[루트 관리자용] 관리자생성',
+    description: `
+  루트 관리자가 새로운 관리자를 생성하는 API입니다. 이 API는 루트 관리자만 호출할 수 있습니다.
+    
+  **주의 사항:**
+  - 루트 관리자만 이 API를 호출할 수 있습니다. 루트 관리자 ID는 1로 고정되어 있습니다.
+  - 비밀번호는 저장 전에 해시 처리됩니다.
+    
+  **동작 과정:**
+  1. 요청을 보낸 관리자가 루트 관리자 인지 확인합니다.
+  2. 제공된 데이터로 새 관리자를 생성합니다.
+  3. 새 관리자의 비밀번호를 해시화합니다.
+  4. 새 관리자를 데이터베이스에 저장합니다.
+  5. 저장된 관리자 정보를 반환합니다.
+  `,
+  })
+  @ApiBody({ type: CreateAdminReqDto })
+  @ApiResponse({ status: 200, type: SavedAdminResDto })
+  async createAdmin(@Req() req: ExpressRequest, @Body() data: CreateAdminReqDto) {
+    return this.adminService.createAdmin(req.user.id, data);
+  }
 
-  @Delete('danger/users/:userId')
+  @Put('root/:adminId')
+  @ApiOperation({
+    summary: '[루트관리자용] 어드민 활성화 상태 변경',
+    description: `
+  어드민의 활성화 상태를 변경합니다. 이 기능은 루트 관리자가 사용합니다.
+
+	**경로 파라미터:**
+  - \`adminId\`: 활성화 상태를 변경할 어드민의 ID
+  
+  **쿼리 파라미터:**
+  - \`activated\`: 활성화 또는 비활성화 상태 (true 또는 false)
+
+  **동작 과정:**
+  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 활성화 상태를 조회합니다.
+  2. \`activated\` 파라미터를 통해 활성화 또는 비활성화 상태로 설정합니다.
+  3. \`activated\` 파라미터가 true라면 요청자 메일로 활성상태 알림이 전송됩니다.
+  4. 변경된 활성화 상태의 어드민 정보를 반환합니다.
+
+  **주의 사항:**
+  - 루트 관리자가 아닌 경우 \`403 Forbidden\` 오류가 발생합니다.
+  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: AdminResDto })
+  @ApiQuery({ name: 'activated', required: true })
+  async activationSettings(
+    @Req() req: ExpressRequest,
+    @Param('adminId', ParseIntPipe) adminId: number,
+    @Query('activated', ParseBoolPipe) activated: boolean,
+  ) {
+    return this.adminService.activationSettings(req.user.id, adminId, activated);
+  }
+
+  @Delete('root/:adminId')
+  async deleteAdmin(@Req() req: ExpressRequest, @Param('adminId', ParseIntPipe) adminId: number) {
+    return this.adminService.deleteAdmin(req.user.id, adminId);
+  }
+
+  @Post('root/server/status')
+  @ApiOperation({
+    summary: '[루트관리자] 서버 상태 업데이트',
+    description: `
+  서버의 상태를 업데이트합니다.
+  
+  **요청 본문: status**
+  - \`open\`: 모든 요청을 허용하는 상태입니다.
+  - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
+  - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 접근할 수 있습니다.
+  
+  `,
+  })
+  @ApiBody({ type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE })
+  @ApiResponse({
+    status: 200,
+    type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
+  })
+  async saveServerStatus(@Req() req: ExpressRequest, @Body('status') status: string) {
+    return await this.adminService.saveServerStatus(req.user.id, status);
+  }
+
+  @Delete('root/users/:userId')
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
-  @Post('danger/super/init')
-  async clearDatabase(@Req() req: ExpressRequest) {
-    return this.adminService.clearDatabase(req.user.id);
+  @Post('root/super/verify')
+  async requestClearDatabase(@Req() req: ExpressRequest) {
+    return this.adminService.requestClearDatabase(req.user.id);
+  }
+
+  @Public()
+  @Get('root/super/init')
+  async clearDatabase(@Query('token') token: string) {
+    return this.adminService.clearDatabase(token);
   }
 }

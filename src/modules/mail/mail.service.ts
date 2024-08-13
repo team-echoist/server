@@ -144,4 +144,37 @@ export class MailService {
       ],
     });
   }
+
+  async rootAuthenticationEmail(to: string, token: string): Promise<void> {
+    const env = this.configService.get<string>('ENV');
+    const baseVerificationUrl =
+      env === 'dev'
+        ? 'http://localhost:3000/api/admin/danger/super/init'
+        : 'https://linkedoutapp.com/api/admin/danger/super/init';
+
+    const verificationUrl = `${baseVerificationUrl}?token=${token}`;
+    const title = '안녕하세요! 링크드아웃 입니다 :)';
+    const message = `루트관리자 인증을 위한 메일입니다. 아래 링크를 클릭시 돌이킬 수 없는 치명적인 작업이 실행됩니다. 신중하게 결정하세요.`;
+    const htmlContent = this.getHtmlTemplate(
+      title,
+      message,
+      'rootAuthMailTemplate',
+      verificationUrl,
+    );
+
+    await this.transporter.sendMail({
+      from: `"LinkedOut" <linkedoutapp@gmail.com>`,
+      to: to,
+      subject: '링크드아웃 서비스 이메일 변경 위한 이메일 인증입니다.',
+      html: htmlContent,
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          cid: 'logo',
+          contentDisposition: 'inline',
+        },
+      ],
+    });
+  }
 }

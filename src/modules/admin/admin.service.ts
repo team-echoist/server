@@ -602,7 +602,7 @@ export class AdminService {
     return null;
   }
 
-  async validateSwaager(name: string, password: string) {
+  async validateSwagger(name: string, password: string) {
     const admin = await this.adminRepository.findByName(name);
     if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
       return admin;
@@ -707,7 +707,7 @@ export class AdminService {
       ...data,
       activated: false,
     };
-    adminData.password = await bcrypt.hash(data.password, 10);
+    adminData.password = await bcrypt.hash(data.password, 12);
 
     await this.adminRepository.saveAdmin(adminData);
 
@@ -951,9 +951,30 @@ export class AdminService {
     await this.supportService.updateAppVersion(versionId, version);
   }
 
-  @Transactional()
-  async clearDatabase(adminId: number) {
+  async requestClearDatabase(adminId: number) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    const admin = await this.adminRepository.findAdmin(adminId);
+
+    const token = await this.utilsService.generateVerifyToken();
+
+    const adminData = { email: admin.email, id: admin.id };
+
+    await this.redis.set(token, JSON.stringify(adminData), 'EX', 600);
+
+    await this.mailService.rootAuthenticationEmail(admin.email, token);
+  }
+
+  @Transactional()
+  async clearDatabase(token: string) {
+    const rootAdmin = await this.redis.get(token);
+
+    if (!rootAdmin)
+      throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
+
+    const { email, id } = JSON.parse(rootAdmin);
+
+    if (id !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminRepository.clearDatabase();
     await this.nicknameService.resetNickname();
@@ -969,5 +990,11 @@ export class AdminService {
     root.password = hashedPassword;
     root.activated = true;
     await this.adminRepository.saveAdmin(root);
+  }
+
+  async deleteAdmin(rootAdminId: number, adminId: number) {
+    if (rootAdminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    await this.adminRepository.deleteAdminById(adminId);
   }
 }

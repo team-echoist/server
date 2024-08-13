@@ -22,6 +22,7 @@ module.exports = {
     'typeorm-transactional.ts',
     'jest.config.js',
     'release.config.js',
+    'generate-migration.js',
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',

@@ -3,6 +3,7 @@
 /node_modules
 /upload
 swagger.json
+/src/config/scripts/k6.ts
 
 # Logs
 logs

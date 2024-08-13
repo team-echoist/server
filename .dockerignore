@@ -3,3 +3,4 @@ dist
 .env
 upload
 swagger.json
+/server/src/config/scripts/k6.ts

@@ -31,9 +31,10 @@ import { ThumbnailResDto } from './dto/response/ThumbnailRes.dto';
 import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { EssayWithAnotherEssayResDto } from './dto/response/essayWithAnotherEssayRes.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Essay')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @Controller('essays')
 export class EssayController {
   constructor(private readonly essayService: EssayService) {}

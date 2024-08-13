@@ -165,7 +165,7 @@ async function bootstrap() {
       basicAuth({
         authorizeAsync: true,
         authorizer: async (email, password, callback) => {
-          const isValid = await adminService.validateSwaager(email, password);
+          const isValid = await adminService.validateSwagger(email, password);
           if (isValid) {
             return callback(null, true);
           } else {

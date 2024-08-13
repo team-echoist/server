@@ -274,4 +274,8 @@ export class AdminRepository {
       await queryRunner.release();
     }
   }
+
+  async deleteAdminById(adminId: number) {
+    return this.adminRepository.delete(adminId);
+  }
 }
