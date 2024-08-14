@@ -121,7 +121,7 @@ describe('SupportController', () => {
 
       service.getUserReleases.mockResolvedValue(histories as any);
 
-      const response = await controller.getUserUpdateHistories(page, limit);
+      const response = await controller.getUserReleases(page, limit);
       expect(service.getUserReleases).toHaveBeenCalledWith(page, limit);
       expect(response).toEqual(histories);
     });
