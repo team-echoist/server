@@ -12,12 +12,12 @@ export class DeviceResDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  deviceId: string;
+  uid: string;
 
   @ApiProperty()
   @Expose()
   @IsString()
-  deviceToken: string;
+  fcmToken: string;
 
   @ApiProperty()
   @Expose()
