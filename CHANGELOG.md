@@ -1,3 +1,10 @@
+## [1.10.4](https://github.com/team-echoist/server/compare/v1.10.3...v1.10.4) (2024-08-14)
+
+
+### Bug Fixes
+
+* Add release entity relations ([#376](https://github.com/team-echoist/server/issues/376)) ([209ffc0](https://github.com/team-echoist/server/commit/209ffc0bdf71fd9587cf40bfd62c30e425527e37))
+
 ## [1.10.3](https://github.com/team-echoist/server/compare/v1.10.2...v1.10.3) (2024-08-14)
 
 ## [1.10.2](https://github.com/team-echoist/server/compare/v1.10.1...v1.10.2) (2024-08-13)
