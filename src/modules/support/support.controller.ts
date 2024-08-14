@@ -172,7 +172,7 @@ export class SupportController {
   `,
   })
   @ApiResponse({ status: 200, type: ReleasesResDto })
-  async getUserUpdateHistories(
+  async getUserReleases(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
