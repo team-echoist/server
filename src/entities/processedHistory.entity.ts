@@ -14,6 +14,7 @@ import { Admin } from './admin.entity';
 import { Inquiry } from './inquiry.entity';
 import { Notice } from './notice.entity';
 import { ActionType } from '../common/types/enum.types';
+import { Release } from './release.entity';
 
 @Entity('processed_history')
 export class ProcessedHistory {
@@ -59,4 +60,8 @@ export class ProcessedHistory {
   @JoinColumn({ name: 'notice_id' })
   @ManyToOne(() => Notice, (notice) => notice.processedHistories, { onDelete: 'CASCADE' })
   notice: Notice;
+
+  @JoinColumn({ name: 'release_id' })
+  @ManyToOne(() => Release, (release) => release.processedHistories, { onDelete: 'CASCADE' })
+  release: Release;
 }

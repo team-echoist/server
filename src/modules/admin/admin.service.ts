@@ -407,6 +407,9 @@ export class AdminService {
       case 'inquiry':
         history.inquiry = target;
         break;
+      case 'release':
+        history.release = target;
+        break;
       default:
         throw new Error(`Unknown target name: ${targetName}`);
     }
