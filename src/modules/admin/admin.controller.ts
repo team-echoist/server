@@ -1014,7 +1014,7 @@ export class AdminController {
     return this.adminService.createAnswer(req.user.id, inquiryId, data.answer);
   }
 
-  @Post('release')
+  @Post('releases')
   @ApiOperation({
     summary: '릴리즈 생성',
     description: `
