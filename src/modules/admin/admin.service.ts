@@ -868,7 +868,7 @@ export class AdminService {
     const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, admin);
     await this.adminRepository.saveHistory(history);
 
-    return this.supportRepository.deleteRelease(releaseId);
+    await this.supportRepository.deleteRelease(releaseId);
   }
 
   async getReleases(page: number, limit: number) {

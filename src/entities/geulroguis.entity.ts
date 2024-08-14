@@ -17,7 +17,7 @@ export class Geulroquis {
   @Column({ default: false })
   provided: boolean;
 
-  @Column({ name: ' provided_date', type: 'timestamptz', nullable: true })
+  @Column({ name: 'provided_date', type: 'timestamptz', nullable: true })
   providedDate: Date;
 
   @CreateDateColumn({ name: 'created_date', type: 'timestamptz' })
