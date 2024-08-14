@@ -1,3 +1,10 @@
+## [1.10.6](https://github.com/team-echoist/server/compare/v1.10.5...v1.10.6) (2024-08-14)
+
+
+### Bug Fixes
+
+* Correct column name in Geulroquis entity and update nickname validation ([#379](https://github.com/team-echoist/server/issues/379)) ([6959b19](https://github.com/team-echoist/server/commit/6959b19557ad9dd5e38c55d46ad190d87a4734ca))
+
 ## [1.10.5](https://github.com/team-echoist/server/compare/v1.10.4...v1.10.5) (2024-08-14)
 
 
