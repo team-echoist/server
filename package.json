@@ -52,6 +52,7 @@
     "firebase-admin": "^12.2.0",
     "google-auth-library": "^9.9.0",
     "helmet": "^7.1.0",
+    "install": "^0.13.0",
     "ioredis": "^5.4.1",
     "lorem-ipsum": "^2.0.8",
     "moment-timezone": "^0.5.45",

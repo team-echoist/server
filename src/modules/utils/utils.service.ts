@@ -182,7 +182,7 @@ export class UtilsService {
     const cleanedText = this.cleanText(text);
     const sentences = this.sentences(cleanedText, minLength, maxLength);
     if (sentences.length === 0) {
-      return text.trim().slice(0, 30);
+      return cleanedText.trim().slice(0, 30);
     }
 
     return sentences[0];
@@ -191,7 +191,7 @@ export class UtilsService {
     const cleanedText = this.cleanText(text);
     const sentences = this.sentences(cleanedText, minLength, maxLength);
     if (sentences.length === 0) {
-      const trimmedText = text.trim();
+      const trimmedText = cleanedText.trim();
       return trimmedText.slice(-30);
     }
 
