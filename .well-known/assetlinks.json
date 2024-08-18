@@ -3,7 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.echoist.linkedout",
-    "sha256_cert_fingerprints":
-    ["C9:FC:E4:8D:6E:03:03:2A:6B:45:C6:9E:A1:B4:3F:AB:74:EB:79:32:33:24:72:E0:8F:94:88:A2:E5:27:7A:A3"]
+    "sha256_cert_fingerprints": [
+			"C9:FC:E4:8D:6E:03:03:2A:6B:45:C6:9E:A1:B4:3F:AB:74:EB:79:32:33:24:72:E0:8F:94:88:A2:E5:27:7A:A3",
+			"1B:24:0C:EB:91:CA:2F:0F:9A:8A:B1:20:13:78:D5:16:EF:CE:25:F7:E9:2A:54:A6:E0:9A:05:D6:8C:A3:A3:2D"
+		]
   }
 }]
