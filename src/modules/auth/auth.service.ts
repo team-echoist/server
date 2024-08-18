@@ -143,13 +143,12 @@ export class AuthService {
   }
 
   async login(req: ExpressRequest) {
-    const payload = { username: req.user.email, sub: req.user.id };
-
-    await this.redis.set(`device:${req.user.id}`, JSON.stringify(req.device));
+    const accessPayload = { username: req.user.email, sub: req.user.id };
+    const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
 
     return {
-      accessToken: await this.generateAccessToken(payload),
-      refreshToken: await this.generateRefreshToken(payload),
+      accessToken: await this.generateAccessToken(accessPayload),
+      refreshToken: await this.generateRefreshToken(refreshPayload),
     };
   }
 

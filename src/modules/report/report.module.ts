@@ -7,9 +7,18 @@ import { ReportService } from './report.service';
 import { ReportRepository } from './report.repository';
 import { EssayModule } from '../essay/essay.module';
 import { ReportController } from './report.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Essay, ReportQueue]), forwardRef(() => EssayModule)],
+  imports: [
+    JwtModule.register({}),
+    TypeOrmModule.forFeature([User, Essay, ReportQueue]),
+    forwardRef(() => AuthModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => EssayModule),
+  ],
   controllers: [ReportController],
   providers: [ReportService, ReportRepository],
   exports: [ReportService, ReportRepository],

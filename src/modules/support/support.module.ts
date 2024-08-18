@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Notice } from '../../entities/notice.entity';
@@ -19,9 +19,7 @@ import { SeenNotice } from '../../entities/seenNotice.entity';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_ACCESS_SECRET,
-    }),
+    JwtModule.register({}),
     TypeOrmModule.forFeature([
       User,
       Notice,
@@ -32,9 +30,9 @@ import { SeenNotice } from '../../entities/seenNotice.entity';
       AppVersions,
       SeenNotice,
     ]),
-    AuthModule,
     UtilsModule,
-    UserModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [SupportController],
   providers: [SupportService, SupportRepository, strategies.JwtStrategy],

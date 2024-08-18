@@ -7,13 +7,17 @@ import { UtilsModule } from '../utils/utils.module';
 import { UserModule } from '../user/user.module';
 import { EssayModule } from '../essay/essay.module';
 import { StoryController } from './story.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    JwtModule.register({}),
     TypeOrmModule.forFeature([Story]),
     UtilsModule,
     forwardRef(() => UserModule),
     forwardRef(() => EssayModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [StoryController],
   providers: [StoryService, StoryRepository],

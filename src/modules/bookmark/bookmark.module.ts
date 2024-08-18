@@ -12,9 +12,12 @@ import { BookmarkProcessor } from './bookmark.processor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BookmarkController } from './bookmark.controller';
 import { EssayModule } from '../essay/essay.module';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    JwtModule.register({}),
     TypeOrmModule.forFeature([Bookmark, Essay, User]),
     BullModule.registerQueueAsync({
       name: 'bookmark',
@@ -29,8 +32,9 @@ import { EssayModule } from '../essay/essay.module';
     }),
     ConfigModule,
     UtilsModule,
-    UserModule,
+    forwardRef(() => UserModule),
     forwardRef(() => EssayModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [BookmarkController],
   providers: [BookmarkService, BookmarkRepository, BookmarkProcessor],

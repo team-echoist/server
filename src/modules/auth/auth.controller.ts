@@ -596,7 +596,7 @@ export class AuthController {
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201, type: JwtResDto })
   async mobileNaverLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
-    req.user = await this.authService.validateAppleUser(oauthData.token);
+    req.user = await this.authService.validateNaverUser(oauthData.token);
     return await this.authService.login(req);
   }
 

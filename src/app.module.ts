@@ -72,6 +72,8 @@ import { DeviceMiddleware } from './common/middlewares/device.middleware';
     // { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
     { provide: APP_GUARD, useClass: ServerGuard },
     strategies.AdminPassStrategy,
+    strategies.LocalStrategy,
+    strategies.JwtStrategy,
   ],
 })
 export class AppModule implements OnModuleInit, NestModule {

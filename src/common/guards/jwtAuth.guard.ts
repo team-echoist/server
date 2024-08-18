@@ -4,24 +4,28 @@ import {
   ExecutionContext,
   HttpException,
   HttpStatus,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { AuthService } from '../../modules/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import { AuthService } from '../../modules/auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../../modules/user/user.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private reflector: Reflector,
-    private authService: AuthService,
-    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => AuthService)) private authService: AuthService,
+    @Inject(forwardRef(() => UserService)) private userService: UserService,
+    @Inject(forwardRef(() => JwtService)) private readonly jwtService: JwtService,
   ) {
     super();
   }
@@ -53,10 +57,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     } catch (error) {
       if (error.name === 'TokenExpiredError') return this.handleTokenExpired(request, response);
 
-      throw new HttpException(
-        '의심스러운 활동이 감지되었습니다. 잘못된 토큰입니다.',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('의심스러운 활동이 감지되었습니다.', HttpStatus.UNAUTHORIZED);
     }
 
     return super.canActivate(context) as Promise<boolean>;
@@ -65,22 +66,44 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
   private async handleTokenExpired(request: any, response: any): Promise<boolean> {
     const refreshToken = request.headers['x-refresh-token'];
     const cachedKey = `accessToken:${refreshToken}`;
-    const cachedToken = await this.redis.get(cachedKey);
+    const inProgressKey = `inProgress:${refreshToken}`;
+    const recentTokenKey = `recentToken:${refreshToken}`;
 
     if (!refreshToken)
       throw new HttpException('다음 누락: "x-refresh-token"', HttpStatus.UNAUTHORIZED);
 
+    /** @description 중복갱신 방지 */
+    const inProgress = await this.redis.get(inProgressKey);
+    if (inProgress) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return this.handleTokenExpired(request, response);
+    }
+
+    await this.redis.set(inProgressKey, 'true', 'EX', 5);
+
+    /** @description 리프레쉬 토큰 사용 후 5초간 만료토큰 허용 */
+    const recentlyRefreshedToken = await this.redis.get(recentTokenKey);
+    if (recentlyRefreshedToken) {
+      response.setHeader('x-access-token', recentlyRefreshedToken);
+      request.headers['authorization'] = `Bearer ${recentlyRefreshedToken}`;
+
+      const decodedToken = this.jwtService.decode(recentlyRefreshedToken);
+      request.user = { userId: decodedToken.sub, email: decodedToken.username };
+
+      return true;
+    }
+
     const decodedRefreshToken = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
-    const storedDevice = await this.redis.get(`device:${decodedRefreshToken.sub}`);
 
-    if (!this.isSameDevice(storedDevice, request.device))
+    if (!this.isSameDevice(decodedRefreshToken.device, request.device))
       throw new HttpException(
-        '알 수 없는 디바이스 또는 위치에서의 접근 시도가 감지되었습니다. 다시 로그인 해주세요.',
+        '알 수 없는 디바이스 또는 환경에서의 접근 시도가 감지되었습니다.',
         HttpStatus.UNAUTHORIZED,
       );
 
+    const cachedToken = await this.redis.get(cachedKey);
     if (cachedToken)
       throw new HttpException(
         '새로운 액세스 토큰이 사용되지 않았습니다. 잠재적인 남용이 감지되었습니다.',
@@ -90,7 +113,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     try {
       const newAccessTokens = await this.authService.refreshToken(refreshToken);
 
+      await this.redis.set(cachedKey + ':recent', newAccessTokens, 'EX', 5);
       await this.redis.set(cachedKey, 'used', 'EX', 29 * 60);
+      await this.redis.del(inProgressKey);
 
       response.setHeader('x-access-token', newAccessTokens);
       request.headers['authorization'] = `Bearer ${newAccessTokens}`;
@@ -103,15 +128,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     }
   }
 
-  private isSameDevice(storedDevice: string, currentDevice: any): boolean {
+  private isSameDevice(storedDevice: any, currentDevice: any): boolean {
     if (!storedDevice) return false;
 
-    const parsedStoredDevice = JSON.parse(storedDevice);
-
     return (
-      parsedStoredDevice.os === currentDevice.os &&
-      parsedStoredDevice.type === currentDevice.type &&
-      parsedStoredDevice.model === currentDevice.model
+      storedDevice.os === currentDevice.os &&
+      storedDevice.type === currentDevice.type &&
+      storedDevice.model === currentDevice.model
     );
   }
 }

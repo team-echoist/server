@@ -35,7 +35,7 @@ export class UserService {
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
     private readonly nicknameService: NicknameService,
-    private readonly authService: AuthService,
+    @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
     @InjectQueue('user') private readonly userQueue: Queue,
   ) {}

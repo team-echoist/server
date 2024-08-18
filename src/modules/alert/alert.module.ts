@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Alert } from '../../entities/alert.entity';
 import { AlertController } from './alert.controller';
@@ -15,9 +15,12 @@ import { AlertProcessor } from './alert.processor';
 import { UserModule } from '../user/user.module';
 import { Essay } from '../../entities/essay.entity';
 import { DeactivationReason } from '../../entities/deactivationReason.entity';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    JwtModule.register({}),
     TypeOrmModule.forFeature([Alert, User, Essay, DeactivationReason]),
     BullModule.registerQueueAsync({
       name: 'alert',
@@ -33,7 +36,8 @@ import { DeactivationReason } from '../../entities/deactivationReason.entity';
     UtilsModule,
     SupportModule,
     AwsModule,
-    UserModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [AlertController],
   providers: [AlertService, AlertRepository, FirebaseService, AlertProcessor],
