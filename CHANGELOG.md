@@ -1,3 +1,10 @@
+## [1.10.7](https://github.com/team-echoist/server/compare/v1.10.6...v1.10.7) (2024-08-15)
+
+
+### Bug Fixes
+
+* Add missing part of tag parser ([#381](https://github.com/team-echoist/server/issues/381)) ([4310fe3](https://github.com/team-echoist/server/commit/4310fe356c5944a4b4692ae763629268530069e6))
+
 ## [1.10.6](https://github.com/team-echoist/server/compare/v1.10.5...v1.10.6) (2024-08-14)
 
 
