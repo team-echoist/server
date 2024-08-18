@@ -11,15 +11,17 @@ import { HttpModule } from '@nestjs/axios';
 import * as strategies from '../../common/guards/strategies';
 import { ConfigModule } from '@nestjs/config';
 import { AwsModule } from '../aws/aws.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    HttpModule,
     TypeOrmModule.forFeature([User]),
+    JwtModule.register({}),
+    ConfigModule,
+    HttpModule,
     MailModule,
     UtilsModule,
     NicknameModule,
-    ConfigModule,
     AwsModule,
   ],
   controllers: [AuthController],

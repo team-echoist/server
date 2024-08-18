@@ -77,13 +77,13 @@ describe('AuthController', () => {
     });
   });
 
-  describe('verifEmail', () => {
+  describe('verifyEmail', () => {
     it('should call service verifEmail method', async () => {
       const dto: EmailReqDto = { email: 'test@example.com' };
       const req: ExpressRequest = { user: { id: 1 } } as any;
 
-      await controller.verifEmail(req, dto);
-      expect(authService.verifEmail).toHaveBeenCalledWith(req.user.id, dto.email);
+      await controller.verifyEmail(req, dto);
+      expect(authService.verifyEmail).toHaveBeenCalledWith(req.user.id, dto.email);
     });
   });
 
@@ -109,7 +109,7 @@ describe('AuthController', () => {
         nickname: 'nickname',
       };
 
-      await controller.verify(dto);
+      await controller.sign(dto);
       expect(authService.signingUp).toHaveBeenCalledWith(dto);
     });
   });
@@ -133,7 +133,8 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should return undefined', async () => {
-      const result = await controller.login();
+      const req: ExpressRequest = {} as any;
+      const result = await controller.login(req);
       expect(result).toBeUndefined();
     });
   });

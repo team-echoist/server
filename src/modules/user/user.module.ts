@@ -21,7 +21,7 @@ import { UserProcessor } from './user.processor';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_ACCESS_SECRET,
     }),
     TypeOrmModule.forFeature([User, Essay, DeactivationReason]),
     BullModule.registerQueueAsync({

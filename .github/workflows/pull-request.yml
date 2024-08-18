@@ -21,14 +21,14 @@ jobs:
         run: npm install
 
       - name: Check JWT Secret
-        run: echo "JWT Secret is $JWT_SECRET"
+        run: echo "JWT Secret is $JWT_ACCESS_SECRET"
         env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET }}
 
       - name: Run Tests
         run: npm test
         env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET }}
         continue-on-error: true
 
       - name: Close PR on Failure

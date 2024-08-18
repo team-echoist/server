@@ -119,7 +119,7 @@ describe('AuthService', () => {
     });
   });
 
-  describe('verifEmail', () => {
+  describe('verifyEmail', () => {
     it('should generate a verification token and send an email', async () => {
       const email = 'test@example.com';
       const userId = 1;
@@ -129,7 +129,7 @@ describe('AuthService', () => {
       mockRedis.set = jest.fn().mockResolvedValue('OK');
       mailService.updateEmail.mockResolvedValue();
 
-      await authService.verifEmail(userId, email);
+      await authService.verifyEmail(userId, email);
 
       expect(authService.isEmailOwned).toHaveBeenCalledWith(email);
       expect(utilsService.generateVerifyToken).toHaveBeenCalled();
