@@ -1,3 +1,10 @@
+## [1.10.8](https://github.com/team-echoist/server/compare/v1.10.7...v1.10.8) (2024-08-19)
+
+
+### Bug Fixes
+
+* nickname reconditioning and patch method added to cors policy ([#384](https://github.com/team-echoist/server/issues/384)) ([d24d76c](https://github.com/team-echoist/server/commit/d24d76cc7aa679d134c6e86b89fce620b4ff5a58))
+
 ## [1.10.7](https://github.com/team-echoist/server/compare/v1.10.6...v1.10.7) (2024-08-15)
 
 
