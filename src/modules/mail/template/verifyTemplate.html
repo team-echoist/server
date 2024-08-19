@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body, table, td, p {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #333333;
+            line-height: 1.4;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .container {
+            width: 100%;
+            background-color: #f4f4f4;
+            padding: 20px 0;
+        }
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .header img {
+            width: 100px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .body-text {
+            font-size: 16px;
+            color: #555555;
+            text-align: center;
+        }
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c7be5;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+        }
+        @media only screen and (max-width: 600px) {
+            .content {
+                width: 100% !important;
+                padding: 10px !important;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .body-text {
+                font-size: 14px;
+            }
+            .code {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table class="container" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <table class="content" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="header">
+                            <img src="cid:logo" alt="LinkedOut Logo">
+                            <h1>{{title}}</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body-text">
+                            <p>{{message}}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="code">
+                            {{sixDigit}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body-text" style="padding-bottom: 20px;">
+                            <p>이 코드는 5분 후에 만료됩니다.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer" style="padding-top: 20px;">
+                            <p>만약 이 요청을 하지 않으셨다면, 이 이메일을 무시해 주세요.</p>
+														<p>&copy; 2024 LinkedOut. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
+

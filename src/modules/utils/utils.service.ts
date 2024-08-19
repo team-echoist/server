@@ -20,6 +20,11 @@ export class UtilsService {
     return jwt.sign({ id: id }, secretKey, options);
   }
 
+  async generateSixDigit() {
+    const num = Math.floor(100000 + Math.random() * 900000);
+    return String(num);
+  }
+
   async generateVerifyToken() {
     const { randomBytes } = await import('crypto');
     return randomBytes(16).toString('hex');

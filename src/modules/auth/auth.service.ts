@@ -10,7 +10,6 @@ import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
-import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { Transactional } from 'typeorm-transactional';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -53,39 +52,43 @@ export class AuthService {
     const emailExists = await this.authRepository.findByEmail(email);
 
     if (emailExists)
-      throw new HttpException('이메일 또는 닉네임이 이미 사용중입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('이미 사용중인 이메일 입니다.', HttpStatus.BAD_REQUEST);
 
     return;
   }
 
   @Transactional()
-  async signingUp(data: CreateUserReqDto) {
+  async signingUp(req: ExpressRequest, data: CreateUserReqDto) {
     await this.isEmailOwned(data.email);
 
-    const token = await this.utilsService.generateVerifyToken();
+    const code = await this.utilsService.generateSixDigit();
     data.password = await bcrypt.hash(data.password, 10);
 
-    await this.redis.set(token, JSON.stringify(data), 'EX', 600);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(data), 'EX', 300);
 
-    await this.mailService.sendVerificationEmail(data.email, token);
+    await this.mailService.sendVerificationEmail(data.email, code);
   }
 
   @Transactional()
-  async verifyEmail(userId: number, email: string) {
+
+  async verifyEmail(req: ExpressRequest, email: string) {
+
     await this.isEmailOwned(email);
 
+    const userId = req.user.id;
     const token = await this.utilsService.generateVerifyToken();
+    const code = await this.utilsService.generateSixDigit();
 
     const userEmailData = { email, userId };
 
-    await this.redis.set(token, JSON.stringify(userEmailData), 'EX', 600);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 300);
 
-    await this.mailService.updateEmail(email, token);
+    await this.mailService.sendVerificationEmail(email, token);
   }
 
   @Transactional()
-  async updateEmail(token: string) {
-    const userEmailData = await this.redis.get(token);
+  async updateEmail(req: ExpressRequest, code: string) {
+    const userEmailData = await this.redis.get(`${req.ip}:${code}`);
 
     if (!userEmailData)
       throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
@@ -106,18 +109,16 @@ export class AuthService {
   }
 
   @Transactional()
-  async register(token: string) {
-    const user = await this.redis.get(token);
+  async register(req: ExpressRequest, code: string) {
+    const user = await this.redis.get(`${req.ip}:${code}`);
     if (!user)
-      throw new HttpException(
-        '회원 등록 과정에서 캐싱된 사용자를 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('회원 등록 과정에서 오류가 발생했습니다.', HttpStatus.BAD_REQUEST);
 
     const userData = JSON.parse(user);
     userData.nickname = await this.nicknameService.generateUniqueNickname();
 
-    return await this.authRepository.saveUser(userData);
+    req.user = await this.authRepository.saveUser(userData);
+    return await this.login(req);
   }
 
   async validateUser(email: string, password: string) {
@@ -199,7 +200,7 @@ export class AuthService {
   }
 
   @Transactional()
-  async passwordResetReq(email: string) {
+  async passwordResetReq(req: ExpressRequest, email: string) {
     const user = await this.authRepository.findByEmail(email);
     if (!user)
       throw new HttpException(
@@ -207,11 +208,11 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
 
-    const token = await this.utilsService.generateVerifyToken();
+    const code = await this.utilsService.generateSixDigit();
 
-    await this.redis.set(token, JSON.stringify(user), 'EX', 600);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(user), 'EX', 300);
 
-    await this.mailService.sendPasswordResetEmail(email, token);
+    await this.mailService.sendVerificationEmail(email, code);
   }
 
   @Transactional()
@@ -231,14 +232,16 @@ export class AuthService {
   }
 
   @Transactional()
-  async passwordReset(data: PasswordResetReqDto) {
-    const user = await this.redis.get(data.token);
+  async passwordReset(email: string) {
+    const user = await this.authRepository.findByEmail(email);
     if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
-    const userData = JSON.parse(user);
-    userData.password = await bcrypt.hash(data.password, 10);
+    const temporaryPassword = this.utilsService.getUUID();
+    user.password = await bcrypt.hash(temporaryPassword, 12);
 
-    await this.authRepository.saveUser(userData);
+    await this.authRepository.saveUser(user);
+
+    await this.mailService.sendPasswordResetEmail(temporaryPassword, temporaryPassword);
   }
 
   // ----------------- OAuth ---------------------

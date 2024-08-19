@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -9,12 +9,12 @@ import { OauthMobileReqDto } from './dto/request/OauthMobileReq.dto';
 import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
 import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
 import { EmailReqDto } from './dto/request/emailReq.dto';
-import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { Public } from '../../common/decorators/public.decorator';
-import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 import { JwtResDto } from './dto/response/jwtRes.dto';
+import { VerifyCodeReqDto } from './dto/request/verifyCodeReq.dto';
+
 
 @ApiTags('Auth')
 @UseGuards(JwtAuthGuard)
@@ -93,9 +93,9 @@ export class AuthController {
     return this.authService.checkNickname(data.nickname);
   }
 
-  @Post('verify/email')
+  @Post('email/verify')
   @ApiOperation({
-    summary: '이메일 변경을 위한 이메일 인증 요청',
+    summary: '이메일 변경 인증코드 발송 요청',
     description: `
   이메일 변경 과정에서 이메일 인증을 요청합니다.
 
@@ -105,73 +105,52 @@ export class AuthController {
   **동작 과정:**
   1. 입력된 이메일 주소가 이미 존재하는지 확인합니다.
   2. 존재할 경우, 에러를 반환합니다.
-  3. 존재하지 않을 경우, 인증 토큰을 생성합니다.
-  4. 생성된 토큰을 Redis에 저장하고, 유효기간을 설정합니다.
+  3. 존재하지 않을 경우, 인증 코드를 생성합니다.
+  4. 생성된 코드를 Redis에 저장하고, 유효기간을 설정합니다.
   5. 입력된 이메일 주소로 인증 이메일을 발송합니다.
 
   **주의 사항:**
   - 이메일 주소가 이미 존재하는 경우, \`400 Bad Request\` 에러가 발생합니다.
-  - 인증 토큰의 유효기간은 10분입니다.
+  - 인증 코드의 유효기간은 5분입니다.
   `,
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: EmailReqDto })
   async verifyEmail(@Req() req: ExpressRequest, @Body() data: EmailReqDto) {
-    await this.authService.verifyEmail(req.user.id, data.email);
+    await this.authService.verifyEmail(req, data.email);
+
     return;
   }
 
-  @Post('change-email')
+  @Post('email/change')
   @ApiOperation({
     summary: '이메일 변경',
     description: `
-  이메일 인증 후 이메일 변경을 처리합니다. 이메일의 인증 링크를 클릭하면 호출됩니다.
+  코드 인증 후 이메일 변경을 처리합니다.
 
-  **쿼리 파라미터:**
-  - \`token\`: 이메일 인증 토큰
+  **요청 본문:**
+  - \`code\`: 이메일 인증 코드
 
   **동작 과정:**
-  1. 제공된 인증 토큰을 Redis에서 조회합니다.
-  2. 토큰이 유효하지 않으면 에러를 반환합니다.
-  3. 토큰이 유효하면 해당 데이터를 사용하여 새 이메일로 변경합니다.
-  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리다이렉션합니다.
-  5. 그 외의 경우, 웹사이트로 리다이렉션합니다.
+  1. 제공된 인증 코드를 Redis에서 조회합니다.
+  2. 코드가 유효하지 않으면 에러를 반환합니다.
+  3. 코드가 유효하면 해당 데이터를 사용하여 새 이메일로 변경합니다.
 
   **주의 사항:**
-  - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
+  - 유효하지 않은 코드를 제공하면 \`400\` 에러가 발생합니다.
   `,
   })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: EmailReqDto })
-  async updateEmail(
-    @Req() req: ExpressRequest,
-    @Res() res: Response,
-    @Query('token') token: string,
-  ) {
-    await this.authService.updateEmail(token);
-
-    let redirectUrl = this.configService.get<string>('WEB_CHANGE_EMAIL_REDIRECT');
-    if (
-      req.device.os === DeviceOS.IOS &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('IOS_CHANGE_EMAIL_REDIRECT');
-    }
-    if (
-      req.device.os === DeviceOS.ANDROID &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    )
-      redirectUrl = this.configService.get<string>('AOS_CHANGE_EMAIL_REDIRECT');
-
-    res.redirect(redirectUrl);
+  @ApiBody({ type: VerifyCodeReqDto })
+  async updateEmail(@Req() req: ExpressRequest, @Body() data: VerifyCodeReqDto) {
+    await this.authService.updateEmail(req, data.code);
+    return;
   }
 
   @Post('sign')
   @Public()
   @ApiOperation({
-    summary: '회원가입을 위한 이메일 인증 요청',
+    summary: '회원가입 인증코드 발송 요청',
     description: `
   회원가입 과정에서 이메일 인증을 요청합니다.
 
@@ -193,56 +172,38 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateUserReqDto })
-  async sign(@Body() createUserDto: CreateUserReqDto) {
-    await this.authService.signingUp(createUserDto);
+  async sign(@Req() req: ExpressRequest, @Body() createUserDto: CreateUserReqDto) {
+    await this.authService.signingUp(req, createUserDto);
+
     return;
   }
 
-  @Get('register')
+  @Post('register')
   @Public()
   @ApiOperation({
     summary: '회원등록',
     description: `
-  이메일 인증 후 회원 등록을 처리합니다. 이메일의 인증 링크를 클릭하면 호출됩니다.
+  인증메일로 발송된 6자리 코드를 입력해 회원등록을 완료합니다.
 
-  **쿼리 파라미터:**
-  - \`token\`: 이메일 인증 토큰
+  **요청 본문:**
+  - \`code\`: 인증 코드
 
   **동작 과정:**
-  1. 제공된 인증 토큰을 Redis에서 조회합니다.
-  2. 토큰이 유효하지 않으면 에러를 반환합니다.
-  3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
+  1. 제공된 인증 코드와 요청자 IP로 Redis에서 조회합니다.
+  2. 코드가 유효하지 않으면 에러를 반환합니다.
+  3. 코드가 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
-	5. 인증에 성공하면 쿼리스트링에 엑세스, 리프레쉬 토큰을 세팅하고 환경에 맞게 리다이렉션 합니다.
+  5. \`accessToken\` 와 \`refreshToken\` 을 반환합니다.
+
 	
   **주의 사항:**
-  - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
+  - 유효하지 않은 코드을 제공하면 \`400\` 에러가 발생합니다.
   `,
   })
-  @ApiResponse({ status: 201 })
-  async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
-    await this.authService.register(token);
-
-    const { accessToken, refreshToken } = await this.authService.login(req);
-
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    if (
-      req.device.os === DeviceOS.IOS &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('IOS_REGISTER_REDIRECT');
-    }
-    if (
-      req.device.os === DeviceOS.ANDROID &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    )
-      redirectUrl = this.configService.get<string>('AOS_REGISTER_REDIRECT');
-
-    redirectUrl += `?accessToken=${accessToken}&refreshToken=${refreshToken}`;
-
-    res.redirect(redirectUrl);
+  @ApiResponse({ status: 201, type: JwtResDto })
+  @ApiBody({ type: VerifyCodeReqDto })
+  async register(@Req() req: ExpressRequest, @Body() data: VerifyCodeReqDto) {
+    return await this.authService.register(req, data.code);
   }
 
   @Post('login')
@@ -270,80 +231,7 @@ export class AuthController {
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
   async login(@Req() req: ExpressRequest) {
-    return this.authService.login(req);
-  }
-
-  @Post('password/reset-req')
-  @Public()
-  @ApiOperation({
-    summary: '비밀번호 재설정 요청',
-    description: `
-  비밀번호 재설정을 요청합니다. 
-  사용자는 이메일로 재설정 링크를 받게 됩니다.
-
-  **동작 과정:**
-  1. 사용자가 비밀번호 재설정을 요청합니다.
-  2. 제공된 이메일 주소로 재설정 링크가 포함된 이메일이 발송됩니다.
-
-  **주의 사항:**
-  - 유효한 이메일 주소를 제공해야 합니다.
-  - 재설정 링크는 10분 동안 유효합니다.
-  `,
-  })
-  @ApiResponse({ status: 201, description: '비밀번호 재설정 요청 성공' })
-  @ApiResponse({ status: 400, description: '잘못된 이메일 주소' })
-  @ApiBody({ type: EmailReqDto })
-  async passwordResetReq(@Body() data: EmailReqDto) {
-    return this.authService.passwordResetReq(data.email);
-  }
-
-  @Get('password/reset-verify')
-  @Public()
-  @ApiOperation({
-    summary: '비밀번호 재설정 검증',
-    description: `
-  이메일로 받은 비밀번호 재설정 토큰을 검증합니다. 
-  검증이 완료되면 새로운 토큰을 생성하여 리다이렉션합니다.
-
-  **쿼리 파라미터:**
-  - \`token\`: 비밀번호 재설정 토큰
-
-  **동작 과정:**
-  1. 제공된 토큰을 검증합니다.
-  2. 유효한 토큰이면 새로운 토큰을 생성하고 리다이렉션합니다.
-
-  **주의 사항:**
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리다이렉션됩니다.
-  `,
-  })
-  @ApiResponse({ status: 302, description: '토큰 검증 및 리다이렉션 성공' })
-  @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
-  async passwordResetVerify(
-    @Query('token') token: string,
-    @Req() req: ExpressRequest,
-    @Res() res: Response,
-  ) {
-    const newToken = await this.authService.passwordResetVerify(token);
-
-    let redirectUrl = this.configService.get<string>('WEB_PASSWORD_RESET_REDIRECT');
-    if (
-      req.device.os === DeviceOS.IOS &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('IOS_PASSWORD_RESET_REDIRECT');
-    }
-
-    if (
-      req.device.os === DeviceOS.ANDROID &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('AOS_PASSWORD_RESET_REDIRECT');
-    }
-
-    redirectUrl += `?token=${newToken}`;
-
-    res.redirect(redirectUrl);
+    return await this.authService.login(req);
   }
 
   @Post('password/reset')
@@ -351,25 +239,23 @@ export class AuthController {
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: `
-  제공된 새로운 비밀번호로 비밀번호를 재설정합니다.
+  제공된 이메일로 임시 비밀번호를 발송합니다.
 
   **요청 본문:**
-  - \`token\`: 비밀번호 재설정 토큰
-  - \`password\`: 새로운 비밀번호
-
+  - \`email\`: 사용자 이메일
+  
   **동작 과정:**
-  1. 제공된 토큰을 검증합니다.
-  2. 유효한 토큰이면 비밀번호를 재설정합니다.
+  1. 제공된 이메일을 검증합니다.
+  2. 유효한 이메일이면 임시 비밀번호를 발송합니다.
 
   **주의 사항:**
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
+  - 유효하지 않은 이메일을 제공하면 \`400\` 에러가 발생합니다.
   - 새로운 비밀번호는 안전하게 저장됩니다.
   `,
   })
-  @ApiResponse({ status: 200, description: '비밀번호 재설정 성공' })
-  @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
-  async passwordReset(@Body() data: PasswordResetReqDto) {
-    return this.authService.passwordReset(data);
+  @ApiResponse({ status: 201 })
+  async passwordReset(@Body() data: EmailReqDto) {
+    return this.authService.passwordReset(data.email);
   }
 
   //-------------------------------------------------------OAuth
