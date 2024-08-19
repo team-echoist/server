@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindManyOptions, Repository } from 'typeorm';
+import { Between, DataSource, FindManyOptions, Repository } from 'typeorm';
 import { Subscription } from '../../entities/subscription.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
@@ -7,6 +7,8 @@ import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { Admin } from '../../entities/admin.entity';
 import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
+import { Server } from '../../entities/server.entity';
+import { Transactional } from 'typeorm-transactional';
 
 export class AdminRepository {
   constructor(
@@ -17,6 +19,10 @@ export class AdminRepository {
     @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>,
     @InjectRepository(ProcessedHistory)
     private readonly processedRepository: Repository<ProcessedHistory>,
+    @InjectRepository(Server)
+    private readonly serverRepository: Repository<Server>,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async totalSubscriberCount(today: Date) {
@@ -179,6 +185,10 @@ export class AdminRepository {
     return this.adminRepository.findOne({ where: { email: email } });
   }
 
+  async findByName(name: string) {
+    return this.adminRepository.findOne({ where: { name: name } });
+  }
+
   async findAdmins(activated: boolean) {
     if (activated !== undefined) {
       return this.adminRepository.find({ where: { activated: activated } });
@@ -197,5 +207,75 @@ export class AdminRepository {
 
   async saveAdmin(admin: Admin | CreateAdminDto) {
     return this.adminRepository.save(admin);
+  }
+
+  async getCurrentServerStatus() {
+    return this.serverRepository.findOne({ where: { id: 1 } });
+  }
+
+  async saveServer(server: Server) {
+    return this.serverRepository.save(server);
+  }
+
+  @Transactional()
+  async clearDatabase() {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    const tablesToKeep = [
+      'admin',
+      'app_versions',
+      'basic_nickname',
+      'migrations',
+      'server',
+      'subscriptions',
+    ];
+
+    try {
+      const tables = await queryRunner.getTables([
+        'alert',
+        'alert_settings',
+        'badge',
+        'bookmark',
+        'cron_log',
+        'deactivation_reason',
+        'device',
+        'essay',
+        'essay_tags',
+        'follow',
+        'geulroquis',
+        'inquiry',
+        'notice',
+        'processed_history',
+        'report_queue',
+        'review_queue',
+        'seen_notice',
+        'story',
+        'tag',
+        'tag_exp',
+        'release',
+        'user',
+        'view_record',
+      ]);
+
+      await queryRunner.startTransaction();
+
+      for (const table of tables) {
+        if (!tablesToKeep.includes(table.name)) {
+          await queryRunner.query(`DELETE
+																	 FROM "${table.name}"`);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteAdminById(adminId: number) {
+    return this.adminRepository.delete(adminId);
   }
 }

@@ -4,11 +4,10 @@ import { Transactional } from 'typeorm-transactional';
 import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { ActionType, ProcessedHistory } from '../../entities/processedHistory.entity';
+import { ProcessedHistory } from '../../entities/processedHistory.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
-import { UserStatus } from '../../entities/user.entity';
+import { Essay } from '../../entities/essay.entity';
 import { Admin } from '../../entities/admin.entity';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
@@ -46,13 +45,17 @@ import { SupportService } from '../support/support.service';
 import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
 import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
-import { UpdatedHistoryResDto } from '../support/dto/response/updatedHistoryRes.dto';
+import { Release } from '../../entities/release.entity';
+import { ReleaseResDto } from '../support/dto/response/releaseRes.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../alert/alert.service';
 import { GeulroquisService } from '../geulroquis/geulroquis.service';
 import { CronService } from '../cron/cron.service';
+import { Server } from '../../entities/server.entity';
+import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
+import { NicknameService } from '../nickname/nickname.service';
+import { ActionType, EssayStatus, UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class AdminService {
@@ -69,9 +72,15 @@ export class AdminService {
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
     private readonly cronService: CronService,
+    private readonly nicknameService: NicknameService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
+
+  private async adminCacheKey(id: number) {
+    return `admin_${id}`;
+  }
+  private readonly serverCacheKey = 'server_status';
 
   @Transactional()
   async dashboard() {
@@ -162,7 +171,7 @@ export class AdminService {
   }
 
   async createAdmin(adminId: number, data: CreateAdminReqDto) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminCheckDuplicates(data.email);
 
@@ -280,10 +289,10 @@ export class AdminService {
   @Transactional()
   async processReports(userId: number, essayId: number, data: ProcessReqDto) {
     const essay = await this.essayRepository.findPublishedEssayById(essayId);
-    if (!essay) throw new HttpException('No essay found.', HttpStatus.BAD_REQUEST);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
     if (essay.status === EssayStatus.PRIVATE)
-      throw new HttpException('The essay is private', HttpStatus.BAD_REQUEST);
+      throw new HttpException('비공개 에세이 입니다.', HttpStatus.BAD_REQUEST);
 
     if (data.actionType === 'approved') await this.handleApprovedAction(essay);
 
@@ -307,7 +316,7 @@ export class AdminService {
     const reports = await this.adminRepository.findReportByEssayId(essayId);
 
     if (!reports.length)
-      throw new HttpException('No reports found for this essay.', HttpStatus.NOT_FOUND);
+      throw new HttpException('이 에세이에 대한 신고를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     console.log(
       `Adding syncReportsProcessed job for essay ${essayId} with ${reports.length} reports`,
@@ -397,6 +406,9 @@ export class AdminService {
         break;
       case 'inquiry':
         history.inquiry = target;
+        break;
+      case 'release':
+        history.release = target;
         break;
       default:
         throw new Error(`Unknown target name: ${targetName}`);
@@ -587,15 +599,24 @@ export class AdminService {
 
   async validateAdmin(email: string, password: string) {
     const admin = await this.adminRepository.findByEmail(email);
-    if (admin && (await bcrypt.compare(password, admin.password))) {
+    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
       return admin;
     }
     return null;
   }
 
+  async validateSwagger(name: string, password: string) {
+    const admin = await this.adminRepository.findByName(name);
+    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
+      return admin;
+    }
+    return false;
+  }
+
   async validatePayload(id: number) {
-    const cacheKey = `admin_${id}`;
+    const cacheKey = await this.adminCacheKey(id);
     const cachedAdmin = await this.redis.get(cacheKey);
+
     let admin = cachedAdmin ? JSON.parse(cachedAdmin) : null;
     if (!admin) {
       admin = await this.adminRepository.findAdmin(id);
@@ -604,6 +625,7 @@ export class AdminService {
         return admin;
       }
     }
+
     return !admin ? null : admin;
   }
 
@@ -668,7 +690,7 @@ export class AdminService {
   async activationSettings(rootAdminId: number, adminId: number, activated: boolean) {
     const rootAdmin = await this.adminRepository.findAdmin(rootAdminId);
     if (rootAdmin.id !== 1) {
-      throw new HttpException('Root administrator only', HttpStatus.FORBIDDEN);
+      throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     }
     const admin = await this.adminRepository.findAdmin(adminId);
     admin.activated = activated;
@@ -688,7 +710,7 @@ export class AdminService {
       ...data,
       activated: false,
     };
-    adminData.password = await bcrypt.hash(data.password, 10);
+    adminData.password = await bcrypt.hash(data.password, 12);
 
     await this.adminRepository.saveAdmin(adminData);
 
@@ -698,7 +720,7 @@ export class AdminService {
   private async adminCheckDuplicates(email: string) {
     const result = await this.adminRepository.findByEmail(email);
     if (result) {
-      throw new HttpException('Email already in use.', HttpStatus.CONFLICT);
+      throw new HttpException('이미 사용중인 이메일입니다.', HttpStatus.CONFLICT);
     }
     return;
   }
@@ -820,40 +842,64 @@ export class AdminService {
     await this.adminRepository.saveHistory(newHistory);
   }
 
-  async createUpdateHistory(adminId: number, history: string) {
+  async createRelease(adminId: number, content: string) {
     const processor = await this.adminRepository.findAdmin(adminId);
 
-    const newUpdateHistory = new UpdatedHistory();
-    newUpdateHistory.history = history;
-    newUpdateHistory.processor = processor;
+    const newRelease = new Release();
+    newRelease.content = content;
+    newRelease.processor = processor;
 
-    await this.supportRepository.saveUpdateHistory(newUpdateHistory);
+    await this.supportRepository.saveRelease(newRelease);
   }
 
-  async getAllUpdateHistories(page: number, limit: number) {
-    const { histories, total } = await this.supportRepository.findAllUpdateHistories(page, limit);
+  async updateRelease(adminId: number, releaseId: number, content: string) {
+    const processor = await this.adminRepository.findAdmin(adminId);
+
+    const release = await this.supportRepository.findRelease(releaseId);
+    release.content = content;
+    release.processor = processor;
+
+    await this.supportRepository.saveRelease(release);
+  }
+
+  async deleteRelease(adminId: number, releaseId: number) {
+    const admin = await this.adminRepository.findAdmin(adminId);
+    const release = await this.supportRepository.findRelease(releaseId);
+    const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, admin);
+    await this.adminRepository.saveHistory(history);
+
+    await this.supportRepository.deleteRelease(releaseId);
+  }
+
+  async getReleases(page: number, limit: number) {
+    const { releases, total } = await this.supportRepository.findReleases(page, limit);
 
     const totalPage = Math.ceil(total / limit);
-    const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
+    const releasesDto = this.utilsService.transformToDto(ReleaseResDto, releases);
 
-    return { histories: historiesDto, total, page, totalPage };
+    return { releases: releasesDto, total, page, totalPage };
   }
 
-  async getUpdateHistory(historyId: number) {
-    const history = await this.supportRepository.findUpdatedHistory(historyId);
+  async getRelease(releaseId: number) {
+    const release = await this.supportRepository.findRelease(releaseId);
 
-    return this.utilsService.transformToDto(UpdatedHistoryResDto, history);
+    return this.utilsService.transformToDto(ReleaseResDto, release);
   }
 
   async deleteUser(adminId: number, userId: number) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
     await this.userRepository.deleteAccount(userId, todayDate);
   }
 
+  async deleteAllUser(adminId: number) {
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+    await this.userRepository.deleteAllAccount();
+  }
+
   async getCronLogs(adminId: number, page: number, limit: number) {
-    if (adminId !== 1) throw new HttpException('You are not authorized.', HttpStatus.FORBIDDEN);
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     return await this.cronService.getCronLogs(page, limit);
   }
 
@@ -881,5 +927,96 @@ export class AdminService {
 
   async changeTomorrowGeulroquis(geulroquisId: number) {
     return this.geulroquisService.changeTomorrowGeulroquis(geulroquisId);
+  }
+
+  async getServerStatus() {
+    const cacheKey = this.serverCacheKey;
+
+    let status = await this.redis.get(cacheKey);
+    if (!status) {
+      const currentStatus = await this.adminRepository.getCurrentServerStatus();
+      await this.redis.set(cacheKey, currentStatus.status, 'EX', 3600);
+      status = currentStatus.status;
+    }
+
+    return status;
+  }
+
+  async saveServerStatus(adminId: number, newStatus: string) {
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    let serverStatus = await this.adminRepository.getCurrentServerStatus();
+    if (!serverStatus) {
+      serverStatus = new Server();
+    }
+    serverStatus.status = newStatus;
+
+    const updatedServer = await this.adminRepository.saveServer(serverStatus);
+
+    await this.redis.del(this.serverCacheKey);
+
+    return updatedServer.status;
+  }
+
+  async getAppVersions() {
+    const versions = await this.supportService.findAllVersions();
+
+    return this.utilsService.transformToDto(VersionsResDto, versions);
+  }
+
+  async deleteAllDevice(adminId: number) {
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+    return this.supportRepository.deleteAllDevice();
+  }
+
+  async updateAppVersion(versionId: number, version: string) {
+    await this.supportService.updateAppVersion(versionId, version);
+  }
+
+  async requestClearDatabase(adminId: number) {
+    if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    const admin = await this.adminRepository.findAdmin(adminId);
+
+    const token = await this.utilsService.generateVerifyToken();
+
+    const adminData = { email: admin.email, id: admin.id };
+
+    await this.redis.set(token, JSON.stringify(adminData), 'EX', 600);
+
+    await this.mailService.rootAuthenticationEmail(admin.email, token);
+  }
+
+  @Transactional()
+  async clearDatabase(token: string) {
+    const rootAdmin = await this.redis.get(token);
+
+    if (!rootAdmin)
+      throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
+
+    const { email, id } = JSON.parse(rootAdmin);
+
+    if (id !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    await this.adminRepository.clearDatabase();
+    await this.nicknameService.resetNickname();
+    await this.resetRootAdmin();
+  }
+
+  async resetRootAdmin() {
+    const root = await this.adminRepository.findAdmin(1);
+    const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 10);
+
+    root.email = process.env.ROOT_EMAIL;
+    root.name = process.env.ROOT_NAME;
+    root.password = hashedPassword;
+    root.activated = true;
+    await this.adminRepository.saveAdmin(root);
+  }
+
+  async deleteAdmin(rootAdminId: number, adminId: number) {
+    if (rootAdminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+
+    await this.adminRepository.deleteAdminById(adminId);
   }
 }

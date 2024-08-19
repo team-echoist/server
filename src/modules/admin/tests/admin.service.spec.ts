@@ -17,6 +17,7 @@ import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { AdminResDto } from '../dto/response/adminRes.dto';
 import { GeulroquisService } from '../../geulroquis/geulroquis.service';
 import { CronService } from '../../cron/cron.service';
+import { NicknameService } from '../../nickname/nickname.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -37,6 +38,7 @@ jest.mock('../../alert/alert.service');
 jest.mock('../../firebase/firebase.service');
 jest.mock('../../geulroquis/geulroquis.service');
 jest.mock('../../cron/cron.service');
+jest.mock('../../nickname/nickname.service');
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -52,6 +54,7 @@ describe('AdminService', () => {
   let alertService: jest.Mocked<AlertService>;
   let geulroquisService: jest.Mocked<GeulroquisService>;
   let cronService: jest.Mocked<CronService>;
+  let nicknameService: jest.Mocked<NicknameService>;
 
   const mockRedis = {
     get: jest.fn(),
@@ -77,6 +80,7 @@ describe('AdminService', () => {
         SupportRepository,
         AlertService,
         GeulroquisService,
+        NicknameService,
         CronService,
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
         {
@@ -164,7 +168,7 @@ describe('AdminService', () => {
       };
 
       await expect(service.createAdmin(adminId, createAdminReqDto)).rejects.toThrowError(
-        'You are not authorized.',
+        '접근 권한이 없습니다.',
       );
     });
   });
@@ -320,7 +324,7 @@ describe('AdminService', () => {
       adminRepository.findByEmail.mockResolvedValue({ email: 'test@example.com' } as any);
 
       await expect(service.register(adminRegisterReqDto)).rejects.toThrowError(
-        'Email already in use.',
+        '이미 사용중인 이메일입니다.',
       );
     });
   });
@@ -348,7 +352,7 @@ describe('AdminService', () => {
       adminRepository.findAdmin.mockResolvedValue(nonRootAdmin as any);
 
       await expect(service.activationSettings(nonRootAdmin.id, 2, true)).rejects.toThrowError(
-        'Root administrator only',
+        '접근 권한이 없습니다.',
       );
     });
   });
@@ -503,46 +507,46 @@ describe('AdminService', () => {
   describe('createUpdateHistory', () => {
     it('should create an update history', async () => {
       const adminId = 1;
-      const history = 'Update history';
+      const content = 'Update history';
       const processor = { id: 1, email: 'admin@example.com' };
-      const newUpdateHistory = { id: 1, history, processor };
+      const newUpdateHistory = { id: 1, content, processor };
 
       adminRepository.findAdmin.mockResolvedValue(processor as any);
-      supportRepository.saveUpdateHistory.mockResolvedValue(newUpdateHistory as any);
+      supportRepository.saveRelease.mockResolvedValue(newUpdateHistory as any);
 
-      await service.createUpdateHistory(adminId, history);
-      expect(supportRepository.saveUpdateHistory).toHaveBeenCalledWith(
-        expect.objectContaining({ history }),
+      await service.createRelease(adminId, content);
+      expect(supportRepository.saveRelease).toHaveBeenCalledWith(
+        expect.objectContaining({ content }),
       );
     });
   });
 
   describe('getAllUpdateHistories', () => {
     it('should return update histories', async () => {
-      const mockHistories = {
-        histories: [{ id: 1, history: 'Update' }],
+      const mockRelease = {
+        releases: [{ id: 1, release: 'Update' }],
         total: 1,
         page: 1,
         totalPage: 1,
       };
-      supportRepository.findAllUpdateHistories.mockResolvedValue(mockHistories as any);
+      supportRepository.findReleases.mockResolvedValue(mockRelease as any);
       utilsService.transformToDto.mockImplementation((_dto, obj) => obj);
 
-      const result = await service.getAllUpdateHistories(1, 10);
-      expect(result).toEqual(mockHistories);
+      const result = await service.getReleases(1, 10);
+      expect(result).toEqual(mockRelease);
     });
   });
 
   describe('getUpdateHistory', () => {
     it('should return an update history', async () => {
-      const historyId = 1;
-      const mockHistory = { id: 1, history: 'Update' };
+      const releaseId = 1;
+      const mockRelease = { id: 1, release: 'Update' };
 
-      supportRepository.findUpdatedHistory.mockResolvedValue(mockHistory as any);
+      supportRepository.findRelease.mockResolvedValue(mockRelease as any);
       utilsService.transformToDto.mockImplementation((_dto, obj) => obj);
 
-      const result = await service.getUpdateHistory(historyId);
-      expect(result).toEqual(mockHistory);
+      const result = await service.getRelease(releaseId);
+      expect(result).toEqual(mockRelease);
     });
   });
 });

@@ -4,8 +4,9 @@ import { ReportRepository } from '../report.repository';
 import { EssayService } from '../../essay/essay.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ReportQueue } from '../../../entities/reportQueue.entity';
-import { Essay, EssayStatus } from '../../../entities/essay.entity';
+import { Essay } from '../../../entities/essay.entity';
 import { CreateReportReqDto } from '../dto/request/createReportReq.dto';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -91,7 +92,7 @@ describe('ReportService', () => {
       essayService.getEssayById.mockResolvedValue(null);
 
       await expect(service.createReport(userId, essayId, data)).rejects.toThrow(
-        new HttpException('Essay not found.', HttpStatus.NOT_FOUND),
+        new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
 
       expect(essayService.getEssayById).toHaveBeenCalledWith(essayId);
@@ -108,7 +109,7 @@ describe('ReportService', () => {
       essayService.getEssayById.mockResolvedValue(essay);
 
       await expect(service.createReport(userId, essayId, data)).rejects.toThrow(
-        new HttpException('Cannot report a private essay.', HttpStatus.BAD_REQUEST),
+        new HttpException('비공개 에세이는 신고할 수 없습니다.', HttpStatus.BAD_REQUEST),
       );
 
       expect(essayService.getEssayById).toHaveBeenCalledWith(essayId);
@@ -127,7 +128,7 @@ describe('ReportService', () => {
       reportRepository.findReportByReporter.mockResolvedValue(existingReport);
 
       await expect(service.createReport(userId, essayId, data)).rejects.toThrow(
-        new HttpException('You have already reported this essay.', HttpStatus.CONFLICT),
+        new HttpException('귀하는 이미 이 에세이를 신고했습니다.', HttpStatus.CONFLICT),
       );
 
       expect(essayService.getEssayById).toHaveBeenCalledWith(essayId);

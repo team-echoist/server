@@ -21,12 +21,8 @@ import { Tag } from './tag.entity';
 import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 import { Alert } from './alert.entity';
-
-export enum EssayStatus {
-  PRIVATE = 'private',
-  PUBLISHED = 'published',
-  LINKEDOUT = 'linkedout',
-}
+import { Device } from './device.entity';
+import { EssayStatus } from '../common/types/enum.types';
 
 @Entity()
 export class Essay {
@@ -36,7 +32,7 @@ export class Essay {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'text' })
   content: string;
 
   @Column({ name: 'linked_out_gauge', nullable: false, default: 0 })
@@ -86,16 +82,15 @@ export class Essay {
   })
   status: EssayStatus;
 
-  @Index()
-  @Column({ nullable: true, name: 'device_info' })
-  device: string;
+  @ManyToOne(() => Device, (device) => device.essays, { onDelete: 'SET NULL' })
+  device: Device;
 
   @JoinTable({ name: 'essay_tags' })
   @ManyToMany(() => Tag, (tag) => tag.essays, { onDelete: 'CASCADE' })
   tags: Tag[];
 
   @JoinColumn({ name: 'story_id' })
-  @ManyToOne(() => Story, (story) => story.essays)
+  @ManyToOne(() => Story, (story) => story.essays, { onDelete: 'CASCADE' })
   story: Story;
 
   @Index()

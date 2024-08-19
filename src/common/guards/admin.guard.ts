@@ -1,23 +1,25 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ExecutionContext, CanActivate } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { Observable } from 'rxjs';
 
 @Injectable()
-export class AdminGuard extends AuthGuard('admin-jwt') {
-  canActivate(context: ExecutionContext) {
-    const canActivate = super.canActivate(context);
-    if (!canActivate) {
-      return false;
-    }
-
-    const request = context.switchToHttp().getRequest();
-    return this.validate(request);
+export class AdminGuard extends AuthGuard('admin-jwt') implements CanActivate {
+  constructor(private reflector: Reflector) {
+    super();
   }
 
-  validate(request: any) {
-    const user = request.user;
-    if (user && user.activated) {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
       return true;
     }
-    throw new UnauthorizedException('Admin access only');
+
+    return super.canActivate(context);
   }
 }

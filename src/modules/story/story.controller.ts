@@ -11,7 +11,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StoryService } from './story.service';
 import { StoriesResDto } from './dto/response/storiesRes.dto';
@@ -21,10 +20,11 @@ import { UpdateStoryReqDto } from './dto/repuest/updateStoryReq.dto';
 import { StoryUpdateEssaysResDto } from '../essay/dto/response/storyUpdateEssaysRes.dto';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Story')
 @Controller('stories')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class StoryController {
   constructor(private readonly storyService: StoryService) {}
 

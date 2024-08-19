@@ -9,10 +9,10 @@ import {
 import { Transactional } from 'typeorm-transactional';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { Essay } from '../../entities/essay.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Story } from '../../entities/story.entity';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { UtilsService } from '../utils/utils.service';
 import { AwsService } from '../aws/aws.service';
 import { ReviewService } from '../review/review.service';
@@ -33,6 +33,9 @@ import { SummaryEssayResDto } from './dto/response/summaryEssayRes.dto';
 import { SentenceEssayResDto } from './dto/response/sentenceEssayRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
+import { DeviceDto } from '../support/dto/device.dto';
+import { SupportService } from '../support/support.service';
+import { AnotherEssayType, EssayStatus, UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class EssayService {
@@ -48,19 +51,32 @@ export class EssayService {
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
     private readonly alertService: AlertService,
+    private readonly supportService: SupportService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async checkEssayPermissions(essay: Essay, userId: number) {
     if (essay.author.id !== userId)
-      throw new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN);
+      throw new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN);
+  }
+
+  async testfn() {
+    const text =
+      '<p>긴내용234ㅇㅇㅇㅇㅇㅇㅇ ㅇ 아 ㅇㅇㅇㅇㅇㅇㅇㅇㅇ ㅇㅇㅇㅇㅇㅇㅇ  <b>ㅇㅇㅇㅇㅇㅇㅇㅇㅇ<u>ㅇㅇㅇㅇ <s>ㅇㅇㅇㅇㅇㅇㅇㅇ </s></u><s>ㅇㅇㅇㅇㅇㅇㅇ 이 이 ㅇㅇㅇㅇㅇㅇ</s>ㅇㅇㅇ  양 ㅇㅇㅇㅇㅇㅇ</b>ㅇ</p><p><s> ㅇㅇㅇㅇㅇㅇㅇㅇㅇ  </s>ㄹㄹㄹㄹㄹㄹㄹㄹ <span style="font-size: 16.0px;">ㄹㄹㄹㄹㄹㄹㄹ<span style="font-size: 17.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 18.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 19.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 20.0px;">ㄹㄹㄹ<span style="font-size: 22.0px;">ㄹㄹ<span style="font-size: 24.0px;">ㄹㄹ</span></span></span></span></span></span></span></p>';
+    return this.utilsService.cleanText(text);
   }
 
   @Transactional()
-  async saveEssay(requester: Express.User, device: string, data: CreateEssayReqDto) {
+  async saveEssay(requester: Express.User, deviceDto: DeviceDto, data: CreateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
     const tags = await this.tagService.getTags(data.tags);
+
+    let device = await this.supportService.findDevice(user, deviceDto);
+
+    if (!device) {
+      device = await this.supportService.newCreateDevice(user, deviceDto);
+    }
 
     const essayData = {
       ...data,
@@ -153,10 +169,7 @@ export class EssayService {
   private async checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
     const isUnderReview = await this.reviewService.findReviewByEssayId(essayId);
     if (isUnderReview && data.status !== EssayStatus.PRIVATE) {
-      throw new HttpException(
-        'Update rejected: Essay is currently under review',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('업데이트 거부: 에세이가 현재 검토중입니다.', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -220,12 +233,12 @@ export class EssayService {
   }
 
   @Transactional()
-  async getEssay(userId: number, essayId: number, type: string) {
+  async getEssay(userId: number, essayId: number, type: AnotherEssayType) {
     const user = await this.userService.fetchUserEntityById(userId);
 
     const essay = await this.essayRepository.findEssayById(essayId);
 
-    if (!essay) throw new HttpException('There are no essays.', HttpStatus.NOT_FOUND);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
@@ -234,9 +247,9 @@ export class EssayService {
     }
 
     const anotherEssays =
-      type === 'community'
+      type === AnotherEssayType.RECOMMEND
         ? await this.getRecommendEssays(userId, 6)
-        : await this.previousEssay(essay.author.id, essay);
+        : await this.previousEssay(userId, essay, type);
 
     const newEssayData = {
       ...essay,
@@ -250,7 +263,7 @@ export class EssayService {
 
   private async handleNonAuthorView(userId: number, essay: Essay) {
     if (essay.status === EssayStatus.PRIVATE) {
-      throw new HttpException('This is an invalid request.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('잘못된 요청입니다.', HttpStatus.BAD_REQUEST);
     }
 
     const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
@@ -316,18 +329,32 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  private async previousEssay(userId: number, essay: Essay) {
+  private async previousEssay(userId: number, essay: Essay, type: AnotherEssayType) {
     let previousEssay: Essay[];
 
-    userId === essay.author.id
-      ? (previousEssay = await this.essayRepository.findPreviousMyEssay(userId, essay.createdDate))
-      : (previousEssay = await this.essayRepository.findPreviousEssay(userId, essay.createdDate));
+    if (type === AnotherEssayType.PUBLISH) {
+      previousEssay = await this.essayRepository.findPreviousPublishEssay(
+        userId,
+        essay.createdDate,
+      );
+    } else if (type === AnotherEssayType.PRIVATE) {
+      if (userId !== essay.author.id)
+        throw new HttpException(
+          '비공개 이전 글은 본인만 조회할 수 있습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      previousEssay = await this.essayRepository.findPreviousPrivateEssay(
+        userId,
+        essay.createdDate,
+      );
+    }
 
     previousEssay.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
 
-    return this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+    const essays = this.utilsService.transformToDto(SummaryEssayResDto, previousEssay);
+    return { essays: essays };
   }
 
   @Transactional()

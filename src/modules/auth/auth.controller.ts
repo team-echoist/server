@@ -8,28 +8,25 @@ import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { OauthMobileReqDto } from './dto/request/OauthMobileReq.dto';
 import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
 import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
-import { UtilsService } from '../utils/utils.service';
 import { EmailReqDto } from './dto/request/emailReq.dto';
 import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { Public } from '../../common/decorators/public.decorator';
+import { DeviceOS, DeviceType } from '../../common/types/enum.types';
+import { JwtResDto } from './dto/response/jwtRes.dto';
 
 @ApiTags('Auth')
+@UseGuards(JwtAuthGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
-    private readonly utilsService: UtilsService,
   ) {}
 
-  @Get('health-check')
-  @ApiOperation({ summary: 'health check' })
-  @ApiResponse({ status: 200 })
-  async healthCheck() {
-    return 'up';
-  }
-
   @Post('check/email')
+  @Public()
   @ApiOperation({
     summary: '이메일 중복 검사',
     description: `
@@ -61,6 +58,7 @@ export class AuthController {
   }
 
   @Post('check/nickname')
+  @Public()
   @ApiOperation({
     summary: '닉네임 중복 검사',
     description: `
@@ -96,7 +94,6 @@ export class AuthController {
   }
 
   @Post('verify/email')
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({
     summary: '이메일 변경을 위한 이메일 인증 요청',
     description: `
@@ -119,8 +116,8 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: EmailReqDto })
-  async verifEmail(@Req() req: ExpressRequest, @Body() data: EmailReqDto) {
-    await this.authService.verifEmail(req.user.id, data.email);
+  async verifyEmail(@Req() req: ExpressRequest, @Body() data: EmailReqDto) {
+    await this.authService.verifyEmail(req.user.id, data.email);
     return;
   }
 
@@ -137,13 +134,13 @@ export class AuthController {
   1. 제공된 인증 토큰을 Redis에서 조회합니다.
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 이메일로 변경합니다.
-  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리디렉션합니다.
+  4. 사용자가 모바일 기기(iPhone, iPad, Android)에서 등록한 경우, 딥링크로 리다이렉션합니다.
   5. 그 외의 경우, 웹사이트로 리다이렉션합니다.
 
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리디렉션되며, 웹에서는 웹사이트로 리디렉션됩니다.
+  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 201 })
@@ -155,19 +152,24 @@ export class AuthController {
   ) {
     await this.authService.updateEmail(token);
 
-    // todo 리다이렉션
     let redirectUrl = this.configService.get<string>('WEB_CHANGE_EMAIL_REDIRECT');
-    if (req.device === 'iPhone' || req.device === 'iPad') {
-      // todo
+    if (
+      req.device.os === DeviceOS.IOS &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('IOS_CHANGE_EMAIL_REDIRECT');
     }
-    if (req.device === 'Android')
+    if (
+      req.device.os === DeviceOS.ANDROID &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    )
       redirectUrl = this.configService.get<string>('AOS_CHANGE_EMAIL_REDIRECT');
 
     res.redirect(redirectUrl);
   }
 
-  @Post('verify')
+  @Post('sign')
+  @Public()
   @ApiOperation({
     summary: '회원가입을 위한 이메일 인증 요청',
     description: `
@@ -191,12 +193,13 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateUserReqDto })
-  async verify(@Body() createUserDto: CreateUserReqDto) {
+  async sign(@Body() createUserDto: CreateUserReqDto) {
     await this.authService.signingUp(createUserDto);
     return;
   }
 
   @Get('register')
+  @Public()
   @ApiOperation({
     summary: '회원등록',
     description: `
@@ -210,34 +213,40 @@ export class AuthController {
   2. 토큰이 유효하지 않으면 에러를 반환합니다.
   3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
-	5. 인증에 성공하면 쿼리스트링에 JWT를 세팅하고 환경에 맞게 리다이렉션 합니다.
+	5. 인증에 성공하면 쿼리스트링에 엑세스, 리프레쉬 토큰을 세팅하고 환경에 맞게 리다이렉션 합니다.
 	
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리디렉션되며, 웹에서는 웹사이트로 리디렉션됩니다.
+  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 201 })
   async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
-    const user = await this.authService.register(token);
+    await this.authService.register(token);
 
-    const newJwt = this.utilsService.generateJWT(user.id);
+    const { accessToken, refreshToken } = await this.authService.login(req);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    if (req.device === 'iPhone' || req.device === 'iPad') {
-      // todo
+    if (
+      req.device.os === DeviceOS.IOS &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('IOS_REGISTER_REDIRECT');
     }
-    if (req.device === 'Android')
+    if (
+      req.device.os === DeviceOS.ANDROID &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    )
       redirectUrl = this.configService.get<string>('AOS_REGISTER_REDIRECT');
 
-    redirectUrl += `?token=${newJwt}`;
+    redirectUrl += `?accessToken=${accessToken}&refreshToken=${refreshToken}`;
 
     res.redirect(redirectUrl);
   }
 
   @Post('login')
+  @Public()
   @ApiOperation({
     summary: '로그인',
     description: `
@@ -254,21 +263,18 @@ export class AuthController {
 
   **주의 사항:**
   - 이메일과 비밀번호는 필수 항목입니다.
-  - 잘못된 이메일 또는 비밀번호로 시도하면 \`401 Unauthorized\` 에러가 발생합니다.
-  - 계정이 정지된 사용자는 202로 응답되며 유예기간까지 일반 사용자와 동일하게 서비스를 이용합니다.
+  - 계정탈퇴 신청 사용자는 202로 응답되며 유예기간까지 일반 사용자와 동일하게 서비스를 이용합니다.
   `,
   })
-  @ApiResponse({ status: 200, description: '로그인 성공' })
-  @ApiResponse({ status: 401, description: '인증 실패: 잘못된 이메일 또는 비밀번호' })
-  @ApiResponse({ status: 202, description: '탈퇴를 요청한 계정' })
-  @ApiResponse({ status: 403, description: '정지 계정' })
+  @ApiResponse({ status: 200, type: JwtResDto })
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
-  async login() {
-    return;
+  async login(@Req() req: ExpressRequest) {
+    return this.authService.login(req);
   }
 
   @Post('password/reset-req')
+  @Public()
   @ApiOperation({
     summary: '비밀번호 재설정 요청',
     description: `
@@ -292,25 +298,26 @@ export class AuthController {
   }
 
   @Get('password/reset-verify')
+  @Public()
   @ApiOperation({
     summary: '비밀번호 재설정 검증',
     description: `
   이메일로 받은 비밀번호 재설정 토큰을 검증합니다. 
-  검증이 완료되면 새로운 토큰을 생성하여 리디렉션합니다.
+  검증이 완료되면 새로운 토큰을 생성하여 리다이렉션합니다.
 
   **쿼리 파라미터:**
   - \`token\`: 비밀번호 재설정 토큰
 
   **동작 과정:**
   1. 제공된 토큰을 검증합니다.
-  2. 유효한 토큰이면 새로운 토큰을 생성하고 리디렉션합니다.
+  2. 유효한 토큰이면 새로운 토큰을 생성하고 리다이렉션합니다.
 
   **주의 사항:**
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리디렉션됩니다.
+  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리다이렉션됩니다.
   `,
   })
-  @ApiResponse({ status: 302, description: '토큰 검증 및 리디렉션 성공' })
+  @ApiResponse({ status: 302, description: '토큰 검증 및 리다이렉션 성공' })
   @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
   async passwordResetVerify(
     @Query('token') token: string,
@@ -320,12 +327,17 @@ export class AuthController {
     const newToken = await this.authService.passwordResetVerify(token);
 
     let redirectUrl = this.configService.get<string>('WEB_PASSWORD_RESET_REDIRECT');
-    if (req.device === 'iPhone' || req.device === 'iPad') {
-      // todo
+    if (
+      req.device.os === DeviceOS.IOS &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('IOS_PASSWORD_RESET_REDIRECT');
     }
 
-    if (req.device === 'Android') {
+    if (
+      req.device.os === DeviceOS.ANDROID &&
+      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
+    ) {
       redirectUrl = this.configService.get<string>('AOS_PASSWORD_RESET_REDIRECT');
     }
 
@@ -335,6 +347,7 @@ export class AuthController {
   }
 
   @Post('password/reset')
+  @Public()
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: `
@@ -360,7 +373,10 @@ export class AuthController {
   }
 
   //-------------------------------------------------------OAuth
+  //-------------------------------------------------------OAuth
+  //-------------------------------------------------------OAuth
   @Get('google')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-구글 로그인',
     description: `
@@ -378,6 +394,7 @@ export class AuthController {
   }
 
   @Get('google/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-구글 콜백',
     description: `
@@ -396,17 +413,18 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    const user = await this.authService.oauthLogin(req.user);
+    req.user = await this.authService.oauthLogin(req.user);
+    const jwt = await this.authService.login(req);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    const newJwt = this.utilsService.generateJWT(user.id);
 
-    redirectUrl += `?token=${newJwt}`;
+    redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
     res.redirect(redirectUrl);
   }
 
   @Post('google/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-구글 모바일 로그인',
     description: `
@@ -419,7 +437,7 @@ export class AuthController {
   1. 클라이언트로부터 구글 인증 토큰과 사용자 ID를 받습니다.
   2. 구글 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+  4. 인증에 성공하면 JWT를 반환합니다.
 
   **주의 사항:**
   - 구글 인증 토큰이 유효하지 않으면 오류가 발생합니다.
@@ -427,22 +445,22 @@ export class AuthController {
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: JwtResDto })
   async mobileGoogleLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
     req.user = await this.authService.validateGoogleUser(oauthData.token);
-
-    return;
+    return await this.authService.login(req);
   }
 
   @Get('kakao')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-카카오 로그인',
     description: `
   사용자가 카카오 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 카카오 로그인 버튼을 클릭하면, 카카오 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 카카오 계정으로 인증을 완료하면, 카카오 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 카카오 로그인 버튼을 클릭하면, 카카오 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 카카오 계정으로 인증을 완료하면, 카카오 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })
@@ -452,6 +470,7 @@ export class AuthController {
   }
 
   @Get('kakao/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-카카오 콜백',
     description: `
@@ -470,17 +489,17 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('kakao'))
   async kakaoCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    const user = await this.authService.oauthLogin(req.user);
-
+    req.user = await this.authService.oauthLogin(req.user);
+    const jwt = await this.authService.login(req);
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    const newJwt = this.utilsService.generateJWT(user.id);
 
-    redirectUrl += `?token=${newJwt}`;
+    redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
     res.redirect(redirectUrl);
   }
 
   @Post('kakao/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-카카오 모바일 로그인',
     description: `
@@ -493,29 +512,30 @@ export class AuthController {
   1. 클라이언트로부터 카카오 인증 토큰과 사용자 ID를 받습니다.
   2. 카카오 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+  4. 인증에 성공하면 JWT를 반환합니다.
 
   **주의 사항:**
   - 카카오 인증 토큰이 유효하지 않으면 오류가 발생합니다.
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 201 })
+  @ApiResponse({ status: 201, type: JwtResDto })
   async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
     req.user = await this.authService.validateKakaoUser(oauthData.token);
 
-    return;
+    return await this.authService.login(req);
   }
 
   @Get('naver')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-네이버 로그인',
     description: `
   사용자가 네이버 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 네이버 로그인 버튼을 클릭하면, 네이버 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 네이버 계정으로 인증을 완료하면, 네이버 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 네이버 로그인 버튼을 클릭하면, 네이버 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 네이버 계정으로 인증을 완료하면, 네이버 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })
@@ -525,6 +545,7 @@ export class AuthController {
   }
 
   @Get('naver/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-네이버 콜백',
     description: `
@@ -543,17 +564,17 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('naver'))
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    const user = await this.authService.oauthLogin(req.user);
-
+    req.user = await this.authService.oauthLogin(req.user);
+    const jwt = await this.authService.login(req);
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    const newJwt = this.utilsService.generateJWT(user.id);
 
-    redirectUrl += `?token=${newJwt}`;
+    redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
     res.redirect(redirectUrl);
   }
 
   @Post('naver/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-네이버 모바일 로그인',
     description: `
@@ -566,29 +587,29 @@ export class AuthController {
   1. 클라이언트로부터 네이버 인증 토큰과 사용자 ID를 받습니다.
   2. 네이버 OAuth 클라이언트를 사용하여 토큰을 검증합니다.
   3. 토큰이 유효한 경우, 사용자 정보를 추출합니다.
-  4. 인증에 성공하면 헤더에 JWT를 세팅하고 반환합니다.
+  4. jwt를 반환합니다.
 
   **주의 사항:**
   - 네이버 인증 토큰이 유효하지 않으면 오류가 발생합니다.
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 201 })
+  @ApiResponse({ status: 201, type: JwtResDto })
   async mobileNaverLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
     req.user = await this.authService.validateNaverUser(oauthData.token);
-
-    return;
+    return await this.authService.login(req);
   }
 
   @Get('apple')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-애플 로그인',
     description: `
   사용자가 애플 계정을 통해 로그인할 수 있도록 합니다.
 
   **동작 과정:**
-  1. 사용자가 애플 로그인 버튼을 클릭하면, 애플 로그인 페이지로 리디렉션됩니다.
-  2. 사용자가 애플 계정으로 인증을 완료하면, 애플 콜백 URL로 리디렉션됩니다.
+  1. 사용자가 애플 로그인 버튼을 클릭하면, 애플 로그인 페이지로 리다이렉션됩니다.
+  2. 사용자가 애플 계정으로 인증을 완료하면, 애플 콜백 URL로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 200 })
@@ -598,6 +619,7 @@ export class AuthController {
   }
 
   @Post('apple/callback')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-애플 콜백',
     description: `
@@ -616,17 +638,17 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('apple'))
   async appleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    const user = await this.authService.oauthLogin(req.user);
-
+    req.user = await this.authService.oauthLogin(req.user);
+    const jwt = await this.authService.login(req);
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    const newJwt = this.utilsService.generateJWT(user.id);
 
-    redirectUrl += `?token=${newJwt}`;
+    redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
     res.redirect(redirectUrl);
   }
 
   @Post('apple/mobile')
+  @Public()
   @ApiOperation({
     summary: 'OAuth-애플 모바일 로그인',
     description: `
@@ -646,9 +668,9 @@ export class AuthController {
   `,
   })
   @ApiBody({ type: OauthMobileReqDto })
-  @ApiResponse({ status: 201 })
+  @ApiResponse({ status: 201, type: JwtResDto })
   async mobileAppleLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
     req.user = await this.authService.validateAppleUser(oauthData.token);
-    return;
+    return await this.authService.login(req);
   }
 }

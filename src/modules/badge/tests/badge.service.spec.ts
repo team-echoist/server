@@ -81,7 +81,7 @@ describe('BadgeService', () => {
       badgeRepository.findBadge.mockResolvedValue(badge);
 
       await expect(service.levelUpBadge(userId, badgeId)).rejects.toThrow(
-        new HttpException('Not enough experience to level up.', HttpStatus.BAD_REQUEST),
+        new HttpException('레벨업에 필요한 경험치가 부족합니다.', HttpStatus.BAD_REQUEST),
       );
     });
 
@@ -92,7 +92,7 @@ describe('BadgeService', () => {
       badgeRepository.findBadge.mockResolvedValue(null);
 
       await expect(service.levelUpBadge(userId, badgeId)).rejects.toThrow(
-        new HttpException('Badge not found for user.', HttpStatus.NOT_FOUND),
+        new HttpException('사용자의 뱃지를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
     });
   });

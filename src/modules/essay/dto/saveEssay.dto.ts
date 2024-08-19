@@ -9,7 +9,8 @@ import {
 } from 'class-validator';
 import { User } from '../../../entities/user.entity';
 import { Story } from '../../../entities/story.entity';
-import { EssayStatus } from '../../../entities/essay.entity';
+import { Device } from '../../../entities/device.entity';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 export class SaveEssayDto {
   @IsNotEmpty()
@@ -36,8 +37,7 @@ export class SaveEssayDto {
   status?: EssayStatus;
 
   @IsNotEmpty()
-  @IsString()
-  device: string;
+  device: Device;
 
   @IsLatitude()
   @IsOptional()

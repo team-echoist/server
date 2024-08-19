@@ -12,12 +12,13 @@ import { swaggerConfig } from './config/swagger.config';
 import * as helmet from 'helmet';
 import * as dotenv from 'dotenv';
 import * as express from 'express';
+import * as basicAuth from 'express-basic-auth';
 import { writeFileSync } from 'fs';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
 import { ConfigService } from '@nestjs/config';
-import { AwsService } from './modules/aws/aws.service';
+import { AdminService } from './modules/admin/admin.service';
 
 dotenv.config();
 
@@ -149,30 +150,33 @@ async function bootstrap() {
     }),
   );
 
+  app.use('/.well-known', express.static(join(__dirname, '../.well-known')));
+
   const server = app.getHttpAdapter().getInstance();
-  server.get('/', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../src/common/static', '404.html'));
-  });
-  server.get('/store', (req: Request, res: Response) => {
-    res.sendFile(join(__dirname, '../src/common/static', 'store.html'));
+
+  server.get('/health-check', (req: Request, res: Response) => {
+    res.status(200).send('OK');
   });
 
-  app.useStaticAssets(join(__dirname, '..', 'src', 'common', 'static'));
-
-  const awsService = app.get(AwsService);
-  server.get('/.well-known/assetlinks.json', async (req, res) => {
-    try {
-      const data = await awsService.getAssetLinksJson();
-      res.setHeader('Content-Type', 'application/json');
-      res.send(data);
-    } catch (error) {
-      res.status(500).send('Error fetching assetlinks.json');
-    }
-  });
-
+  const adminService = app.get(AdminService);
   if (process.env.SWAGGER === 'true') {
+    app.use(
+      ['/api-doc', '/swagger.json'],
+      basicAuth({
+        authorizeAsync: true,
+        authorizer: async (email, password, callback) => {
+          const isValid = await adminService.validateSwagger(email, password);
+          if (isValid) {
+            return callback(null, true);
+          } else {
+            return callback(null, false);
+          }
+        },
+        challenge: true,
+      }),
+    );
     const document: OpenAPIObject = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api-doc', app, document);
+    SwaggerModule.setup('/api-doc', app, document);
     writeFileSync(join(process.cwd(), 'swagger.json'), JSON.stringify(document));
   }
 

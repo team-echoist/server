@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Admin } from './admin.entity';
 import { ProcessedHistory } from './processedHistory.entity';
+import { SeenNotice } from './seenNotice.entity';
 
 @Entity()
 export class Notice {
@@ -35,11 +36,13 @@ export class Notice {
   })
   deletedDate: Date;
 
+  @OneToMany(() => SeenNotice, (seenNotice) => seenNotice.notice)
+  seenNotices: SeenNotice[];
+
   @JoinColumn({ name: 'admin_id' })
-  @ManyToOne(() => Admin, (admin) => admin.notice)
+  @ManyToOne(() => Admin, (admin) => admin.notice, { onDelete: 'CASCADE' })
   processor: Admin;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.notice)
   processedHistories: ProcessedHistory[];
 }

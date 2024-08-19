@@ -11,7 +11,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { EssayStatus } from '../../../../entities/essay.entity';
+import { EssayStatus } from '../../../../common/types/enum.types';
 
 export class CreateEssayReqDto {
   @ApiProperty({ description: '30자 제한' })
@@ -20,10 +20,10 @@ export class CreateEssayReqDto {
   @Length(1, 30)
   title: string;
 
-  @ApiProperty({ description: '4000자 제한' })
+  @ApiProperty({ description: '10000자 제한' })
   @IsString()
   @IsNotEmpty()
-  @Length(10, 4000)
+  @Length(10, 10000)
   content: string;
 
   @ApiProperty({ required: false })
@@ -36,7 +36,7 @@ export class CreateEssayReqDto {
   @IsOptional()
   thumbnail?: string;
 
-  @ApiProperty({ type: 'enum', description: 'private, published, linked_out' })
+  @ApiProperty({ type: 'enum', description: 'private, published, linkedout' })
   @IsEnum(EssayStatus)
   @IsOptional()
   status?: EssayStatus;

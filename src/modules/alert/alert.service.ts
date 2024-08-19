@@ -1,18 +1,18 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AlertRepository } from './alert.repository';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
-import { Alert, AlertType } from '../../entities/alert.entity';
+import { Essay } from '../../entities/essay.entity';
+import { Alert } from '../../entities/alert.entity';
 import { UtilsService } from '../utils/utils.service';
 import { AlertResDto } from './dto/response/alertRes.dto';
 import { SupportService } from '../support/support.service';
 import { FirebaseService } from '../firebase/firebase.service';
-import { ActionType } from '../../entities/processedHistory.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { UserService } from '../user/user.service';
 import { User } from '../../entities/user.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
+import { ActionType, AlertType, EssayStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class AlertService {
@@ -43,7 +43,7 @@ export class AlertService {
   async markAlertAsRead(userId: number, alertId: number) {
     const alert = await this.alertRepository.findAlert(userId, alertId);
 
-    if (!alert) throw new HttpException('Alert not found', HttpStatus.NOT_FOUND);
+    if (!alert) throw new HttpException('알림을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     alert.read = true;
     await this.alertRepository.saveAlert(alert);
@@ -75,20 +75,21 @@ export class AlertService {
 
       await this.createReportProcessedAlert(user, report, type);
 
-      const devices = await this.supportService.getDevices(report.reporter.id);
+      const devices = await this.supportService.getDevicesByUserId(report.reporter.id);
       if (!devices && devices.length === 0) return;
 
       for (const device of devices) {
         const alertSettings = await this.supportService.fetchSettingEntityById(
           report.reporter.id,
-          device.deviceId,
+          device.id,
         );
-        if (alertSettings.report)
+        if (alertSettings.report) {
           await this.fcmService.sendPushAlert(
-            user.deviceToken,
+            device.fcmToken,
             '신고 결과를 알려드릴려고 왔어요!',
             '요청하신 지원에 대한 업데이트가 있어요.',
           );
+        }
       }
     }
   }
@@ -163,17 +164,17 @@ export class AlertService {
   }
 
   async sendPushAlertReportProcessed(essay: Essay) {
-    const devices = await this.supportService.getDevices(essay.author.id);
+    const devices = await this.supportService.getDevicesByUserId(essay.author.id);
     if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
       const alertSettings = await this.supportService.fetchSettingEntityById(
         essay.author.id,
-        device.deviceId,
+        device.id,
       );
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
-          device.deviceToken,
+          device.fcmToken,
           `$작성하신 글에 대한 업데이트가 있어요.`,
           `발행하신 글이 검토 후 비공개 상태로 전환됐어요.`,
         );
@@ -194,17 +195,17 @@ export class AlertService {
   }
 
   async sendPushReviewAlert(essay: Essay) {
-    const devices = await this.supportService.getDevices(essay.author.id);
+    const devices = await this.supportService.getDevicesByUserId(essay.author.id);
     if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
       const alertSettings = await this.supportService.fetchSettingEntityById(
         essay.author.id,
-        device.deviceId,
+        device.id,
       );
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
-          device.deviceToken,
+          device.fcmToken,
           '작성하신 글에 대한 업데이트가 있어요.',
           `발행 또는 링크드아웃하신 글이 검토 후 공개될 예정이에요.`,
         );
@@ -213,7 +214,6 @@ export class AlertService {
 
   async createReviewResultAlert(review: ReviewQueue, actionType: string) {
     const alert = new Alert();
-    const req = review.type === 'published' ? '발행' : '링크드아웃';
     const koreanDate = this.utilsService.formatDateToKorean(review.essay.createdDate);
 
     alert.user = await this.userService.fetchUserEntityById(review.user.id);
@@ -232,20 +232,17 @@ export class AlertService {
   }
 
   async sendPushReviewResultAlert(userId: number, actionType: string) {
-    const devices = await this.supportService.getDevices(userId);
+    const devices = await this.supportService.getDevicesByUserId(userId);
     if (!devices && devices.length === 0) return;
 
     const result = actionType === ActionType.APPROVED ? '공개' : '보류';
     const body = `발행 또는 링크드아웃하신 글이 검토 후 ${result} 상태로 전환됐어요.`;
 
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        userId,
-        device.deviceId,
-      );
+      const alertSettings = await this.supportService.fetchSettingEntityById(userId, device.id);
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
-          device.deviceToken,
+          device.fcmToken,
           `작성하신 글에 대한 업데이트가 있어요.`,
           body,
         );
@@ -273,17 +270,17 @@ export class AlertService {
   }
 
   async sendPushAlertFirstView(essay: Essay) {
-    const devices = await this.supportService.getDevices(essay.author.id);
+    const devices = await this.supportService.getDevicesByUserId(essay.author.id);
     if (!devices && devices.length === 0) return;
 
     for (const device of devices) {
       const alertSettings = await this.supportService.fetchSettingEntityById(
         essay.author.id,
-        device.deviceId,
+        device.id,
       );
       if (alertSettings.viewed)
         await this.fcmService.sendPushAlert(
-          device.deviceToken,
+          device.fcmToken,
           `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 발견!`,
           `사람들이 ${essay.author.nickname} 아무개님의 이야기를 읽기 시작했어요!`,
         );

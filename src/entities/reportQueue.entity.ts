@@ -39,10 +39,9 @@ export class ReportQueue {
   reporter: User;
 
   @JoinColumn({ name: 'essay_id' })
-  @ManyToOne(() => Essay, (essay) => essay.reports)
+  @ManyToOne(() => Essay, (essay) => essay.reports, { onDelete: 'CASCADE' })
   essay: Essay;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.report)
   processedHistories: ProcessedHistory[];
 }

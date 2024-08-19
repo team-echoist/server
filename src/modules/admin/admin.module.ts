@@ -21,18 +21,20 @@ import { Admin } from '../../entities/admin.entity';
 import { Inquiry } from '../../entities/inquiry.entity';
 import { Notice } from '../../entities/notice.entity';
 import { SupportModule } from '../support/support.module';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { Release } from '../../entities/release.entity';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { AdminProcessor } from './admin.processor';
 import { AlertModule } from '../alert/alert.module';
 import { CronModule } from '../cron/cron.module';
 import { GeulroquisModule } from '../geulroquis/geulroquis.module';
+import { Server } from '../../entities/server.entity';
+import { NicknameModule } from '../nickname/nickname.module';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_ACCESS_SECRET,
     }),
     TypeOrmModule.forFeature([
       User,
@@ -45,7 +47,8 @@ import { GeulroquisModule } from '../geulroquis/geulroquis.module';
       Admin,
       Inquiry,
       Notice,
-      UpdatedHistory,
+      Release,
+      Server,
     ]),
     BullModule.registerQueueAsync({
       name: 'admin',
@@ -67,6 +70,7 @@ import { GeulroquisModule } from '../geulroquis/geulroquis.module';
     AlertModule,
     CronModule,
     GeulroquisModule,
+    NicknameModule,
   ],
   controllers: [AdminController],
   providers: [

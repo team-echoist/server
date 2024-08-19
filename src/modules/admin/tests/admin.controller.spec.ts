@@ -13,11 +13,9 @@ import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
 import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
 import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
 import { InquiryAnswerReqDto } from '../dto/request/inquiryAnswerReq.dto';
-import { UpdateHistoryReqDto } from '../dto/request/updateHistoryReq.dto';
+import { UpdateReleaseReqDto } from '../dto/request/updateReleaseReq.dto';
 import { Request as ExpressRequest } from 'express';
-import { ActionType } from '../../../entities/processedHistory.entity';
-import { UserStatus } from '../../../entities/user.entity';
-import { EssayStatus } from '../../../entities/essay.entity';
+import { ActionType, EssayStatus, UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('../admin.service');
 
@@ -335,24 +333,24 @@ describe('AdminController', () => {
 
   describe('createUpdateHistory', () => {
     it('should call service createUpdateHistory method', async () => {
-      const dto: UpdateHistoryReqDto = { history: 'history' };
+      const dto: UpdateReleaseReqDto = { content: 'history' };
       const req: ExpressRequest = { user: { id: 1 } } as any;
-      await controller.createUpdateHistory(req, dto);
-      expect(service.createUpdateHistory).toHaveBeenCalledWith(1, dto.history);
+      await controller.createRelease(req, dto);
+      expect(service.createRelease).toHaveBeenCalledWith(1, dto.content);
     });
   });
 
   describe('getAllUpdateHistories', () => {
     it('should call service getAllUpdateHistories method', async () => {
-      await controller.getAllUpdateHistories(1, 10);
-      expect(service.getAllUpdateHistories).toHaveBeenCalledWith(1, 10);
+      await controller.getReleases(1, 10);
+      expect(service.getReleases).toHaveBeenCalledWith(1, 10);
     });
   });
 
   describe('getUpdateHistory', () => {
     it('should call service getUpdateHistory method', async () => {
-      await controller.getUpdateHistory(1);
-      expect(service.getUpdateHistory).toHaveBeenCalledWith(1);
+      await controller.getRelease(1);
+      expect(service.getRelease).toHaveBeenCalledWith(1);
     });
   });
 

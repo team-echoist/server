@@ -9,7 +9,7 @@ import {
   Length,
 } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { EssayStatus } from '../../../../entities/essay.entity';
+import { EssayStatus } from '../../../../common/types/enum.types';
 
 export class UpdateEssayReqDto {
   @ApiProperty({ description: '30자 제한' })

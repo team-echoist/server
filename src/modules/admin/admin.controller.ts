@@ -50,20 +50,28 @@ import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes
 import { NoticesSummaryResDto } from '../support/dto/response/noticesSummaryRes.dto';
 import { InquiryAnswerReqDto } from './dto/request/inquiryAnswerReq.dto';
 import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
-import { UpdateHistoryReqDto } from './dto/request/updateHistoryReq.dto';
+import { UpdateReleaseReqDto } from './dto/request/updateReleaseReq.dto';
 import { InquiriesSummaryResDto } from '../support/dto/response/inquiriesSummaryRes.dto';
-import { UpdatedHistoriesResDto } from '../support/dto/response/updatedHistoriesRes.dto';
+import { ReleasesResDto } from '../support/dto/response/releasesRes.dto';
 import { AdminsResDto } from './dto/response/adminsRes.dto';
 import { CronLogsResDto } from '../cron/dto/response/cronLogsRes.dto';
 import { GeulroquisResDto } from '../geulroquis/dto/response/geulroquisRes.dto';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
+import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
+import { UpdateVersionReqDto } from '../support/dto/request/updateVersionReq.dto';
+import { AdminGuard } from '../../common/guards/admin.guard';
+import { Public } from '../../common/decorators/public.decorator';
+import { ServerStatus } from '../../common/types/enum.types';
+import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
+@UseGuards(AdminGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('register')
+  @Public()
   @ApiOperation({
     summary: '어드민 회원가입',
     description: `
@@ -91,6 +99,7 @@ export class AdminController {
   }
 
   @Post('login')
+  @Public()
   @UseGuards(AuthGuard('admin-local'))
   @ApiOperation({
     summary: '어드민 로그인',
@@ -107,7 +116,6 @@ export class AdminController {
   }
 
   @Put()
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 본인 정보 수정',
     description: `
@@ -135,7 +143,6 @@ export class AdminController {
   }
 
   @Post('images')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 프로필 이미지 업로드',
     description: `
@@ -160,7 +167,6 @@ export class AdminController {
   }
 
   @Delete('images')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 프로필 이미지 삭제',
     description: `
@@ -182,7 +188,6 @@ export class AdminController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '어드민 리스트',
     description: `
@@ -205,33 +210,7 @@ export class AdminController {
     return this.adminService.getAdmins(activated);
   }
 
-  @Post('produce')
-  @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({
-    summary: '[루트 관리자용] 관리자생성',
-    description: `
-  루트 관리자가 새로운 관리자를 생성하는 API입니다. 이 API는 루트 관리자만 호출할 수 있습니다.
-    
-  **주의 사항:**
-  - 루트 관리자만 이 API를 호출할 수 있습니다. 루트 관리자 ID는 1로 고정되어 있습니다.
-  - 비밀번호는 저장 전에 해시 처리됩니다.
-    
-  **동작 과정:**
-  1. 요청을 보낸 관리자가 루트 관리자 인지 확인합니다.
-  2. 제공된 데이터로 새 관리자를 생성합니다.
-  3. 새 관리자의 비밀번호를 해시화합니다.
-  4. 새 관리자를 데이터베이스에 저장합니다.
-  5. 저장된 관리자 정보를 반환합니다.
-  `,
-  })
-  @ApiBody({ type: CreateAdminReqDto })
-  @ApiResponse({ status: 200, type: SavedAdminResDto })
-  async createAdmin(@Req() req: ExpressRequest, @Body() data: CreateAdminReqDto) {
-    return this.adminService.createAdmin(req.user.id, data);
-  }
-
   @Get('dashboard')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: 'Dashboard',
     description: `
@@ -252,7 +231,6 @@ export class AdminController {
   }
 
   @Get('statistics/essays/daily')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '월간 일별 에세이 작성 카운트',
     description: `
@@ -290,7 +268,6 @@ export class AdminController {
   }
 
   @Get('statistics/essays/monthly')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '년간 월별 에세이 작성 카운트',
     description: `
@@ -323,7 +300,6 @@ export class AdminController {
   }
 
   @Get('statistics/users/daily')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '월간 일별 유저 유입 통계',
     description: `
@@ -360,7 +336,6 @@ export class AdminController {
   }
 
   @Get('statistics/users/monthly')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '년간 월별 유저 유입 통계',
     description: `
@@ -392,7 +367,6 @@ export class AdminController {
   }
 
   @Get('statistics/payments/daily')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '월간 일별 구독 가입 통계',
     description: `
@@ -429,7 +403,6 @@ export class AdminController {
   }
 
   @Get('statistics/payments/monthly')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '년간 월별 구독 가입 통계',
     description: `
@@ -461,7 +434,6 @@ export class AdminController {
   }
 
   @Get('reports')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리포트 리스트',
     description: `
@@ -495,7 +467,6 @@ export class AdminController {
   }
 
   @Get('reports/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리포트 상세 조회',
     description: `
@@ -519,7 +490,6 @@ export class AdminController {
   }
 
   @Post('reports/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리포트 처리',
     description: `
@@ -554,7 +524,6 @@ export class AdminController {
   }
 
   @Get('reviews')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리뷰 리스트',
     description: `
@@ -583,7 +552,6 @@ export class AdminController {
   }
 
   @Get('reviews/:reviewId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리뷰 상세',
     description: `
@@ -606,7 +574,6 @@ export class AdminController {
   }
 
   @Post('review/:reviewId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '리뷰 처리',
     description: `
@@ -641,7 +608,6 @@ export class AdminController {
   }
 
   @Get('users')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '유저 리스트 조회',
     description: `
@@ -674,7 +640,6 @@ export class AdminController {
   }
 
   @Get('users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '유저 상세 조회',
     description: `
@@ -697,7 +662,6 @@ export class AdminController {
   }
 
   @Put('users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '유저 정보 수정',
     description: `
@@ -726,7 +690,6 @@ export class AdminController {
   }
 
   @Get('essays')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '에세이 리스트 조회',
     description: `
@@ -755,7 +718,6 @@ export class AdminController {
   }
 
   @Get('essays/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '에세이 상세 데이터 조회',
     description: `
@@ -778,7 +740,6 @@ export class AdminController {
   }
 
   @Put('essays/:essayId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '에세이 상태 수정',
     description: `
@@ -810,7 +771,6 @@ export class AdminController {
   }
 
   @Get('histories')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '관리자 처리 기록',
     description: `
@@ -864,7 +824,6 @@ export class AdminController {
   }
 
   @Post('notices')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 생성',
     description: `
@@ -886,7 +845,6 @@ export class AdminController {
   }
 
   @Put('notices/:noticeId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 수정',
     description: `
@@ -915,7 +873,6 @@ export class AdminController {
   }
 
   @Delete('notices/:noticeId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 삭제',
     description: `
@@ -937,7 +894,6 @@ export class AdminController {
   }
 
   @Get('notices')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 목록 조회',
     description: `
@@ -960,7 +916,6 @@ export class AdminController {
   }
 
   @Get('notices/:noticeId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '공지 상세 조회',
     description: `
@@ -979,7 +934,6 @@ export class AdminController {
   }
 
   @Get('inquiries')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '처리되지 않은 모든 고객 문의 또는 전체 조회',
     description: `
@@ -1008,7 +962,6 @@ export class AdminController {
   }
 
   @Get('inquiries/:inquiryId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '특정 고객 문의 상세 조회',
     description: `
@@ -1031,7 +984,6 @@ export class AdminController {
   }
 
   @Post('inquiries/:inquiryId')
-  @UseGuards(AuthGuard('admin-jwt'))
   @ApiOperation({
     summary: '고객 문의 답변 작성 및 수정',
     description: `
@@ -1062,18 +1014,17 @@ export class AdminController {
     return this.adminService.createAnswer(req.user.id, inquiryId, data.answer);
   }
 
-  @Post('updated-histories')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Post('releases')
   @ApiOperation({
-    summary: '업데이트 히스토리 생성',
+    summary: '릴리즈 생성',
     description: `
-  관리자가 업데이트 히스토리를 생성합니다.
+  새로운 릴리즈를 생성합니다.
   
   **요청 본문:**
-  - \`history\`: 업데이트 히스토리 내용
+  - \`release\`: 릴리즈 내용
 
   **동작 과정:**
-  1. 관리자가 업데이트 히스토리 내용을 입력하여 요청을 보냅니다.
+  1. 관리자가 릴리즈 내용을 입력하여 요청을 보냅니다.
   2. 입력된 내용을 기반으로 새로운 업데이트 히스토리가 생성됩니다.
   3. 생성된 업데이트 히스토리가 데이터베이스에 저장됩니다.
 
@@ -1082,87 +1033,317 @@ export class AdminController {
   `,
   })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: UpdateHistoryReqDto })
-  async createUpdateHistory(@Req() req: ExpressRequest, @Body() data: UpdateHistoryReqDto) {
-    return this.adminService.createUpdateHistory(req.user.id, data.history);
+  @ApiBody({ type: UpdateReleaseReqDto })
+  async createRelease(@Req() req: ExpressRequest, @Body() data: UpdateReleaseReqDto) {
+    return this.adminService.createRelease(req.user.id, data.content);
   }
 
-  @Put('updated-histories/:historyId')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Put('releases/:releaseId')
   @ApiOperation({
-    summary: '업데이트 히스토리 수정',
+    summary: '릴리즈 수정',
     description: `
-  관리자가 기존 업데이트 히스토리를 수정합니다.
+  기존 릴리즈를 수정합니다.
 
   **경로 파라미터:**
-  - \`historyId\`: 수정할 업데이트 히스토리의 ID
+  - \`releaseId\`: 수정할 릴리즈 ID
 
   **요청 본문:**
-  - \`history\`: 수정된 업데이트 히스토리 내용
+  - \`content\`: 수정된 릴리즈 내용
 
   **동작 과정:**
-  1. 관리자가 수정할 업데이트 히스토리의 ID와 내용을 입력하여 요청을 보냅니다.
-  2. 해당 ID의 업데이트 히스토리가 수정됩니다.
-  3. 수정된 업데이트 히스토리가 데이터베이스에 저장됩니다.
+  1. 관리자가 수정할 릴리즈의 ID와 내용을 입력하여 요청을 보냅니다.
+  2. 해당 ID의 릴리즈가 수정됩니다.
+  3. 수정된 릴리즈가 데이터베이스에 저장됩니다.
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
   @ApiResponse({ status: 201 })
-  @ApiBody({ type: UpdateHistoryReqDto })
-  async modifyUpdateHistory(@Req() req: ExpressRequest, @Body() data: UpdateHistoryReqDto) {
-    return this.adminService.createUpdateHistory(req.user.id, data.history);
+  @ApiBody({ type: UpdateReleaseReqDto })
+  async updateRelease(
+    @Req() req: ExpressRequest,
+    @Param('releaseId', ParseIntPipe) releaseId: number,
+    @Body() data: UpdateReleaseReqDto,
+  ) {
+    return this.adminService.updateRelease(req.user.id, releaseId, data.content);
   }
 
-  @Get('updated-histories')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Delete('releases/:releaseId')
   @ApiOperation({
-    summary: '전체 업데이트 히스토리 조회 (관리자용)',
+    summary: '릴리즈 삭제',
     description: `
-  관리자가 모든 업데이트 히스토리를 조회합니다.
+  릴리즈를 삭제합니다.
+
+  **경로 파라미터:**
+  - \`releaseId\`: 삭제할 릴리즈 ID
+
+  **동작 과정:**
+  1. 관리자가 삭제할 릴리즈의 ID로 요청을 보냅니다.
+  2. 해당 ID의 릴리즈가 데이터베이스에서 삭제됩니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 201 })
+  async deleteRelease(
+    @Req() req: ExpressRequest,
+    @Param('releaseId', ParseIntPipe) releaseId: number,
+  ) {
+    return this.adminService.deleteRelease(req.user.id, releaseId);
+  }
+
+  @Get('releases')
+  @ApiOperation({
+    summary: '전체 릴리즈 조회',
+    description: `
+  모든 릴리즈를 조회합니다.
 
   **쿼리 파라미터:**
   - \`page\`: 페이지 번호 (기본값: 1)
   - \`limit\`: 페이지당 항목 수 (기본값: 10)
 
   **동작 과정:**
-  1. 모든 업데이트 히스토리를 페이지네이션하여 조회합니다.
-  2. 조회된 업데이트 히스토리 목록을 반환합니다.
+  1. 모든 릴리즈를 페이지네이션하여 조회합니다.
+  2. 조회된 릴리즈 목록을 반환합니다.
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
-  async getAllUpdateHistories(
+  @ApiResponse({ status: 200, type: ReleasesResDto })
+  async getReleases(
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.adminService.getAllUpdateHistories(page, limit);
+    return this.adminService.getReleases(page, limit);
   }
 
-  @Get('updated-histories/:historyId')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Get('releases/:releaseId')
   @ApiOperation({
-    summary: '특정 업데이트 히스토리 조회 (관리자용)',
+    summary: '타겟 릴리즈 조회',
     description: `
-  관리자가 특정 업데이트 히스토리를 조회합니다.
+  타겟 릴리즈를 조회합니다.
 
   **경로 파라미터:**
-  - \`historyId\`: 조회할 업데이트 히스토리 아이디
+  - \`releaseId\`: 조회할 릴리즈 아이디
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
-  @ApiResponse({ status: 200, type: UpdatedHistoriesResDto })
-  async getUpdateHistory(@Param('historyId', ParseIntPipe) historyId: number) {
-    return this.adminService.getUpdateHistory(historyId);
+  @ApiResponse({ status: 200, type: ReleasesResDto })
+  async getRelease(@Param('releaseId', ParseIntPipe) releaseId: number) {
+    return this.adminService.getRelease(releaseId);
   }
 
-  @Put(':adminId')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Get('geulroquis')
+  @ApiOperation({ summary: '글로키 리스트' })
+  @ApiResponse({ status: 200, type: GeulroquisResDto })
+  async getGeulroquis(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getGeulroquis(page, limit);
+  }
+
+  @Get('geulroquis/count')
+  @ApiOperation({ summary: '총 글로키 / 사용가능 글로키 카운트' })
+  @ApiResponse({ status: 200, type: GeulroquisCountResDto })
+  async getGeulroquisCount() {
+    return this.adminService.getGeulroquisCount();
+  }
+
+  @Get(':adminId')
+  @ApiOperation({
+    summary: '어드민 상세조회',
+    description: `
+  특정 어드민의 상세 정보를 조회합니다.
+
+  **경로 파라미터:**
+  - \`adminId\`: 조회할 어드민의 ID
+
+  **동작 과정:**
+  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 상세 정보를 조회합니다.
+  2. 조회된 어드민 정보를 반환합니다.
+
+  **주의 사항:**
+  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: AdminResDto })
+  async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
+    return this.adminService.getAdmin(adminId);
+  }
+
+  @Get('/crons/logs')
+  @ApiOperation({ summary: '크론 로그 조회' })
+  @ApiResponse({ type: CronLogsResDto })
+  async getCronLogs(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getCronLogs(req.user.id, page, limit);
+  }
+
+  @Post('geulroquis')
+  @ApiOperation({
+    summary: 'Geulroquis 이미지 업로드',
+    description: `
+  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+
+  **요청 본문:**
+	- \`images\`: 업로드할 이미지 파일들 (form-data)
+
+  **동작 과정:**
+  1. 이미지 파일들을 받아 S3에 업로드합니다.
+  2. 업로드된 이미지들의 URL을 반환합니다.
+
+  **주의 사항:**
+  - 이미지 파일들은 multipart/form-data 형식으로 전송되어야 합니다.
+  - 최대 30개의 파일을 등록할 수 있습니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  @UseInterceptors(FilesInterceptor('images', 30))
+  async saveGeulroquisImages(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.adminService.saveGeulroquisImages(files);
+  }
+
+  @Put('geulroquis/:geulroquisId')
+  @ApiOperation({
+    summary: '다음 글로키 지정하기',
+    description: `
+  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+
+  **매개 변수:**
+  - \`geulroquisId\`: 다음 제공할 글로키 아이디.
+
+  **동작 과정:**
+  1. 데이터베이스에 다음으로 제공할 글로키가 존재하는지 조회하고 무효화합니다.
+  2. 매개변수로 제공받은 아이디에 해당하는 글로키를 다음 글로키로 지정합니다.
+  3. (분기) 만약 다음으로 제공할 글로키가 없다면 매개변수로 제공받은 아이디에 해당하는 글로키를 현재 제공중인 상태로 변경합니다.
+
+  **주의 사항:**
+  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  `,
+  })
+  @ApiResponse({})
+  async changeTomorrowGeulroquis(@Param('geulroquisId', ParseIntPipe) geulroquisId: number) {
+    return this.adminService.changeTomorrowGeulroquis(geulroquisId);
+  }
+
+  @Get('server/status')
+  @ApiOperation({
+    summary: '서버 상태 조회',
+    description: `
+  현재 서버의 상태를 조회합니다.
+   
+  - \`open\`: 모든 요청을 허용하는 상태입니다.
+  - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
+  - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 관리자기능에 접근할 수 있습니다.
+  `,
+  })
+  @ApiResponse({
+    status: 200,
+    type: ServerStatusResDto,
+  })
+  async getServerStatus() {
+    return this.adminService.getServerStatus();
+  }
+
+  @Get('app/versions')
+  @ApiOperation({
+    summary: '앱 버전 조회',
+    description: `
+  각 앱들의 현재 최신 버전과 상세정보를 조회합니다.
+  
+  **앱 타입:**
+  - \`android_mobile\`
+  - \`android_tablet\`
+  - \`ios_mobile\`
+  - \`ios_tablet\`
+  - \`desktop_mac\`
+  - \`desktop_windows\`
+  
+  `,
+  })
+  @ApiResponse({ status: 200, type: VersionsResDto })
+  async getAppVersions() {
+    return this.adminService.getAppVersions();
+  }
+
+  @Post('app/versions/:versionId')
+  @ApiOperation({
+    summary: '앱 버전 변경',
+    description: `
+  각 앱들의 현재 최신 버전과 상세정보를 조회합니다.
+  
+  **앱 타입:**
+  - \`android_mobile\`
+  - \`android_tablet\`
+  - \`ios_mobile\`
+  - \`ios_tablet\`
+  - \`desktop_mac\`
+  - \`desktop_windows\`
+  
+  **경로 파라미터:**
+  - \`versionId\`: 변경할 버전의 ID
+  
+  **요청 본문:**
+  - \`version\`: 변경할 앱의 버젼
+  
+  `,
+  })
+  @ApiResponse({ status: 200, type: VersionsResDto })
+  @ApiBody({ type: UpdateVersionReqDto })
+  async updateAppVersion(
+    @Param('versionId', ParseIntPipe) versionId: number,
+    @Body() data: UpdateVersionReqDto,
+  ) {
+    return this.adminService.updateAppVersion(versionId, data.version);
+  }
+
+  // ===========================================================
+  // ===================== danger zone =========================
+  // ===========================================================
+
+  // @Delete('danger/users/all')
+  // async deleteAllUser(@Req() req: ExpressRequest) {
+  //   return this.adminService.deleteAllUser(req.user.id);
+  // }
+
+  // @Delete('danger/device/all')
+  // async deleteAllDevice(@Req() req: ExpressRequest) {
+  //   return this.adminService.deleteAllDevice(req.user.id);
+  // }
+  @Post('root/produce')
+  @ApiOperation({
+    summary: '[루트 관리자용] 관리자생성',
+    description: `
+  루트 관리자가 새로운 관리자를 생성하는 API입니다. 이 API는 루트 관리자만 호출할 수 있습니다.
+    
+  **주의 사항:**
+  - 루트 관리자만 이 API를 호출할 수 있습니다. 루트 관리자 ID는 1로 고정되어 있습니다.
+  - 비밀번호는 저장 전에 해시 처리됩니다.
+    
+  **동작 과정:**
+  1. 요청을 보낸 관리자가 루트 관리자 인지 확인합니다.
+  2. 제공된 데이터로 새 관리자를 생성합니다.
+  3. 새 관리자의 비밀번호를 해시화합니다.
+  4. 새 관리자를 데이터베이스에 저장합니다.
+  5. 저장된 관리자 정보를 반환합니다.
+  `,
+  })
+  @ApiBody({ type: CreateAdminReqDto })
+  @ApiResponse({ status: 200, type: SavedAdminResDto })
+  async createAdmin(@Req() req: ExpressRequest, @Body() data: CreateAdminReqDto) {
+    return this.adminService.createAdmin(req.user.id, data);
+  }
+
+  @Put('root/:adminId')
   @ApiOperation({
     summary: '[루트관리자용] 어드민 활성화 상태 변경',
     description: `
@@ -1195,111 +1376,46 @@ export class AdminController {
     return this.adminService.activationSettings(req.user.id, adminId, activated);
   }
 
-  @Get('geulroquis')
-  @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '글로키 리스트' })
-  @ApiResponse({ status: 200, type: GeulroquisResDto })
-  async getGeulroquis(
-    @Query('page', new PagingParseIntPipe(1)) page: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit: number,
-  ) {
-    return this.adminService.getGeulroquis(page, limit);
+  @Delete('root/:adminId')
+  async deleteAdmin(@Req() req: ExpressRequest, @Param('adminId', ParseIntPipe) adminId: number) {
+    return this.adminService.deleteAdmin(req.user.id, adminId);
   }
 
-  @Get('geulroquis/count')
-  @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '총 글로키 / 사용가능 글로키 카운트' })
-  @ApiResponse({ status: 200, type: GeulroquisCountResDto })
-  async getGeulroquisCount() {
-    return this.adminService.getGeulroquisCount();
-  }
-
-  @Get(':adminId')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Post('root/server/status')
   @ApiOperation({
-    summary: '어드민 상세조회',
+    summary: '[루트관리자] 서버 상태 업데이트',
     description: `
-  특정 어드민의 상세 정보를 조회합니다.
-
-  **경로 파라미터:**
-  - \`adminId\`: 조회할 어드민의 ID
-
-  **동작 과정:**
-  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 상세 정보를 조회합니다.
-  2. 조회된 어드민 정보를 반환합니다.
-
-  **주의 사항:**
-  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
+  서버의 상태를 업데이트합니다.
+  
+  **요청 본문: status**
+  - \`open\`: 모든 요청을 허용하는 상태입니다.
+  - \`maintenance\`: 유지보수를 위한 상태로 관리자의 요청만 처리하며, '/admin' 경로만 접근할 수 있습니다.
+  - \`closed\`: 모든 요청을 거부합니다. 예외로 루트관리자는 접근할 수 있습니다.
+  
   `,
   })
-  @ApiResponse({ status: 200, type: AdminResDto })
-  async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
-    return this.adminService.getAdmin(adminId);
+  @ApiBody({ type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE })
+  @ApiResponse({
+    status: 200,
+    type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
+  })
+  async saveServerStatus(@Req() req: ExpressRequest, @Body('status') status: string) {
+    return await this.adminService.saveServerStatus(req.user.id, status);
   }
 
-  @Delete('/users/:userId')
-  @UseGuards(AuthGuard('admin-jwt'))
+  @Delete('root/users/:userId')
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
-  @Get('/crons/logs')
-  @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({ summary: '크론 로그 조회' })
-  @ApiResponse({ type: CronLogsResDto })
-  async getCronLogs(
-    @Req() req: ExpressRequest,
-    @Query('page', new PagingParseIntPipe(1)) page: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit: number,
-  ) {
-    return this.adminService.getCronLogs(req.user.id, page, limit);
+  @Post('root/super/verify')
+  async requestClearDatabase(@Req() req: ExpressRequest) {
+    return this.adminService.requestClearDatabase(req.user.id);
   }
 
-  @Post('geulroquis')
-  @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({
-    summary: 'Geulroquis 이미지 업로드',
-    description: `
-  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
-
-  **요청 본문:**
-	- \`images\`: 업로드할 이미지 파일들 (form-data)
-
-  **동작 과정:**
-  1. 이미지 파일들을 받아 S3에 업로드합니다.
-  2. 업로드된 이미지들의 URL을 반환합니다.
-
-  **주의 사항:**
-  - 이미지 파일들은 multipart/form-data 형식으로 전송되어야 합니다.
-  - 최대 30개의 파일을 등록할 수 있습니다.
-  `,
-  })
-  @ApiResponse({ status: 200 })
-  @UseInterceptors(FilesInterceptor('images', 30))
-  async saveGeulroquisImages(@UploadedFiles() files: Express.Multer.File[]) {
-    return this.adminService.saveGeulroquisImages(files);
-  }
-
-  @Put('geulroquis/:geulroquisId')
-  @UseGuards(AuthGuard('admin-jwt'))
-  @ApiOperation({
-    summary: '다음 글로키 지정하기',
-    description: `
-  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
-
-  **매개 변수:**
-  - \`geulroquisId\`: 다음 제공할 글로키 아이디.
-
-  **동작 과정:**
-  1. 데이터베이스에 다음으로 제공할 글로키가 존재하는지 조회하고 무효화합니다.
-  2. 매개변수로 제공받은 아이디에 해당하는 글로키를 다음 글로키로 지정합니다.
-
-  **주의 사항:**
-  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
-  `,
-  })
-  @ApiResponse({})
-  async changeTomorrowGeulroquis(@Param('geulroquisId', ParseIntPipe) geulroquisId: number) {
-    return this.adminService.changeTomorrowGeulroquis(geulroquisId);
+  @Public()
+  @Get('root/super/init')
+  async clearDatabase(@Query('token') token: string) {
+    return this.adminService.clearDatabase(token);
   }
 }

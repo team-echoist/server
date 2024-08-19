@@ -13,7 +13,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request as ExpressRequest } from 'express';
 import { UserService } from './user.service';
@@ -25,9 +24,10 @@ import { UserSummaryWithStatsResDto } from './dto/response/userSummaryWithStatsR
 import { UserSummaryWithCountResDto } from './dto/response/userSummaryWithCountRes.dto';
 import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('User')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -117,6 +117,7 @@ export class UserController {
   5. 저장된 이미지 URL을 반환합니다.
 
   **주의 사항:**
+  - 서비스에서 기본으로 제공하는 프로필 이미지로 변경하는 경우 해당 API 호출은 불필요합니다. 유저 업데이트 API를 바로 이용해주세요.
   - 이미지 파일은 multipart/form-data 형식으로 전송되어야 합니다.
   - 이미지 파일의 확장자는 원본 파일의 확장자를 사용합니다.
   `,
@@ -219,7 +220,7 @@ export class UserController {
   @ApiOperation({
     summary: '본인 기본정보',
     description: `
-  본인 아이디, 닉네임, 프로필이미지, 생성일, 최초접속여부 ,위치기반서비스동의여부 등을 조회합니다.
+  본인 아이디, 닉네임, 프로필이미지, 생성일, 최초접속여부 ,위치기반서비스동의여부, 등록된 디바이스 등을 조회합니다.
 
   **동작 과정:**
   1. 사용자의 ID를 기반으로 해당 사용자의 기본 정보를 조회합니다.

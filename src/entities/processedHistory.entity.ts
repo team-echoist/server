@@ -13,21 +13,8 @@ import { User } from './user.entity';
 import { Admin } from './admin.entity';
 import { Inquiry } from './inquiry.entity';
 import { Notice } from './notice.entity';
-
-export enum ActionType {
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  PENDING = 'pending',
-  UPDATED = 'updated',
-  DELETED = 'deleted',
-  UNPUBLISHED = 'unpublished',
-  UNLINKEDOUT = 'unlinkedout',
-  PUBLISHED = 'published',
-  LINKEDOUT = 'linkedout',
-  BANNED = 'banned',
-  MONITORED = 'monitored',
-  ANSWERED = 'answered',
-}
+import { ActionType } from '../common/types/enum.types';
+import { Release } from './release.entity';
 
 @Entity('processed_history')
 export class ProcessedHistory {
@@ -47,30 +34,34 @@ export class ProcessedHistory {
   processedDate: Date;
 
   @JoinColumn({ name: 'admin_id' })
-  @ManyToOne(() => Admin, (admin) => admin.processedHistories)
+  @ManyToOne(() => Admin, (admin) => admin.processedHistories, { onDelete: 'CASCADE' })
   processor: Admin;
 
   @JoinColumn({ name: 'report_id' })
-  @ManyToOne(() => ReportQueue, (report) => report.processedHistories)
+  @ManyToOne(() => ReportQueue, (report) => report.processedHistories, { onDelete: 'CASCADE' })
   report: ReportQueue;
 
   @JoinColumn({ name: 'review_id' })
-  @ManyToOne(() => ReviewQueue, (review) => review.processedHistories)
+  @ManyToOne(() => ReviewQueue, (review) => review.processedHistories, { onDelete: 'CASCADE' })
   review: ReviewQueue;
 
   @JoinColumn({ name: 'essay_id' })
-  @ManyToOne(() => Essay, (essay) => essay.processedHistories)
+  @ManyToOne(() => Essay, (essay) => essay.processedHistories, { onDelete: 'CASCADE' })
   essay: Essay;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (user) => user.processedHistories)
+  @ManyToOne(() => User, (user) => user.processedHistories, { onDelete: 'CASCADE' })
   user: User;
 
   @JoinColumn({ name: 'inquiry_id' })
-  @ManyToOne(() => Inquiry, (inquiry) => inquiry.processedHistory)
+  @ManyToOne(() => Inquiry, (inquiry) => inquiry.processedHistory, { onDelete: 'CASCADE' })
   inquiry: Inquiry;
 
   @JoinColumn({ name: 'notice_id' })
-  @ManyToOne(() => Notice, (notice) => notice.processedHistories)
+  @ManyToOne(() => Notice, (notice) => notice.processedHistories, { onDelete: 'CASCADE' })
   notice: Notice;
+
+  @JoinColumn({ name: 'release_id' })
+  @ManyToOne(() => Release, (release) => release.processedHistories, { onDelete: 'CASCADE' })
+  release: Release;
 }

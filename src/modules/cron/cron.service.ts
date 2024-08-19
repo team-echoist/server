@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { CronLog } from '../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -13,6 +13,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { Device } from '../../entities/device.entity';
+import { UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class CronService {
@@ -109,6 +110,7 @@ export class CronService {
             email: () => `CONCAT('${todayDate}_', email)`,
             nickname: null,
             status: UserStatus.DEACTIVATED,
+            profileImage: this.configService.get<string>('DEFAULT_PROFILE_IMG'),
             deletedDate: () => `NOW()`,
           })
           .where('id IN (:...userIds)', { userIds })
@@ -117,9 +119,6 @@ export class CronService {
         await this.deviceReposiotry
           .createQueryBuilder()
           .update(Device)
-          .set({
-            deviceId: () => `CONCAT('${todayDate}_', device_id)`,
-          })
           .where('id In (:...userIds)', { userIds })
           .execute();
 

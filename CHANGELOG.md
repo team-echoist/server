@@ -1,3 +1,186 @@
+## [1.10.6](https://github.com/team-echoist/server/compare/v1.10.5...v1.10.6) (2024-08-14)
+
+
+### Bug Fixes
+
+* Correct column name in Geulroquis entity and update nickname validation ([#379](https://github.com/team-echoist/server/issues/379)) ([6959b19](https://github.com/team-echoist/server/commit/6959b19557ad9dd5e38c55d46ad190d87a4734ca))
+
+## [1.10.5](https://github.com/team-echoist/server/compare/v1.10.4...v1.10.5) (2024-08-14)
+
+
+### Bug Fixes
+
+* Add release entity relations ([#377](https://github.com/team-echoist/server/issues/377)) ([96331f7](https://github.com/team-echoist/server/commit/96331f77ad2f28e967eeeae15afd0b0aa6ad6c47))
+
+## [1.10.4](https://github.com/team-echoist/server/compare/v1.10.3...v1.10.4) (2024-08-14)
+
+
+### Bug Fixes
+
+* Add release entity relations ([#376](https://github.com/team-echoist/server/issues/376)) ([209ffc0](https://github.com/team-echoist/server/commit/209ffc0bdf71fd9587cf40bfd62c30e425527e37))
+
+## [1.10.3](https://github.com/team-echoist/server/compare/v1.10.2...v1.10.3) (2024-08-14)
+
+## [1.10.2](https://github.com/team-echoist/server/compare/v1.10.1...v1.10.2) (2024-08-13)
+
+## [1.10.1](https://github.com/team-echoist/server/compare/v1.10.0...v1.10.1) (2024-08-13)
+
+
+### Bug Fixes
+
+* Change to another essay type ([#371](https://github.com/team-echoist/server/issues/371)) ([7233300](https://github.com/team-echoist/server/commit/72333007a82622334c33f260581698b370a473a8))
+
+# [1.10.0](https://github.com/team-echoist/server/compare/v1.9.0...v1.10.0) (2024-08-13)
+
+
+### Features
+
+* Add administrator management API ([#369](https://github.com/team-echoist/server/issues/369)) ([fa1ac77](https://github.com/team-echoist/server/commit/fa1ac7764536a7d71a75029c00b8e7afe330ac09))
+
+# [1.9.0](https://github.com/team-echoist/server/compare/v1.8.9...v1.9.0) (2024-08-12)
+
+
+### Features
+
+* Added profile image invalidation when initializing database and deleting user ([#368](https://github.com/team-echoist/server/issues/368)) ([43cc446](https://github.com/team-echoist/server/commit/43cc446b42febe00f79c6c552ce40c208ca90b12))
+
+## [1.8.9](https://github.com/team-echoist/server/compare/v1.8.8...v1.8.9) (2024-08-12)
+
+
+### Bug Fixes
+
+* Change Naver payload reference property ([#366](https://github.com/team-echoist/server/issues/366)) ([c942858](https://github.com/team-echoist/server/commit/c9428586051a772b8e12622707dc236fa7b0be76))
+
+## [1.8.8](https://github.com/team-echoist/server/compare/v1.8.7...v1.8.8) (2024-08-11)
+
+
+### Bug Fixes
+
+* basicAuth path ([#365](https://github.com/team-echoist/server/issues/365)) ([d19b6b6](https://github.com/team-echoist/server/commit/d19b6b662376e81a6523744837345ac6d8ec599a))
+
+## [1.8.7](https://github.com/team-echoist/server/compare/v1.8.6...v1.8.7) (2024-08-11)
+
+
+### Bug Fixes
+
+* Add Swagger path authentication ([#363](https://github.com/team-echoist/server/issues/363)) ([d68877c](https://github.com/team-echoist/server/commit/d68877ca4b82888f287133f765a70c49cdd3cffc))
+
+## [1.8.6](https://github.com/team-echoist/server/compare/v1.8.5...v1.8.6) (2024-08-10)
+
+
+### Bug Fixes
+
+* Minor bug fixes for profile uploads ([#361](https://github.com/team-echoist/server/issues/361)) ([61833e8](https://github.com/team-echoist/server/commit/61833e8d0188641df629dd9e7b4b20d6378e018d))
+
+## [1.8.5](https://github.com/team-echoist/server/compare/v1.8.4...v1.8.5) (2024-08-08)
+
+
+### Bug Fixes
+
+* prefix ([#357](https://github.com/team-echoist/server/issues/357)) ([f1d67d8](https://github.com/team-echoist/server/commit/f1d67d8cecc7e39799b241b61f8f0555faaa9de7))
+
+## [1.8.4](https://github.com/team-echoist/server/compare/v1.8.3...v1.8.4) (2024-08-08)
+
+
+### Bug Fixes
+
+* invalidate root path for homepage distribution ([#356](https://github.com/team-echoist/server/issues/356)) ([0cad901](https://github.com/team-echoist/server/commit/0cad90167de4736c28a41ae374c21eb4d9f85b6e))
+
+## [1.8.3](https://github.com/team-echoist/server/compare/v1.8.2...v1.8.3) (2024-08-08)
+
+
+### Bug Fixes
+
+* invalidate root path for homepage distribution ([#355](https://github.com/team-echoist/server/issues/355)) ([b301b95](https://github.com/team-echoist/server/commit/b301b953d3982a6a32eb16cc7cd8e84295e5eec3))
+
+## [1.8.2](https://github.com/team-echoist/server/compare/v1.8.1...v1.8.2) (2024-08-08)
+
+
+### Bug Fixes
+
+* invalidate root path for homepage distribution ([#354](https://github.com/team-echoist/server/issues/354)) ([d660cd4](https://github.com/team-echoist/server/commit/d660cd407f37a48b4a39316ac55d137b022825eb))
+
+## [1.8.1](https://github.com/team-echoist/server/compare/v1.8.0...v1.8.1) (2024-08-08)
+
+# [1.8.0](https://github.com/team-echoist/server/compare/v1.7.1...v1.8.0) (2024-08-07)
+
+
+### Features
+
+* Add latest notice check API and other modifications ([#350](https://github.com/team-echoist/server/issues/350)) ([44b24d9](https://github.com/team-echoist/server/commit/44b24d9359c1b8039cc98a120265b06504d844dc))
+
+## [1.7.1](https://github.com/team-echoist/server/compare/v1.7.0...v1.7.1) (2024-08-07)
+
+
+### Bug Fixes
+
+* Update device user and essay foreign key constraints ([#349](https://github.com/team-echoist/server/issues/349)) ([780bac0](https://github.com/team-echoist/server/commit/780bac07ade5a4c7d1ede1afefc36948a128f98c))
+
+# [1.7.0](https://github.com/team-echoist/server/compare/v1.6.5...v1.7.0) (2024-08-07)
+
+
+### Features
+
+* Add version management API ([#348](https://github.com/team-echoist/server/issues/348)) ([f5609d6](https://github.com/team-echoist/server/commit/f5609d6b5b2205dfe70e07f620f6236abdc4f60e))
+
+## [1.6.5](https://github.com/team-echoist/server/compare/v1.6.4...v1.6.5) (2024-08-07)
+
+## [1.6.4](https://github.com/team-echoist/server/compare/v1.6.3...v1.6.4) (2024-08-06)
+
+
+### Bug Fixes
+
+* Why not? ([#345](https://github.com/team-echoist/server/issues/345)) ([5f10683](https://github.com/team-echoist/server/commit/5f106832f6f116a9ef85373d7cbc1d30db3495e3))
+
+## [1.6.3](https://github.com/team-echoist/server/compare/v1.6.2...v1.6.3) (2024-08-06)
+
+
+### Bug Fixes
+
+* developer sleeps here ([#344](https://github.com/team-echoist/server/issues/344)) ([98cde17](https://github.com/team-echoist/server/commit/98cde1794ef993219e0ab3d2bda42d9ee6565950))
+
+## [1.6.2](https://github.com/team-echoist/server/compare/v1.6.1...v1.6.2) (2024-08-06)
+
+
+### Bug Fixes
+
+* branch error when checking server status ([#343](https://github.com/team-echoist/server/issues/343)) ([8d28e68](https://github.com/team-echoist/server/commit/8d28e68fecfc0bf04898b3650b280211255c9a37))
+
+## [1.6.1](https://github.com/team-echoist/server/compare/v1.6.0...v1.6.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* update server state ([#342](https://github.com/team-echoist/server/issues/342)) ([34e86e3](https://github.com/team-echoist/server/commit/34e86e38c68299f96d5137b4f81ad27353bff840))
+
+# [1.6.0](https://github.com/team-echoist/server/compare/v1.5.2...v1.6.0) (2024-08-06)
+
+
+### Features
+
+* check server status and add server guard ([#341](https://github.com/team-echoist/server/issues/341)) ([7f06a2b](https://github.com/team-echoist/server/commit/7f06a2bbf328d75a8775f316c0c29c3384602769))
+
+## [1.5.2](https://github.com/team-echoist/server/compare/v1.5.1...v1.5.2) (2024-08-04)
+
+
+### Bug Fixes
+
+* Add platform ID verification ([#336](https://github.com/team-echoist/server/issues/336)) ([80fac4c](https://github.com/team-echoist/server/commit/80fac4c65b2d3b88151592d90ef69ceff5b77084))
+
+## [1.5.1](https://github.com/team-echoist/server/compare/v1.5.0...v1.5.1) (2024-08-04)
+
+
+### Bug Fixes
+
+* Update geulroquis response structure and added Kakao login test ([#335](https://github.com/team-echoist/server/issues/335)) ([4850284](https://github.com/team-echoist/server/commit/48502847f4c165003eedbfbbb4fdd24c38a79478))
+
+# [1.5.0](https://github.com/team-echoist/server/compare/v1.4.2...v1.5.0) (2024-08-04)
+
+
+### Features
+
+* Add another essay branch of getEssay ([#333](https://github.com/team-echoist/server/issues/333)) ([325de7e](https://github.com/team-echoist/server/commit/325de7e4f81e417b4f66df6c02d7d45cff78423c))
+
 ## [1.4.2](https://github.com/team-echoist/server/compare/v1.4.1...v1.4.2) (2024-08-03)
 
 

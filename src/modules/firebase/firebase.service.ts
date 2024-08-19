@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { AwsService } from '../aws/aws.service';
 
@@ -18,13 +18,13 @@ export class FirebaseService {
     }
   }
 
-  async sendPushAlert(deviceToken: string, title: string, body: string) {
+  async sendPushAlert(fcmToken: string, title: string, body: string) {
     const message = {
       notification: {
         title: title,
         body: body,
       },
-      token: deviceToken,
+      token: fcmToken,
     };
 
     try {

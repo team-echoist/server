@@ -4,9 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  JoinColumn,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -26,13 +24,8 @@ import { Inquiry } from './inquiry.entity';
 import { AlertSettings } from './alertSettings.entity';
 import { Device } from './device.entity';
 import { Alert } from './alert.entity';
-
-export enum UserStatus {
-  ACTIVATED = 'activated',
-  MONITORED = 'monitored',
-  BANNED = 'banned',
-  DEACTIVATED = 'deactivated',
-}
+import { SeenNotice } from './seenNotice.entity';
+import { UserStatus } from '../common/types/enum.types';
 
 @Entity()
 export class User {
@@ -56,7 +49,7 @@ export class User {
   @Column({
     name: 'profile_image',
     nullable: true,
-    default: 'https://driqat77mj5du.cloudfront.net/service/profile_icon_01.png',
+    default: 'https://cdn.linkedoutapp.com/service/profile_icon_01.png',
   })
   profileImage: string;
 
@@ -155,13 +148,15 @@ export class User {
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
   inquiries: Inquiry[];
 
-  @JoinColumn({ name: 'alert_settings_id' })
   @OneToMany(() => AlertSettings, (settings) => settings.user)
   alertSettings: AlertSettings[];
 
-  @OneToMany(() => Device, (device) => device.user)
+  @OneToMany(() => Device, (device) => device.user, { onDelete: 'SET NULL' })
   devices: Device[];
 
   @OneToMany(() => Alert, (alert) => alert.user)
   alerts: Alert[];
+
+  @OneToMany(() => SeenNotice, (seenNotice) => seenNotice.user, { onDelete: 'CASCADE' })
+  seenNotices: SeenNotice[];
 }

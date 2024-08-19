@@ -1,12 +1,6 @@
 import { redisConfig } from './config/redis.config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  OnModuleInit,
-  RequestMethod,
-} from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -25,8 +19,6 @@ import { ReviewModule } from './modules/review/review.module';
 import { UserModule } from './modules/user/user.module';
 import { ReportModule } from './modules/report/report.module';
 import { SeederService } from './modules/seeder/seeder.service';
-import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
-import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
@@ -38,7 +30,9 @@ import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
 import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
 import { HomeModule } from './modules/home/home.module';
-import { NextFunction } from 'express';
+import { ServerGuard } from './common/guards/server.guard';
+import * as strategies from './common/guards/strategies';
+import { DeviceMiddleware } from './common/middlewares/device.middleware';
 
 @Module({
   imports: [
@@ -74,8 +68,12 @@ import { NextFunction } from 'express';
     HomeModule,
   ],
   providers: [
-    { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
-    { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
+    // { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
+    // { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
+    { provide: APP_GUARD, useClass: ServerGuard },
+    strategies.AdminPassStrategy,
+    strategies.LocalStrategy,
+    strategies.JwtStrategy,
   ],
 })
 export class AppModule implements OnModuleInit, NestModule {
@@ -90,23 +88,17 @@ export class AppModule implements OnModuleInit, NestModule {
     await this.cronService.userDeletionCronJobs();
     await this.cronService.updateNextGeulroquis();
 
-    if (process.env.INITIALIZE === 'true') {
+    if (process.env.SEED === 'true') {
+      await this.seederService.initializeServer();
       await this.seederService.initializeAdmin();
-      await this.seederService.initializeNicknames();
-      await this.seederService.initializeAll();
+      await this.seederService.initializeAppVersions();
+      // await this.seederService.initializeNicknames();
     }
   }
 
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DeviceMiddleware).forRoutes('*');
     consumer.apply(TimezoneMiddleware).forRoutes('*');
     consumer.apply(BlockPhpRequestsMiddleware).forRoutes('*');
-    //   consumer
-    //     .apply((req: any, res: Response, next: NextFunction) => {
-    //       if (req.url === '/api/.well-known/assetlinks.json') {
-    //         req.originalUrl = req.url = req.url.replace('/api', '');
-    //       }
-    //       next();
-    //     })
-    //     .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

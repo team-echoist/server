@@ -1,13 +1,13 @@
 import { Body, Controller, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateReportReqDto } from './dto/request/createReportReq.dto';
 import { Request as ExpressRequest } from 'express';
 import { ReportService } from './report.service';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Report')
 @Controller('reports')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 

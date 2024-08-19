@@ -10,17 +10,17 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BookmarkService } from './bookmark.service';
 import { SummaryEssaysResDto } from '../essay/dto/response/SummaryEssaysRes.dto';
 import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { EssayIdsReqDto } from './dto/request/essayIdsReq.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Bookmark')
 @Controller('bookmarks')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 

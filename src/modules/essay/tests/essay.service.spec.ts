@@ -13,8 +13,8 @@ import { ViewService } from '../../view/view.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { AlertService } from '../../alert/alert.service';
 import { getQueueToken } from '@nestjs/bull';
-import { Essay, EssayStatus } from '../../../entities/essay.entity';
-import { User, UserStatus } from '../../../entities/user.entity';
+import { Essay } from '../../../entities/essay.entity';
+import { User } from '../../../entities/user.entity';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { EssayResDto } from '../dto/response/essayRes.dto';
 import { SummaryEssayResDto } from '../dto/response/summaryEssayRes.dto';
@@ -22,6 +22,9 @@ import { WeeklyEssayCountResDto } from '../dto/response/weeklyEssayCountRes.dto'
 import { ThumbnailResDto } from '../dto/response/ThumbnailRes.dto';
 import { EssayStatsDto } from '../dto/essayStats.dto';
 import { Story } from '../../../entities/story.entity';
+import { SupportService } from '../../support/support.service';
+import { SupportRepository } from '../../support/support.repository';
+import { AnotherEssayType, EssayStatus, UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -42,6 +45,7 @@ jest.mock('../../badge/badge.service');
 jest.mock('../../view/view.service');
 jest.mock('../../bookmark/bookmark.service');
 jest.mock('../../alert/alert.service');
+jest.mock('../../support/support.service');
 
 describe('EssayService', () => {
   let service: EssayService;
@@ -57,6 +61,7 @@ describe('EssayService', () => {
   let viewService: jest.Mocked<ViewService>;
   let bookmarkService: jest.Mocked<BookmarkService>;
   let alertService: jest.Mocked<AlertService>;
+  let supportService: jest.Mocked<SupportService>;
 
   const redis = {
     get: jest.fn(),
@@ -83,6 +88,11 @@ describe('EssayService', () => {
         ViewService,
         BookmarkService,
         AlertService,
+        SupportService,
+        {
+          provide: SupportRepository,
+          useValue: { findDevice: jest.fn() },
+        },
         {
           provide: getQueueToken('bookmark'),
           useValue: { add: jest.fn() },
@@ -104,6 +114,7 @@ describe('EssayService', () => {
     viewService = module.get(ViewService);
     bookmarkService = module.get(BookmarkService);
     alertService = module.get(AlertService);
+    supportService = module.get(SupportService);
   });
 
   afterEach(() => {
@@ -146,7 +157,7 @@ describe('EssayService', () => {
       essayRepository.findEssayById.mockResolvedValue(essay);
 
       await expect(service.deleteEssay(userId, essayId)).rejects.toThrow(
-        new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN),
+        new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN),
       );
     });
   });
@@ -154,7 +165,7 @@ describe('EssayService', () => {
   describe('saveEssay', () => {
     it('should save a new essay', async () => {
       const requester = { id: 1, status: UserStatus.ACTIVATED } as Express.User;
-      const device = 'web';
+      const device = 'web' as any;
       const data = { title: 'test', content: 'test content', tags: [1] } as any;
       const user = { id: requester.id } as User;
       const tags = [{ id: 1 }] as any[];
@@ -164,6 +175,7 @@ describe('EssayService', () => {
       tagService.getTags.mockResolvedValue(tags);
       essayRepository.saveEssay.mockResolvedValue(savedEssay);
       utilsService.transformToDto.mockReturnValue(savedEssay);
+      supportService.findDevice.mockReturnValue(device);
 
       const result = await service.saveEssay(requester, device, data);
 
@@ -183,7 +195,7 @@ describe('EssayService', () => {
 
     it('should handle monitored user', async () => {
       const requester = { id: 1, status: UserStatus.MONITORED } as Express.User;
-      const device = 'web';
+      const device = 'web' as any;
       const data = {
         title: 'test',
         content: 'test content',
@@ -203,6 +215,7 @@ describe('EssayService', () => {
       alertService.createReviewAlerts.mockResolvedValue(undefined);
       alertService.sendPushReviewAlert.mockResolvedValue(undefined);
       utilsService.transformToDto.mockReturnValue(finalSavedEssay);
+      supportService.findDevice.mockReturnValue(device);
 
       const result = await service.saveEssay(requester, device, data);
 
@@ -306,10 +319,7 @@ describe('EssayService', () => {
       reviewService.findReviewByEssayId.mockResolvedValue({ id: 1 } as any);
 
       await expect(service.updateEssay(requester, essayId, data)).rejects.toThrow(
-        new HttpException(
-          'Update rejected: Essay is currently under review',
-          HttpStatus.BAD_REQUEST,
-        ),
+        new HttpException('업데이트 거부: 에세이가 현재 검토중입니다.', HttpStatus.BAD_REQUEST),
       );
 
       expect(reviewService.findReviewByEssayId).toHaveBeenCalledWith(essayId);
@@ -401,7 +411,7 @@ describe('EssayService', () => {
       });
       service.getRecommendEssays = jest.fn().mockResolvedValue({ essays: previousEssays });
 
-      const result = await service.getEssay(userId, essayId, 'community');
+      const result = await service.getEssay(userId, essayId, AnotherEssayType.RECOMMEND);
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);
@@ -422,8 +432,8 @@ describe('EssayService', () => {
 
       essayRepository.findEssayById.mockResolvedValue(null);
 
-      await expect(service.getEssay(userId, essayId, 'community')).rejects.toThrow(
-        new HttpException('There are no essays.', HttpStatus.NOT_FOUND),
+      await expect(service.getEssay(userId, essayId, AnotherEssayType.RECOMMEND)).rejects.toThrow(
+        new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
 
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);
@@ -457,7 +467,7 @@ describe('EssayService', () => {
       essayRepository.findEssayById.mockResolvedValue(essay);
 
       await expect(service.deleteEssayStory(userId, essayId)).rejects.toThrow(
-        new HttpException('You do not have permission for this essay.', HttpStatus.FORBIDDEN),
+        new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN),
       );
 
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);

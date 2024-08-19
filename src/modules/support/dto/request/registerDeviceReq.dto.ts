@@ -4,9 +4,9 @@ import { IsString } from 'class-validator';
 export class RegisterDeviceReqDto {
   @ApiProperty()
   @IsString()
-  deviceId: string;
+  uid: string;
 
   @ApiProperty()
   @IsString()
-  deviceToken: string;
+  fcmToken: string;
 }

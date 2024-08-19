@@ -119,10 +119,10 @@ describe('SupportController', () => {
       const limit = 10;
       const histories = { items: [], total: 0 };
 
-      service.getUserUpdateHistories.mockResolvedValue(histories as any);
+      service.getUserReleases.mockResolvedValue(histories as any);
 
-      const response = await controller.getUserUpdateHistories(page, limit);
-      expect(service.getUserUpdateHistories).toHaveBeenCalledWith(page, limit);
+      const response = await controller.getUserReleases(page, limit);
+      expect(service.getUserReleases).toHaveBeenCalledWith(page, limit);
       expect(response).toEqual(histories);
     });
   });
@@ -130,13 +130,12 @@ describe('SupportController', () => {
   describe('getSettings', () => {
     it('should call service getSettings method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
-      const deviceId = 'device123';
       const settings: AlertSettingsResDto = { viewed: true, report: false, marketing: false };
 
       service.getSettings.mockResolvedValue(settings);
 
-      const response = await controller.getSettings(req, deviceId);
-      expect(service.getSettings).toHaveBeenCalledWith(req.user.id, deviceId);
+      const response = await controller.getSettings(req);
+      expect(service.getSettings).toHaveBeenCalledWith(req);
       expect(response).toEqual(settings);
     });
   });
@@ -144,25 +143,24 @@ describe('SupportController', () => {
   describe('updateSettings', () => {
     it('should call service updateSettings method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
-      const deviceId = 'device123';
+      const uid = 'device123';
       const data: UpdateAlertSettingsReqDto = { viewed: true, report: false, marketing: false };
 
-      await controller.updateSettings(req, deviceId, data);
-      expect(service.updateSettings).toHaveBeenCalledWith(req.user.id, data, deviceId);
+      await controller.updateSettings(req, data);
+      expect(service.updateSettings).toHaveBeenCalledWith(req, data);
     });
   });
 
   describe('registerDevice', () => {
     it('should call service registerDevice method', async () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
-      const data: RegisterDeviceReqDto = { deviceId: 'device123', deviceToken: 'token123' };
+      const data: RegisterDeviceReqDto = { uid: 'device123', fcmToken: 'token123' };
+
+      jest.spyOn(service, 'registerDevice').mockResolvedValue({} as any);
 
       await controller.registerDevice(req, data);
-      expect(service.registerDevice).toHaveBeenCalledWith(
-        req.user.id,
-        data.deviceId,
-        data.deviceToken,
-      );
+
+      expect(service.registerDevice).toHaveBeenCalledWith(req, data.uid, data.fcmToken);
     });
   });
 });

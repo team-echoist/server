@@ -2,14 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ProcessedHistory } from './processedHistory.entity';
 import { Notice } from './notice.entity';
-import { UpdatedHistory } from './updatedHistory.entity';
+import { Release } from './release.entity';
 
 @Entity()
 export class Admin {
@@ -22,7 +21,7 @@ export class Admin {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   name: string;
 
   @Column({ default: false, nullable: false })
@@ -40,13 +39,11 @@ export class Admin {
   @UpdateDateColumn({ name: 'updated_date', type: 'timestamptz' })
   updatedDate: Date;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.processor)
   processedHistories: ProcessedHistory[];
 
-  @JoinColumn({ name: 'updated_histories' })
-  @OneToMany(() => UpdatedHistory, (updatedHistory) => updatedHistory.processor)
-  updatedHistories: UpdatedHistory[];
+  @OneToMany(() => Release, (release) => release.processor)
+  releases: Release[];
 
   @OneToMany(() => Notice, (notice) => notice.processor)
   notice: Notice[];

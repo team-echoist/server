@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
-import { EssayStatus } from '../../../../entities/essay.entity';
 import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
+import { EssayStatus } from '../../../../common/types/enum.types';
 
 export class SummaryEssayResDto {
   @ApiProperty()

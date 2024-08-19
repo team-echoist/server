@@ -15,11 +15,11 @@ export const TypeormConfig: TypeOrmModuleAsyncOptions = {
     database: process.env.DB_NAME,
     autoLoadEntities: true,
     timezone: 'Asia/Seoul',
-    dropSchema: process.env.INITIALIZE === 'true',
-    synchronize: process.env.INITIALIZE === 'true',
+    dropSchema: false,
+    synchronize: false,
     migrationsRun: true,
     entities: [path.join(__dirname + '/../entities/*.entity.ts')],
-    migrations: [path.join(__dirname + '/../migrations/*.{js,ts}')],
+    migrations: [path.join(__dirname + '/../migrations/**/*.{js,ts}')],
     cli: {
       migrationsDir: 'src/migrations',
     },
@@ -53,7 +53,7 @@ export const dataSourceOptions = async () => {
     password: String(process.env.DB_PASSWORD),
     database: process.env.DB_NAME,
     entities: [__dirname + '/../entities/*.entity.ts'],
-    migrations: [__dirname + '/../migrations/*.{js,ts}'],
+    migrations: [__dirname + '/../migrations/**/*.{js,ts}'],
     timezone: 'Asia/Seoul',
     logging: false,
     extra: {

@@ -7,10 +7,11 @@ import { UserService } from '../../user/user.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { User } from '../../../entities/user.entity';
-import { Essay, EssayStatus } from '../../../entities/essay.entity';
+import { Essay } from '../../../entities/essay.entity';
 import { Queue } from 'bull';
 import { Bookmark } from '../../../entities/bookmark.entity';
 import { SummaryEssayResDto } from '../../essay/dto/response/summaryEssayRes.dto';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,

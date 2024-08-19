@@ -8,11 +8,19 @@ import { Inquiry } from '../../entities/inquiry.entity';
 import { UserService } from '../user/user.service';
 import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
-import { UpdatedHistoryResDto } from './dto/response/updatedHistoryRes.dto';
+import { ReleaseResDto } from './dto/response/releaseRes.dto';
 import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
 import { Transactional } from 'typeorm-transactional';
+import { Request as ExpressRequest } from 'express';
+import { Device } from '../../entities/device.entity';
+import { User } from '../../entities/user.entity';
+import { DeviceDto } from './dto/device.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
+import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 
 @Injectable()
 export class SupportService {
@@ -20,6 +28,7 @@ export class SupportService {
     private readonly utilsService: UtilsService,
     private readonly supportRepository: SupportRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getNotices(page: number, limit: number) {
@@ -62,74 +71,170 @@ export class SupportService {
   }
 
   @Transactional()
-  async getUserUpdateHistories(page: number, limit: number) {
-    const { histories, total } = await this.supportRepository.findUserUpdateHistories(page, limit);
+  async getUserReleases(page: number, limit: number) {
+    const { releases, total } = await this.supportRepository.findUserReleases(page, limit);
 
     const totalPage = Math.ceil(total / limit);
-    const historiesDto = this.utilsService.transformToDto(UpdatedHistoryResDto, histories);
+    const releasesDto = this.utilsService.transformToDto(ReleaseResDto, releases);
 
-    return { histories: historiesDto, total, page, totalPage };
+    return { releases: releasesDto, total, page, totalPage };
   }
 
   @Transactional()
-  async getSettings(userId: number, deviceId: string) {
-    if (deviceId === '' && !deviceId)
-      throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
+  async getSettings(req: ExpressRequest) {
+    const user = await this.userService.fetchUserEntityById(req.user.id);
+    const currentDevice = await this.findDevice(user, req.device);
 
-    let settings = await this.supportRepository.findSettings(userId, deviceId);
+    if (!currentDevice)
+      throw new HttpException(
+        '등록된 디바이스가 없습니다. 디바이스 등록을 진행해주세요.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    let settings = await this.supportRepository.findSettings(user.id, currentDevice.id);
 
     if (!settings) {
       settings = new AlertSettings();
-      settings.user = await this.userService.fetchUserEntityById(userId);
-      settings.deviceId = deviceId;
+      settings.user = user;
+      settings.device = currentDevice;
 
-      await this.supportRepository.saveSettings(settings);
+      settings = await this.supportRepository.saveSettings(settings);
     }
 
     return this.utilsService.transformToDto(AlertSettingsResDto, settings);
   }
 
   @Transactional()
-  async updateSettings(userId: number, settingsData: UpdateAlertSettingsReqDto, deviceId: string) {
-    if (deviceId === '' || !deviceId)
-      throw new HttpException('Missing parameter.', HttpStatus.BAD_REQUEST);
+  async updateSettings(req: ExpressRequest, settingsData: UpdateAlertSettingsReqDto) {
+    const user = await this.userService.fetchUserEntityById(req.user.id);
+    const currentDevice = await this.findDevice(user, req.device);
 
-    const settings = await this.supportRepository.findSettings(userId, deviceId);
+    if (!currentDevice)
+      throw new HttpException(
+        '등록된 디바이스가 없습니다. 디바이스 등록을 진행해주세요.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const settings = await this.supportRepository.findSettings(user.id, currentDevice.id);
+
     if (settings) {
       Object.assign(settings, settingsData);
       await this.supportRepository.saveSettings(settings);
     } else {
       const newSettings = await this.supportRepository.createAlertSettings(
         settingsData,
-        userId,
-        deviceId,
+        user.id,
+        currentDevice.id,
       );
       await this.supportRepository.saveSettings(newSettings);
     }
   }
 
-  async fetchSettingEntityById(userId: number, deviceId: string) {
+  async fetchSettingEntityById(userId: number, deviceId: number) {
     return await this.supportRepository.findSettings(userId, deviceId);
   }
 
   @Transactional()
-  async registerDevice(userId: number, deviceId: string, deviceToken: string) {
-    const user = await this.userService.fetchUserEntityById(userId);
-    let device = await this.supportRepository.findDevice(deviceId);
+  async registerDevice(req: ExpressRequest, uid: string, fcmToken: string) {
+    const user = await this.userService.fetchUserEntityById(req.user.id);
 
-    device
-      ? (device.deviceToken = deviceToken)
-      : (device = await this.supportRepository.createDevice(user, deviceId, deviceToken));
+    let device = await this.findDevice(user, req.device);
 
-    return await this.supportRepository.saveDevice(device);
+    if (device) {
+      device.uid = uid;
+      device.fcmToken = fcmToken;
+    } else {
+      device = await this.supportRepository.createDevice(
+        user,
+        {
+          os: req.device.os as DeviceOS,
+          type: req.device.type as DeviceType,
+          model: req.device.model,
+        },
+        uid,
+        fcmToken,
+      );
+    }
+
+    await this.supportRepository.saveDevice(device);
+    await this.redis.del(`user:${req.user.id}`);
   }
 
-  async getDevices(userId: number) {
+  async findDevice(user: User, reqDevice: DeviceDto) {
+    return user.devices.length === 0
+      ? null
+      : user.devices.find(
+          (device: Device) =>
+            device.os === reqDevice.os &&
+            device.type === reqDevice.type &&
+            device.model === reqDevice.model,
+        );
+  }
+
+  async newCreateDevice(user: User, device: DeviceDto) {
+    const newDevice = await this.supportRepository.createDevice(user, {
+      os: device.os as DeviceOS,
+      type: device.type as DeviceType,
+      model: device.model,
+    });
+
+    return await this.supportRepository.saveDevice(newDevice);
+  }
+
+  async getDevicesByUserId(userId: number) {
     return await this.supportRepository.findDevices(userId);
   }
 
   @Transactional()
-  async deleteDevice(userId: number, todayDate: string) {
-    return await this.supportRepository.deleteDevice(userId, todayDate);
+  async deleteDevice(userId: number) {
+    return await this.supportRepository.deleteDevice(userId);
+  }
+
+  async findAllVersions() {
+    return await this.supportRepository.findAllVersions();
+  }
+
+  async getVersions() {
+    const foundVersions = await this.findAllVersions();
+
+    const versionMap = foundVersions.reduce((map, version) => {
+      map[version.appType] = version.version;
+      return map;
+    }, {});
+
+    const versions = this.utilsService.transformToDto(VersionsSummaryResDto, versionMap);
+    return { versions: versions };
+  }
+
+  @Transactional()
+  async updateAppVersion(versionId: number, version: string) {
+    const foundVersion = await this.supportRepository.findVersion(versionId);
+    if (!foundVersion)
+      throw new HttpException('Please check the version ID', HttpStatus.BAD_REQUEST);
+
+    foundVersion.version = version;
+
+    await this.supportRepository.saveVersion(foundVersion);
+  }
+
+  @Transactional()
+  async checkNewNotices(userId: number) {
+    const latestNotice = await this.supportRepository.findLatestNotice();
+
+    if (!latestNotice) return { newNotice: null };
+
+    let seenNotice = await this.supportRepository.findSeenNotice(userId);
+
+    if (!seenNotice) {
+      seenNotice = await this.supportRepository.createSeenNotice(userId, latestNotice);
+      await this.supportRepository.saveSeenNotice(seenNotice);
+      return { newNotice: latestNotice.id };
+    } else if (seenNotice.notice.id < latestNotice.id) {
+      seenNotice.notice = latestNotice;
+      await this.supportRepository.saveSeenNotice(seenNotice);
+      return { newNotice: latestNotice.id };
+    }
+
+    return { newNotice: null };
   }
 }

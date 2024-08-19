@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsNumber } from 'class-validator';
-import { UpdatedHistoryResDto } from './updatedHistoryRes.dto';
+import { ReleaseResDto } from './releaseRes.dto';
 
-export class UpdatedHistoriesResDto {
-  @ApiProperty({ type: [UpdatedHistoryResDto] })
-  @Type(() => UpdatedHistoryResDto)
+export class ReleasesResDto {
+  @ApiProperty({ type: [ReleaseResDto] })
+  @Type(() => ReleaseResDto)
   @Expose()
-  histories: UpdatedHistoryResDto[];
+  releases: ReleaseResDto[];
 
   @ApiProperty()
   @Expose()

@@ -11,11 +11,7 @@ import {
 import { Essay } from './essay.entity';
 import { User } from './user.entity';
 import { ProcessedHistory } from './processedHistory.entity';
-
-export enum ReviewQueueType {
-  LINKEDOUT = 'linkedout',
-  PUBLISHED = 'published',
-}
+import { ReviewQueueType } from '../common/types/enum.types';
 
 @Entity('review_queue')
 export class ReviewQueue {
@@ -50,7 +46,6 @@ export class ReviewQueue {
   @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE' })
   user: User;
 
-  @JoinColumn({ name: 'processed_histories' })
   @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.report)
   processedHistories: ProcessedHistory[];
 }

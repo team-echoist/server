@@ -12,7 +12,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: process.env.JWT_ACCESS_SECRET,
     });
   }
 
@@ -21,6 +21,10 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     if (!admin) {
       throw new UnauthorizedException();
     }
+    if (!admin.activated) {
+      throw new UnauthorizedException('Admin account is not activated');
+    }
+
     return admin;
   }
 }

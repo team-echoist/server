@@ -1,8 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserStatus } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { MoreThan, Repository } from 'typeorm';
 import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
 import { DeactivationReason } from '../../entities/deactivationReason.entity';
+import { ConfigService } from '@nestjs/config';
+import { UserStatus } from '../../common/types/enum.types';
 
 export class UserRepository {
   constructor(
@@ -10,6 +12,8 @@ export class UserRepository {
     private readonly userRepository: Repository<User>,
     @InjectRepository(DeactivationReason)
     private readonly deactivationReasonRepository: Repository<DeactivationReason>,
+
+    private readonly configService: ConfigService,
   ) {}
 
   async findUserById(userId: number) {
@@ -117,9 +121,14 @@ export class UserRepository {
         email: () => `CONCAT('${todayDate}_', email)`,
         nickname: null,
         status: UserStatus.DEACTIVATED,
+        profileImage: this.configService.get<string>('DEFAULT_PROFILE_IMG'),
         deletedDate: () => `NOW()`,
       })
       .where('id = :userId', { userId })
       .execute();
+  }
+
+  async deleteAllAccount() {
+    return this.userRepository.delete({});
   }
 }

@@ -4,18 +4,20 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Admin } from './admin.entity';
+import { ProcessedHistory } from './processedHistory.entity';
 
-@Entity('updated_history')
-export class UpdatedHistory {
+@Entity()
+export class Release {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  history: string;
+  content: string;
 
   @CreateDateColumn({ name: 'created_date', type: 'timestamptz' })
   createdDate: Date;
@@ -24,6 +26,9 @@ export class UpdatedHistory {
   updatedDate: Date;
 
   @JoinColumn({ name: 'admin_id' })
-  @ManyToOne(() => Admin, (admin) => admin.updatedHistories)
+  @ManyToOne(() => Admin, (admin) => admin.releases, { onDelete: 'CASCADE' })
   processor: Admin;
+
+  @OneToMany(() => ProcessedHistory, (processedHistory) => processedHistory.release)
+  processedHistories: ProcessedHistory[];
 }

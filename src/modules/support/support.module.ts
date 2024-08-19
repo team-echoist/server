@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Notice } from '../../entities/notice.entity';
@@ -11,19 +11,28 @@ import { AuthModule } from '../auth/auth.module';
 import { User } from '../../entities/user.entity';
 import { UtilsModule } from '../utils/utils.module';
 import { UserModule } from '../user/user.module';
-import { UpdatedHistory } from '../../entities/updatedHistory.entity';
+import { Release } from '../../entities/release.entity';
 import { AlertSettings } from '../../entities/alertSettings.entity';
 import { Device } from '../../entities/device.entity';
+import { AppVersions } from '../../entities/appVersions.entity';
+import { SeenNotice } from '../../entities/seenNotice.entity';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-    }),
-    TypeOrmModule.forFeature([User, Notice, Inquiry, UpdatedHistory, AlertSettings, Device]),
-    AuthModule,
+    JwtModule.register({}),
+    TypeOrmModule.forFeature([
+      User,
+      Notice,
+      Inquiry,
+      Release,
+      AlertSettings,
+      Device,
+      AppVersions,
+      SeenNotice,
+    ]),
     UtilsModule,
-    UserModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [SupportController],
   providers: [SupportService, SupportRepository, strategies.JwtStrategy],

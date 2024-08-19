@@ -62,7 +62,7 @@ describe('AuthService', () => {
     it('should throw an error if email already exists', async () => {
       authRepository.findByEmail.mockResolvedValue({ id: 1 } as any);
       await expect(authService.checkEmail('test@example.com')).rejects.toThrow(
-        new HttpException('Email already exists', HttpStatus.CONFLICT),
+        new HttpException('사용중인 이메일 입니다.', HttpStatus.CONFLICT),
       );
     });
 
@@ -76,7 +76,7 @@ describe('AuthService', () => {
     it('should throw an error if nickname already exists', async () => {
       authRepository.findByNickname.mockResolvedValue({ id: 1 } as any);
       await expect(authService.checkNickname('nickname')).rejects.toThrow(
-        new HttpException('Nickname already exists', HttpStatus.CONFLICT),
+        new HttpException('사용중인 닉네임 입니다.', HttpStatus.CONFLICT),
       );
     });
 
@@ -90,7 +90,7 @@ describe('AuthService', () => {
     it('should throw an error if email already exists', async () => {
       authRepository.findByEmail.mockResolvedValue({ id: 1 } as any);
       await expect(authService.isEmailOwned('test@example.com')).rejects.toThrow(
-        new HttpException('Email or nickname is already exists.', HttpStatus.BAD_REQUEST),
+        new HttpException('이메일 또는 닉네임이 이미 사용중입니다.', HttpStatus.BAD_REQUEST),
       );
     });
 
@@ -119,7 +119,7 @@ describe('AuthService', () => {
     });
   });
 
-  describe('verifEmail', () => {
+  describe('verifyEmail', () => {
     it('should generate a verification token and send an email', async () => {
       const email = 'test@example.com';
       const userId = 1;
@@ -129,7 +129,7 @@ describe('AuthService', () => {
       mockRedis.set = jest.fn().mockResolvedValue('OK');
       mailService.updateEmail.mockResolvedValue();
 
-      await authService.verifEmail(userId, email);
+      await authService.verifyEmail(userId, email);
 
       expect(authService.isEmailOwned).toHaveBeenCalledWith(email);
       expect(utilsService.generateVerifyToken).toHaveBeenCalled();
@@ -175,7 +175,7 @@ describe('AuthService', () => {
       mockRedis.get = jest.fn().mockResolvedValue(null);
 
       await expect(authService.updateEmail(token)).rejects.toThrow(
-        new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST),
+        new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST),
       );
     });
   });
@@ -206,7 +206,10 @@ describe('AuthService', () => {
       mockRedis.get = jest.fn().mockResolvedValue(null);
 
       await expect(authService.register(token)).rejects.toThrow(
-        new HttpException('Not found', HttpStatus.NOT_FOUND),
+        new HttpException(
+          '회원 등록 과정에서 캐싱된 사용자를 찾을 수 없습니다.',
+          HttpStatus.NOT_FOUND,
+        ),
       );
     });
   });
@@ -251,7 +254,7 @@ describe('AuthService', () => {
       authRepository.findByEmail.mockResolvedValue(user as any);
 
       await expect(authService.validateUser(email, password)).rejects.toThrow(
-        'This account is a social subscriber.',
+        `다음 플랫폼 서비스로 가입한 사용자 입니다. (google)`,
       );
     });
   });
@@ -319,7 +322,10 @@ describe('AuthService', () => {
       authRepository.findByEmail.mockResolvedValue(null);
 
       await expect(authService.passwordResetReq(email)).rejects.toThrow(
-        new HttpException('This is an incorrect email.', HttpStatus.BAD_REQUEST),
+        new HttpException(
+          '요청하신 이메일로 등록된 사용자를 찾을 수 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
@@ -347,7 +353,10 @@ describe('AuthService', () => {
       mockRedis.get = jest.fn().mockResolvedValue(null);
 
       await expect(authService.passwordResetVerify(token)).rejects.toThrow(
-        new HttpException('Not found', HttpStatus.NOT_FOUND),
+        new HttpException(
+          '비밀번호 초기화 과정에서 사용자 정보를 찾을 수 없습니다.',
+          HttpStatus.NOT_FOUND,
+        ),
       );
     });
   });
@@ -377,7 +386,7 @@ describe('AuthService', () => {
       mockRedis.get = jest.fn().mockResolvedValue(null);
 
       await expect(authService.passwordReset(data)).rejects.toThrow(
-        new HttpException('Not found', HttpStatus.NOT_FOUND),
+        new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
     });
   });

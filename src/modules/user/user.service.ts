@@ -35,12 +35,12 @@ export class UserService {
     private readonly utilsService: UtilsService,
     private readonly awsService: AwsService,
     private readonly nicknameService: NicknameService,
-    private readonly authService: AuthService,
+    @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
     @InjectQueue('user') private readonly userQueue: Queue,
   ) {}
 
-  async fetchUserEntityById(userId: number) {
+  async fetchUserEntityById(userId: number): Promise<User> {
     const cacheKey = `user:${userId}`;
     const cachedUser = await this.redis.get(cacheKey);
 
@@ -58,14 +58,16 @@ export class UserService {
   async saveProfileImage(userId: number, file: Express.Multer.File) {
     const user = await this.userRepository.findUserById(userId);
     const newExt = file.originalname.split('.').pop();
+    const defaultProfileImage = this.utilsService.isDefaultProfileImage(user.profileImage);
 
     let fileName: any;
-    if (user.profileImage) {
-      const urlParts = user.profileImage.split('/').pop();
-      fileName = `profile/${urlParts}`;
-    } else {
+
+    if (defaultProfileImage) {
       const imageName = this.utilsService.getUUID();
       fileName = `profile/${imageName}`;
+    } else {
+      const urlParts = user.profileImage.split('/').pop();
+      fileName = `profile/${urlParts}`;
     }
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
@@ -158,10 +160,7 @@ export class UserService {
     const user = await this.fetchUserEntityById(userId);
 
     if (user.deactivationDate)
-      throw new HttpException(
-        'This account has already been requested to be deleted.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST);
 
     user.deactivationDate = new Date();
 
@@ -181,7 +180,7 @@ export class UserService {
     const user = await this.userRepository.findUserById(userId);
 
     if (!user.deactivationDate)
-      throw new HttpException('Account is not in deactivated status', HttpStatus.BAD_REQUEST);
+      throw new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST);
 
     user.deactivationDate = null;
 

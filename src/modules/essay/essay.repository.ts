@@ -1,10 +1,11 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Brackets, In, Repository } from 'typeorm';
-import { Essay, EssayStatus } from '../../entities/essay.entity';
+import { Essay } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
+import { EssayStatus } from '../../common/types/enum.types';
 
 export class EssayRepository {
   constructor(
@@ -224,18 +225,18 @@ export class EssayRepository {
     return { essays, total };
   }
 
-  async findPreviousMyEssay(authorId: number, createdDate: Date) {
+  async findPreviousPrivateEssay(authorId: number, createdDate: Date) {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author.id = :authorId', { authorId })
-      .andWhere('essay.status != :status', { status: EssayStatus.LINKEDOUT })
+      .andWhere('essay.status = :status', { status: EssayStatus.PRIVATE })
       .andWhere('essay.created_date < :createdDate', { createdDate })
       .orderBy('essay.created_date', 'DESC')
       .limit(6)
       .getMany();
   }
 
-  async findPreviousEssay(authorId: number, createdDate: Date) {
+  async findPreviousPublishEssay(authorId: number, createdDate: Date) {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author.id = :authorId', { authorId })
@@ -299,6 +300,7 @@ export class EssayRepository {
       .leftJoin('report.reporter', 'reporter')
       .leftJoin('essay.author', 'author')
       .leftJoinAndSelect('essay.bookmarks', 'bookmark')
+      .leftJoinAndSelect('essay.device', 'device')
       .select([
         'essay.id',
         'essay.title',
@@ -309,7 +311,9 @@ export class EssayRepository {
         'essay.thumbnail',
         'essay.views',
         'essay.status',
-        'essay.device',
+        'device.os',
+        'device.type',
+        'device.model',
         'author.id',
       ])
       .addSelect([
@@ -396,7 +400,8 @@ export class EssayRepository {
     const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.story', 'story')
-      .where('essay.author = :userId', { userId });
+      .where('essay.author = :userId', { userId })
+      .andWhere('essay.status != :status', { status: EssayStatus.LINKEDOUT });
 
     if (storyId) {
       queryBuilder.andWhere(

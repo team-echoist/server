@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -21,10 +20,9 @@ export class Tag {
   @CreateDateColumn({ name: 'created_date', type: 'timestamptz' })
   createdDate: Date;
 
-  @ManyToMany(() => Essay, (essay) => essay.tags)
+  @ManyToMany(() => Essay, (essay) => essay.tags, { onDelete: 'CASCADE' })
   essays: Essay[];
 
-  @JoinColumn({ name: 'tag_exps' })
   @OneToMany(() => TagExp, (tagExp) => tagExp.tag)
   tagExps: TagExp[];
 }

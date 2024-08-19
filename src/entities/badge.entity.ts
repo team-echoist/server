@@ -21,6 +21,5 @@ export class Badge {
   user: User;
 
   @OneToMany(() => TagExp, (tagExp) => tagExp.badge)
-  @JoinColumn({ name: 'tag_exp_id' })
   tagExps: TagExp[];
 }
