@@ -10,7 +10,7 @@ export class UpdateUserReqDto {
   @ApiProperty({})
   @IsString()
   @IsOptional()
-  @Length(1, 20, {
+  @Length(1, 6, {
     message: '닉네임은 최소 2자 이상, 최대 6자 이하이어야 합니다.',
   })
   @Matches(/^[가-힣]+$/, {
