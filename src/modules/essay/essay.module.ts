@@ -33,12 +33,9 @@ dotenv.config();
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-    }),
+    JwtModule.register({}),
     TypeOrmModule.forFeature([User, Essay, Story, ReviewQueue, Tag, ViewRecord]),
     ConfigModule,
-    AuthModule,
     MailModule,
     TagModule,
     StoryModule,
@@ -51,6 +48,7 @@ dotenv.config();
     ViewModule,
     AlertModule,
     SupportModule,
+    forwardRef(() => AuthModule),
     forwardRef(() => BookmarkModule),
     forwardRef(() => UserModule),
   ],

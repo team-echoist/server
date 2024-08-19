@@ -13,6 +13,10 @@ export class AuthRepository {
     return this.userRepository.findOne({ where: { id: id } });
   }
 
+  async findByIdWithEmail(payload: any) {
+    return this.userRepository.findOne({ where: { id: payload.sub, email: payload.username } });
+  }
+
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
   }

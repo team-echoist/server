@@ -17,12 +17,11 @@ import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { UserProcessor } from './user.processor';
+import { Auth } from 'firebase-admin/lib/auth';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-    }),
+    JwtModule.register({}),
     TypeOrmModule.forFeature([User, Essay, DeactivationReason]),
     BullModule.registerQueueAsync({
       name: 'user',
@@ -35,11 +34,11 @@ import { UserProcessor } from './user.processor';
       }),
       inject: [ConfigService],
     }),
-    AuthModule,
     MailModule,
     AwsModule,
     UtilsModule,
     NicknameModule,
+    forwardRef(() => AuthModule),
     forwardRef(() => EssayModule),
   ],
   controllers: [UserController],

@@ -15,7 +15,7 @@ export class UtilsService {
   }
 
   generateJWT(id: number) {
-    const secretKey = this.configService.get('JWT_SECRET');
+    const secretKey = this.configService.get('JWT_ACCESS_SECRET');
     const options = { expiresIn: '30d' };
     return jwt.sign({ id: id }, secretKey, options);
   }

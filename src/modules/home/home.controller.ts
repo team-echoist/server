@@ -1,12 +1,12 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { GeulroquisUrlResDto } from '../geulroquis/dto/response/geulroquisUrlRes.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Home')
 @Controller('home')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class HomeController {
   constructor(private readonly homeService: HomeService) {}
 

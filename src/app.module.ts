@@ -1,5 +1,5 @@
 import { redisConfig } from './config/redis.config';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
@@ -19,8 +19,6 @@ import { ReviewModule } from './modules/review/review.module';
 import { UserModule } from './modules/user/user.module';
 import { ReportModule } from './modules/report/report.module';
 import { SeederService } from './modules/seeder/seeder.service';
-import { JwtInterceptor } from './common/interceptros/jwt.interceptor';
-import { DeviceInterceptor } from './common/interceptros/device.interceptor';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
@@ -34,6 +32,7 @@ import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
 import { HomeModule } from './modules/home/home.module';
 import { ServerGuard } from './common/guards/server.guard';
 import * as strategies from './common/guards/strategies';
+import { DeviceMiddleware } from './common/middlewares/device.middleware';
 
 @Module({
   imports: [
@@ -69,10 +68,12 @@ import * as strategies from './common/guards/strategies';
     HomeModule,
   ],
   providers: [
-    { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
-    { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
+    // { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
+    // { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
     { provide: APP_GUARD, useClass: ServerGuard },
     strategies.AdminPassStrategy,
+    strategies.LocalStrategy,
+    strategies.JwtStrategy,
   ],
 })
 export class AppModule implements OnModuleInit, NestModule {
@@ -96,6 +97,7 @@ export class AppModule implements OnModuleInit, NestModule {
   }
 
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DeviceMiddleware).forRoutes('*');
     consumer.apply(TimezoneMiddleware).forRoutes('*');
     consumer.apply(BlockPhpRequestsMiddleware).forRoutes('*');
   }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilsModule } from '../utils/utils.module';
 import { MailModule } from '../mail/mail.module';
@@ -11,16 +11,20 @@ import { HttpModule } from '@nestjs/axios';
 import * as strategies from '../../common/guards/strategies';
 import { ConfigModule } from '@nestjs/config';
 import { AwsModule } from '../aws/aws.module';
+import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    HttpModule,
     TypeOrmModule.forFeature([User]),
+    JwtModule.register({}),
+    ConfigModule,
+    HttpModule,
     MailModule,
     UtilsModule,
     NicknameModule,
-    ConfigModule,
     AwsModule,
+    forwardRef(() => UserModule),
   ],
   controllers: [AuthController],
   providers: [
