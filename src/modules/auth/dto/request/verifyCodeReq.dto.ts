@@ -1,7 +1,7 @@
-import { IsString, Length, Max, Min } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class RegisterReqDto {
+export class VerifyCodeReqDto {
   @ApiProperty()
   @IsString()
   @Length(6)

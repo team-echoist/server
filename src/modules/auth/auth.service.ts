@@ -62,30 +62,32 @@ export class AuthService {
   async signingUp(req: ExpressRequest, data: CreateUserReqDto) {
     await this.isEmailOwned(data.email);
 
-    const sixDigit = await this.utilsService.generateSixDigit();
+    const code = await this.utilsService.generateSixDigit();
     data.password = await bcrypt.hash(data.password, 10);
 
-    await this.redis.set(`${req.ip}:${sixDigit}`, JSON.stringify(data), 'EX', 300);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(data), 'EX', 300);
 
-    await this.mailService.sendVerificationEmail(data.email, sixDigit);
+    await this.mailService.sendVerificationEmail(data.email, code);
   }
 
   @Transactional()
-  async verifyEmail(userId: number, email: string) {
+  async verifyEmail(req: ExpressRequest, email: string) {
     await this.isEmailOwned(email);
 
+    const userId = req.user.id;
     const token = await this.utilsService.generateVerifyToken();
+    const code = await this.utilsService.generateSixDigit();
 
     const userEmailData = { email, userId };
 
-    await this.redis.set(token, JSON.stringify(userEmailData), 'EX', 600);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 600);
 
-    await this.mailService.updateEmail(email, token);
+    await this.mailService.sendVerificationEmail(email, token);
   }
 
   @Transactional()
-  async updateEmail(token: string) {
-    const userEmailData = await this.redis.get(token);
+  async updateEmail(req: ExpressRequest, code: string) {
+    const userEmailData = await this.redis.get(`${req.ip}:${code}`);
 
     if (!userEmailData)
       throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
