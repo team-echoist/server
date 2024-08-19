@@ -448,6 +448,7 @@ export class AuthController {
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     req.user = await this.authService.oauthLogin(req.user);
     const jwt = await this.authService.login(req);
+
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
 
     redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
