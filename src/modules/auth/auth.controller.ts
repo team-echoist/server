@@ -232,103 +232,28 @@ export class AuthController {
     return await this.authService.login(req);
   }
 
-  @Post('password/reset-req')
-  @Public()
-  @ApiOperation({
-    summary: '비밀번호 재설정 요청',
-    description: `
-  비밀번호 재설정을 요청합니다. 
-  사용자는 이메일로 재설정 링크를 받게 됩니다.
-
-  **동작 과정:**
-  1. 사용자가 비밀번호 재설정을 요청합니다.
-  2. 제공된 이메일 주소로 재설정 링크가 포함된 이메일이 발송됩니다.
-
-  **주의 사항:**
-  - 유효한 이메일 주소를 제공해야 합니다.
-  - 재설정 링크는 10분 동안 유효합니다.
-  `,
-  })
-  @ApiResponse({ status: 201, description: '비밀번호 재설정 요청 성공' })
-  @ApiResponse({ status: 400, description: '잘못된 이메일 주소' })
-  @ApiBody({ type: EmailReqDto })
-  async passwordResetReq(@Body() data: EmailReqDto) {
-    return this.authService.passwordResetReq(data.email);
-  }
-
-  @Get('password/reset-verify')
-  @Public()
-  @ApiOperation({
-    summary: '비밀번호 재설정 검증',
-    description: `
-  이메일로 받은 비밀번호 재설정 토큰을 검증합니다. 
-  검증이 완료되면 새로운 토큰을 생성하여 리다이렉션합니다.
-
-  **쿼리 파라미터:**
-  - \`token\`: 비밀번호 재설정 토큰
-
-  **동작 과정:**
-  1. 제공된 토큰을 검증합니다.
-  2. 유효한 토큰이면 새로운 토큰을 생성하고 리다이렉션합니다.
-
-  **주의 사항:**
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로, 웹에서는 지정된 URL로 리다이렉션됩니다.
-  `,
-  })
-  @ApiResponse({ status: 302, description: '토큰 검증 및 리다이렉션 성공' })
-  @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
-  async passwordResetVerify(
-    @Query('token') token: string,
-    @Req() req: ExpressRequest,
-    @Res() res: Response,
-  ) {
-    const newToken = await this.authService.passwordResetVerify(token);
-
-    let redirectUrl = this.configService.get<string>('WEB_PASSWORD_RESET_REDIRECT');
-    if (
-      req.device.os === DeviceOS.IOS &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('IOS_PASSWORD_RESET_REDIRECT');
-    }
-
-    if (
-      req.device.os === DeviceOS.ANDROID &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('AOS_PASSWORD_RESET_REDIRECT');
-    }
-
-    redirectUrl += `?token=${newToken}`;
-
-    res.redirect(redirectUrl);
-  }
-
   @Post('password/reset')
   @Public()
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: `
-  제공된 새로운 비밀번호로 비밀번호를 재설정합니다.
+  제공된 이메일로 임시 비밀번호를 발송합니다.
 
   **요청 본문:**
-  - \`token\`: 비밀번호 재설정 토큰
-  - \`password\`: 새로운 비밀번호
-
+  - \`email\`: 사용자 이메일
+  
   **동작 과정:**
-  1. 제공된 토큰을 검증합니다.
-  2. 유효한 토큰이면 비밀번호를 재설정합니다.
+  1. 제공된 이메일을 검증합니다.
+  2. 유효한 이메일이면 임시 비밀번호를 발송합니다.
 
   **주의 사항:**
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
+  - 유효하지 않은 이메일을 제공하면 \`400\` 에러가 발생합니다.
   - 새로운 비밀번호는 안전하게 저장됩니다.
   `,
   })
-  @ApiResponse({ status: 200, description: '비밀번호 재설정 성공' })
-  @ApiResponse({ status: 404, description: '유효하지 않은 토큰' })
-  async passwordReset(@Body() data: PasswordResetReqDto) {
-    return this.authService.passwordReset(data);
+  @ApiResponse({ status: 201 })
+  async passwordReset(@Body() data: EmailReqDto) {
+    return this.authService.passwordReset(data.email);
   }
 
   //-------------------------------------------------------OAuth

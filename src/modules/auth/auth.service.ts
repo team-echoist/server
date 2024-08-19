@@ -80,7 +80,7 @@ export class AuthService {
 
     const userEmailData = { email, userId };
 
-    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 600);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 300);
 
     await this.mailService.sendVerificationEmail(email, token);
   }
@@ -199,7 +199,7 @@ export class AuthService {
   }
 
   @Transactional()
-  async passwordResetReq(email: string) {
+  async passwordResetReq(req: ExpressRequest, email: string) {
     const user = await this.authRepository.findByEmail(email);
     if (!user)
       throw new HttpException(
@@ -207,11 +207,11 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
 
-    const token = await this.utilsService.generateVerifyToken();
+    const code = await this.utilsService.generateSixDigit();
 
-    await this.redis.set(token, JSON.stringify(user), 'EX', 600);
+    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(user), 'EX', 300);
 
-    await this.mailService.sendPasswordResetEmail(email, token);
+    await this.mailService.sendVerificationEmail(email, code);
   }
 
   @Transactional()
@@ -231,14 +231,16 @@ export class AuthService {
   }
 
   @Transactional()
-  async passwordReset(data: PasswordResetReqDto) {
-    const user = await this.redis.get(data.token);
+  async passwordReset(email: string) {
+    const user = await this.authRepository.findByEmail(email);
     if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
-    const userData = JSON.parse(user);
-    userData.password = await bcrypt.hash(data.password, 10);
+    const temporaryPassword = this.utilsService.getUUID();
+    user.password = await bcrypt.hash(temporaryPassword, 12);
 
-    await this.authRepository.saveUser(userData);
+    await this.authRepository.saveUser(user);
+
+    await this.mailService.sendPasswordResetEmail(temporaryPassword, temporaryPassword);
   }
 
   // ----------------- OAuth ---------------------

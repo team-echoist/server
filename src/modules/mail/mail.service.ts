@@ -27,7 +27,7 @@ export class MailService {
     html = html.replace(/{{title}}/g, title);
     html = html.replace(/{{message}}/g, message);
 
-    if (options && options.length > 6) {
+    if (options && (options.startsWith('http://') || options.startsWith('https://'))) {
       html = html.replace(/{{verificationUrl}}/g, options);
     } else {
       html = html.replace(/{{code}}/g, options);
@@ -38,12 +38,33 @@ export class MailService {
   async sendVerificationEmail(to: string, code: string): Promise<void> {
     const title = '안녕하세요! 링크드아웃에서 요청하신 인증번호를 보내드립니다:)';
     const message = `아래의 인증번호 6자리를 인증번호 입력창에 입력해주세요`;
-    const htmlContent = this.getHtmlTemplate(title, message, 'signupTemplate', code);
+    const htmlContent = this.getHtmlTemplate(title, message, 'verifyTemplate', code);
 
     await this.transporter.sendMail({
       from: `"LinkedOut" <linkedoutapp@gmail.com>`,
       to: to,
-      subject: '링크드아웃 인증번호 안내.',
+      subject: '링크드아웃 인증번호 안내',
+      html: htmlContent,
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          cid: 'logo',
+          contentDisposition: 'inline',
+        },
+      ],
+    });
+  }
+
+  async sendPasswordResetEmail(to: string, code: string): Promise<void> {
+    const title = '안녕하세요! 링크드아웃에서 요청하신 임시 비밀번호를 보내드립니다:)';
+    const message = `아래의 임시 비밀번호를 이용해 로그인 후 비밀번호를 변경해주세요`;
+    const htmlContent = this.getHtmlTemplate(title, message, 'verifyTemplate', code);
+
+    await this.transporter.sendMail({
+      from: `"LinkedOut" <linkedoutapp@gmail.com>`,
+      to: to,
+      subject: '링크드아웃 비밀번호 재설정',
       html: htmlContent,
       attachments: [
         {
@@ -64,7 +85,7 @@ export class MailService {
     await this.transporter.sendMail({
       from: `"LinkedOut" <linkedoutapp@gmail.com>`,
       to: to,
-      subject: '관리자 계정 활성화 완료.',
+      subject: '관리자 계정 활성화',
       html: htmlContent,
       attachments: [
         {
@@ -76,67 +97,13 @@ export class MailService {
       ],
     });
   }
-
-  async sendPasswordResetEmail(to: string, token: string): Promise<void> {
-    const env = this.configService.get<string>('ENV');
-    const baseVerificationUrl =
-      env === 'dev'
-        ? 'http://localhost:3000/api/auth/password/reset-verify'
-        : 'https://linkedoutapp.com/api/auth/password/reset-verify';
-
-    const verificationUrl = `${baseVerificationUrl}?token=${token}`;
-    const title = '안녕하세요! 링크드아웃 입니다 :)';
-    const message = `비밀번호을 재설정 하시려면 아래의 버튼을 클릭하세요.`;
-    const htmlContent = this.getHtmlTemplate(title, message, 'passwordTemplate', verificationUrl);
-
-    await this.transporter.sendMail({
-      from: `"LinkedOut" <linkedoutapp@gmail.com>`,
-      to: to,
-      subject: '링크드아웃 비밀번호 재설정을 위한 이메일 인증입니다.',
-      html: htmlContent,
-      attachments: [
-        {
-          filename: 'logo.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
-          cid: 'logo',
-          contentDisposition: 'inline',
-        },
-      ],
-    });
-  }
-
-  // async updateEmail(to: string, code: string): Promise<void> {
-  //   const title = '안녕하세요! 링크드아웃 입니다 :)';
-  //   const message = `이메일 변경을 완료를 위해 아래의 버튼을 클릭하세요.`;
-  //   const htmlContent = this.getHtmlTemplate(
-  //     title,
-  //     message,
-  //     'updateEmailTemplate',
-  //     verificationUrl,
-  //   );
-  //
-  //   await this.transporter.sendMail({
-  //     from: `"LinkedOut" <linkedoutapp@gmail.com>`,
-  //     to: to,
-  //     subject: '링크드아웃 서비스 이메일 변경 위한 이메일 인증입니다.',
-  //     html: htmlContent,
-  //     attachments: [
-  //       {
-  //         filename: 'logo.png',
-  //         path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
-  //         cid: 'logo',
-  //         contentDisposition: 'inline',
-  //       },
-  //     ],
-  //   });
-  // }
 
   async rootAuthenticationEmail(to: string, token: string): Promise<void> {
     const env = this.configService.get<string>('ENV');
     const baseVerificationUrl =
       env === 'dev'
-        ? 'http://localhost:3000/api/admin/danger/super/init'
-        : 'https://linkedoutapp.com/api/admin/danger/super/init';
+        ? 'http://localhost:3000/api/admin/root/super/init'
+        : 'https://linkedoutapp.com/api/admin/root/super/init';
 
     const verificationUrl = `${baseVerificationUrl}?token=${token}`;
     const title = '안녕하세요! 링크드아웃 입니다 :)';
@@ -151,7 +118,7 @@ export class MailService {
     await this.transporter.sendMail({
       from: `"LinkedOut" <linkedoutapp@gmail.com>`,
       to: to,
-      subject: '링크드아웃 서비스 이메일 변경 위한 이메일 인증입니다.',
+      subject: '',
       html: htmlContent,
       attachments: [
         {
