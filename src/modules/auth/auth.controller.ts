@@ -570,7 +570,6 @@ export class AuthController {
   @UseGuards(AuthGuard('naver'))
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
     const user = await this.authService.oauthLogin(req.user);
-    console.log(req.user);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     const newJwt = this.utilsService.generateJWT(user.id);

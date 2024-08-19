@@ -50,7 +50,7 @@ async function bootstrap() {
     },
     allowedHeaders:
       'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Observe',
-    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
     credentials: true,
   });
 
