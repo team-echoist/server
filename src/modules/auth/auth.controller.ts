@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 import { JwtResDto } from './dto/response/jwtRes.dto';
+import { RegisterReqDto } from './dto/request/registerReq.dto';
 
 @ApiTags('Auth')
 @UseGuards(JwtAuthGuard)
@@ -193,37 +194,37 @@ export class AuthController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateUserReqDto })
-  async sign(@Body() createUserDto: CreateUserReqDto) {
-    await this.authService.signingUp(createUserDto);
+  async sign(@Req() req: ExpressRequest, @Body() createUserDto: CreateUserReqDto) {
+    await this.authService.signingUp(req, createUserDto);
     return;
   }
 
-  @Get('register')
+  @Post('register')
   @Public()
   @ApiOperation({
     summary: '회원등록',
     description: `
-  이메일 인증 후 회원 등록을 처리합니다. 이메일의 인증 링크를 클릭하면 호출됩니다.
+  인증메일로 발송된 6자리 코드를 입력해 회원등록을 완료합니다.
 
-  **쿼리 파라미터:**
-  - \`token\`: 이메일 인증 토큰
+  **요청 본문:**
+  - \`code\`: 인증 코드
 
   **동작 과정:**
-  1. 제공된 인증 토큰을 Redis에서 조회합니다.
-  2. 토큰이 유효하지 않으면 에러를 반환합니다.
-  3. 토큰이 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
+  1. 제공된 인증 코드와 요청자 IP로 Redis에서 조회합니다.
+  2. 코드가 유효하지 않으면 에러를 반환합니다.
+  3. 코드가 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
-	5. 인증에 성공하면 쿼리스트링에 엑세스, 리프레쉬 토큰을 세팅하고 환경에 맞게 리다이렉션 합니다.
+  5. \`accessToken\` 와 \`refreshToken\` 을 반환합니다.
 	
   **주의 사항:**
   - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
   - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
-  - 모바일 기기에서는 딥링크로 리다이렉션되며, 웹에서는 웹사이트로 리다이렉션됩니다.
   `,
   })
   @ApiResponse({ status: 201 })
-  async register(@Query('token') token: string, @Req() req: ExpressRequest, @Res() res: Response) {
-    await this.authService.register(token);
+  @ApiBody({ type: RegisterReqDto })
+  async register(@Req() req: ExpressRequest, @Body() data: RegisterReqDto, @Res() res: Response) {
+    await this.authService.register(req, data.code);
 
     const { accessToken, refreshToken } = await this.authService.login(req);
 

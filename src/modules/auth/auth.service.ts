@@ -53,21 +53,21 @@ export class AuthService {
     const emailExists = await this.authRepository.findByEmail(email);
 
     if (emailExists)
-      throw new HttpException('이메일 또는 닉네임이 이미 사용중입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('이미 사용중인 이메일 입니다.', HttpStatus.BAD_REQUEST);
 
     return;
   }
 
   @Transactional()
-  async signingUp(data: CreateUserReqDto) {
+  async signingUp(req: ExpressRequest, data: CreateUserReqDto) {
     await this.isEmailOwned(data.email);
 
-    const token = await this.utilsService.generateVerifyToken();
+    const sixDigit = await this.utilsService.generateSixDigit();
     data.password = await bcrypt.hash(data.password, 10);
 
-    await this.redis.set(token, JSON.stringify(data), 'EX', 600);
+    await this.redis.set(`${req.ip}:${sixDigit}`, JSON.stringify(data), 'EX', 300);
 
-    await this.mailService.sendVerificationEmail(data.email, token);
+    await this.mailService.sendVerificationEmail(data.email, sixDigit);
   }
 
   @Transactional()
@@ -106,13 +106,10 @@ export class AuthService {
   }
 
   @Transactional()
-  async register(token: string) {
-    const user = await this.redis.get(token);
+  async register(req: ExpressRequest, code: string) {
+    const user = await this.redis.get(`${req.ip}:${code}`);
     if (!user)
-      throw new HttpException(
-        '회원 등록 과정에서 캐싱된 사용자를 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('회원 등록 과정에서 오류가 발생했습니다.', HttpStatus.NOT_FOUND);
 
     const userData = JSON.parse(user);
     userData.nickname = await this.nicknameService.generateUniqueNickname();

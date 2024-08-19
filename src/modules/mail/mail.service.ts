@@ -21,31 +21,24 @@ export class MailService {
     });
   }
 
-  private getHtmlTemplate(
-    title: string,
-    message: string,
-    template: string,
-    verificationUrl?: string,
-  ) {
+  private getHtmlTemplate(title: string, message: string, template: string, options?: string) {
     const templatePath = path.resolve(process.cwd(), `src/modules/mail/template/${template}.html`);
     let html = fs.readFileSync(templatePath, 'utf8');
-    html = html.replace('{{title}}', title);
-    html = html.replace('{{message}}', message);
-    html = html.replace('{{verificationUrl}}', verificationUrl);
+    html = html.replace(/{{title}}/g, title);
+    html = html.replace(/{{message}}/g, message);
+
+    if (options && options.length > 6) {
+      html = html.replace(/{{verificationUrl}}/g, options);
+    } else {
+      html = html.replace(/{{sixDigit}}/g, options);
+    }
     return html;
   }
 
-  async sendVerificationEmail(to: string, token: string): Promise<void> {
-    const env = this.configService.get<string>('ENV');
-    const baseVerificationUrl =
-      env === 'dev'
-        ? 'http://localhost:3000/api/auth/register'
-        : 'https://linkedoutapp.com/api/auth/register';
-
-    const verificationUrl = `${baseVerificationUrl}?token=${token}`;
-    const title = '안녕하세요! 링크드아웃에 가입해주셔서 감사합니다 :)';
-    const message = `회원가입 완료를 위해 아래의 버튼을 클릭하세요.`;
-    const htmlContent = this.getHtmlTemplate(title, message, 'signupTemplate', verificationUrl);
+  async sendVerificationEmail(to: string, sixDigit: string): Promise<void> {
+    const title = '안녕하세요! 링크드아웃에서 요청하신 인증번호를 보내드립니다:)';
+    const message = `아래의 인증번호 6자리를 인증번호 입력창에 입력해주세요`;
+    const htmlContent = this.getHtmlTemplate(title, message, 'signupTemplate', sixDigit);
 
     await this.transporter.sendMail({
       from: `"LinkedOut" <linkedoutapp@gmail.com>`,
