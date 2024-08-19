@@ -109,12 +109,13 @@ export class AuthService {
   async register(req: ExpressRequest, code: string) {
     const user = await this.redis.get(`${req.ip}:${code}`);
     if (!user)
-      throw new HttpException('회원 등록 과정에서 오류가 발생했습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException('회원 등록 과정에서 오류가 발생했습니다.', HttpStatus.BAD_REQUEST);
 
     const userData = JSON.parse(user);
     userData.nickname = await this.nicknameService.generateUniqueNickname();
 
-    return await this.authRepository.saveUser(userData);
+    req.user = await this.authRepository.saveUser(userData);
+    return await this.login(req);
   }
 
   async validateUser(email: string, password: string) {

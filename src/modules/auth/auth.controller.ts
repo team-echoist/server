@@ -217,33 +217,13 @@ export class AuthController {
   5. \`accessToken\` 와 \`refreshToken\` 을 반환합니다.
 	
   **주의 사항:**
-  - 사용자가 이메일 링크를 클릭시 호출되는 api 입니다.
-  - 유효하지 않은 토큰을 제공하면 \`404 Not Found\` 에러가 발생합니다.
+  - 유효하지 않은 코드을 제공하면 \`400\` 에러가 발생합니다.
   `,
   })
-  @ApiResponse({ status: 201 })
+  @ApiResponse({ status: 201, type: JwtResDto })
   @ApiBody({ type: RegisterReqDto })
-  async register(@Req() req: ExpressRequest, @Body() data: RegisterReqDto, @Res() res: Response) {
-    await this.authService.register(req, data.code);
-
-    const { accessToken, refreshToken } = await this.authService.login(req);
-
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    if (
-      req.device.os === DeviceOS.IOS &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    ) {
-      redirectUrl = this.configService.get<string>('IOS_REGISTER_REDIRECT');
-    }
-    if (
-      req.device.os === DeviceOS.ANDROID &&
-      (req.device.type === DeviceType.TABLET || req.device.type === DeviceType.MOBILE)
-    )
-      redirectUrl = this.configService.get<string>('AOS_REGISTER_REDIRECT');
-
-    redirectUrl += `?accessToken=${accessToken}&refreshToken=${refreshToken}`;
-
-    res.redirect(redirectUrl);
+  async register(@Req() req: ExpressRequest, @Body() data: RegisterReqDto) {
+    return await this.authService.register(req, data.code);
   }
 
   @Post('login')
@@ -271,7 +251,7 @@ export class AuthController {
   @ApiBody({ type: LoginReqDto })
   @UseGuards(AuthGuard('local'))
   async login(@Req() req: ExpressRequest) {
-    return this.authService.login(req);
+    return await this.authService.login(req);
   }
 
   @Post('password/reset-req')

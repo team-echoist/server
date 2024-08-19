@@ -1,10 +1,9 @@
-import { IsString, Max, Min } from 'class-validator';
+import { IsString, Length, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterReqDto {
   @ApiProperty()
   @IsString()
-  @Min(6)
-  @Max(6)
+  @Length(6)
   code: string;
 }
