@@ -15,6 +15,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { JwtResDto } from './dto/response/jwtRes.dto';
 import { VerifyCodeReqDto } from './dto/request/verifyCodeReq.dto';
 
+
 @ApiTags('Auth')
 @UseGuards(JwtAuthGuard)
 @Controller('auth')
@@ -117,6 +118,7 @@ export class AuthController {
   @ApiBody({ type: EmailReqDto })
   async verifyEmail(@Req() req: ExpressRequest, @Body() data: EmailReqDto) {
     await this.authService.verifyEmail(req, data.email);
+
     return;
   }
 
@@ -172,6 +174,7 @@ export class AuthController {
   @ApiBody({ type: CreateUserReqDto })
   async sign(@Req() req: ExpressRequest, @Body() createUserDto: CreateUserReqDto) {
     await this.authService.signingUp(req, createUserDto);
+
     return;
   }
 
@@ -191,6 +194,7 @@ export class AuthController {
   3. 코드가 유효하면 해당 데이터를 사용하여 새 사용자를 생성합니다.
   4. 닉네임을 자동으로 생성합니다. 기본 닉네임 테이블에서 사용 가능한 닉네임을 찾아 설정하고, \`isUsed\` 필드를 \`true\`로 업데이트합니다.
   5. \`accessToken\` 와 \`refreshToken\` 을 반환합니다.
+
 	
   **주의 사항:**
   - 유효하지 않은 코드을 제공하면 \`400\` 에러가 발생합니다.

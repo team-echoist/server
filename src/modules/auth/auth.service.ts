@@ -70,7 +70,9 @@ export class AuthService {
   }
 
   @Transactional()
+
   async verifyEmail(req: ExpressRequest, email: string) {
+
     await this.isEmailOwned(email);
 
     const userId = req.user.id;
