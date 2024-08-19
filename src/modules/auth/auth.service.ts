@@ -10,7 +10,6 @@ import { CreateUserReqDto } from './dto/request/createUserReq.dto';
 import { OauthDto } from './dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
-import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { Transactional } from 'typeorm-transactional';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';

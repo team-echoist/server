@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -9,11 +9,9 @@ import { OauthMobileReqDto } from './dto/request/OauthMobileReq.dto';
 import { CheckNicknameReqDto } from './dto/request/checkNicknameReq.dto';
 import { CheckEmailReqDto } from './dto/request/checkEmailReq.dto';
 import { EmailReqDto } from './dto/request/emailReq.dto';
-import { PasswordResetReqDto } from './dto/request/passwordResetReq.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { Public } from '../../common/decorators/public.decorator';
-import { DeviceOS, DeviceType } from '../../common/types/enum.types';
 import { JwtResDto } from './dto/response/jwtRes.dto';
 import { VerifyCodeReqDto } from './dto/request/verifyCodeReq.dto';
 
