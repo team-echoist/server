@@ -16,6 +16,9 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
+import { JwtService } from '@nestjs/jwt';
+import { UserStatus } from '../../common/types/enum.types';
+import { Request as ExpressRequest } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +30,9 @@ export class AuthService {
     private readonly nicknameService: NicknameService,
     private readonly httpService: HttpService,
     private configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
+
   private readonly oauthClient = new OAuth2Client(
     this.configService.get('GOOGLE_ANDROID_CLIENT_ID'),
   );
@@ -66,7 +71,7 @@ export class AuthService {
   }
 
   @Transactional()
-  async verifEmail(userId: number, email: string) {
+  async verifyEmail(userId: number, email: string) {
     await this.isEmailOwned(email);
 
     const token = await this.utilsService.generateVerifyToken();
@@ -96,6 +101,7 @@ export class AuthService {
 
     const cacheKey = `validate_${user.id}`;
     await this.redis.set(cacheKey, JSON.stringify(updatedUser), 'EX', 600);
+
     return user;
   }
 
@@ -117,33 +123,78 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
 
-    if (!user)
-      throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.UNAUTHORIZED);
+    if (!user || !(await bcrypt.compare(password, user.password)))
+      throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
 
     if (user.platformId !== null && user.platform !== null) {
       throw new HttpException(
-        `다음 플랫폼 서비스로 가입한 사용자 입니다. (${user.platform})`,
+        `다른 플랫폼 서비스로 가입한 사용자 입니다.(${user.platform})`,
         HttpStatus.BAD_REQUEST,
       );
     }
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return user;
+    if (user.status === UserStatus.BANNED) {
+      throw new HttpException(
+        '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
+        HttpStatus.FORBIDDEN,
+      );
     }
-    return null;
+
+    return user;
   }
 
-  async validatePayload(id: number) {
-    const cacheKey = `validate_${id}`;
+  async login(req: ExpressRequest) {
+    const accessPayload = { username: req.user.email, sub: req.user.id };
+    const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
+
+    return {
+      accessToken: await this.generateAccessToken(accessPayload),
+      refreshToken: await this.generateRefreshToken(refreshPayload),
+    };
+  }
+
+  async generateAccessToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      expiresIn: '30m',
+    });
+  }
+
+  async generateRefreshToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: '30d',
+    });
+  }
+
+  async refreshToken(refreshToken: string) {
+    let payload = await this.jwtService.verify(refreshToken, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+    });
+    payload = { username: payload.username, sub: payload.sub };
+
+    return await this.generateAccessToken(payload);
+  }
+
+  async validatePayload(payload: any) {
+    const cacheKey = `validate_${payload.sub}_${payload.username}`;
     const cachedUser = await this.redis.get(cacheKey);
+
     let user = cachedUser ? JSON.parse(cachedUser) : null;
+
     if (!user) {
-      user = await this.authRepository.findById(id);
+      user = await this.authRepository.findByIdWithEmail(payload);
       if (user) {
+        if (user.status === UserStatus.BANNED) {
+          throw new HttpException(
+            '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
+            HttpStatus.FORBIDDEN,
+          );
+        }
         await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
         return user;
       }
     }
+
     return !user ? null : user;
   }
 
@@ -204,7 +255,7 @@ export class AuthService {
         const emailUser = await this.authRepository.findByEmail(oauthUser.email);
         if (emailUser) {
           throw new HttpException(
-            '귀하의 계정에 등록된 이메일은 이미 서비스에 사용 중입니다.',
+            '귀하의 계정에 등록된 이메일은 이미 사용 중입니다.',
             HttpStatus.CONFLICT,
           );
         }

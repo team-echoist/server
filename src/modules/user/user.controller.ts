@@ -13,7 +13,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request as ExpressRequest } from 'express';
 import { UserService } from './user.service';
@@ -25,9 +24,10 @@ import { UserSummaryWithStatsResDto } from './dto/response/userSummaryWithStatsR
 import { UserSummaryWithCountResDto } from './dto/response/userSummaryWithCountRes.dto';
 import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('User')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

@@ -1,14 +1,14 @@
 import { Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BadgeService } from './badge.service';
 import { Request as ExpressRequest } from 'express';
 import { BadgesResDto } from './dto/response/badgesRes.dto';
 import { BadgesWithTagsResDto } from './dto/response/badgesWithTagsRes.dto';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Badge')
 @Controller('badges')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class BadgeController {
   constructor(private readonly badgeService: BadgeService) {}
 

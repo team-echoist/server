@@ -10,15 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { FollowService } from './follow.service';
 import { UsersSummaryResDto } from '../user/dto/response/usersSummaryRes.dto';
 import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @ApiTags('Follow')
 @Controller('follows')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class FollowController {
   constructor(private readonly followService: FollowService) {}
 

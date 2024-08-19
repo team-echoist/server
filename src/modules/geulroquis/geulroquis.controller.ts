@@ -1,9 +1,9 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { GeulroquisService } from './geulroquis.service';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 
 @Controller()
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class GeulroquisController {
   constructor(private readonly geulroquisService: GeulroquisService) {}
 }
