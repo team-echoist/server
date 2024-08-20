@@ -1,3 +1,10 @@
+## [1.10.10](https://github.com/team-echoist/server/compare/v1.10.9...v1.10.10) (2024-08-20)
+
+
+### Bug Fixes
+
+* Remove UserService dependency from JwtAuthGuard and update user object structure ([#388](https://github.com/team-echoist/server/issues/388)) ([143c1d7](https://github.com/team-echoist/server/commit/143c1d7d03098c41b8dcdfdfc60497a6079cbe95)), closes [#382](https://github.com/team-echoist/server/issues/382)
+
 ## [1.10.9](https://github.com/team-echoist/server/compare/v1.10.8...v1.10.9) (2024-08-19)
 
 ## [1.10.8](https://github.com/team-echoist/server/compare/v1.10.7...v1.10.8) (2024-08-19)
