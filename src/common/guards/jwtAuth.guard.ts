@@ -15,7 +15,6 @@ import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { AuthService } from '../../modules/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../../modules/user/user.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
@@ -24,7 +23,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     private reflector: Reflector,
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => AuthService)) private authService: AuthService,
-    @Inject(forwardRef(() => UserService)) private userService: UserService,
     @Inject(forwardRef(() => JwtService)) private readonly jwtService: JwtService,
   ) {
     super();
@@ -56,7 +54,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') return this.handleTokenExpired(request, response);
-
+      console.log(error.name);
+      console.log(error.stack);
       throw new HttpException('의심스러운 활동이 감지되었습니다.', HttpStatus.UNAUTHORIZED);
     }
 
@@ -88,7 +87,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       request.headers['authorization'] = `Bearer ${recentlyRefreshedToken}`;
 
       const decodedToken = this.jwtService.decode(recentlyRefreshedToken);
-      request.user = { userId: decodedToken.sub, email: decodedToken.username };
+      request.user = { id: decodedToken.sub, email: decodedToken.username };
 
       return true;
     }
@@ -97,6 +96,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
+    console.log(decodedRefreshToken.device);
+    console.log(request.device);
     if (!this.isSameDevice(decodedRefreshToken.device, request.device))
       throw new HttpException(
         '알 수 없는 디바이스 또는 환경에서의 접근 시도가 감지되었습니다.',
@@ -120,7 +121,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       response.setHeader('x-access-token', newAccessTokens);
       request.headers['authorization'] = `Bearer ${newAccessTokens}`;
 
-      request.user = { userId: decodedRefreshToken.sub, email: decodedRefreshToken.username };
+      request.user = { id: decodedRefreshToken.sub, email: decodedRefreshToken.username };
 
       return true;
     } catch {
