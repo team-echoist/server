@@ -26,7 +26,8 @@ export class ResponseTransformInterceptor implements NestInterceptor {
         if (!response.headersSent && request.user) {
           if (
             request.user.status !== UserStatus.DEACTIVATED &&
-            request.user.deactivationDate !== null
+            request.user.deactivationDate !== null &&
+            request.user.deactivationDate !== undefined
           ) {
             response.statusCode = HttpStatus.ACCEPTED;
           }
