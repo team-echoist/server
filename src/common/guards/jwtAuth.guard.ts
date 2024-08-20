@@ -54,6 +54,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') return this.handleTokenExpired(request, response);
+      console.log('에러 이름: ', error.name);
+      console.log('에러 스택: ', error.stack);
       throw new HttpException('의심스러운 활동이 감지되었습니다.', HttpStatus.UNAUTHORIZED);
     }
 
@@ -94,8 +96,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
-    console.log(decodedRefreshToken.device);
-    console.log(request.device);
     if (!this.isSameDevice(decodedRefreshToken.device, request.device))
       throw new HttpException(
         '알 수 없는 디바이스 또는 환경에서의 접근 시도가 감지되었습니다.',
