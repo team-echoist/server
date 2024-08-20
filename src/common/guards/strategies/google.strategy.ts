@@ -26,6 +26,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       email: emails[0].value,
       accessToken,
     };
+    console.log('전략에서 나온 유저 정보', user);
     done(null, user);
   }
 }

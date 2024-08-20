@@ -250,6 +250,7 @@ export class AuthService {
       throw new HttpException('플랫폼 정보가 올바르지 않습니다.', HttpStatus.BAD_REQUEST);
 
     let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
+    console.log('데이터베이스 유저: ', user);
 
     if (!user) {
       if (oauthUser.email) {
