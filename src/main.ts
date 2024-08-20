@@ -19,6 +19,7 @@ import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
 import { ConfigService } from '@nestjs/config';
 import { AdminService } from './modules/admin/admin.service';
+import { UserStatusInterceptor } from './common/interceptros/userStatus.interceptor';
 
 dotenv.config();
 
@@ -86,8 +87,9 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter(utilsService));
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
-    new ResponseTransformInterceptor(utilsService),
     new LoggingInterceptor(),
+    new UserStatusInterceptor(),
+    new ResponseTransformInterceptor(utilsService),
   );
 
   app.useGlobalPipes(
