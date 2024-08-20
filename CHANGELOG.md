@@ -1,3 +1,10 @@
+## [1.10.11](https://github.com/team-echoist/server/compare/v1.10.10...v1.10.11) (2024-08-20)
+
+
+### Bug Fixes
+
+* Adjust user status handling across interceptors and strategyRelease ([#396](https://github.com/team-echoist/server/issues/396)) ([6ac0e80](https://github.com/team-echoist/server/commit/6ac0e80d445440975957ef82381541bc61a15903)), closes [#382](https://github.com/team-echoist/server/issues/382)
+
 ## [1.10.10](https://github.com/team-echoist/server/compare/v1.10.9...v1.10.10) (2024-08-20)
 
 
