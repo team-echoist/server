@@ -21,9 +21,6 @@ export class UserStatusInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         if (!response.headersSent && request.user) {
-          if (request.user.activated === undefined && request.user.deactivationDate !== null) {
-            response.statusCode = HttpStatus.ACCEPTED;
-          }
           if (request.user.status === UserStatus.BANNED) {
             throw new HttpException(
               '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요1.',

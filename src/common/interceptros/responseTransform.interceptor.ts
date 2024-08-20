@@ -8,6 +8,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { UtilsService } from '../../modules/utils/utils.service';
+import { UserStatus } from '../types/enum.types';
 
 @Injectable()
 export class ResponseTransformInterceptor implements NestInterceptor {
@@ -22,8 +23,13 @@ export class ResponseTransformInterceptor implements NestInterceptor {
       map((data) => {
         const response = context.switchToHttp().getResponse();
 
-        if (request.user.activated === undefined && request.user.deactivationDate !== null) {
-          response.statusCode = HttpStatus.ACCEPTED;
+        if (!response.headersSent && request.user) {
+          if (
+            request.user.status !== UserStatus.DEACTIVATED &&
+            request.user.deactivationDate !== null
+          ) {
+            response.statusCode = HttpStatus.ACCEPTED;
+          }
         }
 
         return {
