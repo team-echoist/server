@@ -1,3 +1,10 @@
+## [1.10.12](https://github.com/team-echoist/server/compare/v1.10.11...v1.10.12) (2024-08-20)
+
+
+### Bug Fixes
+
+* missing caching strategy ([#397](https://github.com/team-echoist/server/issues/397)) ([423cda7](https://github.com/team-echoist/server/commit/423cda756eb0b153d4824ad7c21ea2e15fa87f8e)), closes [#382](https://github.com/team-echoist/server/issues/382)
+
 ## [1.10.11](https://github.com/team-echoist/server/compare/v1.10.10...v1.10.11) (2024-08-20)
 
 
