@@ -1005,7 +1005,7 @@ export class AdminService {
 
   async resetRootAdmin() {
     const root = await this.adminRepository.findAdmin(1);
-    const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 10);
+    const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 12);
 
     root.email = process.env.ROOT_EMAIL;
     root.name = process.env.ROOT_NAME;

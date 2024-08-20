@@ -13,8 +13,10 @@ export class JwtInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap(() => {
-        const newJwt = this.utilsService.generateJWT(request.user.id);
-        response.setHeader('Authorization', `Bearer ${newJwt}`);
+        if (request.user) {
+          const newJwt = this.utilsService.generateJWT(request.user.id);
+          response.setHeader('Authorization', `Bearer ${newJwt}`);
+        }
       }),
     );
   }
