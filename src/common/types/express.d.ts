@@ -29,12 +29,7 @@ declare global {
 
     export interface Request {
       user?: User;
-      token?: string;
-      device: DeviceDto;
-      platform?: string;
-      platformId?: string;
-      accessToken?: string;
-      isFirst?: boolean;
+      device?: DeviceDto;
     }
   }
 }

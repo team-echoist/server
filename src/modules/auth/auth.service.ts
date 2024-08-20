@@ -122,15 +122,16 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
 
-    if (!user || !(await bcrypt.compare(password, user.password)))
-      throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
-
     if (user.platformId !== null && user.platform !== null) {
       throw new HttpException(
         `다른 플랫폼 서비스로 가입한 사용자 입니다.(${user.platform})`,
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    if (!user || !user.password || !(await bcrypt.compare(password, user.password)))
+      throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
+
     if (user.status === UserStatus.BANNED) {
       throw new HttpException(
         '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
@@ -175,7 +176,7 @@ export class AuthService {
   }
 
   async validatePayload(payload: any) {
-    const cacheKey = `validate_${payload.sub}_${payload.username}`;
+    const cacheKey = `user:${payload.sub}`;
     const cachedUser = await this.redis.get(cacheKey);
 
     let user = cachedUser ? JSON.parse(cachedUser) : null;
@@ -183,12 +184,6 @@ export class AuthService {
     if (!user) {
       user = await this.authRepository.findByIdWithEmail(payload);
       if (user) {
-        if (user.status === UserStatus.BANNED) {
-          throw new HttpException(
-            '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
-            HttpStatus.FORBIDDEN,
-          );
-        }
         await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
         return user;
       }

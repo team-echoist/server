@@ -295,9 +295,7 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    console.log('구글 콜백에 도착한 유저: ', req.user);
     req.user = await this.authService.oauthLogin(req.user);
-    console.log('서비스로직 통과 유저: ', req.user);
     const jwt = await this.authService.login(req);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
