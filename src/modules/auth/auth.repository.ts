@@ -14,7 +14,10 @@ export class AuthRepository {
   }
 
   async findByIdWithEmail(payload: any) {
-    return this.userRepository.findOne({ where: { id: payload.sub, email: payload.username } });
+    return this.userRepository.findOne({
+      where: { id: payload.sub, email: payload.username },
+      relations: ['devices'],
+    });
   }
 
   async findByEmail(email: string) {

@@ -63,10 +63,12 @@ import { AdminGuard } from '../../common/guards/admin.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
+import { JwtInterceptor } from '../../common/interceptros/jwt.interceptor';
 
 @ApiTags('Admin')
 @Controller('admin')
 @UseGuards(AdminGuard)
+@UseInterceptors(JwtInterceptor)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

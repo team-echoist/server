@@ -161,14 +161,16 @@ export class SupportService {
   }
 
   async findDevice(user: User, reqDevice: DeviceDto) {
-    return user.devices.length === 0
-      ? null
-      : user.devices.find(
-          (device: Device) =>
-            device.os === reqDevice.os &&
-            device.type === reqDevice.type &&
-            device.model === reqDevice.model,
-        );
+    if (user.devices.length === 0) {
+      return null;
+    }
+
+    return user.devices.find(
+      (device: Device) =>
+        device.os === reqDevice.os &&
+        device.type === reqDevice.type &&
+        device.model === reqDevice.model,
+    );
   }
 
   async newCreateDevice(user: User, device: DeviceDto) {
