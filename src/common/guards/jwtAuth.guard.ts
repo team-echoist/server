@@ -54,8 +54,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') return this.handleTokenExpired(request, response);
-      console.log(error.name);
-      console.log(error.stack);
       throw new HttpException('의심스러운 활동이 감지되었습니다.', HttpStatus.UNAUTHORIZED);
     }
 
