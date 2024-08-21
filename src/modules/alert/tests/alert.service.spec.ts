@@ -8,8 +8,6 @@ import { UserService } from '../../user/user.service';
 import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Alert } from '../../../entities/alert.entity';
-import { ReportQueue } from '../../../entities/reportQueue.entity';
-import { Essay } from '../../../entities/essay.entity';
 import { ActionType, EssayStatus } from '../../../common/types/enum.types';
 
 describe('AlertService', () => {

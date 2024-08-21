@@ -25,7 +25,6 @@ import { InquiryResDto } from './dto/response/inquiryRes.dto';
 import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { Public } from '../../common/decorators/public.decorator';
-import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Support')
 @UseGuards(JwtAuthGuard)
