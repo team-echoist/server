@@ -122,6 +122,10 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
 
+    if (!user || !user.password) {
+      throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
+    }
+
     if (user.platformId !== null && user.platform !== null) {
       throw new HttpException(
         `다른 플랫폼 서비스로 가입한 사용자 입니다.(${user.platform})`,
@@ -155,7 +159,7 @@ export class AuthService {
   async generateAccessToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      expiresIn: '30m',
+      expiresIn: '30s',
     });
   }
 
