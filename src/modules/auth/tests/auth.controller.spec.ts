@@ -1,209 +1,283 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
-import { UtilsService } from '../../utils/utils.service';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import { Request as ExpressRequest, Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from '../../../common/guards/jwtAuth.guard';
 import { CheckEmailReqDto } from '../dto/request/checkEmailReq.dto';
 import { CheckNicknameReqDto } from '../dto/request/checkNicknameReq.dto';
-import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { EmailReqDto } from '../dto/request/emailReq.dto';
-import { PasswordResetReqDto } from '../dto/request/passwordResetReq.dto';
+import { VerifyCodeReqDto } from '../dto/request/verifyCodeReq.dto';
+import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { OauthMobileReqDto } from '../dto/request/OauthMobileReq.dto';
-import { HttpModule, HttpService } from '@nestjs/axios';
-import { of } from 'rxjs';
-import { User } from '../../../entities/user.entity';
-
-jest.mock('../auth.service');
-jest.mock('../../utils/utils.service');
+import { Request, Response } from 'express';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: jest.Mocked<AuthService>;
-  let utilsService: jest.Mocked<UtilsService>;
+  let authService: AuthService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule, JwtModule.register({}), ConfigModule.forRoot()],
       controllers: [AuthController],
       providers: [
-        AuthService,
-        UtilsService,
         {
-          provide: HttpService,
+          provide: AuthService,
           useValue: {
-            get: jest.fn(() => of({ data: { kakao_account: { email: 'test@test.com' } } })),
+            checkEmail: jest.fn(),
+            checkNickname: jest.fn(),
+            verifyEmail: jest.fn(),
+            updateEmail: jest.fn(),
+            signingUp: jest.fn(),
+            register: jest.fn(),
+            login: jest.fn(),
+            passwordReset: jest.fn(),
+            validateGoogleUser: jest.fn(),
+            validateKakaoUser: jest.fn(),
+            validateNaverUser: jest.fn(),
+            validateAppleUser: jest.fn(),
+            oauthLogin: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn(),
           },
         },
       ],
     })
-      .overrideGuard(AuthGuard('jwt'))
-      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
-      .overrideGuard(AuthGuard('local'))
-      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
-      .overrideGuard(AuthGuard('google'))
-      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
     controller = module.get<AuthController>(AuthController);
-    authService = module.get<AuthService>(AuthService) as jest.Mocked<AuthService>;
-    utilsService = module.get<UtilsService>(UtilsService) as jest.Mocked<UtilsService>;
+    authService = module.get<AuthService>(AuthService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('이메일 중복 체크', async () => {
+    const mockEmail = 'test@example.com';
+    const reqDto: CheckEmailReqDto = { email: mockEmail };
+    jest.spyOn(authService, 'checkEmail').mockResolvedValue(true);
+
+    const result = await controller.checkEmail(reqDto);
+
+    expect(result).toBe(true);
+    expect(authService.checkEmail).toHaveBeenCalledWith(mockEmail);
   });
 
-  describe('checkEmail', () => {
-    it('should call service checkEmail method', async () => {
-      const dto: CheckEmailReqDto = { email: 'test@example.com' };
-      authService.checkEmail.mockResolvedValue(true);
+  it('닉네임 중복 체크', async () => {
+    const mockNickname = 'testNickname';
+    const reqDto: CheckNicknameReqDto = { nickname: mockNickname };
+    jest.spyOn(authService, 'checkNickname').mockResolvedValue(true as any);
 
-      const result = await controller.checkEmail(dto);
-      expect(authService.checkEmail).toHaveBeenCalledWith(dto.email);
-      expect(result).toEqual(true);
-    });
+    const result = await controller.checkNick(reqDto);
+
+    expect(result).toBe(true);
+    expect(authService.checkNickname).toHaveBeenCalledWith(mockNickname);
   });
 
-  describe('checkNick', () => {
-    it('should call service checkNickname method', async () => {
-      const dto: CheckNicknameReqDto = { nickname: 'nickname' };
-      authService.checkNickname.mockResolvedValue();
+  it('이메일 인증 요청', async () => {
+    const mockEmail = 'test@example.com';
+    const reqDto: EmailReqDto = { email: mockEmail };
+    const mockReq = { user: { id: 1 } } as Request;
+    jest.spyOn(authService, 'verifyEmail').mockResolvedValue(undefined);
 
-      await controller.checkNick(dto);
-      expect(authService.checkNickname).toHaveBeenCalledWith(dto.nickname);
-    });
+    await controller.verifyEmail(mockReq, reqDto);
+
+    expect(authService.verifyEmail).toHaveBeenCalledWith(mockReq, mockEmail);
   });
 
-  describe('verifyEmail', () => {
-    it('should call service verifEmail method', async () => {
-      const dto: EmailReqDto = { email: 'test@example.com' };
-      const req: ExpressRequest = { user: { id: 1 } } as any;
+  it('이메일 변경을 처리', async () => {
+    const mockCode = '123456';
+    const reqDto: VerifyCodeReqDto = { code: mockCode };
+    const mockReq = { user: { id: 1 } } as Request;
+    jest.spyOn(authService, 'updateEmail').mockResolvedValue(undefined);
 
-      await controller.verifyEmail(req, dto);
-      expect(authService.verifyEmail).toHaveBeenCalledWith(req.user.id, dto.email);
-    });
+    await controller.updateEmail(mockReq, reqDto);
+
+    expect(authService.updateEmail).toHaveBeenCalledWith(mockReq, mockCode);
   });
 
-  describe('updateEmail', () => {
-    it('should call service updateEmail method', async () => {
-      const token = 'testToken';
-      const req: ExpressRequest = {
-        user: { id: 1 },
-        device: { os: 'any', type: 'any', model: 'any' },
-      } as any;
-      const res: Response = { redirect: jest.fn() } as any;
+  it('회원가입 인증 요청', async () => {
+    const mockUserDto: CreateUserReqDto = { email: 'test@example.com', password: 'password123' };
+    const mockReq = { user: { id: 1 } } as Request;
+    jest.spyOn(authService, 'signingUp').mockResolvedValue(undefined);
 
-      await controller.updateEmail(req, res, token);
-      expect(authService.updateEmail).toHaveBeenCalledWith(token);
-    });
+    await controller.sign(mockReq, mockUserDto);
+
+    expect(authService.signingUp).toHaveBeenCalledWith(mockReq, mockUserDto);
   });
 
-  describe('verify', () => {
-    it('should call service signingUp method', async () => {
-      const dto: CreateUserReqDto = {
-        email: 'test@example.com',
-        password: 'password',
-        nickname: 'nickname',
-      };
+  it('회원등록', async () => {
+    const mockCode = '123456';
+    const reqDto: VerifyCodeReqDto = { code: mockCode };
+    const mockReq = { user: { id: 1 } } as Request;
+    jest
+      .spyOn(authService, 'register')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
 
-      await controller.sign(dto);
-      expect(authService.signingUp).toHaveBeenCalledWith(dto);
-    });
+    const result = await controller.register(mockReq, reqDto);
+
+    expect(authService.register).toHaveBeenCalledWith(mockReq, mockCode);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
   });
 
-  describe('register', () => {
-    it('should call service register method and utils generateJWT', async () => {
-      const token = 'testToken';
-      const req: ExpressRequest = { device: 'iPhone' } as any;
-      const res: Response = { redirect: jest.fn() } as any;
-      const user = { id: 1, email: 'test@example.com' };
-      const jwt = 'newJwt';
+  it('로그인', async () => {
+    const mockReq = { user: { id: 1 } } as Request;
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
 
-      authService.register.mockResolvedValue(user as any);
+    const result = await controller.login(mockReq);
 
-      await controller.register(token, req, res);
-
-      expect(authService.register).toHaveBeenCalledWith(token);
-      // expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining(jwt));
-    });
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
   });
 
-  describe('login', () => {
-    it('should return undefined', async () => {
-      const req: ExpressRequest = {} as any;
-      const result = await controller.login(req);
-      expect(result).toBeUndefined();
-    });
+  it('비밀번호 재설정', async () => {
+    const mockEmail = 'test@example.com';
+    const reqDto: EmailReqDto = { email: mockEmail };
+    jest.spyOn(authService, 'passwordReset').mockResolvedValue(undefined);
+
+    await controller.passwordReset(reqDto);
+
+    expect(authService.passwordReset).toHaveBeenCalledWith(mockEmail);
   });
 
-  describe('passwordResetReq', () => {
-    it('should call service passwordResetReq method', async () => {
-      const dto: EmailReqDto = { email: 'test@example.com' };
+  it('구글 OAuth 콜백', async () => {
+    const mockReq = { user: { id: 1 } } as Request as any;
+    const mockRes = { redirect: jest.fn() } as unknown as Response;
+    jest.spyOn(authService, 'oauthLogin').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    jest.spyOn(configService, 'get').mockReturnValue('http://localhost:3000');
 
-      await controller.passwordResetReq(dto);
-      expect(authService.passwordResetReq).toHaveBeenCalledWith(dto.email);
-    });
+    await controller.googleCallback(mockReq, mockRes);
+
+    expect(authService.oauthLogin).toHaveBeenCalledWith(mockReq.user);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(mockRes.redirect).toHaveBeenCalledWith(
+      'http://localhost:3000?accessToken=access-token&refreshToken=refresh-token',
+    );
   });
 
-  describe('passwordResetVerify', () => {
-    it('should call service passwordResetVerify method', async () => {
-      const token = 'testToken';
-      const req: ExpressRequest = { device: 'iPhone' } as any;
-      const res: Response = { redirect: jest.fn() } as any;
-      const newToken = 'newToken';
+  it('구글 모바일 OAuth 로그인', async () => {
+    const mockToken = 'google-token';
+    const reqDto: OauthMobileReqDto = { token: mockToken };
+    const mockReq = { user: { id: 1 } } as Request as any;
+    jest.spyOn(authService, 'validateGoogleUser').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
 
-      authService.passwordResetVerify.mockResolvedValue(newToken);
+    const result = await controller.mobileGoogleLogin(mockReq, reqDto);
 
-      await controller.passwordResetVerify(token, req, res);
-
-      expect(authService.passwordResetVerify).toHaveBeenCalledWith(token);
-      expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining(newToken));
-    });
+    expect(authService.validateGoogleUser).toHaveBeenCalledWith(mockToken);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
   });
 
-  describe('passwordReset', () => {
-    it('should call service passwordReset method', async () => {
-      const dto: PasswordResetReqDto = { token: 'testToken', password: 'newPassword' };
+  it('카카오 OAuth 콜백', async () => {
+    const mockReq = { user: { id: 1 } } as Request as any;
+    const mockRes = { redirect: jest.fn() } as unknown as Response;
+    jest.spyOn(authService, 'oauthLogin').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    jest.spyOn(configService, 'get').mockReturnValue('http://localhost:3000');
 
-      await controller.passwordReset(dto);
-      expect(authService.passwordReset).toHaveBeenCalledWith(dto);
-    });
+    await controller.kakaoCallback(mockReq, mockRes);
+
+    expect(authService.oauthLogin).toHaveBeenCalledWith(mockReq.user);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(mockRes.redirect).toHaveBeenCalledWith(
+      'http://localhost:3000?accessToken=access-token&refreshToken=refresh-token',
+    );
   });
 
-  describe('google', () => {
-    it('should return undefined', async () => {
-      const result = await controller.google();
-      expect(result).toBeUndefined();
-    });
+  it('카카오 모바일 OAuth 로그인', async () => {
+    const mockToken = 'kakao-token';
+    const reqDto: OauthMobileReqDto = { token: mockToken };
+    const mockReq = { user: { id: 1 } } as Request as any;
+    jest.spyOn(authService, 'validateKakaoUser').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+
+    const result = await controller.mobileKakaoLogin(mockReq, reqDto);
+
+    expect(authService.validateKakaoUser).toHaveBeenCalledWith(mockToken);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
   });
 
-  describe('googleCallback', () => {
-    it('should call service oauthLogin method', async () => {
-      const req: ExpressRequest = { user: { id: 1 } } as any;
-      const res: Response = { redirect: jest.fn() } as any;
-      const user = { id: 1 };
+  it('네이버 OAuth 콜백', async () => {
+    const mockReq = { user: { id: 1 } } as Request as any;
+    const mockRes = { redirect: jest.fn() } as unknown as Response;
+    jest.spyOn(authService, 'oauthLogin').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    jest.spyOn(configService, 'get').mockReturnValue('http://localhost:3000');
 
-      authService.oauthLogin.mockResolvedValue(user as any);
+    await controller.naverCallback(mockReq, mockRes);
 
-      await controller.googleCallback(req, res);
-      expect(authService.oauthLogin).toHaveBeenCalledWith(req.user);
-    });
+    expect(authService.oauthLogin).toHaveBeenCalledWith(mockReq.user);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(mockRes.redirect).toHaveBeenCalledWith(
+      'http://localhost:3000?accessToken=access-token&refreshToken=refresh-token',
+    );
   });
 
-  describe('androidGoogleLogin', () => {
-    it('should call service validateGoogleUser method', async () => {
-      const dto: OauthMobileReqDto = { token: 'googleToken' };
-      const req: ExpressRequest = {} as any;
-      const user = { id: 1, email: 'test@example.com' } as User;
+  it('네이버 모바일 OAuth 로그인', async () => {
+    const mockToken = 'naver-token';
+    const reqDto: OauthMobileReqDto = { token: mockToken };
+    const mockReq = { user: { id: 1 } } as Request as any;
+    jest.spyOn(authService, 'validateNaverUser').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
 
-      authService.validateGoogleUser.mockResolvedValue(user);
+    const result = await controller.mobileNaverLogin(mockReq, reqDto);
 
-      const result = await controller.mobileGoogleLogin(req, dto);
-      expect(authService.validateGoogleUser).toHaveBeenCalledWith(dto.token);
-      // expect(result).toEqual(undefined);
-    });
+    expect(authService.validateNaverUser).toHaveBeenCalledWith(mockToken);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+  });
+
+  it('애플 OAuth 콜백', async () => {
+    const mockReq = { user: { id: 1 } } as Request as any;
+    const mockRes = { redirect: jest.fn() } as unknown as Response;
+    jest.spyOn(authService, 'oauthLogin').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    jest.spyOn(configService, 'get').mockReturnValue('http://localhost:3000');
+
+    await controller.appleCallback(mockReq, mockRes);
+
+    expect(authService.oauthLogin).toHaveBeenCalledWith(mockReq.user);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(mockRes.redirect).toHaveBeenCalledWith(
+      'http://localhost:3000?accessToken=access-token&refreshToken=refresh-token',
+    );
+  });
+
+  it('애플 모바일 OAuth 로그인을 처리해야 한다', async () => {
+    const mockToken = 'apple-token';
+    const reqDto: OauthMobileReqDto = { token: mockToken };
+    const mockReq = { user: { id: 1 } } as Request as any;
+    jest.spyOn(authService, 'validateAppleUser').mockResolvedValue(mockReq.user);
+    jest
+      .spyOn(authService, 'login')
+      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+
+    const result = await controller.mobileAppleLogin(mockReq, reqDto);
+
+    expect(authService.validateAppleUser).toHaveBeenCalledWith(mockToken);
+    expect(authService.login).toHaveBeenCalledWith(mockReq);
+    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
   });
 });

@@ -36,7 +36,7 @@ export class MailService {
   }
 
   async sendVerificationEmail(to: string, code: string): Promise<void> {
-    const title = '안녕하세요! 링크드아웃에서 요청하신 인증번호를 보내드립니다:)';
+    const title = '안녕하세요! 요청하신 인증번호를 보내드립니다:)';
     const message = `아래의 인증번호 6자리를 인증번호 입력창에 입력해주세요`;
     const htmlContent = this.getHtmlTemplate(title, message, 'verifyTemplate', code);
 

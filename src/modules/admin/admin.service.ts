@@ -1015,7 +1015,8 @@ export class AdminService {
   }
 
   async deleteAdmin(rootAdminId: number, adminId: number) {
-    if (rootAdminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
+    if (rootAdminId !== 1 && adminId === 1)
+      throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminRepository.deleteAdminById(adminId);
   }

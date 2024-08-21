@@ -180,7 +180,7 @@ export class UserService {
     const user = await this.userRepository.findUserById(userId);
 
     if (!user.deactivationDate)
-      throw new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('이 계정은 이미 활성상태 입니다.', HttpStatus.BAD_REQUEST);
 
     user.deactivationDate = null;
 
