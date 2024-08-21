@@ -159,7 +159,7 @@ export class AuthService {
   async generateAccessToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      expiresIn: '30s',
+      expiresIn: '30m',
     });
   }
 
