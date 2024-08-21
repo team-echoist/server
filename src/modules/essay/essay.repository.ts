@@ -148,6 +148,13 @@ export class EssayRepository {
       .leftJoin('essay.tags', 'tags')
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
       .andWhere('essay.deletedDate IS NULL')
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('essay.status != :linkedOutStatus', {
+            linkedOutStatus: EssayStatus.LINKEDOUT,
+          }).orWhere('essay.author.id != :userId', { userId });
+        }),
+      )
       .andWhere((qb) => {
         const subQuery = qb
           .subQuery()
