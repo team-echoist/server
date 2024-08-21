@@ -49,7 +49,7 @@ export class UserController {
   
   **주의 사항:**
   - 유예기간 동안 계정 복구를 요청하지 않으면 계정이 영구적으로 삭제됩니다.
-  - 유예기간 내에 로그인시 202응답코드를 반환합니다.
+  - 유예기간 내에 __모든 요청__은 \`202\`를 반환합니다.
   `,
   })
   @ApiResponse({
@@ -64,7 +64,8 @@ export class UserController {
   @ApiOperation({
     summary: '회원탈퇴 요청 취소',
     description: `
-  사용자가 회원탈퇴 요청을 취소하고 계정을 복구합
+  사용자가 회원탈퇴 요청을 철회합니다.
+  
   **동작 과정:**
   1. 사용자가 회원탈퇴 요청을 취소합니다.
   2. 계정이 다시 활성상태로 변경됩니다.
@@ -74,9 +75,7 @@ export class UserController {
   - 유예기간이 지나면 계정을 복구할 수 없습니다.
   `,
   })
-  @ApiResponse({
-    status: 200,
-  })
+  @ApiResponse({ status: 200 })
   async cancelDeactivation(@Req() req: ExpressRequest) {
     return this.userService.cancelDeactivation(req.user.id);
   }
@@ -162,9 +161,9 @@ export class UserController {
   - \`email\` (선택적): 새로운 이메일을 설정합니다.
   - \`nickname\` (선택적): 새로운 닉네임을 설정합니다.
   - \`password\` (선택적): 새로운 비밀번호를 설정합니다.
-  - \`gender\` (선택적): 성별을 설정합니다.
+  - \`gender\` (선택적): 성별을 설정합니다. 현재 사용하지 않습니다.
   - \`profileImage\` (선택적): 프로필 이미지를 설정합니다.
-  - \`birthDate\` (선택적): 생년월일을 설정합니다.
+  - \`birthDate\` (선택적): 생년월일을 설정합니다. 현재 사용하지 않습니다.
   - \`isFirst\` (선택적): 최초접속 여부를 설정합니다.
   - \`locationConsent:\` (선택적): 위치기반서비스 동의 여부를 설정합니다.
 
@@ -194,9 +193,6 @@ export class UserController {
     summary: '유저 요약 정보 및 주간 에세이 통계 조회',
     description: `
   로그인한 사용자의 요약 정보를 조회합니다. 
-
-  **요청 헤더:**
-  - \`Authorization\`: Bearer {token}
 
   **동작 과정:**
   1. 요청 헤더의 인증 토큰을 사용하여 사용자를 식별합니다.

@@ -1,67 +1,61 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AlertController } from '../alert.controller';
 import { AlertService } from '../alert.service';
-import { AuthGuard } from '@nestjs/passport';
-import { Request as ExpressRequest } from 'express';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-
-jest.mock('../alert.service');
+import { JwtAuthGuard } from '../../../common/guards/jwtAuth.guard';
 
 describe('AlertController', () => {
   let controller: AlertController;
-  let service: jest.Mocked<AlertService>;
+  let alertService: AlertService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [JwtModule.register({}), ConfigModule.forRoot()],
       controllers: [AlertController],
-      providers: [AlertService],
+      providers: [
+        {
+          provide: AlertService,
+          useValue: {
+            hasUnreadAlerts: jest.fn(),
+            getAlerts: jest.fn(),
+            markAlertAsRead: jest.fn(),
+          },
+        },
+      ],
     })
-      .overrideGuard(AuthGuard('jwt'))
-      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
     controller = module.get<AlertController>(AlertController);
-    service = module.get<AlertService>(AlertService) as jest.Mocked<AlertService>;
+    alertService = module.get<AlertService>(AlertService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('안 읽은 알림 여부를 반환', async () => {
+    const mockRequest = { user: { id: 1 } } as any;
+    jest.spyOn(alertService, 'hasUnreadAlerts').mockResolvedValue(true);
+
+    const result = await controller.hasUnreadAlerts(mockRequest);
+
+    expect(result).toBe(true);
+    expect(alertService.hasUnreadAlerts).toHaveBeenCalledWith(1);
   });
 
-  describe('hasUnreadAlerts', () => {
-    it('should call service hasUnreadAlerts method', async () => {
-      const req: ExpressRequest = { user: { id: 1 } } as any;
-      service.hasUnreadAlerts.mockResolvedValue(true);
+  it('알림 목록을 반환', async () => {
+    const mockRequest = { user: { id: 1 } } as any;
+    const mockAlerts = [{ id: 1, message: '알림 메시지' }] as any;
+    jest.spyOn(alertService, 'getAlerts').mockResolvedValue(mockAlerts);
 
-      const result = await controller.hasUnreadAlerts(req);
-      expect(service.hasUnreadAlerts).toHaveBeenCalledWith(1);
-      expect(result).toEqual(true);
-    });
+    const result = await controller.getAlerts(mockRequest, 1, 10);
+
+    expect(result).toBe(mockAlerts);
+    expect(alertService.getAlerts).toHaveBeenCalledWith(1, 1, 10);
   });
 
-  describe('getAlerts', () => {
-    it('should call service getAlerts method', async () => {
-      const req: ExpressRequest = { user: { id: 1 } } as any;
-      const page = 1;
-      const limit = 10;
-      const alerts = { alerts: [], total: 0, page: 0, totalPage: 0 };
-      service.getAlerts.mockResolvedValue(alerts);
+  it('알림을 읽음 처리', async () => {
+    const mockRequest = { user: { id: 1 } } as any;
+    jest.spyOn(alertService, 'markAlertAsRead').mockResolvedValue(undefined);
 
-      const result = await controller.getAlerts(req, page, limit);
-      expect(service.getAlerts).toHaveBeenCalledWith(1, page, limit);
-      expect(result).toEqual(alerts);
-    });
-  });
+    await controller.markAlertAsRead(mockRequest, 1);
 
-  describe('markAlertAsRead', () => {
-    it('should call service markAlertAsRead method', async () => {
-      const req: ExpressRequest = { user: { id: 1 } } as any;
-      const alertId = 1;
-
-      await controller.markAlertAsRead(req, alertId);
-      expect(service.markAlertAsRead).toHaveBeenCalledWith(1, alertId);
-    });
+    expect(alertService.markAlertAsRead).toHaveBeenCalledWith(1, 1);
   });
 });

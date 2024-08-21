@@ -15,7 +15,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
@@ -75,7 +82,7 @@ export class AdminController {
   @Post('register')
   @Public()
   @ApiOperation({
-    summary: '어드민 회원가입',
+    summary: '🟢 어드민 회원가입',
     description: `
   새로운 어드민 계정을 생성합니다. 회원가입 요청이 성공하면, 루트 관리자 확인 대기 상태가 됩니다.
 
@@ -104,7 +111,7 @@ export class AdminController {
   @Public()
   @UseGuards(AuthGuard('admin-local'))
   @ApiOperation({
-    summary: '어드민 로그인',
+    summary: '🟢 어드민 로그인',
     description: `
   어드민 로그인을 처리합니다. 요청 본문에 어드민의 이메일과 비밀번호를 포함하여 인증을 시도합니다.
 
@@ -1406,17 +1413,20 @@ export class AdminController {
   }
 
   @Delete('root/users/:userId')
+  @ApiExcludeEndpoint()
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
   @Post('root/super/verify')
+  @ApiExcludeEndpoint()
   async requestClearDatabase(@Req() req: ExpressRequest) {
     return this.adminService.requestClearDatabase(req.user.id);
   }
 
-  @Public()
   @Get('root/super/init')
+  @Public()
+  @ApiExcludeEndpoint()
   async clearDatabase(@Query('token') token: string) {
     return this.adminService.clearDatabase(token);
   }
