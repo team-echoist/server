@@ -71,8 +71,8 @@ export class SupportService {
   }
 
   @Transactional()
-  async getUserReleases(page: number, limit: number) {
-    const { releases, total } = await this.supportRepository.findUserReleases(page, limit);
+  async getPublicReleases(page: number, limit: number) {
+    const { releases, total } = await this.supportRepository.findPublicReleases(page, limit);
 
     const totalPage = Math.ceil(total / limit);
     const releasesDto = this.utilsService.transformToDto(ReleaseResDto, releases);
@@ -197,15 +197,23 @@ export class SupportService {
   }
 
   async getVersions() {
-    const foundVersions = await this.findAllVersions();
+    let versions = await this.redis.get('versions');
 
-    const versionMap = foundVersions.reduce((map, version) => {
+    if (!versions) {
+      const fetchedVersions = await this.findAllVersions();
+      versions = JSON.stringify(fetchedVersions);
+      await this.redis.setex('versions', 10800, versions);
+    }
+
+    const parsedVersions = JSON.parse(versions);
+
+    const versionMap = parsedVersions.reduce((map, version) => {
       map[version.appType] = version.version;
       return map;
     }, {});
 
-    const versions = this.utilsService.transformToDto(VersionsSummaryResDto, versionMap);
-    return { versions: versions };
+    const versionsDto = this.utilsService.transformToDto(VersionsSummaryResDto, versionMap);
+    return { versions: versionsDto };
   }
 
   @Transactional()
@@ -217,26 +225,70 @@ export class SupportService {
     foundVersion.version = version;
 
     await this.supportRepository.saveVersion(foundVersion);
+
+    await this.redis.del('versions');
   }
 
   @Transactional()
   async checkNewNotices(userId: number) {
-    const latestNotice = await this.supportRepository.findLatestNotice();
+    let latestNotice = await this.redis.get('latestNotice');
+    if (!latestNotice) {
+      const fetchedLatestNotice = await this.supportRepository.findLatestNotice();
+      if (fetchedLatestNotice) {
+        latestNotice = JSON.stringify(fetchedLatestNotice);
+        await this.redis.setex('latestNotice', 10800, latestNotice);
+      } else {
+        return { newNotice: null };
+      }
+    }
 
-    if (!latestNotice) return { newNotice: null };
-
+    const parsedNotice = JSON.parse(latestNotice);
     let seenNotice = await this.supportRepository.findSeenNotice(userId);
 
     if (!seenNotice) {
-      seenNotice = await this.supportRepository.createSeenNotice(userId, latestNotice);
+      seenNotice = await this.supportRepository.createSeenNotice(userId, parsedNotice);
       await this.supportRepository.saveSeenNotice(seenNotice);
-      return { newNotice: latestNotice.id };
-    } else if (seenNotice.notice.id < latestNotice.id) {
-      seenNotice.notice = latestNotice;
+
+      return { newNotice: parsedNotice.id };
+    } else if (seenNotice.notice.id < parsedNotice.id) {
+      seenNotice.notice = parsedNotice;
       await this.supportRepository.saveSeenNotice(seenNotice);
-      return { newNotice: latestNotice.id };
+
+      return { newNotice: parsedNotice.id };
     }
 
     return { newNotice: null };
+  }
+
+  @Transactional()
+  async checkNewRelease(userId: number) {
+    let latestRelease = await this.redis.get('latestRelease');
+
+    if (!latestRelease) {
+      const fetchedLatestRelease = await this.supportRepository.findLatestRelease();
+      if (fetchedLatestRelease) {
+        latestRelease = JSON.stringify(fetchedLatestRelease);
+        await this.redis.setex('latestRelease', 10800, latestRelease);
+      } else {
+        return { newRelease: null };
+      }
+    }
+
+    const parsedRelease = JSON.parse(latestRelease);
+    let seenRelease = await this.supportRepository.findSeenRelease(userId);
+
+    if (!seenRelease) {
+      seenRelease = await this.supportRepository.createSeenRelease(userId);
+      await this.supportRepository.saveSeenRelease(seenRelease);
+
+      return { newRelease: true };
+    } else if (parsedRelease.createdDate > seenRelease.lastChecked) {
+      seenRelease.lastChecked = new Date();
+      await this.supportRepository.saveSeenRelease(seenRelease);
+
+      return { newRelease: true };
+    }
+
+    return { newRelease: null };
   }
 }

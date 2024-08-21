@@ -11,11 +11,13 @@ import { DeviceDto } from './dto/device.dto';
 import { AppVersions } from '../../entities/appVersions.entity';
 import { SeenNotice } from '../../entities/seenNotice.entity';
 import { DeviceOS, DeviceType } from '../../common/types/enum.types';
+import { SeenRelease } from '../../entities/seenRelease.entity';
 
 export class SupportRepository {
   constructor(
     @InjectRepository(Inquiry) private readonly inquiryRepository: Repository<Inquiry>,
     @InjectRepository(Notice) private readonly noticeRepository: Repository<Notice>,
+    @InjectRepository(SeenRelease) private readonly seenReleaseRepository: Repository<SeenRelease>,
     @InjectRepository(Release)
     private readonly releaseRepository: Repository<Release>,
     @InjectRepository(AlertSettings)
@@ -117,7 +119,7 @@ export class SupportRepository {
       .getOne();
   }
 
-  async findUserReleases(page: number, limit: number) {
+  async findPublicReleases(page: number, limit: number) {
     const [releases, total] = await this.releaseRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
@@ -218,5 +220,27 @@ export class SupportRepository {
 
   async saveSeenNotice(seenNotice: SeenNotice) {
     return this.seenNoticeRepository.save(seenNotice);
+  }
+
+  async findLatestRelease() {
+    return this.releaseRepository.findOne({ where: {}, order: { createdDate: 'DESC' } });
+  }
+
+  async findSeenRelease(userId: number) {
+    return this.seenReleaseRepository.findOne({
+      where: { user: { id: userId } },
+      order: { lastChecked: 'DESC' },
+    });
+  }
+
+  async createSeenRelease(userId: number) {
+    return this.seenReleaseRepository.create({
+      user: { id: userId },
+      lastChecked: new Date(),
+    });
+  }
+
+  async saveSeenRelease(seenRelease: SeenRelease) {
+    return this.seenReleaseRepository.save(seenRelease);
   }
 }

@@ -247,7 +247,6 @@ export class EssayRepository {
       .getMany();
   }
 
-  // ------------------------------------------------------admin api
   async totalEssayCount() {
     return this.essayRepository.count();
   }

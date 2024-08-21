@@ -16,6 +16,7 @@ import { AlertSettings } from '../../entities/alertSettings.entity';
 import { Device } from '../../entities/device.entity';
 import { AppVersions } from '../../entities/appVersions.entity';
 import { SeenNotice } from '../../entities/seenNotice.entity';
+import { SeenRelease } from '../../entities/seenRelease.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SeenNotice } from '../../entities/seenNotice.entity';
       Device,
       AppVersions,
       SeenNotice,
+      SeenRelease,
     ]),
     UtilsModule,
     forwardRef(() => UserModule),
