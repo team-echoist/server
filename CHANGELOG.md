@@ -1,3 +1,10 @@
+## [1.10.13](https://github.com/team-echoist/server/compare/v1.10.12...v1.10.13) (2024-08-21)
+
+
+### Bug Fixes
+
+* unnecessary authentication request and endpoint display in Swagger document ([#400](https://github.com/team-echoist/server/issues/400)) ([df8cb08](https://github.com/team-echoist/server/commit/df8cb08ca05d57d0dbcbff85f4df9daca2efb3d4)), closes [#382](https://github.com/team-echoist/server/issues/382)
+
 ## [1.10.12](https://github.com/team-echoist/server/compare/v1.10.11...v1.10.12) (2024-08-20)
 
 
