@@ -1,3 +1,10 @@
+## [1.10.14](https://github.com/team-echoist/server/compare/v1.10.13...v1.10.14) (2024-08-21)
+
+
+### Bug Fixes
+
+* validateUser ([#401](https://github.com/team-echoist/server/issues/401)) ([9808cd0](https://github.com/team-echoist/server/commit/9808cd0a890433d78df651177b4935c29686476a)), closes [#382](https://github.com/team-echoist/server/issues/382)
+
 ## [1.10.13](https://github.com/team-echoist/server/compare/v1.10.12...v1.10.13) (2024-08-21)
 
 
