@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/team-echoist/server/compare/v1.10.14...v1.11.0) (2024-08-21)
+
+
+### Features
+
+* latest release notification ([#405](https://github.com/team-echoist/server/issues/405)) ([18274e0](https://github.com/team-echoist/server/commit/18274e06ca9a016a71f0f107d4cda79742b351c0)), closes [#382](https://github.com/team-echoist/server/issues/382)
+
 ## [1.10.14](https://github.com/team-echoist/server/compare/v1.10.13...v1.10.14) (2024-08-21)
 
 
