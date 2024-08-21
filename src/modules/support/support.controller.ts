@@ -42,19 +42,42 @@ export class SupportController {
 
   **사용 시나리오:**
   - 사용자가 앱에 접속할 때마다 새로운 공지가 있는지 확인할 수 있습니다.
-  - 새로운 공지가 있다면 사용자에게 이를 알릴 수 있습니다.
 
   **응답 형식:**
   - \`newNotice: noticeId\`: 새로운 공지가 있을 경우
   - \`newNotice: null\`: 새로운 공지가 없을 경우
   
   **주의 사항:**
-  - 해당 api는 새로운 공지가 있을 경우 한 번만 true를 응답합니다.
+  - 해당 api는 새로운 공지가 있을 경우 한 번만 \`noticeId\`를 응답합니다.
   `,
   })
   @ApiResponse({ status: 200 })
   async checkLatestNotice(@Req() req: ExpressRequest) {
     return this.supportService.checkNewNotices(req.user.id);
+  }
+
+  @Get('releases/latest')
+  @ApiOperation({
+    summary: '🔵새로운 업데이트 알림',
+    description: `
+  사용자에게 알리지 않은 최신 업데이트 내역이 있는지 확인합니다.
+
+  이 엔드포인트는 사용자에게 마지막으로 알린 이후에 새로 게시된 업데이트 내역이 있는지 확인하며, 만약 새로운 업데이트 내역이 있다면 \`true\`를 반환합니다. 사용자에게 이미 최신 업데이트를 알렸다면 \`null\`을 반환합니다.
+
+  **사용 시나리오:**
+  - 사용자가 앱에 접속할 때마다 새로운 업데이트 내역이 있는지 확인할 수 있습니다.
+
+  **응답 형식:**
+  - \`newRelease: true\`: 새로운 공지가 있을 경우
+  - \`newRelease: null\`: 새로운 공지가 없을 경우
+  
+  **주의 사항:**
+  - 해당 api는 새로운 업데이트 내역이 있을 경우 한 번만 true를 응답합니다.
+  `,
+  })
+  @ApiResponse({ status: 200 })
+  async checkLatestRelease(@Req() req: ExpressRequest) {
+    return this.supportService.checkNewRelease(req.user.id);
   }
 
   @Get('notices')
@@ -176,7 +199,7 @@ export class SupportController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.supportService.getUserReleases(page, limit);
+    return this.supportService.getPublicReleases(page, limit);
   }
 
   @Get('settings')

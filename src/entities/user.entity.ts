@@ -4,6 +4,8 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -26,6 +28,7 @@ import { Device } from './device.entity';
 import { Alert } from './alert.entity';
 import { SeenNotice } from './seenNotice.entity';
 import { UserStatus } from '../common/types/enum.types';
+import { SeenRelease } from './seenRelease.entity';
 
 @Entity()
 export class User {
@@ -159,4 +162,7 @@ export class User {
 
   @OneToMany(() => SeenNotice, (seenNotice) => seenNotice.user, { onDelete: 'CASCADE' })
   seenNotices: SeenNotice[];
+
+  @OneToMany(() => SeenRelease, (seenRelease) => seenRelease.user, { onDelete: 'CASCADE' })
+  seenReleases: SeenRelease[];
 }

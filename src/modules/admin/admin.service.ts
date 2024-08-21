@@ -752,6 +752,8 @@ export class AdminService {
 
     await this.adminRepository.saveHistory(newHistory);
 
+    await this.redis.del('latestNotice');
+
     return this.utilsService.transformToDto(NoticeWithProcessorResDto, savedNotice);
   }
 
@@ -777,6 +779,8 @@ export class AdminService {
 
     await this.adminRepository.saveHistory(newHistory);
 
+    await this.redis.del('latestNotice');
+
     return this.utilsService.transformToDto(NoticeWithProcessorResDto, savedNotice);
   }
 
@@ -791,6 +795,7 @@ export class AdminService {
       deletedDate: new Date(),
     };
 
+    await this.redis.del('latestNotice');
     await this.supportRepository.saveNotice(newNotice);
   }
 
@@ -849,6 +854,8 @@ export class AdminService {
     newRelease.content = content;
     newRelease.processor = processor;
 
+    await this.redis.del('latestRelease');
+
     await this.supportRepository.saveRelease(newRelease);
   }
 
@@ -859,6 +866,8 @@ export class AdminService {
     release.content = content;
     release.processor = processor;
 
+    await this.redis.del('latestRelease');
+
     await this.supportRepository.saveRelease(release);
   }
 
@@ -867,6 +876,8 @@ export class AdminService {
     const release = await this.supportRepository.findRelease(releaseId);
     const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, admin);
     await this.adminRepository.saveHistory(history);
+
+    await this.redis.del('latestRelease');
 
     await this.supportRepository.deleteRelease(releaseId);
   }
