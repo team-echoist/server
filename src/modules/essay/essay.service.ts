@@ -35,7 +35,7 @@ import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
-import { AnotherEssayType, EssayStatus, UserStatus } from '../../common/types/enum.types';
+import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
 
 @Injectable()
 export class EssayService {
@@ -193,17 +193,17 @@ export class EssayService {
   @Transactional()
   async getMyEssays(
     userId: number,
-    published: boolean,
-    storyId: number,
+    pageType: PageType,
     page: number,
     limit: number,
+    storyId?: number,
   ) {
     const { essays, total } = await this.essayRepository.findEssays(
       userId,
-      published,
-      storyId,
+      pageType,
       page,
       limit,
+      storyId,
     );
     const totalPage: number = Math.ceil(total / limit);
 
@@ -232,31 +232,83 @@ export class EssayService {
     return { essays: essayDtos, total, totalPage, page };
   }
 
-  @Transactional()
-  async getEssay(userId: number, essayId: number, type: AnotherEssayType) {
-    const user = await this.userService.fetchUserEntityById(userId);
-
-    const essay = await this.essayRepository.findEssayById(essayId);
-
+  async applyCommonEssayQueryLogic(userId: number, essay: Essay) {
     if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
+    const user = await this.userService.fetchUserEntityById(userId);
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
     if (essay.author && userId !== essay.author.id) {
       await this.handleNonAuthorView(userId, essay);
     }
 
-    const anotherEssays =
-      type === AnotherEssayType.RECOMMEND
-        ? await this.getRecommendEssays(userId, 6)
-        : await this.previousEssay(userId, essay, type);
-
     const newEssayData = {
       ...essay,
       author: essay.status === EssayStatus.LINKEDOUT ? undefined : essay.author,
       isBookmarked: isBookmarked,
     };
-    const essayDto = this.utilsService.transformToDto(EssayResDto, newEssayData);
+
+    return this.utilsService.transformToDto(EssayResDto, newEssayData);
+  }
+
+  @Transactional()
+  async getEssay(userId: number, essayId: number, pageType: PageType, storyId?: number) {
+    const essay = await this.essayRepository.findEssayById(essayId);
+    const essayDto = await this.applyCommonEssayQueryLogic(userId, essay);
+
+    const anotherEssays =
+      pageType === PageType.RECOMMEND
+        ? await this.getRecommendEssays(userId, 6)
+        : await this.previousEssay(userId, essay, pageType, storyId);
+
+    return { essay: essayDto, anotherEssays: anotherEssays };
+  }
+
+  @Transactional()
+  async getNextEssay(userId: number, essayId: number, pageType: PageType, storyId?: number) {
+    const currentEssay = await this.essayRepository.findEssayById(essayId);
+
+    if (!currentEssay) {
+      throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    let nextEssay: Essay | null = null;
+
+    switch (pageType) {
+      case PageType.PUBLIC:
+        nextEssay = await this.essayRepository.findNextEssayByPublic(
+          currentEssay.author.id,
+          currentEssay.id,
+        );
+        break;
+      case PageType.PRIVATE:
+        if (currentEssay.author.id !== userId) {
+          throw new HttpException(
+            '비공개 다음 글은 본인만 조회할 수 있습니다.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        nextEssay = await this.essayRepository.findNextEssayByPrivate(userId, currentEssay.id);
+        break;
+      case PageType.STORY:
+        const excludePrivate = currentEssay.author.id !== userId;
+        nextEssay = await this.essayRepository.findNextEssayByStory(
+          storyId,
+          currentEssay.id,
+          excludePrivate,
+        );
+        break;
+      default:
+        throw new HttpException('잘못된 페이지 타입입니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!nextEssay) {
+      return null;
+    }
+
+    const essayDto = await this.applyCommonEssayQueryLogic(userId, nextEssay);
+
+    const anotherEssays = await this.previousEssay(userId, nextEssay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
@@ -329,15 +381,15 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  private async previousEssay(userId: number, essay: Essay, type: AnotherEssayType) {
+  private async previousEssay(userId: number, essay: Essay, pageType: PageType, storyId?: number) {
     let previousEssay: Essay[];
 
-    if (type === AnotherEssayType.PUBLISH) {
+    if (pageType === PageType.PUBLIC) {
       previousEssay = await this.essayRepository.findPreviousPublishEssay(
-        userId,
+        essay.author.id,
         essay.createdDate,
       );
-    } else if (type === AnotherEssayType.PRIVATE) {
+    } else if (pageType === PageType.PRIVATE) {
       if (userId !== essay.author.id)
         throw new HttpException(
           '비공개 이전 글은 본인만 조회할 수 있습니다.',
@@ -345,6 +397,13 @@ export class EssayService {
         );
       previousEssay = await this.essayRepository.findPreviousPrivateEssay(
         userId,
+        essay.createdDate,
+      );
+    } else if (pageType === PageType.STORY && storyId !== undefined) {
+      previousEssay = await this.essayRepository.findPreviousStoryEssay(
+        userId,
+        essay.author.id,
+        storyId,
         essay.createdDate,
       );
     }

@@ -5,13 +5,17 @@ import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
-import { EssayStatus } from '../../common/types/enum.types';
+import { EssayStatus, PageType } from '../../common/types/enum.types';
 
 export class EssayRepository {
   constructor(
     @InjectRepository(Essay)
     private readonly essayRepository: Repository<Essay>,
   ) {}
+
+  async totalEssayCount() {
+    return await this.essayRepository.count();
+  }
 
   async findEssayById(essayId: number) {
     return await this.essayRepository
@@ -57,10 +61,10 @@ export class EssayRepository {
 
   async findEssays(
     userId: number,
-    published: boolean,
-    storyId: number,
+    pageType: PageType,
     page: number,
     limit: number,
+    storyId?: number,
   ) {
     const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
@@ -74,16 +78,10 @@ export class EssayRepository {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
     }
 
-    if (published !== undefined) {
-      if (published) {
-        queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED });
-      } else {
-        queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
-      }
-    } else {
-      queryBuilder.andWhere('essay.status IN (:...statuses)', {
-        statuses: [EssayStatus.PRIVATE, EssayStatus.PUBLISHED],
-      });
+    if (pageType === PageType.PUBLIC) {
+      queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED });
+    } else if (pageType === PageType.PRIVATE) {
+      queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
     }
 
     queryBuilder.offset((page - 1) * limit).limit(limit);
@@ -254,8 +252,63 @@ export class EssayRepository {
       .getMany();
   }
 
-  async totalEssayCount() {
-    return this.essayRepository.count();
+  async findPreviousStoryEssay(
+    userId: number,
+    authorId: number,
+    storyId: number,
+    createdDate: Date,
+  ) {
+    const query = this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.story.id = :storyId', { storyId })
+      .andWhere('essay.created_date < :createdDate', { createdDate });
+
+    if (authorId !== userId) {
+      query.andWhere('essay.status != :status', { status: EssayStatus.PRIVATE });
+    }
+
+    return await query.orderBy('essay.created_date', 'DESC').limit(6).getMany();
+  }
+
+  async findNextEssayByPublic(authorId: number, currentEssayId: number) {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .andWhere('essay.author.id = :authorId', { authorId })
+      .where('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('essay.id > :currentEssayId', { currentEssayId })
+      .orderBy('essay.created_date', 'ASC')
+      .getOne();
+  }
+
+  async findNextEssayByPrivate(userId: number, currentEssayId: number): Promise<Essay | null> {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .where('essay.author.id = :userId', { userId })
+      .andWhere('essay.status = :status', { status: EssayStatus.PRIVATE })
+      .andWhere('essay.id > :currentEssayId', { currentEssayId })
+      .orderBy('essay.created_date', 'ASC')
+      .getOne();
+  }
+
+  async findNextEssayByStory(
+    storyId: number,
+    currentEssayId: number,
+    excludePrivate?: boolean,
+  ): Promise<Essay | null> {
+    const query = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .where('essay.story.id = :storyId', { storyId })
+      .andWhere('essay.id > :currentEssayId', { currentEssayId })
+      .orderBy('essay.created_date', 'ASC');
+
+    if (excludePrivate) {
+      query.andWhere('essay.status != :status', { status: EssayStatus.PRIVATE });
+    }
+
+    return await query.getOne();
   }
 
   async todayEssays(todayStart: Date, todayEnd: Date) {

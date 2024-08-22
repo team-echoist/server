@@ -1,6 +1,7 @@
-export enum AnotherEssayType {
+export enum PageType {
   PRIVATE = 'private',
-  PUBLISH = 'publish',
+  PUBLIC = 'public',
+  STORY = 'story',
   RECOMMEND = 'recommend',
 }
 
