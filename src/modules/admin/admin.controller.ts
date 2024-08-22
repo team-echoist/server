@@ -120,8 +120,8 @@ export class AdminAuthController {
   `,
   })
   @ApiBody({ type: AdminLoginReqDto })
-  async adminLogin() {
-    return;
+  async adminLogin(@Req() req: ExpressRequest) {
+    return this.adminService.login(req);
   }
 }
 

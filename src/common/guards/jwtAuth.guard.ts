@@ -62,7 +62,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 
   private async handleTokenExpired(request: any, response: any): Promise<boolean> {
     const refreshToken = request.headers['x-refresh-token'];
-    const recentTokenKey = `accessToken:${refreshToken}`;
+    const recentTokenKey = `recentToken:${refreshToken}`;
     const inProgressKey = `inProgress:${refreshToken}`;
 
     if (!refreshToken)

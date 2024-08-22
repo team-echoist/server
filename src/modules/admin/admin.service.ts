@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { FindManyOptions } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import * as bcrypt from 'bcrypt';
@@ -65,6 +58,9 @@ import { NicknameService } from '../nickname/nickname.service';
 import { ActionType, EssayStatus, UserStatus } from '../../common/types/enum.types';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
 import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Request as ExpressRequest } from 'express';
 
 @Injectable()
 export class AdminService {
@@ -83,6 +79,8 @@ export class AdminService {
     private readonly awsService: AwsService,
     private readonly cronService: CronService,
     private readonly utilsService: UtilsService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
@@ -1069,5 +1067,41 @@ export class AdminService {
       throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminRepository.deleteAdminById(adminId);
+  }
+
+  async generateAdminAccessToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      expiresIn: '30m',
+    });
+  }
+
+  async generateAdminRefreshToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: '30d',
+    });
+  }
+
+  async adminRefreshToken(refreshToken: string) {
+    let payload = await this.jwtService.verify(refreshToken, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+    });
+    payload = { username: payload.username, sub: payload.sub };
+
+    return await this.generateAdminAccessToken(payload);
+  }
+
+  async login(req: ExpressRequest) {
+    const accessPayload = { username: req.user.email, sub: req.user.id };
+    const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
+
+    const refreshToken = await this.generateAdminRefreshToken(refreshPayload);
+    await this.redis.set(`${refreshToken}:${req.user.id}:admin`, 'used', 'EX', 29 * 60 + 50);
+
+    return {
+      accessToken: await this.generateAdminAccessToken(accessPayload),
+      refreshToken: refreshToken,
+    };
   }
 }
