@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { FindManyOptions } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import * as bcrypt from 'bcrypt';
@@ -56,6 +63,8 @@ import { Server } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { NicknameService } from '../nickname/nickname.service';
 import { ActionType, EssayStatus, UserStatus } from '../../common/types/enum.types';
+import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
+import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
 
 @Injectable()
 export class AdminService {
@@ -64,15 +73,16 @@ export class AdminService {
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
     private readonly userService: UserService,
-    private readonly mailService: MailService,
-    private readonly utilsService: UtilsService,
-    private readonly awsService: AwsService,
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
-    private readonly cronService: CronService,
+    private readonly geulroquisRepository: GeulroquisRepository,
     private readonly nicknameService: NicknameService,
+    private readonly mailService: MailService,
+    private readonly awsService: AwsService,
+    private readonly cronService: CronService,
+    private readonly utilsService: UtilsService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
@@ -932,12 +942,41 @@ export class AdminService {
     return this.geulroquisService.getGeulroquis(page, limit);
   }
 
+  @Transactional()
   async getGeulroquisCount() {
-    return this.geulroquisService.getGeulroquisCount();
+    const total = await this.geulroquisRepository.countTotalGeulroquis();
+    const available = await this.geulroquisRepository.countAvailableGeulroquis();
+
+    return this.utilsService.transformToDto(GeulroquisCountResDto, { total, available });
   }
 
+  @Transactional()
   async changeTomorrowGeulroquis(geulroquisId: number) {
-    return this.geulroquisService.changeTomorrowGeulroquis(geulroquisId);
+    const TomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
+
+    if (TomorrowGeulroquis) {
+      TomorrowGeulroquis.next = false;
+      await this.geulroquisRepository.saveGeulroquis(TomorrowGeulroquis);
+    } else {
+      const currentGeulroquis = await this.geulroquisRepository.findCurrentGeulroquis();
+      if (currentGeulroquis) {
+        currentGeulroquis.current = false;
+        currentGeulroquis.provided = true;
+        currentGeulroquis.providedDate = new Date();
+
+        await this.geulroquisRepository.saveGeulroquis(currentGeulroquis);
+      }
+      const geulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+      geulroquis.current = true;
+
+      await this.geulroquisRepository.saveGeulroquis(geulroquis);
+    }
+
+    const nextGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+    nextGeulroquis.next = true;
+    await this.geulroquisRepository.saveGeulroquis(nextGeulroquis);
+
+    return;
   }
 
   async getServerStatus() {

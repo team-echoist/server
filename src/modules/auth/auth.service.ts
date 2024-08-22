@@ -150,9 +150,12 @@ export class AuthService {
     const accessPayload = { username: req.user.email, sub: req.user.id };
     const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
 
+    const refreshToken = await this.generateRefreshToken(refreshPayload);
+    await this.redis.set(`${refreshToken}:${req.user.id}`, 'used', 'EX', 29 * 60 + 50);
+
     return {
       accessToken: await this.generateAccessToken(accessPayload),
-      refreshToken: await this.generateRefreshToken(refreshPayload),
+      refreshToken: refreshToken,
     };
   }
 

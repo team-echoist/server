@@ -62,12 +62,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 
   private async handleTokenExpired(request: any, response: any): Promise<boolean> {
     const refreshToken = request.headers['x-refresh-token'];
-    const cachedKey = `accessToken:${refreshToken}`;
+    const recentTokenKey = `accessToken:${refreshToken}`;
     const inProgressKey = `inProgress:${refreshToken}`;
-    const recentTokenKey = `recentToken:${refreshToken}`;
 
     if (!refreshToken)
-      throw new HttpException('다음 누락: "x-refresh-token"', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('다음 누락: x-refresh-token', HttpStatus.UNAUTHORIZED);
 
     /** @description 중복갱신 방지 */
     const inProgress = await this.redis.get(inProgressKey);
@@ -100,18 +99,24 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
         HttpStatus.UNAUTHORIZED,
       );
 
-    const cachedToken = await this.redis.get(cachedKey);
-    if (cachedToken)
+    const cachedToken = await this.redis.get(`${refreshToken}:${decodedRefreshToken.sub}`);
+    if (cachedToken) {
+      await this.redis.set(`${refreshToken}:${decodedRefreshToken.sub}`, 'used', 'EX', 720 * 60);
       throw new HttpException(
-        '새로운 액세스 토큰이 사용되지 않았습니다. 잠재적인 남용이 감지되었습니다.',
+        '잠재적인 토큰 탈취 또는 남용이 감지되었습니다.',
         HttpStatus.UNAUTHORIZED,
       );
-
+    }
     try {
       const newAccessTokens = await this.authService.refreshToken(refreshToken);
 
-      await this.redis.set(cachedKey + ':recent', newAccessTokens, 'EX', 5);
-      await this.redis.set(cachedKey, 'used', 'EX', 29 * 60);
+      await this.redis.set(recentTokenKey, newAccessTokens, 'EX', 5);
+      await this.redis.set(
+        `${refreshToken}:${decodedRefreshToken.sub}`,
+        'used',
+        'EX',
+        29 * 60 + 50,
+      );
       await this.redis.del(inProgressKey);
 
       response.setHeader('x-access-token', newAccessTokens);

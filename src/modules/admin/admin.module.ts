@@ -2,7 +2,16 @@ import { Module } from '@nestjs/common';
 import * as strategies from '../../common/guards/strategies';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { AdminController } from './admin.controller';
+import {
+  AdminOfficeController,
+  AdminAuthController,
+  AdminDashboardController,
+  AdminInfoController,
+  AdminTaskController,
+  AdminManagementController,
+  AdminSupportController,
+  AdminRootController,
+} from './admin.controller';
 import { UserModule } from '../user/user.module';
 import { EssayModule } from '../essay/essay.module';
 import { MailModule } from '../mail/mail.module';
@@ -72,7 +81,16 @@ import { NicknameModule } from '../nickname/nickname.module';
     GeulroquisModule,
     NicknameModule,
   ],
-  controllers: [AdminController],
+  controllers: [
+    AdminAuthController,
+    AdminInfoController,
+    AdminDashboardController,
+    AdminTaskController,
+    AdminManagementController,
+    AdminSupportController,
+    AdminOfficeController,
+    AdminRootController,
+  ],
   providers: [
     AdminService,
     AdminRepository,
