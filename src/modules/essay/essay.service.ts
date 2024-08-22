@@ -265,16 +265,10 @@ export class EssayService {
   }
 
   @Transactional()
-  async getNextEssay(userId: number, essayId: number, pageType: PageType, storyId?: number) {
-    const currentEssay = await this.essayRepository.findEssayById(essayId);
+  let nextEssay: Essay | null = null;
 
-    if (!currentEssay) {
-      throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
-    }
-
-    let nextEssay: Essay | null = null;
-
-    switch (pageType) {
+  switch (pageType) {
+    {
       case PageType.PUBLIC:
         nextEssay = await this.essayRepository.findNextEssayByPublic(
           currentEssay.author.id,
@@ -301,14 +295,7 @@ export class EssayService {
       default:
         throw new HttpException('잘못된 페이지 타입입니다.', HttpStatus.BAD_REQUEST);
     }
-
-    if (!nextEssay) {
-      return null;
     }
-
-    const essayDto = await this.applyCommonEssayQueryLogic(userId, nextEssay);
-
-    const anotherEssays = await this.previousEssay(userId, nextEssay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
