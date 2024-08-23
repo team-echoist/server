@@ -1,4 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UtilsService } from '../../modules/utils/utils.service';
 
@@ -36,6 +43,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     const errorStack = exception.stack;
+
+    if (status === HttpStatus.NOT_FOUND) {
+      const allowedPaths = ['/api', '/api-doc', '/.well-known', '/health-check'];
+
+      if (!allowedPaths.some((path) => request.path.startsWith(path))) {
+        return response.status(HttpStatus.NO_CONTENT).send();
+      }
+    }
 
     if (status >= 500) {
       this.logger.error(
