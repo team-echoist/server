@@ -15,14 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiExcludeEndpoint,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
@@ -70,12 +63,10 @@ import { AdminGuard } from '../../common/guards/admin.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
-import { JwtInterceptor } from '../../common/interceptros/jwt.interceptor';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminAuthController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -128,7 +119,6 @@ export class AdminAuthController {
 @ApiTags('Admin-dashboard')
 @Controller('admin-dashboard')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminDashboardController {
   constructor(private readonly adminService: AdminService) {}
   @Get()
@@ -358,7 +348,6 @@ export class AdminDashboardController {
 @ApiTags('Admin-info')
 @Controller('admin-info')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminInfoController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -502,7 +491,6 @@ export class AdminInfoController {
 @ApiTags('Admin-task')
 @Controller('admin-task')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminTaskController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -684,7 +672,6 @@ export class AdminTaskController {
 @ApiTags('Admin-support')
 @Controller('admin-support')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminSupportController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -1007,7 +994,6 @@ export class AdminSupportController {
 @ApiTags('Admin-management')
 @Controller('admin-management')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminManagementController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -1178,7 +1164,6 @@ export class AdminManagementController {
 @ApiTags('Admin-office')
 @Controller('admin-office')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminOfficeController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -1366,7 +1351,6 @@ export class AdminOfficeController {
 @ApiTags('위험구역')
 @Controller('admin-root')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
 export class AdminRootController {
   constructor(private readonly adminService: AdminService) {}
 
