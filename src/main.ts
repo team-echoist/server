@@ -50,7 +50,7 @@ async function bootstrap() {
       }
     },
     allowedHeaders:
-      'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, x-refresh-token, Accept, Observe',
+      'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, x-access-token, x-refresh-token, Accept, Observe',
     methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
     credentials: true,
   });
@@ -73,14 +73,6 @@ async function bootstrap() {
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     next();
-  });
-
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.url === '/favicon.png') {
-      res.status(204).end();
-    } else {
-      next();
-    }
   });
 
   app.setGlobalPrefix('/api');

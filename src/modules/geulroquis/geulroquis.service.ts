@@ -59,15 +59,23 @@ export class GeulroquisService {
   @Transactional()
   async changeTomorrowGeulroquis(geulroquisId: number) {
     const TomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
+
     if (TomorrowGeulroquis) {
       TomorrowGeulroquis.next = false;
       await this.geulroquisRepository.saveGeulroquis(TomorrowGeulroquis);
     } else {
-      const currentGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
-      currentGeulroquis.current = true;
-      await this.geulroquisRepository.saveGeulroquis(currentGeulroquis);
+      const currentGeulroquis = await this.geulroquisRepository.findCurrentGeulroquis();
+      if (currentGeulroquis) {
+        currentGeulroquis.current = false;
+        currentGeulroquis.provided = true;
+        currentGeulroquis.providedDate = new Date();
 
-      return;
+        await this.geulroquisRepository.saveGeulroquis(currentGeulroquis);
+      }
+      const geulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+      geulroquis.current = true;
+
+      await this.geulroquisRepository.saveGeulroquis(geulroquis);
     }
 
     const nextGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);

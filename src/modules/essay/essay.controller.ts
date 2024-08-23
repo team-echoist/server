@@ -396,7 +396,7 @@ export class EssayController {
   
   **쿼리 파라미터:**
   - \`pageType\` (required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. \`private\`, \`public\`, \`story\`, \`recommend\` 를 사용할 수 있으며 각각 저장한 글, 발행한 글, 타겟 스토리 의 \`이전 글\`. 그리고 추천 에세이의 \`다른 글\`에 사용됩니다.
-  - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`면 해당 스토리의 아이디를 쿼리로 추가해야합니다.
+  - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`라면 해당 스토리의 아이디를 쿼리로 추가해야합니다.
   
   **각 페이지 타입에 대한 '이전 글' 동작:**
   '이전 글'이란 현재 상세조회한 글의 직전 글을 뜻합니다.

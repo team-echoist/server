@@ -38,6 +38,10 @@ export class GeulroquisRepository {
     return this.geulroquisRepository.findOne({ where: { next: true } });
   }
 
+  async findCurrentGeulroquis() {
+    return this.geulroquisRepository.findOne({ where: { current: true } });
+  }
+
   async findOneGeulroquis(geulroquisId: number) {
     return this.geulroquisRepository.findOne({ where: { id: geulroquisId } });
   }

@@ -1225,7 +1225,7 @@ export class AdminController {
   @ApiOperation({
     summary: '다음 글로키 지정하기',
     description: `
-  여러 개의 이미지를 업로드하여 geulroquis 테이블에 저장합니다. 요청 본문에 이미지 파일들을 포함하여 전송합니다.
+  다음 글로키를 지정합니다.
 
   **매개 변수:**
   - \`geulroquisId\`: 다음 제공할 글로키 아이디.
