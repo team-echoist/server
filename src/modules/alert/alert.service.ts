@@ -278,6 +278,8 @@ export class AlertService {
         essay.author.id,
         device.id,
       );
+      if (!alertSettings && !alertSettings?.viewed) return;
+
       if (alertSettings.viewed)
         await this.fcmService.sendPushAlert(
           device.fcmToken,

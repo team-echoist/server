@@ -21,7 +21,6 @@ import { Request as ExpressRequest } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
-import { OptionalBoolPipe } from '../../common/pipes/optionalBool.pipe';
 import { CreateEssayReqDto } from './dto/request/createEssayReq.dto';
 import { EssayResDto } from './dto/response/essayRes.dto';
 import { UpdateEssayReqDto } from './dto/request/updateEssayReq.dto';
@@ -32,7 +31,7 @@ import { PublicEssaysResDto } from './dto/response/publicEssaysRes.dto';
 import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { EssayWithAnotherEssayResDto } from './dto/response/essayWithAnotherEssayRes.dto';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
-import { AnotherEssayType } from '../../common/types/enum.types';
+import { PageType } from '../../common/types/enum.types';
 
 @ApiTags('Essay')
 @UseGuards(JwtAuthGuard)
@@ -115,8 +114,8 @@ export class EssayController {
   **쿼리 파라미터:**
   - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
   - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 10입니다.
-  - \`published\`: 발행 여부 (true 또는 false)
-  - \`storyId\`: 특정 스토리에 속한 에세이만 조회
+  - \`pageType\`: '나만의 글'에선 'private', '발행한 글'에선 'public' 를 사용합니다.
+  - \`storyId\`: (number, optional): 특정 스토리에 속한 에세이만 조회
 
   **동작 과정:**
   1. 사용자가 작성한 에세이를 조회합니다.
@@ -124,7 +123,6 @@ export class EssayController {
   3. 조회된 에세이 목록과 전체 에세이 수를 반환합니다.
   
   **주의 사항:**
-  - 쿼리 파라미터 키는 필수이지만 값이 비어있어도 됩니다.
   `,
   })
   @ApiResponse({ status: 200, type: SummaryEssaysResDto })
@@ -136,10 +134,10 @@ export class EssayController {
     @Req() req: ExpressRequest,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
-    @Query('published', OptionalBoolPipe) published: boolean,
-    @Query('storyId', OptionalParseIntPipe) storyId: number,
+    @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
-    return this.essayService.getMyEssays(req.user.id, published, storyId, page, limit);
+    return this.essayService.getMyEssays(req.user.id, pageType, page, limit, storyId);
   }
 
   @Get('author/:userId')
@@ -391,13 +389,21 @@ export class EssayController {
   @ApiOperation({
     summary: '에세이 상세조회',
     description: `
-  특정 에세이의 상세 정보를 조회합니다. 요청한 사용자가 해당 에세이의 작성자가 아니고 에세이 상태가 PRIVATE일 경우, 조회가 거부됩니다.
+  특정 에세이의 상세 정보를 조회합니다. 각 에세이의 '다른 글' 또는 '이전 글' 을 같이 조회합니다.
 
   **경로 파라미터:**
   - \`essayId\` (number, required): 조회할 에세이의 ID
   
   **쿼리 파라미터:**
-  - \`type\` (string, required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. 'private', 'publish', 'recommend' 를 사용할 수 있으며 각각 '저장한 글', '발행한 글' 의 '이전 글'. 그리고 추천 에세이의 '다른 글'에 사용됩니다.
+  - \`pageType\` (required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. \`private\`, \`public\`, \`story\`, \`recommend\` 를 사용할 수 있으며 각각 저장한 글, 발행한 글, 타겟 스토리 의 \`이전 글\`. 그리고 추천 에세이의 \`다른 글\`에 사용됩니다.
+  - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`라면 해당 스토리의 아이디를 쿼리로 추가해야합니다.
+  
+  **각 페이지 타입에 대한 '이전 글' 동작:**
+  '이전 글'이란 현재 상세조회한 글의 직전 글을 뜻합니다.
+  - \`private\` 자신의 글이 아닌 경우 예외를 던집니다. '나만의 글' 페이지에 포함된 이전 글을 같이 반환합니다.
+  - \`public\` 자신 혹은 타인의 '발행한 글' 페이지에 포함된 이전 글을 반환합니다.
+  - \`story\` 'storyId' 에 해당하는 이전 글을 반환합니다. 만약 자신의 글이 아닌 경우 'private'상태의 글은 제외합니다.
+  - \`recommend\` 랜덤 추천 글을 제공합니다.
 
   **동작 과정:**
   1. 요청된 에세이 ID로 에세이를 조회합니다.
@@ -414,9 +420,53 @@ export class EssayController {
   async getEssay(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
-    @Query('type', new ParseEnumPipe(AnotherEssayType)) type: AnotherEssayType,
+    @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
-    return this.essayService.getEssay(req.user.id, essayId, type);
+    return this.essayService.getEssay(req.user.id, essayId, pageType, storyId);
+  }
+
+  @Get('next/:essayId')
+  @ApiOperation({
+    summary: '다음 에세이 상세조회',
+    description: `
+  현재 에세이에서 다음 에세이의 상세 정보를 조회합니다. 각 에세이의 '다른 글' 또는 '이전 글' 을 같이 조회합니다.
+
+  **경로 파라미터:**
+  - \`essayId\` (number, required): 현재 에세이의 아이디
+  
+  **쿼리 파라미터:**
+  - \`pageType\` (required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. \`private\`, \`public\`, \`story\` 를 사용할 수 있으며 각각 저장한 글, 발행한 글, 타겟 스토리 의 \`이전 글\`. 그리고 추천 에세이의 \`다른 글\`에 사용됩니다.
+  - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`면 해당 스토리의 아이디를 쿼리로 추가해야합니다.
+  
+  **각 페이지 타입에 대한 동작:**
+  페이지 타입에 따라 '이전 글'은 '에세이 상세조회'와 동일하게 동작합니다.
+  페이지 타입에 따라 '현재 글' 의 '다음 글'을 조회합니다.
+  - \`private\` 자신의 글이 아닌 경우 예외를 던집니다. '나만의 글' 페이지에 포함된 다음 글을 조회합니다.
+  - \`public\` 자신 혹은 타인의 '발행한 글' 페이지에 포함된 다음 글을 반환합니다.
+  - \`story\` 'storyId' 에 해당하는 다음 글을 반환합니다. 만약 자신의 글이 아닌 경우 'private'상태의 글은 제외합니다.
+
+  **동작 과정:**
+  1. 요청된 에세이 ID의 다음 에세이를 조회합니다.
+  2. 요청한 사용자가 에세이의 작성자가 아닌 경우, 에세이 상태가 PRIVATE일 때 조회가 거부됩니다.
+  3. 조회에 성공한 경우 조회수를 증가시킵니다.
+  4. 요청된 페이지 타입에 따라 다른 에세이 목록을 조회합니다.
+  5. 조회된 에세이와 추가 에세이 목록을 반환합니다.
+
+  **주의 사항:**
+  - '다음 글'이 없을 경우 \`null\`을 반환합니다.
+  - \'pageType\'에 \`recommend\`를 사용할 시 예외처리됩니다.
+  - 에세이 ID는 유효한 숫자여야 합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: EssayWithAnotherEssayResDto })
+  async getNextEssay(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+    @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('storyId', OptionalParseIntPipe) storyId?: number,
+  ) {
+    return this.essayService.getNextEssay(req.user.id, essayId, pageType, storyId);
   }
 
   @Delete(':essayId')
