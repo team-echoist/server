@@ -23,7 +23,6 @@ import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
 import { BookmarkModule } from './modules/bookmark/bookmark.module';
-import { BlockPhpRequestsMiddleware } from './common/middlewares/blockPhpRequests.middleware';
 import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { SupportModule } from './modules/support/support.module';
@@ -68,8 +67,6 @@ import { DeviceMiddleware } from './common/middlewares/device.middleware';
     HomeModule,
   ],
   providers: [
-    // { provide: APP_INTERCEPTOR, useClass: JwtInterceptor },
-    // { provide: APP_INTERCEPTOR, useClass: DeviceInterceptor },
     { provide: APP_GUARD, useClass: ServerGuard },
     strategies.AdminPassStrategy,
     strategies.LocalStrategy,
@@ -92,13 +89,11 @@ export class AppModule implements OnModuleInit, NestModule {
       await this.seederService.initializeServer();
       await this.seederService.initializeAdmin();
       await this.seederService.initializeAppVersions();
-      // await this.seederService.initializeNicknames();
     }
   }
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DeviceMiddleware).forRoutes('*');
     consumer.apply(TimezoneMiddleware).forRoutes('*');
-    consumer.apply(BlockPhpRequestsMiddleware).forRoutes('*');
   }
 }
