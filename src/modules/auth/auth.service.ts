@@ -18,6 +18,7 @@ import * as jwksClient from 'jwks-rsa';
 import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '../../common/types/enum.types';
 import { Request as ExpressRequest } from 'express';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -148,7 +149,12 @@ export class AuthService {
 
   async login(req: ExpressRequest) {
     const accessPayload = { username: req.user.email, sub: req.user.id };
-    const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
+    const refreshPayload = {
+      username: req.user.email,
+      sub: req.user.id,
+      device: req.device,
+      tokenVersion: req.user.tokenVersion,
+    };
 
     return {
       accessToken: await this.generateAccessToken(accessPayload),
@@ -159,7 +165,7 @@ export class AuthService {
   async generateAccessToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      expiresIn: '30m',
+      expiresIn: '1s',
     });
   }
 
@@ -194,6 +200,12 @@ export class AuthService {
     }
 
     return !user ? null : user;
+  }
+
+  @Transactional()
+  async incrementTokenVersion(user: User) {
+    user.tokenVersion += 1;
+    await this.authRepository.saveUser(user);
   }
 
   @Transactional()
