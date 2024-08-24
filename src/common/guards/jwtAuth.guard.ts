@@ -62,12 +62,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 
   private async handleTokenExpired(request: any, response: any): Promise<boolean> {
     const refreshToken = request.headers['x-refresh-token'];
-    const cachedKey = `accessToken:${refreshToken}`;
-    const inProgressKey = `inProgress:${refreshToken}`;
     const recentTokenKey = `recentToken:${refreshToken}`;
+    const inProgressKey = `inProgress:${refreshToken}`;
 
     if (!refreshToken)
-      throw new HttpException('다음 누락: "x-refresh-token"', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('다음 누락: x-refresh-token', HttpStatus.UNAUTHORIZED);
 
     /** @description 중복갱신 방지 */
     const inProgress = await this.redis.get(inProgressKey);
@@ -94,24 +93,47 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
-    if (!this.isSameDevice(decodedRefreshToken.device, request.device))
+    const user = await this.authService.validatePayload({
+      username: decodedRefreshToken.username,
+      sub: decodedRefreshToken.sub,
+    });
+
+    if (decodedRefreshToken.tokenVersion !== user.tokenVersion) {
+      throw new HttpException(
+        '잠재적인 위협이 감지되어 토큰이 무효화 되었습니다. 다시 로그인 해주세요.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    if (!this.isSameDevice(decodedRefreshToken.device, request.device)) {
+      await this.authService.incrementTokenVersion(user);
+      await this.redis.del(`user:${decodedRefreshToken.sub}`);
       throw new HttpException(
         '알 수 없는 디바이스 또는 환경에서의 접근 시도가 감지되었습니다.',
         HttpStatus.UNAUTHORIZED,
       );
+    }
 
-    const cachedToken = await this.redis.get(cachedKey);
-    if (cachedToken)
+    const cachedToken = await this.redis.get(`${refreshToken}:${decodedRefreshToken.sub}`);
+    if (cachedToken) {
+      await this.authService.incrementTokenVersion(user);
+      await this.redis.del(`user:${decodedRefreshToken.sub}`);
       throw new HttpException(
-        '새로운 액세스 토큰이 사용되지 않았습니다. 잠재적인 남용이 감지되었습니다.',
+        '잠재적인 토큰 탈취 또는 남용이 감지되었습니다.',
         HttpStatus.UNAUTHORIZED,
       );
+    }
 
     try {
       const newAccessTokens = await this.authService.refreshToken(refreshToken);
 
-      await this.redis.set(cachedKey + ':recent', newAccessTokens, 'EX', 5);
-      await this.redis.set(cachedKey, 'used', 'EX', 29 * 60);
+      await this.redis.set(recentTokenKey, newAccessTokens, 'EX', 5);
+      await this.redis.set(
+        `${refreshToken}:${decodedRefreshToken.sub}`,
+        'used',
+        'EX',
+        29 * 60 + 50,
+      );
       await this.redis.del(inProgressKey);
 
       response.setHeader('x-access-token', newAccessTokens);

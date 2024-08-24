@@ -4,8 +4,6 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -108,6 +106,9 @@ export class User {
 
   @Column({ name: 'is_first', default: true })
   isFirst: boolean;
+
+  @Column({ name: 'token_version', default: 1 })
+  tokenVersion: number;
 
   @OneToMany(() => Story, (story) => story.user)
   stories: Story[];
