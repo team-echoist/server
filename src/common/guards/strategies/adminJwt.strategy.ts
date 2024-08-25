@@ -21,8 +21,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   }
 
   async validate(payload: any) {
-    const admin = await this.adminService.validatePayload(payload.id);
-    console.log('인가 중 admin-jwt에서 찾아온 관리자: ', admin);
+    const admin = await this.adminService.validatePayload(payload.sub);
     if (!admin) {
       throw new UnauthorizedException();
     }
