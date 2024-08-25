@@ -15,10 +15,13 @@ export class AdminLocalStrategy extends PassportStrategy(Strategy, 'admin-local'
   async validate(email: string, password: string) {
     const admin = await this.adminService.validateAdmin(email, password);
     if (!admin) {
-      throw new UnauthorizedException('Invalid email or password.');
+      throw new UnauthorizedException('이메일 혹은 비밀번호가 잘못되었습니다.');
     }
     if (!admin.activated) {
-      throw new HttpException('Your account has not been activated.', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        '계정이 활성화 상태가 아닙니다. 관리자에게 문의하세요.',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     return admin;
   }

@@ -3,21 +3,26 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as dotenv from 'dotenv';
 import { AdminService } from '../../../modules/admin/admin.service';
+import { ConfigService } from '@nestjs/config';
 
 dotenv.config();
 
 @Injectable()
 export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
-  constructor(private readonly adminService: AdminService) {
+  constructor(
+    configService: ConfigService,
+    private readonly adminService: AdminService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_ACCESS_SECRET,
+      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET'),
     });
   }
 
   async validate(payload: any) {
     const admin = await this.adminService.validatePayload(payload.id);
+    console.log('인가 중 admin-jwt에서 찾아온 관리자: ', admin);
     if (!admin) {
       throw new UnauthorizedException();
     }
