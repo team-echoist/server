@@ -17,6 +17,6 @@ export class AdminPassStrategy extends PassportStrategy(Strategy, 'admin-pass') 
   }
 
   async validate(payload: any) {
-    return await this.adminService.validatePayload(payload.id);
+    return await this.adminService.validatePayload(payload.sub);
   }
 }
