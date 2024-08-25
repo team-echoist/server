@@ -1,3 +1,10 @@
+## [1.11.5](https://github.com/team-echoist/server/compare/v1.11.4...v1.11.5) (2024-08-25)
+
+
+### Bug Fixes
+
+* Add init root admin ([#413](https://github.com/team-echoist/server/issues/413)) ([a57c1bc](https://github.com/team-echoist/server/commit/a57c1bc5a8ee0f077b67807ecf050a11e05958b7))
+
 ## [1.11.4](https://github.com/team-echoist/server/compare/v1.11.3...v1.11.4) (2024-08-25)
 
 ## [1.11.3](https://github.com/team-echoist/server/compare/v1.11.2...v1.11.3) (2024-08-24)
