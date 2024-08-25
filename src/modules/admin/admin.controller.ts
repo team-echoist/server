@@ -1460,7 +1460,7 @@ export class AdminRootController {
     return this.adminService.clearRootAdminVerify();
   }
 
-  @Post('clear/root-init')
+  @Get('clear/root-init')
   @Public()
   async clearRootAdmin(@Query('token') token: string) {
     return this.adminService.clearRootAdmin(token);
