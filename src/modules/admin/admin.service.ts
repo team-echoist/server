@@ -1110,7 +1110,7 @@ export class AdminService {
 
     await this.redis.set(token, '이게뭔일이람', 'EX', 600);
 
-    await this.mailService.rootAuthenticationEmail(
+    await this.mailService.rootInitAuthenticationEmail(
       this.configService.get<string>('ROOT_EMAIL'),
       token,
     );

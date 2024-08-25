@@ -130,4 +130,37 @@ export class MailService {
       ],
     });
   }
+
+  async rootInitAuthenticationEmail(to: string, token: string): Promise<void> {
+    const env = this.configService.get<string>('ENV');
+    const baseVerificationUrl =
+      env === 'dev'
+        ? 'http://localhost:3000/api/admin-root/clear/root-init'
+        : 'https://linkedoutapp.com/api/admin-root/clear/root-init';
+
+    const verificationUrl = `${baseVerificationUrl}?token=${token}`;
+    const title = '안녕하세요! 링크드아웃 입니다 :)';
+    const message = `루트관리자 기본정보 초기화`;
+    const htmlContent = this.getHtmlTemplate(
+      title,
+      message,
+      'rootAuthMailTemplate',
+      verificationUrl,
+    );
+
+    await this.transporter.sendMail({
+      from: `"LinkedOut" <linkedoutapp@gmail.com>`,
+      to: to,
+      subject: '',
+      html: htmlContent,
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          cid: 'logo',
+          contentDisposition: 'inline',
+        },
+      ],
+    });
+  }
 }
