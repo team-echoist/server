@@ -30,7 +30,7 @@ async function bootstrap() {
   const configService = new ConfigService();
   const utilsService = new UtilsService(configService);
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { snapshot: true });
 
   const allowedOrigins = [
     'https://linkedoutapp.com',
@@ -39,6 +39,7 @@ async function bootstrap() {
     'http://localhost:5173',
     'http://localhost:8888',
     'https://appleid.apple.com',
+    'https://devtools.nestjs.com',
   ];
 
   app.enableCors({

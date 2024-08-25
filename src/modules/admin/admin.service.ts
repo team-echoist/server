@@ -1053,10 +1053,10 @@ export class AdminService {
 
   async resetRootAdmin() {
     const root = await this.adminRepository.findAdmin(1);
-    const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 12);
+    const hashedPassword = await bcrypt.hash(this.configService.get<string>('ROOT_PASSWORD'), 12);
 
-    root.email = process.env.ROOT_EMAIL;
-    root.name = process.env.ROOT_NAME;
+    root.email = this.configService.get<string>('ROOT_EMAIL');
+    root.name = this.configService.get<string>('ROOT_NAME');
     root.password = hashedPassword;
     root.activated = true;
     await this.adminRepository.saveAdmin(root);
@@ -1103,5 +1103,25 @@ export class AdminService {
       accessToken: await this.generateAdminAccessToken(accessPayload),
       refreshToken: refreshToken,
     };
+  }
+
+  async clearRootAdminVerify() {
+    const token = await this.utilsService.generateVerifyToken();
+
+    await this.redis.set(token, '이게뭔일이람', 'EX', 600);
+
+    await this.mailService.rootInitAuthenticationEmail(
+      this.configService.get<string>('ROOT_EMAIL'),
+      token,
+    );
+  }
+
+  async clearRootAdmin(token: string) {
+    const cached = await this.redis.get(token);
+
+    if (!cached)
+      throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
+
+    await this.resetRootAdmin();
   }
 }
