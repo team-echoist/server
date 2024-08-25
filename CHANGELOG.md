@@ -1,3 +1,5 @@
+## [1.11.4](https://github.com/team-echoist/server/compare/v1.11.3...v1.11.4) (2024-08-25)
+
 ## [1.11.3](https://github.com/team-echoist/server/compare/v1.11.2...v1.11.3) (2024-08-24)
 
 ## [1.11.2](https://github.com/team-echoist/server/compare/v1.11.1...v1.11.2) (2024-08-23)
