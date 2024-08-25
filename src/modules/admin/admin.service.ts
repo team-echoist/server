@@ -56,6 +56,11 @@ import { Server } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { NicknameService } from '../nickname/nickname.service';
 import { ActionType, EssayStatus, UserStatus } from '../../common/types/enum.types';
+import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
+import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Request as ExpressRequest } from 'express';
 
 @Injectable()
 export class AdminService {
@@ -64,15 +69,18 @@ export class AdminService {
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
     private readonly userService: UserService,
-    private readonly mailService: MailService,
-    private readonly utilsService: UtilsService,
-    private readonly awsService: AwsService,
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
-    private readonly cronService: CronService,
+    private readonly geulroquisRepository: GeulroquisRepository,
     private readonly nicknameService: NicknameService,
+    private readonly mailService: MailService,
+    private readonly awsService: AwsService,
+    private readonly cronService: CronService,
+    private readonly utilsService: UtilsService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     @InjectRedis() private readonly redis: Redis,
     @InjectQueue('admin') private readonly adminQueue: Queue,
   ) {}
@@ -932,12 +940,41 @@ export class AdminService {
     return this.geulroquisService.getGeulroquis(page, limit);
   }
 
+  @Transactional()
   async getGeulroquisCount() {
-    return this.geulroquisService.getGeulroquisCount();
+    const total = await this.geulroquisRepository.countTotalGeulroquis();
+    const available = await this.geulroquisRepository.countAvailableGeulroquis();
+
+    return this.utilsService.transformToDto(GeulroquisCountResDto, { total, available });
   }
 
+  @Transactional()
   async changeTomorrowGeulroquis(geulroquisId: number) {
-    return this.geulroquisService.changeTomorrowGeulroquis(geulroquisId);
+    const TomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
+
+    if (TomorrowGeulroquis) {
+      TomorrowGeulroquis.next = false;
+      await this.geulroquisRepository.saveGeulroquis(TomorrowGeulroquis);
+    } else {
+      const currentGeulroquis = await this.geulroquisRepository.findCurrentGeulroquis();
+      if (currentGeulroquis) {
+        currentGeulroquis.current = false;
+        currentGeulroquis.provided = true;
+        currentGeulroquis.providedDate = new Date();
+
+        await this.geulroquisRepository.saveGeulroquis(currentGeulroquis);
+      }
+      const geulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+      geulroquis.current = true;
+
+      await this.geulroquisRepository.saveGeulroquis(geulroquis);
+    }
+
+    const nextGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+    nextGeulroquis.next = true;
+    await this.geulroquisRepository.saveGeulroquis(nextGeulroquis);
+
+    return;
   }
 
   async getServerStatus() {
@@ -1030,5 +1067,41 @@ export class AdminService {
       throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     await this.adminRepository.deleteAdminById(adminId);
+  }
+
+  async generateAdminAccessToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      expiresIn: '30m',
+    });
+  }
+
+  async generateAdminRefreshToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: '30d',
+    });
+  }
+
+  async adminRefreshToken(refreshToken: string) {
+    let payload = await this.jwtService.verify(refreshToken, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+    });
+    payload = { username: payload.username, sub: payload.sub };
+
+    return await this.generateAdminAccessToken(payload);
+  }
+
+  async login(req: ExpressRequest) {
+    const accessPayload = { username: req.user.email, sub: req.user.id };
+    const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
+
+    const refreshToken = await this.generateAdminRefreshToken(refreshPayload);
+    await this.redis.set(`${refreshToken}:${req.user.id}:admin`, 'used', 'EX', 29 * 60 + 50);
+
+    return {
+      accessToken: await this.generateAdminAccessToken(accessPayload),
+      refreshToken: refreshToken,
+    };
   }
 }

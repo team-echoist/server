@@ -15,14 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiExcludeEndpoint,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
@@ -70,13 +63,11 @@ import { AdminGuard } from '../../common/guards/admin.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
-import { JwtInterceptor } from '../../common/interceptros/jwt.interceptor';
 
-@ApiTags('Admin')
-@Controller('admin')
+@ApiTags('Admin-auth')
+@Controller('admin-auth')
 @UseGuards(AdminGuard)
-@UseInterceptors(JwtInterceptor)
-export class AdminController {
+export class AdminAuthController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('register')
@@ -120,9 +111,245 @@ export class AdminController {
   `,
   })
   @ApiBody({ type: AdminLoginReqDto })
-  async adminLogin() {
-    return;
+  async adminLogin(@Req() req: ExpressRequest) {
+    return this.adminService.login(req);
   }
+}
+
+@ApiTags('Admin-dashboard')
+@Controller('admin-dashboard')
+@UseGuards(AdminGuard)
+export class AdminDashboardController {
+  constructor(private readonly adminService: AdminService) {}
+  @Get()
+  @ApiOperation({
+    summary: 'Dashboard',
+    description: `
+  1. 총 가입자 수를 조회합니다.
+  2. 현재 프리미엄 구독자 수를 조회합니다.
+  3. 오늘 가입한 사용자 수를 조회합니다.
+  4. 총 에세이 수를 조회합니다.
+  5. 오늘 작성된 에세이 수를 조회합니다.
+  6. 발행된 에세이 수를 조회합니다.
+  7. 링크드아웃된 에세이 수를 조회합니다.
+  8. 처리되지 않은 리포트 수를 조회합니다.
+  9. 처리되지 않은 리뷰 수를 조회합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: DashboardResDto })
+  async dashboard() {
+    return this.adminService.dashboard();
+  }
+
+  @Get('stats/essays/daily')
+  @ApiOperation({
+    summary: '월간 일별 에세이 작성 카운트',
+    description: `
+  월간 일별 에세이 작성 수를 조회합니다.
+    
+  **쿼리 파라미터:**
+  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+  - \`month\`: 조회할 월 (기본값: 현재 월, 1~12 범위)
+    
+  **동작 과정:**
+  1. 제공된 연도와 월을 기준으로 월의 첫날과 마지막 날을 계산합니다.
+  2. 해당 기간 동안의 일별 에세이 작성 수를 조회합니다.
+  3. 일별 데이터를 반환합니다.
+    
+  **주의 사항:**
+  - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
+  - 응답 예시는 월의 각 일자에 해당하는 작성 수를 포함합니다.
+  `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({
+    status: 200,
+    description: 'key = month(1~12), year(4자리)',
+    schema: {
+      type: 'object',
+      example: { '1': 126, '2': 89, '31': 150 },
+    },
+  })
+  async getDailyEssayCount(
+    @Query('year', OptionalParseIntPipe) year?: number,
+    @Query('month', OptionalParseIntPipe) month?: number,
+  ) {
+    return this.adminService.countEssaysByDailyThisMonth(year, month);
+  }
+
+  @Get('stats/essays/monthly')
+  @ApiOperation({
+    summary: '년간 월별 에세이 작성 카운트',
+    description: `
+  년간 월별 에세이 작성 통계를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+
+  **동작 과정:**
+  1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
+  2. 해당 기간 동안의 월별 유저 유입 수를 조회합니다.
+  3. 월별 데이터를 반환합니다.
+
+  **주의 사항:**
+  - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
+  - 응답 예시는 월의 각 월에 해당하는 유저 유입 수를 포함합니다.
+  `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({
+    status: 200,
+    description: 'key = 월(1~12)',
+    schema: {
+      type: 'object',
+      example: { '1': 542, '2': 753, '12': '347' },
+    },
+  })
+  async getMonthlyEssayCount(@Query('year', OptionalParseIntPipe) year?: number) {
+    return this.adminService.countEssaysByMonthlyThisYear(year);
+  }
+
+  @Get('stats/users/daily')
+  @ApiOperation({
+    summary: '월간 일별 유저 유입 통계',
+    description: `
+  월간 일별 유저 유입 통계를 조회합니다.
+    
+  **쿼리 파라미터:**
+  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+  - \`month\`: 조회할 월 (기본값: 현재 월, 1~12 범위)
+    
+  **동작 과정:**
+  1. 제공된 연도와 월을 기준으로 월의 첫날과 마지막 날을 계산합니다.
+  2. 해당 기간 동안의 일별 유저 유입 수를 조회합니다.
+  3. 일별 데이터를 반환합니다.
+    
+  **주의 사항:**
+  - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
+  - 응답 예시는 월의 각 일자에 해당하는 유저 유입 수를 포함합니다.
+  `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      example: { '1': 126, '2': 89, '31': 150 },
+    },
+  })
+  async getDailyRegistrations(
+    @Query('year', OptionalParseIntPipe) year?: number,
+    @Query('month', OptionalParseIntPipe) month?: number,
+  ) {
+    return this.adminService.countDailyRegistrations(year, month);
+  }
+
+  @Get('stats/users/monthly')
+  @ApiOperation({
+    summary: '년간 월별 유저 유입 통계',
+    description: `
+  년간 월별 유저 유입 통계를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+
+  **동작 과정:**
+  1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
+  2. 해당 기간 동안의 월별 유저 유입 수를 조회합니다.
+  3. 월별 데이터를 반환합니다.
+
+  **주의 사항:**
+  - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
+  - 응답 예시는 월의 각 월에 해당하는 유저 유입 수를 포함합니다.
+  `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      example: { '1': 542, '2': 753, '12': '347' },
+    },
+  })
+  async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
+    return this.adminService.countMonthlyRegistrations(year);
+  }
+
+  @Get('stats/payments/daily')
+  @ApiOperation({
+    summary: '월간 일별 구독 가입 통계',
+    description: `
+  월간 일별 구독 가입 통계를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+  - \`month\`: 조회할 월 (기본값: 현재 월)
+
+  **동작 과정:**
+  1. 제공된 연도와 월을 기준으로 일별 첫날과 마지막 날을 계산합니다.
+  2. 해당 기간 동안의 일별 구독 가입 수를 조회합니다.
+  3. 일별 데이터를 반환합니다.
+
+  **주의 사항:**
+  - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
+  - 응답 예시는 일별 구독 가입 수를 포함합니다.
+  `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiQuery({ name: 'month', required: false })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      example: { '1': 126, '2': 89, '31': 150 },
+    },
+  })
+  async getDailySubscriptionPayments(
+    @Query('year', OptionalParseIntPipe) year?: number,
+    @Query('month', OptionalParseIntPipe) month?: number,
+  ) {
+    return this.adminService.countMonthlySubscriptionPayments(year, month);
+  }
+
+  @Get('stats/payments/monthly')
+  @ApiOperation({
+    summary: '년간 월별 구독 가입 통계(구독 미구현)',
+    description: `
+  년간 월별 구독 가입 통계를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+
+  **동작 과정:**
+  1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
+  2. 해당 기간 동안의 월별 구독 가입 수를 조회합니다.
+  3. 월별 데이터를 반환합니다.
+
+  **주의 사항:**
+  - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
+  - 응답 예시는 월별 구독 가입 수를 포함합니다.
+  `,
+  })
+  @ApiQuery({ name: 'year', required: false })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      example: { '1': 542, '2': 753, '12': '347' },
+    },
+  })
+  async getMonthlySubscriptionPayments(@Query('year', OptionalParseIntPipe) year?: number) {
+    return this.adminService.countYearlySubscriptionPayments(year);
+  }
+}
+
+@ApiTags('Admin-info')
+@Controller('admin-info')
+@UseGuards(AdminGuard)
+export class AdminInfoController {
+  constructor(private readonly adminService: AdminService) {}
 
   @Put()
   @ApiOperation({
@@ -219,228 +446,53 @@ export class AdminController {
     return this.adminService.getAdmins(activated);
   }
 
-  @Get('dashboard')
+  @Get('inactive')
   @ApiOperation({
-    summary: 'Dashboard',
+    summary: '비활성화 어드민 리스트',
     description: `
-  1. 총 가입자 수를 조회합니다.
-  2. 현재 프리미엄 구독자 수를 조회합니다.
-  3. 오늘 가입한 사용자 수를 조회합니다.
-  4. 총 에세이 수를 조회합니다.
-  5. 오늘 작성된 에세이 수를 조회합니다.
-  6. 발행된 에세이 수를 조회합니다.
-  7. 링크드아웃된 에세이 수를 조회합니다.
-  8. 처리되지 않은 리포트 수를 조회합니다.
-  9. 처리되지 않은 리뷰 수를 조회합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: DashboardResDto })
-  async dashboard() {
-    return this.adminService.dashboard();
-  }
-
-  @Get('statistics/essays/daily')
-  @ApiOperation({
-    summary: '월간 일별 에세이 작성 카운트',
-    description: `
-  월간 일별 에세이 작성 수를 조회합니다.
-    
-  **쿼리 파라미터:**
-  - \`year\`: 조회할 연도 (기본값: 현재 연도)
-  - \`month\`: 조회할 월 (기본값: 현재 월, 1~12 범위)
+  비활성화 어드민 리스트를 조회합니다.
     
   **동작 과정:**
-  1. 제공된 연도와 월을 기준으로 월의 첫날과 마지막 날을 계산합니다.
-  2. 해당 기간 동안의 일별 에세이 작성 수를 조회합니다.
-  3. 일별 데이터를 반환합니다.
-    
-  **주의 사항:**
-  - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
-  - 응답 예시는 월의 각 일자에 해당하는 작성 수를 포함합니다.
+  1. \`activated\`가 false인 어드민을 조회합니다.
+  2. 조회된 어드민 목록을 DTO로 변환하여 반환합니다.
   `,
   })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiQuery({ name: 'month', required: false })
   @ApiResponse({
     status: 200,
-    description: 'key = month(1~12), year(4자리)',
-    schema: {
-      type: 'object',
-      example: { '1': 126, '2': 89, '31': 150 },
-    },
+    type: AdminsResDto,
   })
-  async getDailyEssayCount(
-    @Query('year', OptionalParseIntPipe) year?: number,
-    @Query('month', OptionalParseIntPipe) month?: number,
-  ) {
-    return this.adminService.countEssaysByDailyThisMonth(year, month);
+  async getInactiveAdmins() {
+    return this.adminService.getInactiveAdmins();
   }
 
-  @Get('statistics/essays/monthly')
+  @Get(':adminId')
   @ApiOperation({
-    summary: '년간 월별 에세이 작성 카운트',
+    summary: '어드민 상세조회',
     description: `
-  년간 월별 에세이 작성 통계를 조회합니다.
+  특정 어드민의 상세 정보를 조회합니다.
 
-  **쿼리 파라미터:**
-  - \`year\`: 조회할 연도 (기본값: 현재 연도)
+  **경로 파라미터:**
+  - \`adminId\`: 조회할 어드민의 ID
 
   **동작 과정:**
-  1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
-  2. 해당 기간 동안의 월별 유저 유입 수를 조회합니다.
-  3. 월별 데이터를 반환합니다.
+  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 상세 정보를 조회합니다.
+  2. 조회된 어드민 정보를 반환합니다.
 
   **주의 사항:**
-  - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
-  - 응답 예시는 월의 각 월에 해당하는 유저 유입 수를 포함합니다.
+  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
   `,
   })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({
-    status: 200,
-    description: 'key = 월(1~12)',
-    schema: {
-      type: 'object',
-      example: { '1': 542, '2': 753, '12': '347' },
-    },
-  })
-  async getMonthlyEssayCount(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countEssaysByMonthlyThisYear(year);
+  @ApiResponse({ status: 200, type: AdminResDto })
+  async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
+    return this.adminService.getAdmin(adminId);
   }
+}
 
-  @Get('statistics/users/daily')
-  @ApiOperation({
-    summary: '월간 일별 유저 유입 통계',
-    description: `
-  월간 일별 유저 유입 통계를 조회합니다.
-    
-  **쿼리 파라미터:**
-  - \`year\`: 조회할 연도 (기본값: 현재 연도)
-  - \`month\`: 조회할 월 (기본값: 현재 월, 1~12 범위)
-    
-  **동작 과정:**
-  1. 제공된 연도와 월을 기준으로 월의 첫날과 마지막 날을 계산합니다.
-  2. 해당 기간 동안의 일별 유저 유입 수를 조회합니다.
-  3. 일별 데이터를 반환합니다.
-    
-  **주의 사항:**
-  - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
-  - 응답 예시는 월의 각 일자에 해당하는 유저 유입 수를 포함합니다.
-  `,
-  })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'object',
-      example: { '1': 126, '2': 89, '31': 150 },
-    },
-  })
-  async getDailyRegistrations(
-    @Query('year', OptionalParseIntPipe) year?: number,
-    @Query('month', OptionalParseIntPipe) month?: number,
-  ) {
-    return this.adminService.countDailyRegistrations(year, month);
-  }
-
-  @Get('statistics/users/monthly')
-  @ApiOperation({
-    summary: '년간 월별 유저 유입 통계',
-    description: `
-  년간 월별 유저 유입 통계를 조회합니다.
-
-  **쿼리 파라미터:**
-  - \`year\`: 조회할 연도 (기본값: 현재 연도)
-
-  **동작 과정:**
-  1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
-  2. 해당 기간 동안의 월별 유저 유입 수를 조회합니다.
-  3. 월별 데이터를 반환합니다.
-
-  **주의 사항:**
-  - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
-  - 응답 예시는 월의 각 월에 해당하는 유저 유입 수를 포함합니다.
-  `,
-  })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'object',
-      example: { '1': 542, '2': 753, '12': '347' },
-    },
-  })
-  async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countMonthlyRegistrations(year);
-  }
-
-  @Get('statistics/payments/daily')
-  @ApiOperation({
-    summary: '월간 일별 구독 가입 통계',
-    description: `
-  월간 일별 구독 가입 통계를 조회합니다.
-
-  **쿼리 파라미터:**
-  - \`year\`: 조회할 연도 (기본값: 현재 연도)
-  - \`month\`: 조회할 월 (기본값: 현재 월)
-
-  **동작 과정:**
-  1. 제공된 연도와 월을 기준으로 일별 첫날과 마지막 날을 계산합니다.
-  2. 해당 기간 동안의 일별 구독 가입 수를 조회합니다.
-  3. 일별 데이터를 반환합니다.
-
-  **주의 사항:**
-  - \`year\`와 \`month\`가 제공되지 않으면 현재 연도와 월을 기본값으로 사용합니다.
-  - 응답 예시는 일별 구독 가입 수를 포함합니다.
-  `,
-  })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiQuery({ name: 'month', required: false })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'object',
-      example: { '1': 126, '2': 89, '31': 150 },
-    },
-  })
-  async getDailySubscriptionPayments(
-    @Query('year', OptionalParseIntPipe) year?: number,
-    @Query('month', OptionalParseIntPipe) month?: number,
-  ) {
-    return this.adminService.countMonthlySubscriptionPayments(year, month);
-  }
-
-  @Get('statistics/payments/monthly')
-  @ApiOperation({
-    summary: '년간 월별 구독 가입 통계',
-    description: `
-  년간 월별 구독 가입 통계를 조회합니다.
-
-  **쿼리 파라미터:**
-  - \`year\`: 조회할 연도 (기본값: 현재 연도)
-
-  **동작 과정:**
-  1. 제공된 연도를 기준으로 월별 첫날과 마지막 날을 계산합니다.
-  2. 해당 기간 동안의 월별 구독 가입 수를 조회합니다.
-  3. 월별 데이터를 반환합니다.
-
-  **주의 사항:**
-  - \`year\`가 제공되지 않으면 현재 연도를 기본값으로 사용합니다.
-  - 응답 예시는 월별 구독 가입 수를 포함합니다.
-  `,
-  })
-  @ApiQuery({ name: 'year', required: false })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'object',
-      example: { '1': 542, '2': 753, '12': '347' },
-    },
-  })
-  async getMonthlySubscriptionPayments(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countYearlySubscriptionPayments(year);
-  }
+@ApiTags('Admin-task')
+@Controller('admin-task')
+@UseGuards(AdminGuard)
+export class AdminTaskController {
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('reports')
   @ApiOperation({
@@ -615,222 +667,13 @@ export class AdminController {
   ) {
     return this.adminService.processReview(req.user.id, reviewId, processReqDto);
   }
+}
 
-  @Get('users')
-  @ApiOperation({
-    summary: '유저 리스트 조회',
-    description: `
-  관리자가 유저 리스트를 조회합니다. 다양한 필터와 페이지네이션을 사용하여 유저 목록을 조회할 수 있습니다.
-
-  **쿼리 파라미터:**
-  - \`page\`: 조회할 페이지 번호 (기본값: 1)
-  - \`limit\`: 한 페이지에 조회할 유저 수 (기본값: 10)
-  - \`filter\`: 필터 옵션 ('all', 'monitored', 'activeSubscription')
-
-  **동작 과정:**
-  1. 필터와 페이지네이션 옵션을 적용하여 유저 목록을 조회합니다.
-  2. 조회된 유저 목록과 총 페이지 수, 현재 페이지, 총 유저 수를 반환합니다.
-
-  **주의 사항:**
-  - 필터 옵션은 선택 사항이며, 값을 제공하지 않으면 기본값 'all'로 설정됩니다.
-  - 관리자 권한이 필요합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: UsersResDto })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'filter', enum: ['all', 'monitored', 'activeSubscription'], required: false })
-  async getUsers(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
-    @Query('filter') filter?: string,
-  ) {
-    return this.adminService.getUsers(filter, page, limit);
-  }
-
-  @Get('users/:userId')
-  @ApiOperation({
-    summary: '유저 상세 조회',
-    description: `
-  관리자 권한으로 특정 유저의 상세 정보를 조회합니다.
-  
-  **경로 파라미터:**
-  - \`userId\`: 조회할 유저의 고유 ID
-
-  **동작 과정:**
-  1. 해당 유저의 상세 정보를 조회합니다.
-  2. 유저의 총 신고 수, 작성한 에세이 수, 리뷰 수를 포함한 정보를 반환합니다.
-
-  **주의 사항:**
-  - 관리자 권한이 필요합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: UserDetailResDto })
-  async getUser(@Param('userId', ParseIntPipe) userId: number) {
-    return this.adminService.getUser(userId);
-  }
-
-  @Put('users/:userId')
-  @ApiOperation({
-    summary: '유저 정보 수정',
-    description: `
-  관리자가 특정 유저의 정보를 수정합니다.
-
-  **경로 파라미터:**
-  - \`userId\`: 수정할 유저의 고유 ID
-
-  **동작 과정:**
-  1. 관리자가 유저 정보를 수정합니다.
-  2. 유저 상태가 'banned'로 변경될 경우, 해당 유저의 모든 에세이를 논리적으로 삭제하고 계정을 정지합니다.
-  3. 수정된 유저 정보를 반환합니다.
-
-  **주의 사항:**
-  - 관리자 권한이 필요합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: UserDetailResDto })
-  @ApiBody({ type: UpdateFullUserReqDto })
-  async updateUser(
-    @Req() req: ExpressRequest,
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() data: UpdateFullUserReqDto,
-  ) {
-    return this.adminService.updateUser(req.user.id, userId, data);
-  }
-
-  @Get('essays')
-  @ApiOperation({
-    summary: '에세이 리스트 조회',
-    description: `
-  관리자용 에세이 리스트를 조회합니다.
-
-  **쿼리 파라미터:**
-  - \`page\`: 페이지 번호 (기본값: 1)
-  - \`limit\`: 한 페이지에 보여질 에세이 수 (기본값: 10)
-
-  **동작 과정:**
-  1. 관리자 권한으로 에세이 리스트를 조회합니다.
-  2. 페이지네이션을 적용하여 결과를 반환합니다.
-
-  **주의 사항:**
-  - 관리자 권한이 필요합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: EssaysInfoResDto })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  async getEssays(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
-  ) {
-    return this.adminService.getFullEssays(page, limit);
-  }
-
-  @Get('essays/:essayId')
-  @ApiOperation({
-    summary: '에세이 상세 데이터 조회',
-    description: `
-  특정 에세이의 상세 데이터를 조회합니다.
-
-  **경로 파라미터:**
-  - \`essayId\`: 조회할 에세이의 고유 ID
-
-  **동작 과정:**
-  1. 관리자 권한으로 특정 에세이의 상세 데이터를 조회합니다.
-  2. 조회된 데이터를 반환합니다.
-
-  **주의 사항:**
-  - 관리자 권한이 필요합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: FullEssayResDto })
-  async getEssay(@Param('essayId', ParseIntPipe) essayId: number) {
-    return this.adminService.getFullEssay(essayId);
-  }
-
-  @Put('essays/:essayId')
-  @ApiOperation({
-    summary: '에세이 상태 수정',
-    description: `
-	관리자 권한으로 특정 에세이의 상태를 수정합니다. 이 API는 발행 및 링크드아웃 취소에 사용됩니다.
-	타겟 에세이에 포함된 리포트 및 리뷰를 일괄적으로 '보류' 상태로 변경합니다.
-
-	**경로 파라미터:**
-	- \`essayId\`: 상태를 수정할 에세이의 고유 ID
-
-	**요청 바디:**
-	- \`status\`: 수정할 에세이의 새로운 상태 (PUBLISHED, LINKEDOUT, PRIVATE)
-
-	**동작 과정:**
-	1. 관리자 권한으로 특정 에세이의 상태를 수정합니다.
-	2. 에세이와 연관된 리포트 및 리뷰를 '보류' 상태로 일괄 처리합니다.
-
-	**주의 사항:**
-	- 관리자 권한이 필요합니다.
-	`,
-  })
-  @ApiResponse({ status: 200, type: FullEssayResDto })
-  @ApiBody({ type: UpdateEssayStatusReqDto })
-  async updateEssayStatus(
-    @Req() req: ExpressRequest,
-    @Param('essayId', ParseIntPipe) essayId: number,
-    @Body() data: UpdateEssayStatusReqDto,
-  ) {
-    return this.adminService.updateEssayStatus(req.user.id, essayId, data);
-  }
-
-  @Get('histories')
-  @ApiOperation({
-    summary: '관리자 처리 기록',
-    description: `
-  관리자 처리 기록을 조회합니다. 다양한 쿼리 파라미터를 사용하여 기록을 필터링할 수 있습니다.
-
-  **쿼리 파라미터:**
-  - \`page\`: 페이지 번호 (기본값: 1)
-  - \`limit\`: 페이지당 항목 수 (기본값: 10)
-  - \`target\`: 타겟 (report, review, essay, user)
-  - \`action\`: 액션 (approved, rejected, pending, unpublished, unlinkedout, deleted)
-
-  **동작 과정:**
-  1. 관리자 처리 기록을 페이지네이션과 함께 조회합니다.
-  2. 필터 조건에 맞는 기록만 조회합니다.
-
-  **주의 사항:**
-  - 관리자 권한이 필요합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: HistoriesResDto })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'target', required: false })
-  @ApiQuery({ name: 'action', required: false })
-  async getHistories(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
-    @Query('target') target?: string,
-    @Query('action') action?: string,
-  ) {
-    return this.adminService.getHistories(page, limit, target, action);
-  }
-
-  @Get('inactive')
-  @ApiOperation({
-    summary: '비활성화 어드민 리스트',
-    description: `
-  비활성화 어드민 리스트를 조회합니다.
-    
-  **동작 과정:**
-  1. \`activated\`가 false인 어드민을 조회합니다.
-  2. 조회된 어드민 목록을 DTO로 변환하여 반환합니다.
-  `,
-  })
-  @ApiResponse({
-    status: 200,
-    type: AdminsResDto,
-  })
-  async getInactiveAdmins() {
-    return this.adminService.getInactiveAdmins();
-  }
+@ApiTags('Admin-support')
+@Controller('admin-support')
+@UseGuards(AdminGuard)
+export class AdminSupportController {
+  constructor(private readonly adminService: AdminService) {}
 
   @Post('notices')
   @ApiOperation({
@@ -1146,6 +989,228 @@ export class AdminController {
   async getRelease(@Param('releaseId', ParseIntPipe) releaseId: number) {
     return this.adminService.getRelease(releaseId);
   }
+}
+
+@ApiTags('Admin-management')
+@Controller('admin-management')
+@UseGuards(AdminGuard)
+export class AdminManagementController {
+  constructor(private readonly adminService: AdminService) {}
+
+  @Get('users')
+  @ApiOperation({
+    summary: '유저 리스트 조회',
+    description: `
+  관리자가 유저 리스트를 조회합니다. 다양한 필터와 페이지네이션을 사용하여 유저 목록을 조회할 수 있습니다.
+
+  **쿼리 파라미터:**
+  - \`page\`: 조회할 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 조회할 유저 수 (기본값: 10)
+  - \`filter\`: 필터 옵션 ('all', 'monitored', 'activeSubscription')
+
+  **동작 과정:**
+  1. 필터와 페이지네이션 옵션을 적용하여 유저 목록을 조회합니다.
+  2. 조회된 유저 목록과 총 페이지 수, 현재 페이지, 총 유저 수를 반환합니다.
+
+  **주의 사항:**
+  - 필터 옵션은 선택 사항이며, 값을 제공하지 않으면 기본값 'all'로 설정됩니다.
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UsersResDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'filter', enum: ['all', 'monitored', 'activeSubscription'], required: false })
+  async getUsers(
+    @Query('page', new PagingParseIntPipe(1)) page?: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+    @Query('filter') filter?: string,
+  ) {
+    return this.adminService.getUsers(filter, page, limit);
+  }
+
+  @Get('users/:userId')
+  @ApiOperation({
+    summary: '유저 상세 조회',
+    description: `
+  관리자 권한으로 특정 유저의 상세 정보를 조회합니다.
+  
+  **경로 파라미터:**
+  - \`userId\`: 조회할 유저의 고유 ID
+
+  **동작 과정:**
+  1. 해당 유저의 상세 정보를 조회합니다.
+  2. 유저의 총 신고 수, 작성한 에세이 수, 리뷰 수를 포함한 정보를 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UserDetailResDto })
+  async getUser(@Param('userId', ParseIntPipe) userId: number) {
+    return this.adminService.getUser(userId);
+  }
+
+  @Put('users/:userId')
+  @ApiOperation({
+    summary: '유저 정보 수정',
+    description: `
+  관리자가 특정 유저의 정보를 수정합니다.
+
+  **경로 파라미터:**
+  - \`userId\`: 수정할 유저의 고유 ID
+
+  **동작 과정:**
+  1. 관리자가 유저 정보를 수정합니다.
+  2. 유저 상태가 'banned'로 변경될 경우, 해당 유저의 모든 에세이를 논리적으로 삭제하고 계정을 정지합니다.
+  3. 수정된 유저 정보를 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UserDetailResDto })
+  @ApiBody({ type: UpdateFullUserReqDto })
+  async updateUser(
+    @Req() req: ExpressRequest,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() data: UpdateFullUserReqDto,
+  ) {
+    return this.adminService.updateUser(req.user.id, userId, data);
+  }
+
+  @Get('essays')
+  @ApiOperation({
+    summary: '에세이 리스트 조회',
+    description: `
+  관리자용 에세이 리스트를 조회합니다.
+
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 보여질 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 관리자 권한으로 에세이 리스트를 조회합니다.
+  2. 페이지네이션을 적용하여 결과를 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: EssaysInfoResDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getEssays(
+    @Query('page', new PagingParseIntPipe(1)) page?: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+  ) {
+    return this.adminService.getFullEssays(page, limit);
+  }
+
+  @Get('essays/:essayId')
+  @ApiOperation({
+    summary: '에세이 상세 데이터 조회',
+    description: `
+  특정 에세이의 상세 데이터를 조회합니다.
+
+  **경로 파라미터:**
+  - \`essayId\`: 조회할 에세이의 고유 ID
+
+  **동작 과정:**
+  1. 관리자 권한으로 특정 에세이의 상세 데이터를 조회합니다.
+  2. 조회된 데이터를 반환합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: FullEssayResDto })
+  async getEssay(@Param('essayId', ParseIntPipe) essayId: number) {
+    return this.adminService.getFullEssay(essayId);
+  }
+
+  @Put('essays/:essayId')
+  @ApiOperation({
+    summary: '에세이 상태 수정',
+    description: `
+	관리자 권한으로 특정 에세이의 상태를 수정합니다. 이 API는 발행 및 링크드아웃 취소에 사용됩니다.
+	타겟 에세이에 포함된 리포트 및 리뷰를 일괄적으로 '보류' 상태로 변경합니다.
+
+	**경로 파라미터:**
+	- \`essayId\`: 상태를 수정할 에세이의 고유 ID
+
+	**요청 바디:**
+	- \`status\`: 수정할 에세이의 새로운 상태 (PUBLISHED, LINKEDOUT, PRIVATE)
+
+	**동작 과정:**
+	1. 관리자 권한으로 특정 에세이의 상태를 수정합니다.
+	2. 에세이와 연관된 리포트 및 리뷰를 '보류' 상태로 일괄 처리합니다.
+
+	**주의 사항:**
+	- 관리자 권한이 필요합니다.
+	`,
+  })
+  @ApiResponse({ status: 200, type: FullEssayResDto })
+  @ApiBody({ type: UpdateEssayStatusReqDto })
+  async updateEssayStatus(
+    @Req() req: ExpressRequest,
+    @Param('essayId', ParseIntPipe) essayId: number,
+    @Body() data: UpdateEssayStatusReqDto,
+  ) {
+    return this.adminService.updateEssayStatus(req.user.id, essayId, data);
+  }
+}
+
+@ApiTags('Admin-office')
+@Controller('admin-office')
+@UseGuards(AdminGuard)
+export class AdminOfficeController {
+  constructor(private readonly adminService: AdminService) {}
+
+  @Get('crons/logs')
+  @ApiOperation({ summary: '크론 로그 조회' })
+  @ApiResponse({ type: CronLogsResDto })
+  async getCronLogs(
+    @Req() req: ExpressRequest,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getCronLogs(req.user.id, page, limit);
+  }
+
+  @Get('histories')
+  @ApiOperation({
+    summary: '관리자 처리 기록',
+    description: `
+  관리자 처리 기록을 조회합니다. 다양한 쿼리 파라미터를 사용하여 기록을 필터링할 수 있습니다.
+
+  **쿼리 파라미터:**
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 페이지당 항목 수 (기본값: 10)
+  - \`target\`: 타겟 (report, review, essay, user)
+  - \`action\`: 액션 (approved, rejected, pending, unpublished, unlinkedout, deleted)
+
+  **동작 과정:**
+  1. 관리자 처리 기록을 페이지네이션과 함께 조회합니다.
+  2. 필터 조건에 맞는 기록만 조회합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: HistoriesResDto })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'target', required: false })
+  @ApiQuery({ name: 'action', required: false })
+  async getHistories(
+    @Query('page', new PagingParseIntPipe(1)) page?: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+    @Query('target') target?: string,
+    @Query('action') action?: string,
+  ) {
+    return this.adminService.getHistories(page, limit, target, action);
+  }
 
   @Get('geulroquis')
   @ApiOperation({ summary: '글로키 리스트' })
@@ -1162,39 +1227,6 @@ export class AdminController {
   @ApiResponse({ status: 200, type: GeulroquisCountResDto })
   async getGeulroquisCount() {
     return this.adminService.getGeulroquisCount();
-  }
-
-  @Get(':adminId')
-  @ApiOperation({
-    summary: '어드민 상세조회',
-    description: `
-  특정 어드민의 상세 정보를 조회합니다.
-
-  **경로 파라미터:**
-  - \`adminId\`: 조회할 어드민의 ID
-
-  **동작 과정:**
-  1. 주어진 \`adminId\`를 기반으로 해당 어드민의 상세 정보를 조회합니다.
-  2. 조회된 어드민 정보를 반환합니다.
-
-  **주의 사항:**
-  - 어드민 ID가 유효하지 않으면 \`404 Not Found\` 오류가 발생합니다.
-  `,
-  })
-  @ApiResponse({ status: 200, type: AdminResDto })
-  async getAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
-    return this.adminService.getAdmin(adminId);
-  }
-
-  @Get('/crons/logs')
-  @ApiOperation({ summary: '크론 로그 조회' })
-  @ApiResponse({ type: CronLogsResDto })
-  async getCronLogs(
-    @Req() req: ExpressRequest,
-    @Query('page', new PagingParseIntPipe(1)) page: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit: number,
-  ) {
-    return this.adminService.getCronLogs(req.user.id, page, limit);
   }
 
   @Post('geulroquis')
@@ -1314,23 +1346,17 @@ export class AdminController {
   ) {
     return this.adminService.updateAppVersion(versionId, data.version);
   }
+}
 
-  // ===========================================================
-  // ===================== danger zone =========================
-  // ===========================================================
+@ApiTags('위험구역')
+@Controller('admin-root')
+@UseGuards(AdminGuard)
+export class AdminRootController {
+  constructor(private readonly adminService: AdminService) {}
 
-  // @Delete('danger/users/all')
-  // async deleteAllUser(@Req() req: ExpressRequest) {
-  //   return this.adminService.deleteAllUser(req.user.id);
-  // }
-
-  // @Delete('danger/device/all')
-  // async deleteAllDevice(@Req() req: ExpressRequest) {
-  //   return this.adminService.deleteAllDevice(req.user.id);
-  // }
-  @Post('root/produce')
+  @Post('produce')
   @ApiOperation({
-    summary: '[루트 관리자용] 관리자생성',
+    summary: '관리자생성',
     description: `
   루트 관리자가 새로운 관리자를 생성하는 API입니다. 이 API는 루트 관리자만 호출할 수 있습니다.
     
@@ -1352,9 +1378,9 @@ export class AdminController {
     return this.adminService.createAdmin(req.user.id, data);
   }
 
-  @Put('root/:adminId')
+  @Put(':adminId')
   @ApiOperation({
-    summary: '[루트관리자용] 어드민 활성화 상태 변경',
+    summary: '어드민 활성화 상태 변경',
     description: `
   어드민의 활성화 상태를 변경합니다. 이 기능은 루트 관리자가 사용합니다.
 
@@ -1385,14 +1411,9 @@ export class AdminController {
     return this.adminService.activationSettings(req.user.id, adminId, activated);
   }
 
-  @Delete('root/:adminId')
-  async deleteAdmin(@Req() req: ExpressRequest, @Param('adminId', ParseIntPipe) adminId: number) {
-    return this.adminService.deleteAdmin(req.user.id, adminId);
-  }
-
-  @Post('root/server/status')
+  @Post('server/status')
   @ApiOperation({
-    summary: '[루트관리자] 서버 상태 업데이트',
+    summary: '서버 상태 업데이트',
     description: `
   서버의 상태를 업데이트합니다.
   
@@ -1412,22 +1433,34 @@ export class AdminController {
     return await this.adminService.saveServerStatus(req.user.id, status);
   }
 
-  @Delete('root/users/:userId')
-  @ApiExcludeEndpoint()
+  @Delete(':adminId')
+  async deleteAdmin(@Req() req: ExpressRequest, @Param('adminId', ParseIntPipe) adminId: number) {
+    return this.adminService.deleteAdmin(req.user.id, adminId);
+  }
+
+  @Delete('users/:userId')
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.deleteUser(req.user.id, userId);
   }
 
-  @Post('root/super/verify')
-  @ApiExcludeEndpoint()
+  @Post('clear/verify')
   async requestClearDatabase(@Req() req: ExpressRequest) {
     return this.adminService.requestClearDatabase(req.user.id);
   }
 
-  @Get('root/super/init')
+  @Get('clear/init')
   @Public()
-  @ApiExcludeEndpoint()
   async clearDatabase(@Query('token') token: string) {
     return this.adminService.clearDatabase(token);
+  }
+
+  @Delete('clear/users')
+  async deleteAllUser(@Req() req: ExpressRequest) {
+    return this.adminService.deleteAllUser(req.user.id);
+  }
+
+  @Delete('clear/device')
+  async deleteAllDevice(@Req() req: ExpressRequest) {
+    return this.adminService.deleteAllDevice(req.user.id);
   }
 }

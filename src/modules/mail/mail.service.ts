@@ -102,8 +102,8 @@ export class MailService {
     const env = this.configService.get<string>('ENV');
     const baseVerificationUrl =
       env === 'dev'
-        ? 'http://localhost:3000/api/admin/root/super/init'
-        : 'https://linkedoutapp.com/api/admin/root/super/init';
+        ? 'http://localhost:3000/api/admin-root/clear/init'
+        : 'https://linkedoutapp.com/api/admin-root/clear/init';
 
     const verificationUrl = `${baseVerificationUrl}?token=${token}`;
     const title = '안녕하세요! 링크드아웃 입니다 :)';

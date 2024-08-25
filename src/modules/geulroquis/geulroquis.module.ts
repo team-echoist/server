@@ -19,6 +19,6 @@ import { UserModule } from '../user/user.module';
   ],
   controllers: [GeulroquisController],
   providers: [GeulroquisService, GeulroquisRepository],
-  exports: [GeulroquisService],
+  exports: [GeulroquisService, GeulroquisRepository],
 })
 export class GeulroquisModule {}
