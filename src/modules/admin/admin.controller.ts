@@ -1454,6 +1454,18 @@ export class AdminRootController {
     return this.adminService.clearDatabase(token);
   }
 
+  @Post('clear/root-verify')
+  @Public()
+  async clearRootAdminVerify() {
+    return this.adminService.clearRootAdminVerify();
+  }
+
+  @Post('clear/root-init')
+  @Public()
+  async clearRootAdmin(@Query('token') token: string) {
+    return this.adminService.clearRootAdmin(token);
+  }
+
   @Delete('clear/users')
   async deleteAllUser(@Req() req: ExpressRequest) {
     return this.adminService.deleteAllUser(req.user.id);

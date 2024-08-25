@@ -32,9 +32,12 @@ import { HomeModule } from './modules/home/home.module';
 import { ServerGuard } from './common/guards/server.guard';
 import * as strategies from './common/guards/strategies';
 import { DeviceMiddleware } from './common/middlewares/device.middleware';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
+import * as process from 'node:process';
 
 @Module({
   imports: [
+    DevtoolsModule.register({ http: true }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '../.env',
