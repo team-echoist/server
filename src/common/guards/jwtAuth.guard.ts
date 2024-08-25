@@ -93,20 +93,37 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
-    if (!this.isSameDevice(decodedRefreshToken.device, request.device))
+    const user = await this.authService.validatePayload({
+      username: decodedRefreshToken.username,
+      sub: decodedRefreshToken.sub,
+    });
+
+    if (decodedRefreshToken.tokenVersion !== user.tokenVersion) {
+      throw new HttpException(
+        '잠재적인 위협이 감지되어 토큰이 무효화 되었습니다. 다시 로그인 해주세요.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    if (!this.isSameDevice(decodedRefreshToken.device, request.device)) {
+      await this.authService.incrementTokenVersion(user);
+      await this.redis.del(`user:${decodedRefreshToken.sub}`);
       throw new HttpException(
         '알 수 없는 디바이스 또는 환경에서의 접근 시도가 감지되었습니다.',
         HttpStatus.UNAUTHORIZED,
       );
+    }
 
     const cachedToken = await this.redis.get(`${refreshToken}:${decodedRefreshToken.sub}`);
     if (cachedToken) {
-      await this.redis.set(`${refreshToken}:${decodedRefreshToken.sub}`, 'used', 'EX', 720 * 60);
+      await this.authService.incrementTokenVersion(user);
+      await this.redis.del(`user:${decodedRefreshToken.sub}`);
       throw new HttpException(
         '잠재적인 토큰 탈취 또는 남용이 감지되었습니다.',
         HttpStatus.UNAUTHORIZED,
       );
     }
+
     try {
       const newAccessTokens = await this.authService.refreshToken(refreshToken);
 

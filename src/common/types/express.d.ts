@@ -19,6 +19,7 @@ declare global {
       deletedAt?: Date;
       deactivationDate?: Date;
       isFirst?: boolean;
+      tokenVersion?: number;
     }
 
     export interface DeviceDto {
