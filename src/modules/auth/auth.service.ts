@@ -81,7 +81,6 @@ export class AuthService {
     const userEmailData = { email, userId };
 
     await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 300);
-
     await this.mailService.sendVerificationEmail(email, token);
   }
 
@@ -168,7 +167,7 @@ export class AuthService {
   async generateAccessToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      expiresIn: '1s',
+      expiresIn: '30m',
     });
   }
 
@@ -253,7 +252,7 @@ export class AuthService {
 
     await this.authRepository.saveUser(user);
 
-    await this.mailService.sendPasswordResetEmail(temporaryPassword, temporaryPassword);
+    await this.mailService.sendPasswordResetEmail(email, temporaryPassword);
   }
 
   // ----------------- OAuth ---------------------

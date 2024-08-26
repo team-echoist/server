@@ -13,6 +13,12 @@ describe('ReportController', () => {
   let controller: ReportController;
   let service: jest.Mocked<ReportService>;
 
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [JwtModule.register({}), ConfigModule.forRoot()],

@@ -1,3 +1,10 @@
+## [1.11.6](https://github.com/team-echoist/server/compare/v1.11.5...v1.11.6) (2024-08-25)
+
+
+### Bug Fixes
+
+* incorrect reference in admin token payload ([#416](https://github.com/team-echoist/server/issues/416)) ([05fb555](https://github.com/team-echoist/server/commit/05fb55500432b8adb99a387a977244a472f823ec))
+
 ## [1.11.5](https://github.com/team-echoist/server/compare/v1.11.4...v1.11.5) (2024-08-25)
 
 

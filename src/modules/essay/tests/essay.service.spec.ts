@@ -24,7 +24,7 @@ import { EssayStatsDto } from '../dto/essayStats.dto';
 import { Story } from '../../../entities/story.entity';
 import { SupportService } from '../../support/support.service';
 import { SupportRepository } from '../../support/support.repository';
-import { AnotherEssayType, EssayStatus, UserStatus } from '../../../common/types/enum.types';
+import { PageType, EssayStatus, UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -329,7 +329,6 @@ describe('EssayService', () => {
   describe('getMyEssays', () => {
     it('should return my essays', async () => {
       const userId = 1;
-      const published = true;
       const storyId = 1;
       const page = 1;
       const limit = 10;
@@ -340,11 +339,11 @@ describe('EssayService', () => {
       utilsService.extractPartContent.mockImplementation((content) => `part of ${content}`);
       utilsService.transformToDto.mockReturnValue(essays);
 
-      const result = await service.getMyEssays(userId, published, storyId, page, limit);
+      const result = await service.getMyEssays(userId, PageType.PUBLIC, storyId, page, limit);
 
       expect(essayRepository.findEssays).toHaveBeenCalledWith(
         userId,
-        published,
+        PageType.PUBLIC,
         storyId,
         page,
         limit,
@@ -411,7 +410,7 @@ describe('EssayService', () => {
       });
       service.getRecommendEssays = jest.fn().mockResolvedValue({ essays: previousEssays });
 
-      const result = await service.getEssay(userId, essayId, AnotherEssayType.RECOMMEND);
+      const result = await service.getEssay(userId, essayId, PageType.RECOMMEND);
 
       expect(userService.fetchUserEntityById).toHaveBeenCalledWith(userId);
       expect(essayRepository.findEssayById).toHaveBeenCalledWith(essayId);
@@ -432,7 +431,7 @@ describe('EssayService', () => {
 
       essayRepository.findEssayById.mockResolvedValue(null);
 
-      await expect(service.getEssay(userId, essayId, AnotherEssayType.RECOMMEND)).rejects.toThrow(
+      await expect(service.getEssay(userId, essayId, PageType.RECOMMEND)).rejects.toThrow(
         new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
       );
 
