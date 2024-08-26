@@ -11,6 +11,12 @@ describe('UserController', () => {
   let controller: UserController;
   let service: jest.Mocked<UserService>;
 
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],

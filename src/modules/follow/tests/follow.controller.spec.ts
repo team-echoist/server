@@ -12,6 +12,12 @@ describe('FollowController', () => {
   let controller: FollowController;
   let service: jest.Mocked<FollowService>;
 
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [JwtModule.register({}), ConfigModule.forRoot()],

@@ -12,6 +12,12 @@ describe('BadgeController', () => {
   let controller: BadgeController;
   let service: jest.Mocked<BadgeService>;
 
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [JwtModule.register({}), ConfigModule.forRoot()],

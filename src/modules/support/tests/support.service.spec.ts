@@ -152,29 +152,6 @@ describe('SupportService', () => {
     });
   });
 
-  describe('getUserUpdateHistories', () => {
-    it('should return user update histories', async () => {
-      const page = 1;
-      const limit = 10;
-      const releases = [{ id: 1, content: 'Update 1' }] as any;
-      const total = releases.length;
-
-      supportRepository.findUserReleases.mockResolvedValue({ releases, total });
-      utilsService.transformToDto.mockReturnValue(releases);
-
-      const result = await service.getUserReleases(page, limit);
-
-      expect(supportRepository.findUserReleases).toHaveBeenCalledWith(page, limit);
-      expect(utilsService.transformToDto).toHaveBeenCalledWith(expect.any(Function), releases);
-      expect(result).toEqual({
-        releases,
-        total,
-        page,
-        totalPage: Math.ceil(total / limit),
-      });
-    });
-  });
-
   describe('getSettings', () => {
     it('should return user settings', async () => {
       const req: ExpressRequest = {

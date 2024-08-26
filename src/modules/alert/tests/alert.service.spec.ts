@@ -81,6 +81,7 @@ describe('AlertService', () => {
     const mockUser = { id: 1 } as any;
     const mockReport = { essay: { status: EssayStatus.PUBLISHED }, createdDate: new Date() } as any;
     const mockAlert = new Alert();
+    mockAlert.title = '2024-08-21';
     jest.spyOn(userService, 'fetchUserEntityById').mockResolvedValue(mockUser);
     jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
     jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
@@ -97,7 +98,10 @@ describe('AlertService', () => {
   });
 
   it('신고 처리 알림 샌드', async () => {
-    const mockReport = { reporter: { id: 1 } } as any;
+    const mockReport = {
+      reporter: { id: 1 },
+      essay: { id: 1, status: EssayStatus.PUBLISHED },
+    } as any;
     const mockDevice = { id: 1, fcmToken: 'token' } as any;
     const mockAlertSettings = { report: true } as any;
     const mockUser = { id: 1 } as any;
@@ -124,6 +128,8 @@ describe('AlertService', () => {
       title: '테스트 글',
     } as any;
     const mockAlert = new Alert();
+    mockAlert.title = '2024-08-21';
+    mockAlert.content = '테스트 글';
     jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
     jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
 
@@ -155,6 +161,8 @@ describe('AlertService', () => {
       user: { id: 1 },
     } as any;
     const mockAlert = new Alert();
+    mockAlert.title = '2024-08-21';
+    mockAlert.content = '공개처리되었습니다.';
     jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
     jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
 
@@ -187,6 +195,7 @@ describe('AlertService', () => {
       content: '테스트 내용',
     } as any;
     const mockAlert = new Alert();
+    mockAlert.content = '테스트 내용';
     jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
     jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
     jest.spyOn(utilsService, 'extractPartContent').mockReturnValue('테스트 내용');

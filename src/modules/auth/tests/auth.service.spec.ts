@@ -1,8 +1,3 @@
-// jest.mock('typeorm-transactional', () => ({
-//   initializeTransactionalContext: jest.fn(),
-//   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
-//   Transactional: () => (target, key, descriptor: any) => descriptor,
-// }));
 // jest.mock('bull');
 // jest.mock('../auth.repository');
 // jest.mock('../../utils/utils.service');
@@ -55,7 +50,6 @@ import { NicknameService } from '../../nickname/nickname.service';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Redis } from 'ioredis';
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { of } from 'rxjs';
@@ -64,6 +58,11 @@ import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { OauthDto } from '../dto/oauth.dto';
 
 jest.mock('bcrypt');
+jest.mock('typeorm-transactional', () => ({
+  initializeTransactionalContext: jest.fn(),
+  patchTypeORMRepositoryWithBaseRepository: jest.fn(),
+  Transactional: () => (target, key, descriptor: any) => descriptor,
+}));
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -74,9 +73,15 @@ describe('AuthService', () => {
   let httpService: HttpService;
   let jwtService: JwtService;
   let configService: ConfigService;
-  let redis: Redis;
+  const redis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+    getex: jest.fn(),
+  };
 
   beforeEach(async () => {
+    const RedisInstance = jest.fn(() => redis);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -132,13 +137,7 @@ describe('AuthService', () => {
             get: jest.fn(),
           },
         },
-        {
-          provide: 'REDIS',
-          useValue: {
-            set: jest.fn(),
-            get: jest.fn(),
-          },
-        },
+        { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
 
@@ -150,7 +149,6 @@ describe('AuthService', () => {
     httpService = module.get<HttpService>(HttpService);
     jwtService = module.get<JwtService>(JwtService);
     configService = module.get<ConfigService>(ConfigService);
-    redis = module.get<Redis>('REDIS');
   });
 
   it('이메일 중복 체크', async () => {
@@ -193,7 +191,7 @@ describe('AuthService', () => {
     await authService.signingUp(mockReq, mockDto);
 
     expect(authRepository.findByEmail).toHaveBeenCalledWith(mockDto.email);
-    expect(bcrypt.hash).toHaveBeenCalledWith(mockDto.password, 10);
+    expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
     expect(redis.set).toHaveBeenCalledWith(
       `${mockReq.ip}:123456`,
       JSON.stringify({ ...mockDto, password: 'hashed_password' }),
@@ -267,6 +265,7 @@ describe('AuthService', () => {
 
     jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(null);
     jest.spyOn(utilsService, 'generateSixDigit').mockReturnValue('123456' as any);
+    jest.spyOn(utilsService, 'generateVerifyToken').mockReturnValue('testToken' as any);
     jest.spyOn(redis, 'set').mockResolvedValue('OK');
     jest.spyOn(mailService, 'sendVerificationEmail').mockResolvedValue(undefined);
 
@@ -278,7 +277,7 @@ describe('AuthService', () => {
       'EX',
       300,
     );
-    expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(mockEmail, '123456');
+    expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(mockEmail, 'testToken');
   });
 
   it('이메일을 업데이트하고 인증 코드를 확인', async () => {
