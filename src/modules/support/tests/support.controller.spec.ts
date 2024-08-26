@@ -16,6 +16,12 @@ describe('SupportController', () => {
   let controller: SupportController;
   let service: jest.Mocked<SupportService>;
 
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SupportController],
@@ -110,20 +116,6 @@ describe('SupportController', () => {
       const response = await controller.getInquiry(req, inquiryId);
       expect(service.getInquiry).toHaveBeenCalledWith(req.user.id, inquiryId);
       expect(response).toEqual(inquiry);
-    });
-  });
-
-  describe('getUserUpdateHistories', () => {
-    it('should call service getUserUpdateHistories method', async () => {
-      const page = 1;
-      const limit = 10;
-      const histories = { items: [], total: 0 };
-
-      service.getUserReleases.mockResolvedValue(histories as any);
-
-      const response = await controller.getUserReleases(page, limit);
-      expect(service.getUserReleases).toHaveBeenCalledWith(page, limit);
-      expect(response).toEqual(histories);
     });
   });
 

@@ -7,13 +7,19 @@ import { ConfigModule } from '@nestjs/config';
 import { Request as ExpressRequest } from 'express';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
 import { UpdateEssayReqDto } from '../dto/request/updateEssayReq.dto';
-import { AnotherEssayType } from '../../../common/types/enum.types';
+import { PageType } from '../../../common/types/enum.types';
 
 jest.mock('../essay.service');
 
 describe('EssayController', () => {
   let controller: EssayController;
   let service: jest.Mocked<EssayService>;
+
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -67,16 +73,15 @@ describe('EssayController', () => {
       const req: ExpressRequest = { user: { id: 1 } } as any;
       const page = 1;
       const limit = 10;
-      const published = true;
       const storyId = 1;
       const result = { items: [], total: 0 };
 
       service.getMyEssays.mockResolvedValue(result as any);
 
-      const response = await controller.getMyEssay(req, page, limit, published, storyId);
+      const response = await controller.getMyEssay(req, page, limit, PageType.PUBLIC, storyId);
       expect(service.getMyEssays).toHaveBeenCalledWith(
         req.user.id,
-        published,
+        PageType.PUBLIC,
         storyId,
         page,
         limit,
@@ -206,7 +211,7 @@ describe('EssayController', () => {
 
       service.getEssay.mockResolvedValue(result as any);
 
-      const response = await controller.getEssay(req, essayId, AnotherEssayType.RECOMMEND);
+      const response = await controller.getEssay(req, essayId, PageType.RECOMMEND);
       expect(service.getEssay).toHaveBeenCalledWith(req.user.id, essayId, 'recommend');
       expect(response).toEqual(result);
     });

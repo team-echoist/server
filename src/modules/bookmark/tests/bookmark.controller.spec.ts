@@ -13,6 +13,12 @@ describe('BookmarkController', () => {
   let controller: BookmarkController;
   let service: jest.Mocked<BookmarkService>;
 
+  jest.mock('@nestjs/passport', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  }));
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [JwtModule.register({}), ConfigModule.forRoot()],
