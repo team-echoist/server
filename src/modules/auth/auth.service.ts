@@ -80,6 +80,11 @@ export class AuthService {
 
     const userEmailData = { email, userId };
 
+    const existingCodeKey = await this.redis.keys(`${req.ip}:*`);
+    if (existingCodeKey.length > 0) {
+      await this.redis.del(existingCodeKey);
+    }
+
     await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 300);
     await this.mailService.sendVerificationEmail(email, token);
   }
