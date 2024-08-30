@@ -1,3 +1,10 @@
+## [1.11.7](https://github.com/team-echoist/server/compare/v1.11.6...v1.11.7) (2024-08-30)
+
+
+### Bug Fixes
+
+* update jwtAuthGuard redis key expiration time ([#419](https://github.com/team-echoist/server/issues/419)) ([72121d5](https://github.com/team-echoist/server/commit/72121d58185b907686f829c23e74d9b30a94aad8))
+
 ## [1.11.6](https://github.com/team-echoist/server/compare/v1.11.5...v1.11.6) (2024-08-25)
 
 
