@@ -75,7 +75,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       return this.handleTokenExpired(request, response);
     }
 
-    await this.redis.set(inProgressKey, 'true', 'EX', 5);
+    await this.redis.set(inProgressKey, 'true', 'PX', 300);
 
     /** @description 리프레쉬 토큰 사용 후 5초간 만료토큰 허용 */
     const recentlyRefreshedToken = await this.redis.get(recentTokenKey);
