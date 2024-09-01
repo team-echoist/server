@@ -21,20 +21,28 @@ import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { Story } from '../../entities/story.entity';
 import { Tag } from '../../entities/tag.entity';
 import * as strategies from '../../common/guards/strategies';
-import * as dotenv from 'dotenv';
 import { ViewModule } from '../view/view.module';
 import { BookmarkModule } from '../bookmark/bookmark.module';
 import { ConfigModule } from '@nestjs/config';
 import { ViewRecord } from '../../entities/viewRecord.entity';
 import { AlertModule } from '../alert/alert.module';
 import { SupportModule } from '../support/support.module';
-
-dotenv.config();
+import { Aggregate } from '../../entities/aggregate.entity';
+import { SyncStatus } from '../../entities/sysncStatus.entity';
 
 @Module({
   imports: [
     JwtModule.register({}),
-    TypeOrmModule.forFeature([User, Essay, Story, ReviewQueue, Tag, ViewRecord]),
+    TypeOrmModule.forFeature([
+      User,
+      Essay,
+      Story,
+      ReviewQueue,
+      Tag,
+      ViewRecord,
+      Aggregate,
+      SyncStatus,
+    ]),
     ConfigModule,
     MailModule,
     TagModule,

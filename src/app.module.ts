@@ -87,6 +87,7 @@ export class AppModule implements OnModuleInit, NestModule {
     this.configService.set('APP_INITIALIZING', true);
     await this.cronService.userDeletionCronJobs();
     await this.cronService.updateNextGeulroquis();
+    await this.cronService.syncAggregateDataToMainTable();
 
     if (process.env.SEED === 'true') {
       await this.seederService.initializeServer();

@@ -13,10 +13,19 @@ import { Geulroquis } from '../../entities/geulroguis.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UtilsModule } from '../utils/utils.module';
 import { Device } from '../../entities/device.entity';
+import { SyncStatus } from '../../entities/sysncStatus.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Essay, CronLog, DeactivationReason, Geulroquis, Device]),
+    TypeOrmModule.forFeature([
+      User,
+      Essay,
+      CronLog,
+      DeactivationReason,
+      Geulroquis,
+      Device,
+      SyncStatus,
+    ]),
     ScheduleModule.forRoot(),
     BullModule.registerQueueAsync({
       name: 'cron',
@@ -31,6 +40,7 @@ import { Device } from '../../entities/device.entity';
     ConfigModule,
     EssayModule,
     UtilsModule,
+    EssayModule,
   ],
   providers: [CronService, CronProcessor],
   exports: [CronService],

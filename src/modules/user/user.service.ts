@@ -26,6 +26,7 @@ import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { Transactional } from 'typeorm-transactional';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { Aggregate } from '../../entities/aggregate.entity';
 
 @Injectable()
 export class UserService {
@@ -212,5 +213,9 @@ export class UserService {
     const user = await this.fetchUserEntityById(userId);
 
     return this.utilsService.transformToDto(UserSummaryResDto, user);
+  }
+
+  async updateUserTable(aggregate: Aggregate) {
+    await this.userRepository.updateUserTable(aggregate.userId, aggregate.reputationScore);
   }
 }

@@ -1,16 +1,22 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Brackets, In, Repository } from 'typeorm';
+import { Between, Brackets, In, MoreThan, Repository } from 'typeorm';
 import { Essay } from '../../entities/essay.entity';
 import { SaveEssayDto } from './dto/saveEssay.dto';
 import { UpdateEssayDto } from './dto/updateEssay.dto';
 import { Bookmark } from '../../entities/bookmark.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { EssayStatus, PageType } from '../../common/types/enum.types';
+import { Aggregate } from '../../entities/aggregate.entity';
+import { SyncStatus } from '../../entities/sysncStatus.entity';
 
 export class EssayRepository {
   constructor(
     @InjectRepository(Essay)
     private readonly essayRepository: Repository<Essay>,
+    @InjectRepository(Aggregate)
+    private readonly aggregateRepository: Repository<Aggregate>,
+    @InjectRepository(SyncStatus)
+    private readonly syncStatusRepository: Repository<SyncStatus>,
   ) {}
 
   async totalEssayCount() {
@@ -44,10 +50,6 @@ export class EssayRepository {
 
   async saveEssays(essays: Essay[]) {
     return this.essayRepository.save(essays);
-  }
-
-  async incrementViews(essay: Essay, newViews: number) {
-    return await this.essayRepository.update(essay.id, { views: newViews });
   }
 
   async updateTrendScore(essayId: number, newTrendScore: number) {
@@ -483,33 +485,6 @@ export class EssayRepository {
     return { essays, total };
   }
 
-  // 버전1: 토큰매치 방식(빠름)
-  // async searchEssays(keyword: string, page: number, limit: number) {
-  //   const offset = (page - 1) * limit;
-  //
-  //   const query = this.essayRepository
-  //     .createQueryBuilder('essay')
-  //     .addSelect(
-  //       `ts_rank_cd(search_vector, plainto_tsquery('simple', unaccent(:keyword)))`,
-  //       'relevance',
-  //     )
-  //     .where('essay.deleted_date IS NULL AND search_vector @@ plainto_tsquery(:keyword)', {
-  //       keyword,
-  //     })
-  //     .andWhere('essay.status IN (:...statuses)', {
-  //       statuses: [EssayStatus.PUBLISHED, EssayStatus.LINKEDOUT],
-  //     });
-  //
-  //   const [essays, total] = await query
-  //     .orderBy('relevance', 'DESC')
-  //     .offset(offset)
-  //     .limit(limit)
-  //     .getManyAndCount();
-  //
-  //   return { essays, total };
-  // }
-
-  // 버전2: 유사도 매치
   async searchEssays(keyword: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
 
@@ -609,5 +584,44 @@ export class EssayRepository {
       .where('author_id IN (:...userIds)', { userIds })
       .andWhere('status = :status', { status: EssayStatus.PUBLISHED })
       .execute();
+  }
+
+  async findAggregateById(essayId: number) {
+    return await this.aggregateRepository.findOne({ where: { essayId: essayId } });
+  }
+
+  async saveAggregate(aggregate: Aggregate) {
+    return await this.aggregateRepository.save(aggregate);
+  }
+
+  async findLastSyncTime() {
+    const syncStatusRecords = await this.syncStatusRepository.find({
+      order: { id: 'DESC' },
+      take: 1,
+    });
+
+    return syncStatusRecords[0] || null;
+  }
+
+  async updateLastSyncTime(newSyncStatus: SyncStatus) {
+    await this.syncStatusRepository.save(newSyncStatus);
+  }
+
+  async findAggregateByLastTime(lastSyncTime: Date, offset: number, limit: number) {
+    return this.aggregateRepository.find({
+      where: { updatedDate: MoreThan(lastSyncTime) },
+      skip: offset,
+      take: limit,
+    });
+  }
+
+  async updateEssayTable(aggregate: Aggregate) {
+    await this.essayRepository.update(
+      { id: aggregate.essayId },
+      {
+        views: aggregate.totalViews,
+        trendScore: aggregate.trendScore,
+      },
+    );
   }
 }
