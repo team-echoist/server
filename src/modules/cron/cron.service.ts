@@ -14,6 +14,8 @@ import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { Device } from '../../entities/device.entity';
 import { UserStatus } from '../../common/types/enum.types';
+import { SyncStatus } from '../../entities/sysncStatus.entity';
+import { EssayService } from '../essay/essay.service';
 
 @Injectable()
 export class CronService {
@@ -27,14 +29,18 @@ export class CronService {
     @InjectRepository(Geulroquis)
     private readonly geulroquisRepository: Repository<Geulroquis>,
     @InjectRepository(Device)
-    private readonly deviceReposiotry: Repository<Device>,
+    private readonly deviceRepository: Repository<Device>,
+    @InjectRepository(SyncStatus)
+    private readonly syncStatusRepository: Repository<SyncStatus>,
 
-    @InjectQueue('cron') private readonly cronQueue: Queue,
+    @InjectQueue('cron')
+    private readonly cronQueue: Queue,
 
     @InjectRedis() private readonly redis: Redis,
 
     private readonly utilsService: UtilsService,
     private readonly configService: ConfigService,
+    private readonly essayService: EssayService,
   ) {}
 
   async getCronLogs(page: number, limit: number) {
@@ -116,7 +122,7 @@ export class CronService {
           .where('id IN (:...userIds)', { userIds })
           .execute();
 
-        await this.deviceReposiotry
+        await this.deviceRepository
           .createQueryBuilder()
           .update(Device)
           .where('id In (:...userIds)', { userIds })
@@ -169,12 +175,32 @@ export class CronService {
         });
         await this.redis.set(cacheKey, JSON.stringify(todayGeulroquis.url), 'EX', 24 * 60 * 60);
 
-        await this.logEnd(logId, 'completed', 'Next Geulroguis updated successfully.');
-        this.logger.log('Next Geulroguis updated successfully.');
+        await this.logEnd(logId, 'completed', '글로키 스케쥴링이 정상적으로 완료되었습니다.');
+        this.logger.log('글로키 스케쥴링이 정상적으로 완료되었습니다.');
       } catch (error) {
         await this.logEnd(logId, 'failed', error.message);
-        this.logger.error('Failed to update next Geulroguis.', error);
+        this.logger.error('글로키 스케쥴링이 실패하였습니다.', error);
       }
     }
+  }
+
+  @Cron('*/3 * * * *')
+  async syncAggregateDataToMainTable() {
+    const logId = await this.logStart('sync_aggregate_data');
+    let batchOffset = 0;
+    let hasMoreData = true;
+
+    while (hasMoreData) {
+      const updatedAggregates = await this.essayService.findUpdatedAggregates(batchOffset, 100);
+
+      if (updatedAggregates.length > 0) {
+        await this.cronQueue.add('syncAggregates', { aggregates: updatedAggregates });
+        batchOffset += 100;
+      } else {
+        hasMoreData = false;
+      }
+    }
+
+    await this.logEnd(logId, 'completed', '집계 데이터 동기화가 성공적으로 완료되었습니다.');
   }
 }

@@ -36,6 +36,7 @@ import { AlertService } from '../alert/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
+import { Aggregate } from '../../entities/aggregate.entity';
 
 @Injectable()
 export class EssayService {
@@ -59,12 +60,6 @@ export class EssayService {
   async checkEssayPermissions(essay: Essay, userId: number) {
     if (essay.author.id !== userId)
       throw new HttpException('이 에세이에 대한 권한이 없습니다.', HttpStatus.FORBIDDEN);
-  }
-
-  async testfn() {
-    const text =
-      '<p>긴내용234ㅇㅇㅇㅇㅇㅇㅇ ㅇ 아 ㅇㅇㅇㅇㅇㅇㅇㅇㅇ ㅇㅇㅇㅇㅇㅇㅇ  <b>ㅇㅇㅇㅇㅇㅇㅇㅇㅇ<u>ㅇㅇㅇㅇ <s>ㅇㅇㅇㅇㅇㅇㅇㅇ </s></u><s>ㅇㅇㅇㅇㅇㅇㅇ 이 이 ㅇㅇㅇㅇㅇㅇ</s>ㅇㅇㅇ  양 ㅇㅇㅇㅇㅇㅇ</b>ㅇ</p><p><s> ㅇㅇㅇㅇㅇㅇㅇㅇㅇ  </s>ㄹㄹㄹㄹㄹㄹㄹㄹ <span style="font-size: 16.0px;">ㄹㄹㄹㄹㄹㄹㄹ<span style="font-size: 17.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 18.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 19.0px;">ㄹㄹㄹㄹㄹㄹ<span style="font-size: 20.0px;">ㄹㄹㄹ<span style="font-size: 22.0px;">ㄹㄹ<span style="font-size: 24.0px;">ㄹㄹ</span></span></span></span></span></span></span></p>';
-    return this.utilsService.cleanText(text);
   }
 
   @Transactional()
@@ -314,70 +309,121 @@ export class EssayService {
   }
 
   private async handleNonAuthorView(userId: number, essay: Essay) {
+    const newViews = (essay.views || 0) + 1;
+
     if (essay.status === EssayStatus.PRIVATE) {
       throw new HttpException('잘못된 요청입니다.', HttpStatus.BAD_REQUEST);
     }
 
     const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
-    const newViews = (essay.views || 0) + 1;
 
     if (viewHistory === null) {
-      await this.essayRepository.incrementViews(essay, newViews);
-      await this.checkViewsForReputation(essay);
-      await this.updateTrendScoreOnView(essay);
       await this.viewService.addViewRecord(
         await this.userService.fetchUserEntityById(userId),
         essay,
       );
-      setImmediate(() => {
-        this.alertFirstView(essay, newViews);
+
+      setImmediate(async () => {
+        await this.updateEssayAggregateData(essay);
+
+        const cacheKey = `firstViewAlert:${essay.id}`;
+        const firstViewAlertSent = await this.redis.get(cacheKey);
+
+        if (!firstViewAlertSent && newViews === 1) {
+          await this.redis.set(cacheKey, 'true', 'EX', 200);
+          await this.alertFirstView(essay);
+        }
       });
     }
   }
 
-  private async alertFirstView(essay: Essay, newViews: number) {
-    if (newViews !== 1) return;
+  private async updateEssayAggregateData(essay: Essay) {
+    const lockKey = `lock:aggregate:${essay.id}`;
+    const lockTimeout = 30;
+    const maxAttempts = 5;
+    const retryDelay = 10;
 
+    let lock: string | null = null;
+    let attempts = 0;
+
+    while (!lock && attempts < maxAttempts) {
+      lock = await this.redis.set(lockKey, 'locked', 'PX', lockTimeout, 'NX');
+
+      if (!lock) {
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    }
+
+    if (lock) {
+      try {
+        const viewThreshold = 100;
+        const incrementAmount = 1;
+        const decayFactor = 0.995;
+
+        const currentDate = new Date();
+        const createdDate = essay.createdDate;
+        const daysSinceCreation =
+          (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
+
+        let newTrendScore = essay.trendScore;
+
+        if (daysSinceCreation <= 7) {
+          newTrendScore += incrementAmount;
+        } else {
+          const daysSinceDecay = daysSinceCreation - 7;
+          newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
+          newTrendScore = Math.floor(newTrendScore);
+          newTrendScore += incrementAmount;
+        }
+
+        const increaseReputation = essay.views > 0 && (essay.views + 1) % viewThreshold === 0;
+
+        let aggregate = await this.findAggregate(essay.id);
+        if (aggregate === null) {
+          aggregate = new Aggregate();
+          aggregate.essayId = essay.id;
+          aggregate.userId = essay.author.id;
+          aggregate.totalViews = 0;
+          aggregate.reputationScore = 0;
+          aggregate.trendScore = 0;
+        }
+        aggregate.totalViews += (aggregate.totalViews ?? 0) + 1;
+        aggregate.trendScore = newTrendScore;
+        aggregate.reputationScore = increaseReputation
+          ? (aggregate.reputationScore ?? 0) + 1
+          : aggregate.reputationScore ?? 0;
+
+        const savedAggregate = await this.essayRepository.saveAggregate(aggregate);
+
+        await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(savedAggregate), 'EX', 300);
+      } finally {
+        await this.redis.del(lockKey);
+      }
+    } else {
+      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 잠금을 획득하지 못했습니다.`);
+    }
+  }
+
+  private async findAggregate(essayId: number) {
+    const cachedAggregate = await this.redis.get(`aggregate:${essayId}`);
+
+    let aggregate = cachedAggregate ? JSON.parse(cachedAggregate) : null;
+
+    if (!aggregate) {
+      aggregate = await this.essayRepository.findAggregateById(essayId);
+    }
+
+    return aggregate ? aggregate : null;
+  }
+
+  private async alertFirstView(essay: Essay) {
     await this.alertService.createAlertFirstView(essay);
     await this.alertService.sendPushAlertFirstView(essay);
   }
 
-  private async checkViewsForReputation(essay: Essay) {
-    const viewThreshold = 100;
-
-    if (essay.views > 0 && essay.views % viewThreshold === 0) {
-      const increasePoints = 1;
-      await this.userService.increaseReputation(essay.author, increasePoints);
-    }
-  }
-
   async increaseTrendScore(essay: Essay, incrementAmount: number) {
     const newTrendScore = essay.trendScore + incrementAmount;
-    await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
-  }
-
-  private async updateTrendScoreOnView(essay: Essay) {
-    const incrementAmount = 1;
-    const decayFactor = 0.995;
-
-    const currentDate = new Date();
-    const createdDate = essay.createdDate;
-    const daysSinceCreation =
-      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
-
-    let newTrendScore: number;
-
-    if (daysSinceCreation <= 7) {
-      newTrendScore = essay.trendScore + incrementAmount;
-    } else {
-      const daysSinceDecay = daysSinceCreation - 7;
-      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
-      newTrendScore = Math.floor(newTrendScore);
-      newTrendScore += incrementAmount;
-    }
-
-    newTrendScore = Math.max(newTrendScore, 0);
-
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
@@ -665,5 +711,15 @@ export class EssayService {
   @Transactional()
   async handleUpdateEssayStatus(userIds: number[]) {
     await this.essayRepository.handleUpdateEssayStatus(userIds);
+  }
+
+  async findUpdatedAggregates(offset: number, limit: number) {
+    const lastSyncTime = await this.essayRepository.findLastSyncTime();
+
+    return await this.essayRepository.findAggregateByLastTime(
+      lastSyncTime ? lastSyncTime.lastSync : new Date(0),
+      offset,
+      limit,
+    );
   }
 }

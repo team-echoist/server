@@ -131,4 +131,11 @@ export class UserRepository {
   async deleteAllAccount() {
     return this.userRepository.delete({});
   }
+
+  async updateUserTable(userId: number, reputation: number) {
+    await this.userRepository.update(
+      { id: userId },
+      { reputation: () => `reputationScore + ${reputation}` },
+    );
+  }
 }
