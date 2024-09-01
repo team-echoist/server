@@ -318,64 +318,91 @@ export class EssayService {
     const viewHistory = await this.viewService.findViewRecord(userId, essay.id);
 
     if (viewHistory === null) {
-      await this.updateEssayAggregateData(essay);
-
       await this.viewService.addViewRecord(
         await this.userService.fetchUserEntityById(userId),
         essay,
       );
 
-      const cacheKey = `firstViewAlert:${essay.id}`;
-      const firstViewAlertSent = await this.redis.get(cacheKey);
+      setImmediate(async () => {
+        await this.updateEssayAggregateData(essay);
 
-      if (!firstViewAlertSent && newViews === 1)
-        setImmediate(() => {
-          this.redis.set(cacheKey, 'true', 'EX', 200).then(() => this.alertFirstView(essay));
-        });
+        const cacheKey = `firstViewAlert:${essay.id}`;
+        const firstViewAlertSent = await this.redis.get(cacheKey);
+
+        if (!firstViewAlertSent && newViews === 1) {
+          await this.redis.set(cacheKey, 'true', 'EX', 200);
+          await this.alertFirstView(essay);
+        }
+      });
     }
   }
 
   private async updateEssayAggregateData(essay: Essay) {
-    const viewThreshold = 100;
-    const incrementAmount = 1;
-    const decayFactor = 0.995;
+    const lockKey = `lock:aggregate:${essay.id}`;
+    const lockTimeout = 30;
+    const maxAttempts = 5;
+    const retryDelay = 10;
 
-    const currentDate = new Date();
-    const createdDate = essay.createdDate;
-    const daysSinceCreation =
-      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
+    let lock: string | null = null;
+    let attempts = 0;
 
-    let newTrendScore = essay.trendScore;
+    while (!lock && attempts < maxAttempts) {
+      lock = await this.redis.set(lockKey, 'locked', 'PX', lockTimeout, 'NX');
 
-    if (daysSinceCreation <= 7) {
-      newTrendScore += incrementAmount;
+      if (!lock) {
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    }
+
+    if (lock) {
+      try {
+        const viewThreshold = 100;
+        const incrementAmount = 1;
+        const decayFactor = 0.995;
+
+        const currentDate = new Date();
+        const createdDate = essay.createdDate;
+        const daysSinceCreation =
+          (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
+
+        let newTrendScore = essay.trendScore;
+
+        if (daysSinceCreation <= 7) {
+          newTrendScore += incrementAmount;
+        } else {
+          const daysSinceDecay = daysSinceCreation - 7;
+          newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
+          newTrendScore = Math.floor(newTrendScore);
+          newTrendScore += incrementAmount;
+        }
+
+        const increaseReputation = essay.views > 0 && (essay.views + 1) % viewThreshold === 0;
+
+        let aggregate = await this.findAggregate(essay.id);
+        if (aggregate === null) {
+          aggregate = new Aggregate();
+          aggregate.essayId = essay.id;
+          aggregate.userId = essay.author.id;
+          aggregate.totalViews = 0;
+          aggregate.reputationScore = 0;
+          aggregate.trendScore = 0;
+        }
+        aggregate.totalViews += (aggregate.totalViews ?? 0) + 1;
+        aggregate.trendScore = newTrendScore;
+        aggregate.reputationScore = increaseReputation
+          ? (aggregate.reputationScore ?? 0) + 1
+          : aggregate.reputationScore ?? 0;
+
+        const savedAggregate = await this.essayRepository.saveAggregate(aggregate);
+
+        await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(savedAggregate), 'EX', 300);
+      } finally {
+        await this.redis.del(lockKey);
+      }
     } else {
-      const daysSinceDecay = daysSinceCreation - 7;
-      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
-      newTrendScore = Math.floor(newTrendScore);
-      newTrendScore += incrementAmount;
+      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 잠금을 획득하지 못했습니다.`);
     }
-
-    const increaseReputation = essay.views > 0 && (essay.views + 1) % viewThreshold === 0;
-
-    let aggregate = await this.findAggregate(essay.id);
-    if (aggregate === null) {
-      aggregate = new Aggregate();
-      aggregate.essayId = essay.id;
-      aggregate.userId = essay.author.id;
-      aggregate.totalViews = 0;
-      aggregate.reputationScore = 0;
-      aggregate.trendScore = 0;
-    }
-    aggregate.totalViews += (aggregate.totalViews ?? 0) + 1;
-    aggregate.trendScore = newTrendScore;
-    aggregate.reputationScore = increaseReputation
-      ? (aggregate.reputationScore ?? 0) + 1
-      : aggregate.reputationScore ?? 0;
-
-    const savedAggregate = await this.essayRepository.saveAggregate(aggregate);
-
-    await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(savedAggregate), 'EX', 300);
   }
 
   private async findAggregate(essayId: number) {
