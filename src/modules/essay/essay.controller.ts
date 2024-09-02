@@ -423,7 +423,7 @@ export class EssayController {
     @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
     @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
-    return this.essayService.getEssay(req.user.id, essayId, pageType, storyId);
+    return this.essayService.getEssay(req, essayId, pageType, storyId);
   }
 
   @Get('next/:essayId')
@@ -466,7 +466,7 @@ export class EssayController {
     @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
     @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
-    return this.essayService.getNextEssay(req.user.id, essayId, pageType, storyId);
+    return this.essayService.getNextEssay(req, essayId, pageType, storyId);
   }
 
   @Delete(':essayId')

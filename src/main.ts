@@ -17,7 +17,6 @@ import { writeFileSync } from 'fs';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
-import { ConfigService } from '@nestjs/config';
 import { AdminService } from './modules/admin/admin.service';
 import { UserStatusInterceptor } from './common/interceptros/userStatus.interceptor';
 
@@ -27,8 +26,7 @@ declare const module: any;
 async function bootstrap() {
   initializeTransactionalContext();
 
-  const configService = new ConfigService();
-  const utilsService = new UtilsService(configService);
+  const utilsService = new UtilsService();
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { snapshot: true });
 
