@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
 import { v4 } from 'uuid';
 import * as moment from 'moment-timezone';
 import * as sanitizeHtml from 'sanitize-html';
@@ -9,15 +7,10 @@ import { ClassConstructor, plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UtilsService {
-  constructor(private configService: ConfigService) {}
+  constructor() {}
+
   getUUID(): string {
     return v4();
-  }
-
-  generateJWT(id: number) {
-    const secretKey = this.configService.get('JWT_ACCESS_SECRET');
-    const options = { expiresIn: '30d' };
-    return jwt.sign({ id: id }, secretKey, options);
   }
 
   async generateSixDigit() {
@@ -260,5 +253,19 @@ export class UtilsService {
 
   isDefaultProfileImage(profileImageUrl: string): boolean {
     return profileImageUrl.includes('profile_icon_');
+  }
+
+  wrapContentWithHtmlTemplate(content: string) {
+    return `<html lang=\"ko\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Linkedout</title></head><body>${content}</body></html>`;
+  }
+
+  extractContentFromHtml(htmlContent: string): string {
+    const bodyContentMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+
+    if (bodyContentMatch && bodyContentMatch[1]) {
+      return bodyContentMatch[1];
+    }
+
+    return htmlContent;
   }
 }

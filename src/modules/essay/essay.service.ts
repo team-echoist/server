@@ -35,8 +35,9 @@ import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
-import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
+import { DeviceOS, EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
+import { Request as ExpressRequest } from 'express';
 
 @Injectable()
 export class EssayService {
@@ -87,6 +88,9 @@ export class EssayService {
     if (requester.status === UserStatus.MONITORED) {
       return await this.handleMonitoredUser(user, essayData, data);
     }
+
+    if (device.os === DeviceOS.ANDROID)
+      essayData.content = this.utilsService.wrapContentWithHtmlTemplate(essayData.content);
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
 
@@ -227,14 +231,14 @@ export class EssayService {
     return { essays: essayDtos, total, totalPage, page };
   }
 
-  async applyCommonEssayQueryLogic(userId: number, essay: Essay) {
+  async applyCommonEssayQueryLogic(req: ExpressRequest, essay: Essay) {
     if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
-    const user = await this.userService.fetchUserEntityById(userId);
+    const user = await this.userService.fetchUserEntityById(req.user.id);
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
-    if (essay.author && userId !== essay.author.id) {
-      await this.handleNonAuthorView(userId, essay);
+    if (essay.author && req.user.id !== essay.author.id) {
+      await this.handleNonAuthorView(req.user.id, essay);
     }
 
     const newEssayData = {
@@ -243,24 +247,27 @@ export class EssayService {
       isBookmarked: isBookmarked,
     };
 
+    if (req.device.os === DeviceOS.ANDROID)
+      newEssayData.content = this.utilsService.extractContentFromHtml(newEssayData.content);
+
     return this.utilsService.transformToDto(EssayResDto, newEssayData);
   }
 
   @Transactional()
-  async getEssay(userId: number, essayId: number, pageType: PageType, storyId?: number) {
+  async getEssay(req: ExpressRequest, essayId: number, pageType: PageType, storyId?: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    const essayDto = await this.applyCommonEssayQueryLogic(userId, essay);
+    const essayDto = await this.applyCommonEssayQueryLogic(req, essay);
 
     const anotherEssays =
       pageType === PageType.RECOMMEND
-        ? await this.getRecommendEssays(userId, 6)
-        : await this.previousEssay(userId, essay, pageType, storyId);
+        ? await this.getRecommendEssays(req.user.id, 6)
+        : await this.previousEssay(req.user.id, essay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
 
   @Transactional()
-  async getNextEssay(userId: number, essayId: number, pageType: PageType, storyId?: number) {
+  async getNextEssay(req: ExpressRequest, essayId: number, pageType: PageType, storyId?: number) {
     const currentEssay = await this.essayRepository.findEssayById(essayId);
 
     if (!currentEssay) {
@@ -277,16 +284,16 @@ export class EssayService {
         );
         break;
       case PageType.PRIVATE:
-        if (currentEssay.author.id !== userId) {
+        if (currentEssay.author.id !== req.user.id) {
           throw new HttpException(
             '비공개 다음 글은 본인만 조회할 수 있습니다.',
             HttpStatus.BAD_REQUEST,
           );
         }
-        nextEssay = await this.essayRepository.findNextEssayByPrivate(userId, currentEssay.id);
+        nextEssay = await this.essayRepository.findNextEssayByPrivate(req.user.id, currentEssay.id);
         break;
       case PageType.STORY:
-        const excludePrivate = currentEssay.author.id !== userId;
+        const excludePrivate = currentEssay.author.id !== req.user.id;
         nextEssay = await this.essayRepository.findNextEssayByStory(
           storyId,
           currentEssay.id,
@@ -301,9 +308,9 @@ export class EssayService {
       return null;
     }
 
-    const essayDto = await this.applyCommonEssayQueryLogic(userId, nextEssay);
+    const essayDto = await this.applyCommonEssayQueryLogic(req, nextEssay);
 
-    const anotherEssays = await this.previousEssay(userId, nextEssay, pageType, storyId);
+    const anotherEssays = await this.previousEssay(req.user.id, nextEssay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
