@@ -168,7 +168,15 @@ export class UtilsService {
   }
 
   cleanText(text: string) {
-    return sanitizeHtml(text, { allowedTags: [], allowedAttributes: {} });
+    const bodyContent = sanitizeHtml(text, {
+      allowedTags: ['body'],
+      allowedAttributes: {},
+    });
+
+    return sanitizeHtml(bodyContent, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
   }
 
   extractPartContent(text: string) {
