@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/team-echoist/server/compare/v1.12.0...v1.12.1) (2024-09-03)
+
+
+### Bug Fixes
+
+* Add preprocessing to the one-sentence essay method ([#424](https://github.com/team-echoist/server/issues/424)) ([db2ce0a](https://github.com/team-echoist/server/commit/db2ce0a42d523d30cba54abd04c397f893861f2d))
+
 # [1.12.0](https://github.com/team-echoist/server/compare/v1.11.8...v1.12.0) (2024-09-02)
 
 
