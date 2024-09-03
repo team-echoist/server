@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/team-echoist/server/compare/v1.11.8...v1.12.0) (2024-09-02)
+
+
+### Features
+
+* Rich text processing in Android ([#423](https://github.com/team-echoist/server/issues/423)) ([ac63061](https://github.com/team-echoist/server/commit/ac63061420afbdc47e1ff910b910c80e69ae046a))
+
 ## [1.11.8](https://github.com/team-echoist/server/compare/v1.11.7...v1.11.8) (2024-09-01)
 
 ## [1.11.7](https://github.com/team-echoist/server/compare/v1.11.6...v1.11.7) (2024-08-30)
