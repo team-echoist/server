@@ -14,7 +14,6 @@ import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { Device } from '../../entities/device.entity';
 import { UserStatus } from '../../common/types/enum.types';
-import { SyncStatus } from '../../entities/sysncStatus.entity';
 import { EssayService } from '../essay/essay.service';
 
 @Injectable()
@@ -30,10 +29,8 @@ export class CronService {
     private readonly geulroquisRepository: Repository<Geulroquis>,
     @InjectRepository(Device)
     private readonly deviceRepository: Repository<Device>,
-    @InjectRepository(SyncStatus)
-    private readonly syncStatusRepository: Repository<SyncStatus>,
 
-    @InjectQueue('cron')
+    @InjectQueue('{cron}cron')
     private readonly cronQueue: Queue,
 
     @InjectRedis() private readonly redis: Redis,

@@ -28,7 +28,7 @@ import { SyncStatus } from '../../entities/sysncStatus.entity';
     ]),
     ScheduleModule.forRoot(),
     BullModule.registerQueueAsync({
-      name: 'cron',
+      name: '{cron}cron',
       useFactory: async (configService: ConfigService) => ({
         redis: {
           host: configService.get<string>('REDIS_HOST'),

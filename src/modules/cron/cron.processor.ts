@@ -7,7 +7,7 @@ import { Essay } from '../../entities/essay.entity';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { User } from '../../entities/user.entity';
 
-@Processor('cron')
+@Processor('{cron}cron')
 export class CronProcessor {
   constructor(
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
