@@ -168,12 +168,7 @@ export class UtilsService {
   }
 
   cleanText(text: string) {
-    const bodyContent = sanitizeHtml(text, {
-      allowedTags: ['body'],
-      allowedAttributes: {},
-    });
-
-    return sanitizeHtml(bodyContent, {
+    return sanitizeHtml(text, {
       allowedTags: [],
       allowedAttributes: {},
     });
@@ -195,6 +190,7 @@ export class UtilsService {
   }
   extractEndSentences(text: string, minLength: number, maxLength: number) {
     const cleanedText = this.cleanText(text);
+
     const sentences = this.sentences(cleanedText, minLength, maxLength);
     if (sentences.length === 0) {
       const trimmedText = cleanedText.trim();
@@ -221,6 +217,7 @@ export class UtilsService {
   highlightKeywordSnippet(text: string, keyword: string) {
     const snippetLength = 100;
     const cleanedText = this.cleanText(text);
+
     const keywordIndex = cleanedText.toLowerCase().indexOf(keyword.toLowerCase());
 
     if (keywordIndex === -1) {
