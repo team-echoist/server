@@ -1,3 +1,10 @@
+## [1.12.2](https://github.com/team-echoist/server/compare/v1.12.1...v1.12.2) (2024-09-04)
+
+
+### Bug Fixes
+
+* Android rich text preprocessing removal ([#428](https://github.com/team-echoist/server/issues/428)) ([2d94c26](https://github.com/team-echoist/server/commit/2d94c2607d703c0c703c18a372ffd89888bd245c))
+
 ## [1.12.1](https://github.com/team-echoist/server/compare/v1.12.0...v1.12.1) (2024-09-03)
 
 
