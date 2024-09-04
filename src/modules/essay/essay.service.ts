@@ -89,8 +89,8 @@ export class EssayService {
       return await this.handleMonitoredUser(user, essayData, data);
     }
 
-    if (device.os === DeviceOS.ANDROID)
-      essayData.content = this.utilsService.wrapContentWithHtmlTemplate(essayData.content);
+    // if (device.os === DeviceOS.ANDROID)
+    //   essayData.content = this.utilsService.wrapContentWithHtmlTemplate(essayData.content);
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
 
@@ -247,8 +247,8 @@ export class EssayService {
       isBookmarked: isBookmarked,
     };
 
-    if (req.device.os === DeviceOS.ANDROID)
-      newEssayData.content = this.utilsService.extractContentFromHtml(newEssayData.content);
+    // if (req.device.os === DeviceOS.ANDROID)
+    //   newEssayData.content = this.utilsService.extractContentFromHtml(newEssayData.content);
 
     return this.utilsService.transformToDto(EssayResDto, newEssayData);
   }
