@@ -75,7 +75,6 @@ export class AuthService {
     await this.isEmailOwned(email);
 
     const userId = req.user.id;
-    const token = await this.utilsService.generateVerifyToken();
     const code = await this.utilsService.generateSixDigit();
 
     const userEmailData = { email, userId };
@@ -86,7 +85,7 @@ export class AuthService {
     }
 
     await this.redis.set(`${req.ip}:${code}`, JSON.stringify(userEmailData), 'EX', 300);
-    await this.mailService.sendVerificationEmail(email, token);
+    await this.mailService.sendVerificationEmail(email, code);
   }
 
   @Transactional()
@@ -94,7 +93,7 @@ export class AuthService {
     const userEmailData = await this.redis.get(`${req.ip}:${code}`);
 
     if (!userEmailData)
-      throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException('유효하지 않거나 만료된 요청입니다.', HttpStatus.BAD_REQUEST);
 
     const { email, userId } = JSON.parse(userEmailData);
 
@@ -103,10 +102,7 @@ export class AuthService {
     if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     user.email = email;
-    const updatedUser = await this.authRepository.saveUser(user);
-
-    const cacheKey = `validate_${user.id}`;
-    await this.redis.set(cacheKey, JSON.stringify(updatedUser), 'EX', 600);
+    await this.authRepository.saveUser(user);
 
     return user;
   }

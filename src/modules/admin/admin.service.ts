@@ -500,6 +500,12 @@ export class AdminService {
     return { users: userDtos, totalPage, page, total };
   }
 
+  async searchUser(email: string) {
+    const user = await this.userRepository.findUserByEmail(email);
+
+    return this.utilsService.transformToDto(UserDetailResDto, user);
+  }
+
   async getUser(userId: number) {
     const user = await this.userRepository.findUserDetailById(userId);
 
@@ -795,13 +801,21 @@ export class AdminService {
   @Transactional()
   async deleteNotice(adminId: number, announcementId: number) {
     const processor = await this.adminRepository.findAdmin(adminId);
-    const Notice = await this.supportRepository.findNotice(announcementId);
+    const notice = await this.supportRepository.findNotice(announcementId);
 
     const newNotice = {
-      ...Notice,
+      ...notice,
       processor: processor,
       deletedDate: new Date(),
     };
+
+    const newHistory = this.createProcessedHistory(
+      ActionType.UPDATED,
+      'notice',
+      newNotice,
+      processor,
+    );
+    await this.adminRepository.saveHistory(newHistory);
 
     await this.redis.del('latestNotice');
     await this.supportRepository.saveNotice(newNotice);
@@ -855,6 +869,7 @@ export class AdminService {
     await this.adminRepository.saveHistory(newHistory);
   }
 
+  @Transactional()
   async createRelease(adminId: number, content: string) {
     const processor = await this.adminRepository.findAdmin(adminId);
 
@@ -865,6 +880,15 @@ export class AdminService {
     await this.redis.del('latestRelease');
 
     await this.supportRepository.saveRelease(newRelease);
+
+    const newHistory = this.createProcessedHistory(
+      ActionType.UPDATED,
+      'release',
+      newRelease,
+      processor,
+    );
+
+    await this.adminRepository.saveHistory(newHistory);
   }
 
   async updateRelease(adminId: number, releaseId: number, content: string) {
@@ -877,12 +901,21 @@ export class AdminService {
     await this.redis.del('latestRelease');
 
     await this.supportRepository.saveRelease(release);
+
+    const newHistory = this.createProcessedHistory(
+      ActionType.UPDATED,
+      'release',
+      release,
+      processor,
+    );
+
+    await this.adminRepository.saveHistory(newHistory);
   }
 
   async deleteRelease(adminId: number, releaseId: number) {
-    const admin = await this.adminRepository.findAdmin(adminId);
+    const processor = await this.adminRepository.findAdmin(adminId);
     const release = await this.supportRepository.findRelease(releaseId);
-    const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, admin);
+    const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, processor);
     await this.adminRepository.saveHistory(history);
 
     await this.redis.del('latestRelease');

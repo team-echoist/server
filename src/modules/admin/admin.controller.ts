@@ -121,6 +121,7 @@ export class AdminAuthController {
 @UseGuards(AdminGuard)
 export class AdminDashboardController {
   constructor(private readonly adminService: AdminService) {}
+
   @Get()
   @ApiOperation({
     summary: 'Dashboard',
@@ -1049,6 +1050,28 @@ export class AdminManagementController {
   @ApiResponse({ status: 200, type: UserDetailResDto })
   async getUser(@Param('userId', ParseIntPipe) userId: number) {
     return this.adminService.getUser(userId);
+  }
+
+  @Get('users/search/:email')
+  @ApiOperation({
+    //todo 문서변경
+    summary: '유저 검색 (이메일)',
+    description: `
+  관리자 권한으로 이메일로 유저를 검색합니다..
+  
+  **경로 파라미터:**
+  - \`email\`: 조회할 유저의 고유 이메일
+
+  **동작 과정:**
+  1. 해당 유저의 상세 정보를 조회합니다.
+
+  **주의 사항:**
+  - 관리자 권한이 필요합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: UserDetailResDto })
+  async searchUser(@Param('email') email: string) {
+    return this.adminService.searchUser(email);
   }
 
   @Put('users/:userId')
