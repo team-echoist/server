@@ -20,6 +20,10 @@ export class UserRepository {
     return this.userRepository.findOne({ where: { id: userId }, relations: ['devices'] });
   }
 
+  async findUserByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email: email }, relations: ['devices'] });
+  }
+
   async saveUser(user: User) {
     return this.userRepository.save(user);
   }
