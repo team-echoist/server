@@ -1054,7 +1054,6 @@ export class AdminManagementController {
 
   @Get('users/search/:email')
   @ApiOperation({
-    //todo 문서변경
     summary: '유저 검색 (이메일)',
     description: `
   관리자 권한으로 이메일로 유저를 검색합니다..
