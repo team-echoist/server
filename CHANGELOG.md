@@ -1,3 +1,23 @@
+# [1.14.0](https://github.com/team-echoist/server/compare/v1.13.0...v1.14.0) (2024-09-11)
+
+
+### Bug Fixes
+
+* Add init root admin ([cfdddee](https://github.com/team-echoist/server/commit/cfdddee6d1c0bbbdb7a2f73bb3280b2fbb594ac1))
+* Add init root admin ([d42da36](https://github.com/team-echoist/server/commit/d42da36d332087d6e2e3c62fb5f108136093656f))
+* Add init root admin ([191f848](https://github.com/team-echoist/server/commit/191f84810578c04a6c3ee27052a62ffd0a46d5d5))
+* Add preprocessing to the one-sentence essay method ([b5471a6](https://github.com/team-echoist/server/commit/b5471a6adb57f833f0a91937dffcde7e427711f7))
+* Android rich text preprocessing removal ([a9e4e6d](https://github.com/team-echoist/server/commit/a9e4e6da9ef2270cbdebe902546c95258c89927d))
+* incorrect reference in admin token payload ([e438197](https://github.com/team-echoist/server/commit/e4381972b3bde1cb1ea7dc5c7b42a8cc37020d9d))
+* Invalidate duplicate email verification ([8d05ad2](https://github.com/team-echoist/server/commit/8d05ad201f2d8ed7faa360749febc13e620ac77c))
+* update jwtAuthGuard redis key expiration time ([ccde7cc](https://github.com/team-echoist/server/commit/ccde7cc839ef3db2e9d62b5f23f71723d288375e))
+
+
+### Features
+
+* Added user search function by email and fixed bugs ([92d4d79](https://github.com/team-echoist/server/commit/92d4d79f2f9fadc3a97bab54df6a522da4115795))
+* Rich text processing in Android ([b73c90f](https://github.com/team-echoist/server/commit/b73c90f72edb097c057c9bfe51f987874b079512))
+
 # [1.13.0](https://github.com/team-echoist/server/compare/v1.12.2...v1.13.0) (2024-09-05)
 
 
