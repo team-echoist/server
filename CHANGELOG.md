@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/team-echoist/server/compare/v1.12.2...v1.13.0) (2024-09-05)
+
+
+### Features
+
+* Added user search function by email and fixed bugsRelease ([#429](https://github.com/team-echoist/server/issues/429)) ([971d1bd](https://github.com/team-echoist/server/commit/971d1bdee423d4e0d8f6f6b8dd159e1a7c5ae6e8))
+
 ## [1.12.2](https://github.com/team-echoist/server/compare/v1.12.1...v1.12.2) (2024-09-04)
 
 
