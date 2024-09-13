@@ -950,9 +950,9 @@ export class AdminService {
     await this.userRepository.deleteAllAccount();
   }
 
-  async getCronLogs(adminId: number, page: number, limit: number) {
+  async getCronLogs(adminId: number, page: number, limit: number, key?: string) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
-    return await this.cronService.getCronLogs(page, limit);
+    return await this.cronService.getCronLogs(page, limit, key);
   }
 
   async saveGeulroquisImages(files: Express.Multer.File[]) {

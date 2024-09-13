@@ -1194,10 +1194,11 @@ export class AdminOfficeController {
   @ApiResponse({ type: CronLogsResDto })
   async getCronLogs(
     @Req() req: ExpressRequest,
+    @Query('key') key: string,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.adminService.getCronLogs(req.user.id, page, limit);
+    return this.adminService.getCronLogs(req.user.id, page, limit, key);
   }
 
   @Get('histories')

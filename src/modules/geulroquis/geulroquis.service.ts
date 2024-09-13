@@ -6,7 +6,6 @@ import { GeulroquisDto } from './dto/response/geulroquis.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { GeulroquisUrlResDto } from './dto/response/geulroquisUrlRes.dto';
-import { GeulroquisCountResDto } from './dto/response/geulroquisCountRes.dto';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
