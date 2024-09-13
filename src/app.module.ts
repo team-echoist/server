@@ -23,7 +23,6 @@ import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/view/view.module';
 import { BookmarkModule } from './modules/bookmark/bookmark.module';
-import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { SupportModule } from './modules/support/support.module';
 import { AlertModule } from './modules/alert/alert.module';
@@ -79,21 +78,19 @@ import * as process from 'node:process';
 export class AppModule implements OnModuleInit, NestModule {
   constructor(
     private readonly seederService: SeederService,
-    private readonly cronService: CronService,
     private readonly configService: ConfigService,
   ) {}
 
   async onModuleInit() {
     this.configService.set('APP_INITIALIZING', true);
-    await this.cronService.userDeletionCronJobs();
-    await this.cronService.updateNextGeulroquis();
-    await this.cronService.syncAggregateDataToMainTable();
 
     if (process.env.SEED === 'true') {
       await this.seederService.initializeServer();
       await this.seederService.initializeAdmin();
       await this.seederService.initializeAppVersions();
     }
+
+    this.configService.set('APP_INITIALIZING', false);
   }
 
   configure(consumer: MiddlewareConsumer) {

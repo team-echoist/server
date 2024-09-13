@@ -15,7 +15,7 @@ export class GeulroquisRepository {
     const [geulroquis, total] = await this.geulroquisRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
-      order: { createdDate: 'DESC' },
+      order: { id: 'DESC' },
     });
     return { geulroquis, total };
   }

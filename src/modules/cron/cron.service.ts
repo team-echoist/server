@@ -143,7 +143,7 @@ export class CronService {
 
   @Cron('0 0 * * *')
   async updateNextGeulroquis() {
-    if (!this.configService.get('APP_INITIALIZING')) {
+    if (this.configService.get('APP_INITIALIZING')) {
       const logId = await this.logStart('update_geulroguis');
       try {
         const currentImage = await this.geulroquisRepository.findOne({ where: { current: true } });
