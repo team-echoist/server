@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { CronLog } from '../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
@@ -40,8 +40,11 @@ export class CronService {
     private readonly essayService: EssayService,
   ) {}
 
-  async getCronLogs(page: number, limit: number) {
+  async getCronLogs(page: number, limit: number, key?: string) {
+    const whereCondition = key ? { taskName: Like(`%${key}%`) } : {};
+
     const [logs, total] = await this.cronLogRepository.findAndCount({
+      where: whereCondition,
       skip: (page - 1) * limit,
       take: limit,
       order: { id: 'DESC' },
@@ -63,7 +66,7 @@ export class CronService {
 
   @Cron('0 4 * * *')
   async userDeletionCronJobs() {
-    const logId = await this.logStart('deactivate_users_and_update_essays');
+    const logId = await this.logStart('deactivate_users');
     try {
       await this.deactivateUsersAndQueueEssays();
       await this.logEnd(logId, 'completed', 'Batch processing completed successfully.');
@@ -75,7 +78,7 @@ export class CronService {
   }
 
   private async deactivateUsersAndQueueEssays() {
-    const logId = await this.logStart('deactivate_users_and_queue_essays');
+    const logId = await this.logStart('deactivate_essays');
     try {
       const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
 
@@ -141,7 +144,7 @@ export class CronService {
   @Cron('0 0 * * *')
   async updateNextGeulroquis() {
     if (!this.configService.get('APP_INITIALIZING')) {
-      const logId = await this.logStart('update_next_geulroguis');
+      const logId = await this.logStart('update_geulroguis');
       try {
         const currentImage = await this.geulroquisRepository.findOne({ where: { current: true } });
         if (currentImage) {
@@ -183,7 +186,7 @@ export class CronService {
 
   @Cron('*/3 * * * *')
   async syncAggregateDataToMainTable() {
-    const logId = await this.logStart('sync_aggregate_data');
+    const logId = await this.logStart('sync_aggregate');
     let batchOffset = 0;
     let hasMoreData = true;
 
