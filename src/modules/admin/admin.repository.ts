@@ -10,6 +10,8 @@ import { CreateAdminDto } from './dto/createAdmin.dto';
 import { Server } from '../../entities/server.entity';
 import { Transactional } from 'typeorm-transactional';
 import { Theme } from '../../entities/theme.entity';
+import { Release } from '../../entities/release.entity';
+import { Item } from '../../entities/item.entity';
 
 export class AdminRepository {
   constructor(
@@ -24,6 +26,8 @@ export class AdminRepository {
     private readonly serverRepository: Repository<Server>,
     @InjectRepository(Theme)
     private readonly themeRepository: Repository<Theme>,
+    @InjectRepository(Item)
+    private readonly itemRepository: Repository<Item>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -288,5 +292,21 @@ export class AdminRepository {
 
   async findThemes() {
     return this.themeRepository.find();
+  }
+
+  async deleteTheme(themeId: number) {
+    return this.themeRepository.delete(themeId);
+  }
+
+  async findItems(themeName?: string) {
+    if (!themeName) {
+      return await this.itemRepository.find();
+    } else {
+      return await this.itemRepository
+        .createQueryBuilder('item')
+        .leftJoinAndSelect('item.theme', 'theme')
+        .where('theme.name = :themeName', { themeName: themeName })
+        .getMany();
+    }
   }
 }

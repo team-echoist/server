@@ -64,6 +64,8 @@ import { Public } from '../../common/decorators/public.decorator';
 import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
+import { ThemesResDto } from './dto/response/themesRes.dto';
+import { ItemsResDto } from './dto/response/itemsRes.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
@@ -1253,19 +1255,33 @@ export class AdminOfficeController {
     return this.adminService.getGeulroquisCount();
   }
 
-  @Get('stores/theme')
+  @Get('stores/themes')
   @ApiOperation({ summary: '테마 리스트' })
-  @ApiResponse({ status: 200, type: '' })
+  @ApiResponse({ status: 200, type: ThemesResDto })
   async getThemes() {
     return this.adminService.getThemes();
   }
 
-  @Post('stores/theme')
+  @Post('stores/themes')
   @ApiOperation({ summary: '테마 등록' })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateThemeReqDto })
   async registerTheme(@Body() data: CreateThemeReqDto) {
     return this.adminService.registerTheme(data);
+  }
+
+  @Delete('stores/themes/:themeId')
+  @ApiOperation({ summary: '테마 삭제' })
+  @ApiResponse({ status: 204 })
+  async deleteTheme(@Param('themeId', ParseIntPipe) themeId: number) {
+    return this.adminService.deleteTheme(themeId);
+  }
+
+  @Get('stores/items')
+  @ApiOperation({ summary: '아이템 리스트' })
+  @ApiResponse({ status: 200, type: ItemsResDto })
+  async getItems(@Query('themeName') themeName?: string) {
+    return this.adminService.getItems(themeName);
   }
 
   @Post('geulroquis')

@@ -63,7 +63,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { Theme } from '../../entities/theme.entity';
-import { ThemeResDto } from './dto/response/themesRes.dto';
+import { ThemeResDto } from './dto/response/themeRes.dto';
+import { ItemResDto } from './dto/response/itemRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -1164,7 +1165,9 @@ export class AdminService {
   async getThemes() {
     const themes = await this.adminRepository.findThemes();
 
-    return this.utilsService.transformToDto(ThemeResDto, themes);
+    const themesDto = this.utilsService.transformToDto(ThemeResDto, themes);
+
+    return { themes: themesDto };
   }
 
   async registerTheme(data: CreateThemeReqDto) {
@@ -1174,5 +1177,15 @@ export class AdminService {
     newTheme.price = data.price;
 
     await this.adminRepository.saveTheme(newTheme);
+  }
+
+  async deleteTheme(themeId: number) {
+    return this.adminRepository.deleteTheme(themeId);
+  }
+
+  async getItems(themeName?: string) {
+    const items = await this.adminRepository.findItems(themeName);
+
+    return this.utilsService.transformToDto(ItemResDto, items);
   }
 }

@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ThemeResDto } from './themeRes.dto';
+import { ItemResDto } from './itemRes.dto';
 
-export class ThemesResDto {
+export class ItemsResDto {
   @ApiProperty()
   @Expose()
-  themes: ThemeResDto[];
+  items: ItemResDto[];
 }
