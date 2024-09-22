@@ -10,7 +10,6 @@ import { CreateAdminDto } from './dto/createAdmin.dto';
 import { Server } from '../../entities/server.entity';
 import { Transactional } from 'typeorm-transactional';
 import { Theme } from '../../entities/theme.entity';
-import { Release } from '../../entities/release.entity';
 import { Item } from '../../entities/item.entity';
 
 export class AdminRepository {
@@ -308,5 +307,13 @@ export class AdminRepository {
         .where('theme.name = :themeName', { themeName: themeName })
         .getMany();
     }
+  }
+
+  async saveItem(newItem: Item) {
+    return this.itemRepository.save(newItem);
+  }
+
+  async deleteItem(itemId: number) {
+    return this.itemRepository.delete(itemId);
   }
 }

@@ -65,6 +65,8 @@ import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { Theme } from '../../entities/theme.entity';
 import { ThemeResDto } from './dto/response/themeRes.dto';
 import { ItemResDto } from './dto/response/itemRes.dto';
+import { CreateItemReqDto } from './dto/request/createItemReq.dto';
+import { Item } from '../../entities/item.entity';
 
 @Injectable()
 export class AdminService {
@@ -1187,5 +1189,19 @@ export class AdminService {
     const items = await this.adminRepository.findItems(themeName);
 
     return this.utilsService.transformToDto(ItemResDto, items);
+  }
+
+  async createItem(data: CreateItemReqDto) {
+    const newItem = new Item();
+    newItem.name = data.name;
+    newItem.price = data.price;
+    newItem.url = data.url;
+    newItem.position = data.position;
+
+    await this.adminRepository.saveItem(newItem);
+  }
+
+  async deleteItem(itemId: number) {
+    return this.adminRepository.deleteItem(itemId);
   }
 }

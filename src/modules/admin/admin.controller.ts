@@ -66,6 +66,7 @@ import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { ThemesResDto } from './dto/response/themesRes.dto';
 import { ItemsResDto } from './dto/response/itemsRes.dto';
+import { CreateItemReqDto } from './dto/request/createItemReq.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
@@ -1282,6 +1283,21 @@ export class AdminOfficeController {
   @ApiResponse({ status: 200, type: ItemsResDto })
   async getItems(@Query('themeName') themeName?: string) {
     return this.adminService.getItems(themeName);
+  }
+
+  @Post('stores/items')
+  @ApiOperation({ summary: '아이템 추가' })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: CreateItemReqDto })
+  async createItem(@Body() data: CreateItemReqDto) {
+    return this.adminService.createItem(data);
+  }
+
+  @Delete('stores/items/:itemId')
+  @ApiOperation({ summary: '아이템 삭제' })
+  @ApiResponse({ status: 204 })
+  async deleteItem(@Param('itemId', ParseIntPipe) itemId: number) {
+    return this.adminService.deleteItem(itemId);
   }
 
   @Post('geulroquis')
