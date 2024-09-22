@@ -39,6 +39,12 @@ import { CronModule } from '../cron/cron.module';
 import { GeulroquisModule } from '../geulroquis/geulroquis.module';
 import { Server } from '../../entities/server.entity';
 import { NicknameModule } from '../nickname/nickname.module';
+import { Theme } from '../../entities/theme.entity';
+import { Item } from '../../entities/item.entity';
+import { UserItem } from '../../entities/userItem.entity';
+import { UserHomeItem } from '../../entities/userHomeItem.entity';
+import { UserHomeLayout } from '../../entities/userHomeLayout.entity';
+import { UserTheme } from '../../entities/userTheme.entity';
 
 @Module({
   imports: [
@@ -58,6 +64,12 @@ import { NicknameModule } from '../nickname/nickname.module';
       Notice,
       Release,
       Server,
+      Theme,
+      Item,
+      UserItem,
+      UserHomeItem,
+      UserHomeLayout,
+      UserTheme,
     ]),
     BullModule.registerQueueAsync({
       name: 'admin',

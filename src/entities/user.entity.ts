@@ -27,6 +27,9 @@ import { Alert } from './alert.entity';
 import { SeenNotice } from './seenNotice.entity';
 import { UserStatus } from '../common/types/enum.types';
 import { SeenRelease } from './seenRelease.entity';
+import { UserTheme } from './userTheme.entity';
+import { UserItem } from './userItem.entity';
+import { UserHomeLayout } from './userHomeLayout.entity';
 
 @Entity()
 export class User {
@@ -72,6 +75,9 @@ export class User {
   status: UserStatus;
 
   @Column({ default: 0 })
+  gems: number;
+
+  @Column({ default: 0 })
   reputation: number;
 
   @Column({
@@ -109,6 +115,15 @@ export class User {
 
   @Column({ name: 'token_version', default: 1 })
   tokenVersion: number;
+
+  @OneToMany(() => UserTheme, (userTheme) => userTheme.user)
+  themes: UserTheme[];
+
+  @OneToMany(() => UserItem, (userItem) => userItem.user)
+  items: UserItem[];
+
+  @OneToMany(() => UserHomeLayout, (layout) => layout.user)
+  homeLayouts: UserHomeLayout[];
 
   @OneToMany(() => Story, (story) => story.user)
   stories: Story[];

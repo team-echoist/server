@@ -61,6 +61,9 @@ import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
+import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
+import { Theme } from '../../entities/theme.entity';
+import { ThemeResDto } from './dto/response/themesRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -1156,5 +1159,20 @@ export class AdminService {
       throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
 
     await this.resetRootAdmin();
+  }
+
+  async getThemes() {
+    const themes = await this.adminRepository.findThemes();
+
+    return this.utilsService.transformToDto(ThemeResDto, themes);
+  }
+
+  async registerTheme(data: CreateThemeReqDto) {
+    const newTheme = new Theme();
+    newTheme.url = data.url;
+    newTheme.name = data.name;
+    newTheme.price = data.price;
+
+    await this.adminRepository.saveTheme(newTheme);
   }
 }

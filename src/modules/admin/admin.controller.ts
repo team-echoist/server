@@ -63,6 +63,7 @@ import { AdminGuard } from '../../common/guards/admin.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
+import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
@@ -1250,6 +1251,21 @@ export class AdminOfficeController {
   @ApiResponse({ status: 200, type: GeulroquisCountResDto })
   async getGeulroquisCount() {
     return this.adminService.getGeulroquisCount();
+  }
+
+  @Get('stores/theme')
+  @ApiOperation({ summary: '테마 리스트' })
+  @ApiResponse({ status: 200, type: '' })
+  async getThemes() {
+    return this.adminService.getThemes();
+  }
+
+  @Post('stores/theme')
+  @ApiOperation({ summary: '테마 등록' })
+  @ApiResponse({ status: 201 })
+  @ApiBody({ type: CreateThemeReqDto })
+  async registerTheme(@Body() data: CreateThemeReqDto) {
+    return this.adminService.registerTheme(data);
   }
 
   @Post('geulroquis')

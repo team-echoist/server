@@ -26,6 +26,11 @@ export class UserSummaryResDto {
 
   @ApiProperty()
   @Expose()
+  @IsNumber()
+  gems: number;
+
+  @ApiProperty()
+  @Expose()
   @IsDate()
   createdDate: Date;
 

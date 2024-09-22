@@ -9,6 +9,7 @@ import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import { Server } from '../../entities/server.entity';
 import { Transactional } from 'typeorm-transactional';
+import { Theme } from '../../entities/theme.entity';
 
 export class AdminRepository {
   constructor(
@@ -21,6 +22,8 @@ export class AdminRepository {
     private readonly processedRepository: Repository<ProcessedHistory>,
     @InjectRepository(Server)
     private readonly serverRepository: Repository<Server>,
+    @InjectRepository(Theme)
+    private readonly themeRepository: Repository<Theme>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -277,5 +280,13 @@ export class AdminRepository {
 
   async deleteAdminById(adminId: number) {
     return this.adminRepository.delete(adminId);
+  }
+
+  async saveTheme(newTheme: Theme) {
+    return this.themeRepository.save(newTheme);
+  }
+
+  async findThemes() {
+    return this.themeRepository.find();
   }
 }
