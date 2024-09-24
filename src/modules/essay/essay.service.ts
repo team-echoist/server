@@ -35,7 +35,7 @@ import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../alert/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
-import { DeviceOS, EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
+import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { Request as ExpressRequest } from 'express';
 

@@ -1179,6 +1179,7 @@ export class AdminService {
     newTheme.price = data.price;
 
     await this.adminRepository.saveTheme(newTheme);
+    await this.redis.del(`linkedout:theme`);
   }
 
   async deleteTheme(themeId: number) {
@@ -1199,6 +1200,7 @@ export class AdminService {
     newItem.position = data.position;
 
     await this.adminRepository.saveItem(newItem);
+    await this.redis.del(`linkedout:item`);
   }
 
   async deleteItem(itemId: number) {

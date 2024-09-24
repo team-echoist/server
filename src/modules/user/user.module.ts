@@ -17,7 +17,6 @@ import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { UserProcessor } from './user.processor';
-import { Auth } from 'firebase-admin/lib/auth';
 
 @Module({
   imports: [
