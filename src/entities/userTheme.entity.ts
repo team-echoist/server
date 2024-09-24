@@ -7,11 +7,11 @@ export class UserTheme {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.themes)
+  @ManyToOne(() => User, (user) => user.themes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Theme, (theme) => theme.userThemes)
+  @ManyToOne(() => Theme, (theme) => theme.userThemes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'theme_id' })
   theme: Theme;
 

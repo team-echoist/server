@@ -65,8 +65,8 @@ import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { ThemesResDto } from './dto/response/themesRes.dto';
-import { ItemsResDto } from './dto/response/itemsRes.dto';
 import { CreateItemReqDto } from './dto/request/createItemReq.dto';
+import { ItemsResDto } from '../home/dto/response/itemsRes.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')

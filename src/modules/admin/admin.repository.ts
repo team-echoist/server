@@ -293,6 +293,10 @@ export class AdminRepository {
     return this.themeRepository.find();
   }
 
+  async findThemeById(themeId: number) {
+    return this.themeRepository.findOne({ where: { id: themeId } });
+  }
+
   async deleteTheme(themeId: number) {
     return this.themeRepository.delete(themeId);
   }

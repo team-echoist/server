@@ -16,11 +16,11 @@ export class UserHomeLayout {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.homeLayouts)
+  @ManyToOne(() => User, (user) => user.homeLayouts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Theme, (theme) => theme.layouts)
+  @ManyToOne(() => Theme, (theme) => theme.layouts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'theme_id' })
   theme: Theme;
 

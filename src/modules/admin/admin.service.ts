@@ -64,9 +64,9 @@ import { Request as ExpressRequest } from 'express';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { Theme } from '../../entities/theme.entity';
 import { ThemeResDto } from './dto/response/themeRes.dto';
-import { ItemResDto } from './dto/response/itemRes.dto';
 import { CreateItemReqDto } from './dto/request/createItemReq.dto';
 import { Item } from '../../entities/item.entity';
+import { ItemResDto } from '../home/dto/response/itemRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -1179,7 +1179,7 @@ export class AdminService {
     newTheme.price = data.price;
 
     await this.adminRepository.saveTheme(newTheme);
-    await this.redis.del(`linkedout:theme`);
+    await this.redis.del(`linkedout:themes`);
   }
 
   async deleteTheme(themeId: number) {
@@ -1193,14 +1193,17 @@ export class AdminService {
   }
 
   async createItem(data: CreateItemReqDto) {
+    const theme = await this.adminRepository.findThemeById(data.themeId);
+
     const newItem = new Item();
     newItem.name = data.name;
     newItem.price = data.price;
     newItem.url = data.url;
+    newItem.theme = theme;
     newItem.position = data.position;
 
     await this.adminRepository.saveItem(newItem);
-    await this.redis.del(`linkedout:item`);
+    await this.redis.del(`items:theme:${data.themeId}:${data.position}`);
   }
 
   async deleteItem(itemId: number) {

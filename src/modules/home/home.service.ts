@@ -9,6 +9,9 @@ import { UtilsService } from '../utils/utils.service';
 import { ThemeResDto } from './dto/response/themeRes.dto';
 import { Theme } from '../../entities/theme.entity';
 import { Transactional } from 'typeorm-transactional';
+import { Item } from '../../entities/item.entity';
+import { ItemResDto } from './dto/response/itemRes.dto';
+import { UserItem } from '../../entities/userItem.entity';
 
 @Injectable()
 export class HomeService {
@@ -27,7 +30,7 @@ export class HomeService {
 
   @Transactional()
   async getThemes(userId: number) {
-    const cachedThemes = await this.redis.get('linkedout:theme');
+    const cachedThemes = await this.redis.get('linkedout:themes');
 
     let allThemes: Theme[];
 
@@ -35,7 +38,7 @@ export class HomeService {
       allThemes = JSON.parse(cachedThemes);
     } else {
       allThemes = await this.homeRepository.findAllThemes();
-      await this.redis.set('linkedout:theme', JSON.stringify(allThemes));
+      await this.redis.set('linkedout:themes', JSON.stringify(allThemes));
     }
 
     const userThemes = await this.homeRepository.findUserThemes(userId);
@@ -79,11 +82,79 @@ export class HomeService {
     const theme = await this.homeRepository.findThemeById(themeId);
     if (!theme) throw new HttpException('존재하지 않는 테마입니다.', HttpStatus.BAD_REQUEST);
 
+    if (user.gems < theme.price) {
+      throw new HttpException('재화가 부족합니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    user.gems -= theme.price;
+
     const newUserTheme = new UserTheme();
     newUserTheme.purchasedDate = new Date();
     newUserTheme.theme = theme;
     newUserTheme.user = user;
 
     await this.homeRepository.saveUserTheme(newUserTheme);
+    await this.userService.updateUser(userId, user);
+  }
+
+  async getItems(userId: number, themeId: number, position: string) {
+    const cacheKey = `items:theme:${themeId}:${position || 'all'}`;
+
+    let items: Item[] | null = null;
+    const cachedItems = await this.redis.get(cacheKey);
+
+    if (cachedItems) {
+      items = JSON.parse(cachedItems);
+    }
+
+    if (!items) {
+      items = await this.homeRepository.findItemsByThemeAndPosition(themeId, position);
+
+      await this.redis.set(cacheKey, JSON.stringify(items));
+    }
+
+    const userItems = await this.homeRepository.findUserItemsByTheme(userId, themeId);
+
+    const userItemIds = new Set(userItems.map((userItem) => userItem.item.id));
+
+    const itemsWithOwnership = items.map((item) => ({
+      ...item,
+      owned: userItemIds.has(item.id),
+    }));
+
+    const itemsDto = this.utilsService.transformToDto(ItemResDto, itemsWithOwnership);
+    return { items: itemsDto };
+  }
+
+  @Transactional()
+  async buyItem(userId: number, itemId: number) {
+    const user = await this.userService.fetchUserEntityById(userId);
+
+    const userItems = await this.homeRepository.findUserItems(userId);
+
+    const alreadyOwned = userItems.some((userItem) => userItem.item.id === itemId);
+    if (alreadyOwned) {
+      throw new HttpException('이미 소유한 아이템입니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    const item = await this.homeRepository.findItemById(itemId);
+    if (!item) {
+      throw new HttpException('존재하지 않는 아이템입니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    if (user.gems < item.price) {
+      throw new HttpException('재화가 부족합니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    user.gems -= item.price;
+
+    const newUserItem = new UserItem();
+    newUserItem.purchasedDate = new Date();
+    newUserItem.item = item;
+    newUserItem.user = user;
+
+    await this.homeRepository.saveUserItem(newUserItem);
+
+    await this.userService.updateUser(userId, user);
   }
 }

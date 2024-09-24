@@ -122,7 +122,6 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
-
     if (!user || !user.password) {
       throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
     }
@@ -133,7 +132,6 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-
     if (!user || !user.password || !(await bcrypt.compare(password, user.password)))
       throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
 

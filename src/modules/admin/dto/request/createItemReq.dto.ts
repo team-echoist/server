@@ -7,6 +7,10 @@ export class CreateItemReqDto {
   name: string;
 
   @ApiProperty()
+  @IsNumber()
+  themeId: number;
+
+  @ApiProperty()
   @IsString()
   position: string;
 

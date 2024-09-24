@@ -1,9 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GeulroquisUrlResDto } from '../geulroquis/dto/response/geulroquisUrlRes.dto';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
-import { Request as ExpressRequest, Response } from 'express';
+import { Request as ExpressRequest } from 'express';
 
 @ApiTags('Home')
 @Controller('home')
@@ -52,5 +52,19 @@ export class HomeController {
   @ApiResponse({ status: 201 })
   async buyTheme(@Req() req: ExpressRequest, @Param('themeId', ParseIntPipe) themeId: number) {
     return this.homeService.buyTheme(req.user.id, themeId);
+  }
+
+  @Get('items')
+  async getItems(
+    @Req() req: ExpressRequest,
+    @Query('themeId') themeId: number,
+    @Query('position') position: string,
+  ) {
+    return this.homeService.getItems(req.user.id, themeId, position);
+  }
+
+  @Post('items/buy/:itemId')
+  async buyItem(@Req() req: ExpressRequest, @Param('itemId', ParseIntPipe) itemId: number) {
+    return this.homeService.buyItem(req.user.id, itemId);
   }
 }
