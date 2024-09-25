@@ -184,6 +184,7 @@ export class HomeService {
 
     newLayout.isActive = true;
     await this.homeRepository.saveUserHomeLayout(newLayout);
+    await this.redis.del(`user:${userId}`);
   }
 
   private async checkUserOwnsTheme(userThemes: UserTheme[], themeId: number): Promise<void> {
@@ -231,5 +232,6 @@ export class HomeService {
     newUserHomeItem.item = item;
 
     await this.homeRepository.saveUserHomeItem(newUserHomeItem);
+    await this.redis.del(`user:${userId}`);
   }
 }

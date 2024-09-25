@@ -53,6 +53,7 @@ export class UserService {
         return user;
       }
     }
+
     return user;
   }
 
@@ -109,8 +110,12 @@ export class UserService {
       await this.authService.checkEmail(data.email);
     }
 
-    if (!(await bcrypt.compare(data.password, user.password))) {
-      data.password = await bcrypt.hash(data.password, 12);
+    if (data.password !== user.password) {
+      const isMatch = await bcrypt.compare(data.password, user.password);
+
+      if (!isMatch) {
+        data.password = await bcrypt.hash(data.password, 12);
+      }
     }
     const updatedUser = await this.userRepository.updateUser(user, data);
     await this.redis.setex(cacheKey, 3600, JSON.stringify(updatedUser));
@@ -212,7 +217,14 @@ export class UserService {
   async getUserInfo(userId: number) {
     const user = await this.fetchUserEntityById(userId);
 
-    return this.utilsService.transformToDto(UserSummaryResDto, user);
+    const activeLayout = user.homeLayouts.find((layout) => layout.isActive);
+
+    const filteredUser = {
+      ...user,
+      homeLayouts: activeLayout,
+    };
+
+    return this.utilsService.transformToDto(UserSummaryResDto, filteredUser);
   }
 
   async updateUserTable(aggregate: Aggregate) {
