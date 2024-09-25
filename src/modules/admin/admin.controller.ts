@@ -1257,14 +1257,41 @@ export class AdminOfficeController {
   }
 
   @Get('stores/themes')
-  @ApiOperation({ summary: '테마 리스트' })
+  @ApiOperation({
+    summary: '테마 리스트 조회',
+    description: `
+  제공중인 테마 리스트를 반환합니다.
+
+  **동작 과정:**
+  1. 클라이언트가 테마 리스트 조회 요청을 서버에 보냅니다.
+  2. 서버는 데이터베이스에서 사용 가능한 모든 테마를 조회합니다.
+  3. 조회된 테마들을 DTO로 변환하여 클라이언트에 반환합니다.
+  `,
+  })
   @ApiResponse({ status: 200, type: ThemesResDto })
   async getThemes() {
     return this.adminService.getThemes();
   }
 
   @Post('stores/themes')
-  @ApiOperation({ summary: '테마 등록' })
+  @ApiOperation({
+    summary: '테마 등록',
+    description: `
+  새로운 테마를 등록합니다.
+
+  **동작 과정:**
+  1. 클라이언트는 등록할 테마의 데이터를 서버에 전달합니다.
+  2. 서버는 전달된 데이터를 기반으로 새로운 테마를 생성합니다.
+  3. 생성된 테마를 데이터베이스에 저장합니다.
+  4. 테마 캐시를 초기화하여 최신 테마 리스트가 반영되도록 합니다.
+
+  **요청 바디:**
+  - \`name\`: 테마의 이름 (필수).
+  - \`url\`: 테마의 URL (필수).
+  - \`price\`: 테마의 가격 (필수).
+
+  `,
+  })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateThemeReqDto })
   async registerTheme(@Body() data: CreateThemeReqDto) {
@@ -1272,21 +1299,67 @@ export class AdminOfficeController {
   }
 
   @Delete('stores/themes/:themeId')
-  @ApiOperation({ summary: '테마 삭제' })
+  @ApiOperation({
+    summary: '테마 삭제',
+    description: `
+  특정 테마를 삭제합니다.
+
+  **동작 과정:**
+  1. 클라이언트는 삭제할 테마의 ID를 서버에 전달합니다.
+  2. 서버는 데이터베이스에서 해당 테마를 삭제합니다.
+  3. 삭제 작업이 완료되면, 서버는 204 No Content 상태 코드를 반환합니다.
+
+  **경로 파라미터:**
+  - \`themeId\`: 삭제할 테마의 ID (필수).
+
+  **예외 처리:**
+  - \`테마를 찾을 수 없습니다.\`: 주어진 ID에 해당하는 테마가 존재하지 않는 경우 발생.
+  `,
+  })
   @ApiResponse({ status: 204 })
   async deleteTheme(@Param('themeId', ParseIntPipe) themeId: number) {
     return this.adminService.deleteTheme(themeId);
   }
 
   @Get('stores/items')
-  @ApiOperation({ summary: '아이템 리스트' })
+  @ApiOperation({
+    summary: '아이템 리스트 조회',
+    description: `
+  테마 이름에 따라 필터링된 아이템 리스트를 반환합니다. 
+
+  **동작 과정:**
+  1. 클라이언트는 선택적으로 테마 이름을 쿼리 파라미터로 전달할 수 있습니다.
+  2. 서버는 전달된 테마 이름에 따라 아이템들을 필터링합니다.
+  3. 필터링된 아이템 리스트를 DTO로 변환하여 클라이언트에 반환합니다.
+
+  **쿼리 파라미터:**
+  - \`themeName\` (선택): 특정 테마에 속한 아이템만 조회하고자 할 때 사용.
+  `,
+  })
   @ApiResponse({ status: 200, type: ItemsResDto })
   async getItems(@Query('themeName') themeName?: string) {
     return this.adminService.getItems(themeName);
   }
 
   @Post('stores/items')
-  @ApiOperation({ summary: '아이템 추가' })
+  @ApiOperation({
+    summary: '아이템 추가',
+    description: `
+  새로운 아이템을 추가합니다.
+
+  **동작 과정:**
+  1. 클라이언트는 추가할 아이템의 데이터를 서버에 전달합니다.
+  2. 서버는 전달된 데이터를 기반으로 새로운 아이템 객체를 생성합니다.
+  3. 아이템을 데이터베이스에 저장하고, 관련된 캐시를 초기화합니다.
+
+  **요청 바디:**
+  - \`name\`: 아이템의 이름 (필수).
+  - \`price\`: 아이템의 가격 (필수).
+  - \`url\`: 아이템의 이미지 URL (필수).
+  - \`themeId\`: 아이템이 속한 테마의 ID (필수).
+  - \`position\`: 아이템의 위치 (필수).
+  `,
+  })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateItemReqDto })
   async createItem(@Body() data: CreateItemReqDto) {
@@ -1294,7 +1367,20 @@ export class AdminOfficeController {
   }
 
   @Delete('stores/items/:itemId')
-  @ApiOperation({ summary: '아이템 삭제' })
+  @ApiOperation({
+    summary: '아이템 삭제',
+    description: `
+  특정 아이템을 삭제합니다.
+
+  **동작 과정:**
+  1. 클라이언트는 삭제할 아이템의 ID를 서버에 전달합니다.
+  2. 서버는 데이터베이스에서 해당 아이템을 삭제합니다.
+  3. 삭제 작업이 완료되면, 서버는 204 No Content 상태 코드를 반환합니다.
+
+  **경로 파라미터:**
+  - \`itemId\`: 삭제할 아이템의 ID (필수).
+  `,
+  })
   @ApiResponse({ status: 204 })
   async deleteItem(@Param('itemId', ParseIntPipe) itemId: number) {
     return this.adminService.deleteItem(itemId);
