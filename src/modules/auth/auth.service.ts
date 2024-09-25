@@ -63,7 +63,7 @@ export class AuthService {
     await this.isEmailOwned(data.email);
 
     const code = await this.utilsService.generateSixDigit();
-    data.password = await bcrypt.hash(data.password, 10);
+    data.password = await bcrypt.hash(data.password, 12);
 
     await this.redis.set(`${req.ip}:${code}`, JSON.stringify(data), 'EX', 300);
 
@@ -122,8 +122,8 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
-    if (!user || !user.password) {
-      throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
+    if (!user) {
+      throw new HttpException('존재하지 않는 계정입니다.', HttpStatus.BAD_REQUEST);
     }
 
     if (user.platformId !== null && user.platform !== null) {
@@ -132,7 +132,8 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    if (!user || !user.password || !(await bcrypt.compare(password, user.password)))
+
+    if (!user.password || !(await bcrypt.compare(password, user.password)))
       throw new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST);
 
     if (user.status === UserStatus.BANNED) {

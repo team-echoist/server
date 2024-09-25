@@ -32,4 +32,10 @@ export class ThemeResDto {
   @IsBoolean()
   @Expose()
   owned: boolean;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsBoolean()
+  @Expose()
+  isActive: boolean;
 }

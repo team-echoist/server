@@ -109,8 +109,8 @@ export class UserService {
       await this.authService.checkEmail(data.email);
     }
 
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
+    if (!(await bcrypt.compare(data.password, user.password))) {
+      data.password = await bcrypt.hash(data.password, 12);
     }
     const updatedUser = await this.userRepository.updateUser(user, data);
     await this.redis.setex(cacheKey, 3600, JSON.stringify(updatedUser));

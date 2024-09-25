@@ -11,7 +11,8 @@ import { Theme } from '../../entities/theme.entity';
 import { Transactional } from 'typeorm-transactional';
 import { Item } from '../../entities/item.entity';
 import { ItemResDto } from './dto/response/itemRes.dto';
-import { UserItem } from '../../entities/userItem.entity';
+import { UserHomeLayout } from '../../entities/userHomeLayout.entity';
+import { UserHomeItem } from '../../entities/userHomeItem.entity';
 
 @Injectable()
 export class HomeService {
@@ -41,20 +42,29 @@ export class HomeService {
       await this.redis.set('linkedout:themes', JSON.stringify(allThemes));
     }
 
+    let activeLayout: UserHomeLayout;
+
     const userThemes = await this.homeRepository.findUserThemes(userId);
     if (userThemes.length === 0) {
-      const defaultTheme = await this.createDefaultTheme(userId);
-      userThemes.push(defaultTheme);
+      const { userTheme, userLayout } = await this.createDefaultTheme(userId);
+      userThemes.push(userTheme);
+      activeLayout = userLayout;
     }
+
+    if (!activeLayout) {
+      activeLayout = await this.homeRepository.findActiveLayoutByUserId(userId);
+    }
+    const activeThemeId = activeLayout ? activeLayout.theme.id : null;
 
     const userThemeIds = new Set(userThemes.map((theme) => theme.theme.id));
 
-    const themesWithOwnership = allThemes.map((theme: { id: number }) => ({
+    const themesWithOwnershipAndActive = allThemes.map((theme: { id: number }) => ({
       ...theme,
       owned: userThemeIds.has(theme.id),
+      isActive: theme.id === activeThemeId,
     }));
 
-    const themesDto = this.utilsService.transformToDto(ThemeResDto, themesWithOwnership);
+    const themesDto = this.utilsService.transformToDto(ThemeResDto, themesWithOwnershipAndActive);
     return { themes: themesDto };
   }
 
@@ -67,7 +77,15 @@ export class HomeService {
     newDefaultTheme.user = user;
     newDefaultTheme.theme = defaultTheme;
 
-    return await this.homeRepository.saveUserTheme(newDefaultTheme);
+    const newLayout = new UserHomeLayout();
+    newLayout.user = user;
+    newLayout.theme = defaultTheme;
+    newLayout.isActive = true;
+
+    const userLayout = await this.homeRepository.saveUserHomeLayout(newLayout);
+    const userTheme = await this.homeRepository.saveUserTheme(newDefaultTheme);
+
+    return { userTheme, userLayout };
   }
 
   @Transactional()
@@ -88,12 +106,9 @@ export class HomeService {
 
     user.gems -= theme.price;
 
-    const newUserTheme = new UserTheme();
-    newUserTheme.purchasedDate = new Date();
-    newUserTheme.theme = theme;
-    newUserTheme.user = user;
+    await this.homeRepository.saveNewUserTheme(user, theme);
+    await this.homeRepository.createNewUserHomeLayout(user, theme);
 
-    await this.homeRepository.saveUserTheme(newUserTheme);
     await this.userService.updateUser(userId, user);
   }
 
@@ -133,28 +148,88 @@ export class HomeService {
     const userItems = await this.homeRepository.findUserItems(userId);
 
     const alreadyOwned = userItems.some((userItem) => userItem.item.id === itemId);
-    if (alreadyOwned) {
-      throw new HttpException('이미 소유한 아이템입니다.', HttpStatus.BAD_REQUEST);
-    }
+    if (alreadyOwned) throw new HttpException('이미 소유한 아이템입니다.', HttpStatus.BAD_REQUEST);
 
     const item = await this.homeRepository.findItemById(itemId);
-    if (!item) {
-      throw new HttpException('존재하지 않는 아이템입니다.', HttpStatus.BAD_REQUEST);
-    }
+    if (!item) throw new HttpException('존재하지 않는 아이템입니다.', HttpStatus.BAD_REQUEST);
 
-    if (user.gems < item.price) {
+    if (user.gems < item.price)
       throw new HttpException('재화가 부족합니다.', HttpStatus.BAD_REQUEST);
-    }
 
     user.gems -= item.price;
 
-    const newUserItem = new UserItem();
-    newUserItem.purchasedDate = new Date();
-    newUserItem.item = item;
-    newUserItem.user = user;
-
-    await this.homeRepository.saveUserItem(newUserItem);
+    await this.homeRepository.saveNewUserItem(user, item);
 
     await this.userService.updateUser(userId, user);
+  }
+
+  @Transactional()
+  async changeTheme(userId: number, themeId: number): Promise<void> {
+    const userThemes = await this.homeRepository.findUserThemes(userId);
+    await this.checkUserOwnsTheme(userThemes, themeId);
+
+    const currentLayout = await this.homeRepository.findUserCurrentLayout(userId);
+    if (currentLayout) {
+      currentLayout.isActive = false;
+      await this.homeRepository.saveUserHomeLayout(currentLayout);
+    }
+
+    const newLayout = await this.homeRepository.findUserActivateLayout(userId, themeId);
+    if (!newLayout) {
+      throw new HttpException(
+        '해당 테마에 대한 레이아웃이 존재하지 않습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    newLayout.isActive = true;
+    await this.homeRepository.saveUserHomeLayout(newLayout);
+  }
+
+  private async checkUserOwnsTheme(userThemes: UserTheme[], themeId: number): Promise<void> {
+    const ownsTheme = userThemes.some((userTheme) => userTheme.theme.id === themeId);
+    if (!ownsTheme) {
+      throw new HttpException('해당 테마를 소유하고 있지 않습니다.', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Transactional()
+  async activateItem(userId: number, itemId: number) {
+    // 현재 활성화된 레이아웃 가져오기
+    const activeLayout = await this.homeRepository.findUserCurrentHomeLayout(userId);
+
+    if (!activeLayout) {
+      throw new HttpException('활성화된 레이아웃이 없습니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    // 아이템 가져오기 및 검증
+    const item = await this.homeRepository.findItemById(itemId);
+    if (!item || item.theme.id !== activeLayout.theme.id) {
+      throw new HttpException(
+        '해당 아이템이 존재하지 않거나, 현재 테마에 속하지 않습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 사용자가 해당 아이템을 소유했는지 확인
+    const userOwnsItem = await this.homeRepository.findUserItemById(userId, itemId);
+    if (!userOwnsItem) {
+      throw new HttpException('해당 아이템을 소유하고 있지 않습니다.', HttpStatus.FORBIDDEN);
+    }
+
+    // 같은 포지션에 있는 기존 아이템 비활성화
+    const existingItem = activeLayout.homeItems.find(
+      (homeItem) => homeItem.item.position === item.position,
+    );
+    if (existingItem) {
+      await this.homeRepository.removeUserHomeItem(existingItem);
+    }
+
+    // 새 아이템 활성화
+    const newUserHomeItem = new UserHomeItem();
+    newUserHomeItem.layout = activeLayout;
+    newUserHomeItem.item = item;
+
+    await this.homeRepository.saveUserHomeItem(newUserHomeItem);
   }
 }

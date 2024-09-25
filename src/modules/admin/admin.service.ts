@@ -63,10 +63,10 @@ import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { Theme } from '../../entities/theme.entity';
-import { ThemeResDto } from './dto/response/themeRes.dto';
 import { CreateItemReqDto } from './dto/request/createItemReq.dto';
 import { Item } from '../../entities/item.entity';
 import { ItemResDto } from '../home/dto/response/itemRes.dto';
+import { ThemeResDto } from '../home/dto/response/themeRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -189,7 +189,7 @@ export class AdminService {
 
     await this.adminCheckDuplicates(data.email);
 
-    data.password = await bcrypt.hash(data.password, 10);
+    data.password = await bcrypt.hash(data.password, 12);
     const newAdmin: CreateAdminDto = {
       ...data,
       activated: true,
@@ -664,7 +664,7 @@ export class AdminService {
   async updateAdmin(adminId: number, data: AdminUpdateReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
     if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
+      data.password = await bcrypt.hash(data.password, 12);
     }
     const updatedAdmin = await this.adminRepository.updateAdmin(admin, data);
     return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
@@ -989,11 +989,10 @@ export class AdminService {
 
   @Transactional()
   async changeTomorrowGeulroquis(geulroquisId: number) {
-    const TomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
-
-    if (TomorrowGeulroquis) {
-      TomorrowGeulroquis.next = false;
-      await this.geulroquisRepository.saveGeulroquis(TomorrowGeulroquis);
+    const tomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
+    if (tomorrowGeulroquis) {
+      tomorrowGeulroquis.next = false;
+      await this.geulroquisRepository.saveGeulroquis(tomorrowGeulroquis);
     } else {
       const currentGeulroquis = await this.geulroquisRepository.findCurrentGeulroquis();
       if (currentGeulroquis) {
@@ -1009,7 +1008,8 @@ export class AdminService {
       await this.geulroquisRepository.saveGeulroquis(geulroquis);
     }
 
-    const nextGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+    const nextGeulroquis = await this.geulroquisRepository.findOneNextGeulroquis();
+
     nextGeulroquis.next = true;
     await this.geulroquisRepository.saveGeulroquis(nextGeulroquis);
 
@@ -1208,5 +1208,9 @@ export class AdminService {
 
   async deleteItem(itemId: number) {
     return this.adminRepository.deleteItem(itemId);
+  }
+
+  async resetGeulroquis(adminId: number) {
+    return this.geulroquisRepository.deleteAllGeulroquis();
   }
 }

@@ -12,11 +12,13 @@ import { Theme } from '../../entities/theme.entity';
 import { UserTheme } from '../../entities/userTheme.entity';
 import { UtilsModule } from '../utils/utils.module';
 import { UserItem } from '../../entities/userItem.entity';
+import { UserHomeLayout } from '../../entities/userHomeLayout.entity';
+import { UserHomeItem } from '../../entities/userHomeItem.entity';
 
 @Module({
   imports: [
     JwtModule.register({}),
-    TypeOrmModule.forFeature([Item, Theme, UserTheme, UserItem]),
+    TypeOrmModule.forFeature([Item, Theme, UserTheme, UserItem, UserHomeLayout, UserHomeItem]),
     GeulroquisModule,
     UtilsModule,
     forwardRef(() => AuthModule),

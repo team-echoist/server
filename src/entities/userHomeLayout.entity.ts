@@ -16,6 +16,9 @@ export class UserHomeLayout {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ name: 'is_active', default: false, nullable: false })
+  isActive: boolean;
+
   @ManyToOne(() => User, (user) => user.homeLayouts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;

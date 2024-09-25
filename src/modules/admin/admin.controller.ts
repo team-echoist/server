@@ -64,9 +64,9 @@ import { Public } from '../../common/decorators/public.decorator';
 import { ServerStatus } from '../../common/types/enum.types';
 import { ServerStatusResDto } from './dto/response/serverStatusRes.dto';
 import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
-import { ThemesResDto } from './dto/response/themesRes.dto';
 import { CreateItemReqDto } from './dto/request/createItemReq.dto';
 import { ItemsResDto } from '../home/dto/response/itemsRes.dto';
+import { ThemesResDto } from '../home/dto/response/themesRes.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
@@ -1517,6 +1517,11 @@ export class AdminRootController {
   @Post('clear/verify')
   async requestClearDatabase(@Req() req: ExpressRequest) {
     return this.adminService.requestClearDatabase(req.user.id);
+  }
+
+  @Post('clear/geulroquis')
+  async resetGeulroquis(@Req() req: ExpressRequest) {
+    return this.adminService.resetGeulroquis(req.user.id);
   }
 
   @Get('clear/init')
