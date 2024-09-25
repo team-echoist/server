@@ -217,7 +217,8 @@ export class UserService {
   async getUserInfo(userId: number) {
     const user = await this.fetchUserEntityById(userId);
 
-    const activeLayout = user.homeLayouts.find((layout) => layout.isActive);
+    const activeLayout = (user.homeLayouts || []).find((layout) => layout.isActive);
+
 
     const filteredUser = {
       ...user,
