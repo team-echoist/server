@@ -58,7 +58,7 @@ export class SeederService {
   async initializeAdmin() {
     const root = await this.adminRepository.findOne({ where: { id: 1 } });
     if (!root) {
-      const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 10);
+      const hashedPassword = await bcrypt.hash(process.env.ROOT_PASSWORD, 12);
       const newRoot = new Admin();
       newRoot.email = process.env.ROOT_EMAIL;
       newRoot.name = process.env.ROOT_NAME;

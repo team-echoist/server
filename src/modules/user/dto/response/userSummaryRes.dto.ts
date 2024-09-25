@@ -2,6 +2,7 @@ import { Expose, Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { DeviceResDto } from '../../../support/dto/response/deviceRes.dto';
+import { LayoutResDto } from '../../../home/dto/response/layoutRes.dto';
 
 export class UserSummaryResDto {
   @ApiProperty()
@@ -26,6 +27,11 @@ export class UserSummaryResDto {
 
   @ApiProperty()
   @Expose()
+  @IsNumber()
+  gems: number;
+
+  @ApiProperty()
+  @Expose()
   @IsDate()
   createdDate: Date;
 
@@ -43,4 +49,9 @@ export class UserSummaryResDto {
   @Type(() => DeviceResDto)
   @Expose()
   devices: DeviceResDto[];
+
+  @ApiProperty({ type: [LayoutResDto] })
+  @Type(() => LayoutResDto)
+  @Expose()
+  homeLayouts: LayoutResDto;
 }

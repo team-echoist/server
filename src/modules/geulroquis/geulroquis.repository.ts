@@ -45,4 +45,15 @@ export class GeulroquisRepository {
   async findOneGeulroquis(geulroquisId: number) {
     return this.geulroquisRepository.findOne({ where: { id: geulroquisId } });
   }
+
+  async findOneNextGeulroquis() {
+    return this.geulroquisRepository.findOne({
+      where: { current: false, next: false },
+      order: { createdDate: 'ASC' },
+    });
+  }
+
+  async deleteAllGeulroquis() {
+    return this.geulroquisRepository.delete({});
+  }
 }

@@ -17,7 +17,10 @@ export class UserRepository {
   ) {}
 
   async findUserById(userId: number) {
-    return this.userRepository.findOne({ where: { id: userId }, relations: ['devices'] });
+    return this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['devices', 'homeLayouts', 'homeLayouts.homeItems', 'homeLayouts.homeItems.item'],
+    });
   }
 
   async findUserByEmail(email: string) {

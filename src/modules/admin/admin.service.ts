@@ -61,6 +61,12 @@ import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
+import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
+import { Theme } from '../../entities/theme.entity';
+import { CreateItemReqDto } from './dto/request/createItemReq.dto';
+import { Item } from '../../entities/item.entity';
+import { ItemResDto } from '../home/dto/response/itemRes.dto';
+import { ThemeResDto } from '../home/dto/response/themeRes.dto';
 
 @Injectable()
 export class AdminService {
@@ -183,7 +189,7 @@ export class AdminService {
 
     await this.adminCheckDuplicates(data.email);
 
-    data.password = await bcrypt.hash(data.password, 10);
+    data.password = await bcrypt.hash(data.password, 12);
     const newAdmin: CreateAdminDto = {
       ...data,
       activated: true,
@@ -658,7 +664,7 @@ export class AdminService {
   async updateAdmin(adminId: number, data: AdminUpdateReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
     if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
+      data.password = await bcrypt.hash(data.password, 12);
     }
     const updatedAdmin = await this.adminRepository.updateAdmin(admin, data);
     return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
@@ -983,11 +989,10 @@ export class AdminService {
 
   @Transactional()
   async changeTomorrowGeulroquis(geulroquisId: number) {
-    const TomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
-
-    if (TomorrowGeulroquis) {
-      TomorrowGeulroquis.next = false;
-      await this.geulroquisRepository.saveGeulroquis(TomorrowGeulroquis);
+    const tomorrowGeulroquis = await this.geulroquisRepository.findTomorrowGeulroquis();
+    if (tomorrowGeulroquis) {
+      tomorrowGeulroquis.next = false;
+      await this.geulroquisRepository.saveGeulroquis(tomorrowGeulroquis);
     } else {
       const currentGeulroquis = await this.geulroquisRepository.findCurrentGeulroquis();
       if (currentGeulroquis) {
@@ -1003,7 +1008,8 @@ export class AdminService {
       await this.geulroquisRepository.saveGeulroquis(geulroquis);
     }
 
-    const nextGeulroquis = await this.geulroquisRepository.findOneGeulroquis(geulroquisId);
+    const nextGeulroquis = await this.geulroquisRepository.findOneNextGeulroquis();
+
     nextGeulroquis.next = true;
     await this.geulroquisRepository.saveGeulroquis(nextGeulroquis);
 
@@ -1156,5 +1162,55 @@ export class AdminService {
       throw new HttpException('유효하지 않거나 만료된 토큰입니다.', HttpStatus.BAD_REQUEST);
 
     await this.resetRootAdmin();
+  }
+
+  async getThemes() {
+    const themes = await this.adminRepository.findThemes();
+
+    const themesDto = this.utilsService.transformToDto(ThemeResDto, themes);
+
+    return { themes: themesDto };
+  }
+
+  async registerTheme(data: CreateThemeReqDto) {
+    const newTheme = new Theme();
+    newTheme.url = data.url;
+    newTheme.name = data.name;
+    newTheme.price = data.price;
+
+    await this.adminRepository.saveTheme(newTheme);
+    await this.redis.del(`linkedout:themes`);
+  }
+
+  async deleteTheme(themeId: number) {
+    return this.adminRepository.deleteTheme(themeId);
+  }
+
+  async getItems(themeName?: string) {
+    const items = await this.adminRepository.findItems(themeName);
+
+    return this.utilsService.transformToDto(ItemResDto, items);
+  }
+
+  async createItem(data: CreateItemReqDto) {
+    const theme = await this.adminRepository.findThemeById(data.themeId);
+
+    const newItem = new Item();
+    newItem.name = data.name;
+    newItem.price = data.price;
+    newItem.url = data.url;
+    newItem.theme = theme;
+    newItem.position = data.position;
+
+    await this.adminRepository.saveItem(newItem);
+    await this.redis.del(`items:theme:${data.themeId}:${data.position}`);
+  }
+
+  async deleteItem(itemId: number) {
+    return this.adminRepository.deleteItem(itemId);
+  }
+
+  async resetGeulroquis(adminId: number) {
+    return this.geulroquisRepository.deleteAllGeulroquis();
   }
 }

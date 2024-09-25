@@ -9,6 +9,8 @@ import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
 import { CreateAdminDto } from './dto/createAdmin.dto';
 import { Server } from '../../entities/server.entity';
 import { Transactional } from 'typeorm-transactional';
+import { Theme } from '../../entities/theme.entity';
+import { Item } from '../../entities/item.entity';
 
 export class AdminRepository {
   constructor(
@@ -21,6 +23,10 @@ export class AdminRepository {
     private readonly processedRepository: Repository<ProcessedHistory>,
     @InjectRepository(Server)
     private readonly serverRepository: Repository<Server>,
+    @InjectRepository(Theme)
+    private readonly themeRepository: Repository<Theme>,
+    @InjectRepository(Item)
+    private readonly itemRepository: Repository<Item>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -277,5 +283,41 @@ export class AdminRepository {
 
   async deleteAdminById(adminId: number) {
     return this.adminRepository.delete(adminId);
+  }
+
+  async saveTheme(newTheme: Theme) {
+    return this.themeRepository.save(newTheme);
+  }
+
+  async findThemes() {
+    return this.themeRepository.find();
+  }
+
+  async findThemeById(themeId: number) {
+    return this.themeRepository.findOne({ where: { id: themeId } });
+  }
+
+  async deleteTheme(themeId: number) {
+    return this.themeRepository.delete(themeId);
+  }
+
+  async findItems(themeName?: string) {
+    if (!themeName) {
+      return await this.itemRepository.find();
+    } else {
+      return await this.itemRepository
+        .createQueryBuilder('item')
+        .leftJoinAndSelect('item.theme', 'theme')
+        .where('theme.name = :themeName', { themeName: themeName })
+        .getMany();
+    }
+  }
+
+  async saveItem(newItem: Item) {
+    return this.itemRepository.save(newItem);
+  }
+
+  async deleteItem(itemId: number) {
+    return this.itemRepository.delete(itemId);
   }
 }
