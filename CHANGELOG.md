@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/team-echoist/server/compare/v1.14.2...v1.15.0) (2024-09-25)
+
+
+### Features
+
+* Add home screen decoration ([#432](https://github.com/team-echoist/server/issues/432)) ([ab8834b](https://github.com/team-echoist/server/commit/ab8834bf1d56bfa64ced1465a7beb47eae3a57b8))
+
 ## [1.14.2](https://github.com/team-echoist/server/compare/v1.14.1...v1.14.2) (2024-09-13)
 
 ## [1.14.1](https://github.com/team-echoist/server/compare/v1.14.0...v1.14.1) (2024-09-13)
