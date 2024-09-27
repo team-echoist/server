@@ -86,9 +86,20 @@ export class EssayRepository {
       queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
     }
 
-    queryBuilder.offset((page - 1) * limit).limit(limit);
+    const subQuery = queryBuilder
+      .clone()
+      .select('essay.id')
+      .orderBy('essay.createdDate', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
 
-    const [essays, total] = await queryBuilder
+    const [essays, total] = await this.essayRepository
+      .createQueryBuilder('essay')
+      .where(`essay.id IN (${subQuery.getQuery()})`)
+      .setParameters(subQuery.getParameters()) // 파라미터 설정
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.story', 'story')
+      .leftJoinAndSelect('essay.tags', 'tags')
       .orderBy('essay.createdDate', 'DESC')
       .getManyAndCount();
 
