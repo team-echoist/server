@@ -33,6 +33,7 @@ import * as strategies from './common/guards/strategies';
 import { DeviceMiddleware } from './common/middlewares/device.middleware';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import * as process from 'node:process';
+import { RequestIdMiddleware } from './common/middlewares/requestId.middleware';
 
 @Module({
   imports: [
@@ -96,5 +97,6 @@ export class AppModule implements OnModuleInit, NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DeviceMiddleware).forRoutes('*');
     consumer.apply(TimezoneMiddleware).forRoutes('*');
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
   }
 }
