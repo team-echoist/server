@@ -79,7 +79,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 
     /** @description 리프레쉬 토큰 사용 후 5초간 만료토큰 허용 */
     const recentlyRefreshedToken = await this.redis.get(recentTokenKey);
+
+    console.log('RT사용 기록: ', recentlyRefreshedToken);
     if (recentlyRefreshedToken) {
+      console.log('RT사용 기록 분기 내부 진입');
       response.setHeader('x-access-token', recentlyRefreshedToken);
       request.headers['authorization'] = `Bearer ${recentlyRefreshedToken}`;
 
@@ -88,6 +91,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 
       return true;
     }
+    console.log('RT사용 기록 없음. 다음 코드 진행');
 
     const decodedRefreshToken = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
