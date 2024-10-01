@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/team-echoist/server/compare/v1.15.1...v1.16.0) (2024-10-01)
+
+
+### Features
+
+* middleware is added to add request request identifier for testing. ([#436](https://github.com/team-echoist/server/issues/436)) ([27beee6](https://github.com/team-echoist/server/commit/27beee6b2d320e558ec2df5e1040929b844362dc))
+
 ## [1.15.1](https://github.com/team-echoist/server/compare/v1.15.0...v1.15.1) (2024-09-27)
 
 
