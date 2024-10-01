@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/team-echoist/server/compare/v1.15.0...v1.15.1) (2024-09-27)
+
+
+### Bug Fixes
+
+* problem with published posts not being viewed properly due to paging issues ([#433](https://github.com/team-echoist/server/issues/433)) ([ded3612](https://github.com/team-echoist/server/commit/ded361282f342d93049acc06dc7b7fa849778159))
+
 # [1.15.0](https://github.com/team-echoist/server/compare/v1.14.2...v1.15.0) (2024-09-25)
 
 
