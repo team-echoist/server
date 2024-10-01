@@ -31,6 +31,7 @@ declare global {
     export interface Request {
       user?: User;
       device?: DeviceDto;
+      requestId: string;
     }
   }
 }
