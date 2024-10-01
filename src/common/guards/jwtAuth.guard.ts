@@ -98,6 +98,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       sub: decodedRefreshToken.sub,
     });
 
+    console.log('RT 토큰버전: ', decodedRefreshToken.tokenVersion);
+    console.log('유저 토큰버전: ', user.tokenVersion);
+    console.log('일치검사결과: ', decodedRefreshToken.tokenVersion === user.tokenVersion);
+
     if (decodedRefreshToken.tokenVersion !== user.tokenVersion) {
       throw new HttpException(
         '잠재적인 위협이 감지되어 토큰이 무효화 되었습니다. 다시 로그인 해주세요.',
