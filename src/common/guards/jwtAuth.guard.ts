@@ -73,7 +73,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       throw new HttpException('다음 누락: x-refresh-token', HttpStatus.UNAUTHORIZED);
 
     const inProgress = await this.redis.get(inProgressKey);
-    console.log(`${id}:중복 갱신 확인`);
+    console.log(`${id}:중복 갱신 체크`);
     if (inProgress) {
       console.log(`${id}:중복 갱신 발견, 재시도`);
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -81,12 +81,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     }
 
     await this.redis.set(inProgressKey, 'true', 'PX', 300);
-    console.log('갱신 시작');
+    console.log(`${id}:갱신 시작`);
 
     /** @description 리프레쉬 토큰 사용 후 5초간 만료토큰 허용 */
     const isPassKey = await this.redis.get(passKey);
 
-    console.log('리프레쉬 토큰 사용 후 5초간 만료토큰 허용을 위한 PASS KEY 확인: ', isPassKey);
+    console.log(`${id}:리프레쉬 토큰 사용 후 5초간 만료토큰 허용을 위한 PASS KEY 확인:`, isPassKey);
     if (isPassKey) {
       console.log(`${id}:PASS키 존재. 비동기요청 정상처리`);
       response.setHeader('x-access-token', isPassKey);
