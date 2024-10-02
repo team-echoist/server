@@ -1,3 +1,10 @@
+## [1.16.2](https://github.com/team-echoist/server/compare/v1.16.1...v1.16.2) (2024-10-02)
+
+
+### Bug Fixes
+
+* replace app.enableCors with express cors middleware for custom headers ([#438](https://github.com/team-echoist/server/issues/438)) ([793172a](https://github.com/team-echoist/server/commit/793172a208d35120d2c7193dadfd3e7e0e075ddd))
+
 ## [1.16.1](https://github.com/team-echoist/server/compare/v1.16.0...v1.16.1) (2024-10-02)
 
 
