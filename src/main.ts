@@ -14,6 +14,7 @@ import * as dotenv from 'dotenv';
 import * as express from 'express';
 import * as basicAuth from 'express-basic-auth';
 import { writeFileSync } from 'fs';
+import * as cors from 'cors';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
@@ -40,7 +41,22 @@ async function bootstrap() {
     'https://devtools.nestjs.com',
   ];
 
-  app.enableCors({
+  // app.enableCors({
+  //   origin: (origin, callback) => {
+  //     if (allowedOrigins.includes(origin) || !origin) {
+  //       callback(null, origin);
+  //     } else {
+  //       callback(new Error('Not allowed by CORS'));
+  //     }
+  //   },
+  //   allowedHeaders:
+  //     'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, x-access-token, x-refresh-token, Accept, Observe',
+  //   methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
+  //   credentials: true,
+  //   exposeHeaders: ['x-access-token', 'x-refresh-token'],
+  // });
+
+  const corsOptions = {
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin) || !origin) {
         callback(null, origin);
@@ -52,7 +68,10 @@ async function bootstrap() {
       'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, x-access-token, x-refresh-token, Accept, Observe',
     methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
     credentials: true,
-  });
+    exposeHeaders: ['x-access-token', 'x-refresh-token'],
+  };
+
+  app.use(cors(corsOptions));
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     const origin = req.headers.origin as string;
