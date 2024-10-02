@@ -64,8 +64,16 @@ async function bootstrap() {
         callback(new Error('Not allowed by CORS'));
       }
     },
-    allowedHeaders:
-      'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, x-access-token, x-refresh-token, Accept, Observe',
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'X-HTTP-Method-Override',
+      'x-access-token',
+      'x-refresh-token',
+      'Accept',
+      'Observe',
+    ],
     methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
     credentials: true,
     exposeHeaders: ['x-access-token', 'x-refresh-token'],
