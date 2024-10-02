@@ -1,3 +1,10 @@
+## [1.16.3](https://github.com/team-echoist/server/compare/v1.16.2...v1.16.3) (2024-10-02)
+
+
+### Bug Fixes
+
+* add X-Access-Token to Access-Control-Expose-Headers ([#439](https://github.com/team-echoist/server/issues/439)) ([b8951ea](https://github.com/team-echoist/server/commit/b8951eab93fe93300a0a7a9c069a815636e04368))
+
 ## [1.16.2](https://github.com/team-echoist/server/compare/v1.16.1...v1.16.2) (2024-10-02)
 
 
