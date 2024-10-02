@@ -97,7 +97,7 @@ async function bootstrap() {
   });
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization, X-Access-Token');
     next();
   });
 
