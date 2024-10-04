@@ -19,6 +19,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '../../common/types/enum.types';
 import { Request as ExpressRequest } from 'express';
 import { User } from '../../entities/user.entity';
+import { HomeService } from '../home/home.service';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly httpService: HttpService,
     private configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly homeService: HomeService,
   ) {}
 
   private readonly oauthClient = new OAuth2Client(
@@ -117,6 +119,9 @@ export class AuthService {
     userData.nickname = await this.nicknameService.generateUniqueNickname();
 
     req.user = await this.authRepository.saveUser(userData);
+
+    await this.homeService.createDefaultTheme(req.user.id);
+
     return await this.login(req);
   }
 
