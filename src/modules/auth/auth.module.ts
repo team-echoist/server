@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AwsModule } from '../aws/aws.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
+import { HomeModule } from '../home/home.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from '../user/user.module';
     UtilsModule,
     NicknameModule,
     AwsModule,
+    HomeModule,
     forwardRef(() => UserModule),
   ],
   controllers: [AuthController],
