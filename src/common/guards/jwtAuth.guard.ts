@@ -29,10 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const isPublic = this.isPublicRoute(context);
 
     if (isPublic) {
       return true;
@@ -60,48 +57,62 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     return super.canActivate(context) as Promise<boolean>;
   }
 
-  private async handleTokenExpired(request: any, response: any): Promise<boolean> {
-    const id = request.requestId;
-    console.log(`${id}:AT가 만료되어 갱신 핸들러 진입`);
-    const refreshToken = request.headers['x-refresh-token'];
-    console.log(`${id}:사용할 RT:`, refreshToken);
+  private isPublicRoute(context: ExecutionContext) {
+    return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+  }
+
+  private async handleTokenExpired(request: any, response: any) {
+    const { requestId: id, headers } = request;
+    const refreshToken = headers['x-refresh-token'];
+
+    if (!refreshToken) throw new HttpException('missing x-refresh-token', HttpStatus.UNAUTHORIZED);
 
     const passKey = `recentToken:${refreshToken}`;
     const inProgressKey = `inProgress:${refreshToken}`;
 
-    if (!refreshToken)
-      throw new HttpException('다음 누락: x-refresh-token', HttpStatus.UNAUTHORIZED);
+    await this.preventDuplicateTokenRefresh(inProgressKey);
 
+    const isPassKey = await this.redis.get(passKey);
+    if (isPassKey) {
+      return this.usePassKey(isPassKey, request, response);
+    }
+
+    return this.refreshAccessToken(refreshToken, request, response, passKey, inProgressKey);
+  }
+
+  /** @description 중복 갱신 방지 */
+  private async preventDuplicateTokenRefresh(inProgressKey: string) {
     const inProgress = await this.redis.get(inProgressKey);
-    console.log(`${id}:중복 갱신 체크`);
+
     if (inProgress) {
-      console.log(`${id}:중복 갱신 발견, 재시도`);
       await new Promise((resolve) => setTimeout(resolve, 100));
-      return this.handleTokenExpired(request, response);
+      return this.preventDuplicateTokenRefresh(inProgressKey);
     }
 
     await this.redis.set(inProgressKey, 'true', 'PX', 300);
-    console.log(`${id}:갱신 시작`);
+  }
 
-    /** @description 리프레쉬 토큰 사용 후 5초간 만료토큰 허용 */
-    const isPassKey = await this.redis.get(passKey);
+  /** @description 비동기요청에 대한 RT 재사용 처리 */
+  private async usePassKey(passKey: string, request: any, response: any) {
+    response.setHeader('x-access-token', passKey);
+    request.headers['authorization'] = `Bearer ${passKey}`;
+    const decodedToken = this.jwtService.decode(passKey);
+    request.user = { id: decodedToken.sub, email: decodedToken.username };
 
-    console.log(`${id}:리프레쉬 토큰 사용 후 5초간 만료토큰 허용을 위한 PASS KEY 확인:`, isPassKey);
-    if (isPassKey) {
-      console.log(`${id}:PASS키 존재. 비동기요청 정상처리`);
-      response.setHeader('x-access-token', isPassKey);
-      request.headers['authorization'] = `Bearer ${isPassKey}`;
+    return true;
+  }
 
-      const decodedToken = this.jwtService.decode(isPassKey);
-      request.user = { id: decodedToken.sub, email: decodedToken.username };
-
-      console.log(
-        `${id}:PASS키 사용 후 예상되는 동작은 통신 종료이므로 마지막 로그가 되어야합니다.`,
-      );
-      return true;
-    }
-    console.log(`${id}:PASS KEY 없음. 다음 코드 진행`);
-
+  /** @description 만료 AT갱신 */
+  private async refreshAccessToken(
+    refreshToken: string,
+    request: any,
+    response: any,
+    passKey: string,
+    inProgressKey: string,
+  ) {
     const decodedRefreshToken = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
@@ -111,17 +122,19 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       sub: decodedRefreshToken.sub,
     });
 
-    console.log(`${id}:RT 토큰버전:`, decodedRefreshToken.tokenVersion);
-    console.log(`${id}:유저 토큰버전:`, user.tokenVersion);
-    console.log(`${id}:일치검사결과:`, decodedRefreshToken.tokenVersion === user.tokenVersion);
+    await this.validateTokenVersion(decodedRefreshToken, user);
+    await this.validateDevice(decodedRefreshToken, request, user);
 
+    return this.issueNewAccessToken(decodedRefreshToken, request, response, passKey, inProgressKey);
+  }
+
+  private async validateTokenVersion(decodedRefreshToken: any, user: any) {
     if (decodedRefreshToken.tokenVersion !== user.tokenVersion) {
-      throw new HttpException(
-        '잠재적인 위협이 감지되어 토큰이 무효화 되었습니다. 다시 로그인 해주세요.',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('의심스러운 활동이 감지되었습니다.', HttpStatus.UNAUTHORIZED);
     }
+  }
 
+  private async validateDevice(decodedRefreshToken: any, request: any, user: any): Promise<void> {
     if (!this.isSameDevice(decodedRefreshToken.device, request.device)) {
       await this.authService.incrementTokenVersion(user);
       await this.redis.del(`user:${decodedRefreshToken.sub}`);
@@ -130,40 +143,27 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
 
-    const reuseKey = `${refreshToken}:${decodedRefreshToken.sub}`;
+  private async issueNewAccessToken(
+    decodedRefreshToken: any,
+    request: any,
+    response: any,
+    passKey: string,
+    inProgressKey: string,
+  ): Promise<boolean> {
+    const refreshToken = request.headers['x-refresh-token'];
+    const newAccessTokens = await this.authService.refreshToken(refreshToken);
 
-    const isReuseKey = await this.redis.get(reuseKey);
-    console.log(`${id}:RT 쿨타임 조회:`, isReuseKey);
-    if (isReuseKey) {
-      console.log(`${id}:RT 재사용 쿨타임 감지`);
-      await this.authService.incrementTokenVersion(user);
-      await this.redis.del(`user:${decodedRefreshToken.sub}`);
-      throw new HttpException(
-        '잠재적인 토큰 탈취 또는 남용이 감지되었습니다.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    await this.redis.set(passKey, newAccessTokens, 'EX', 5);
+    await this.redis.set(`reuseKey:${refreshToken}`, 'used', 'EX', 29 * 60 + 50);
+    await this.redis.del(inProgressKey);
 
-    try {
-      console.log(`${id}:RT 쿨타임 정상 / 환경변화 감지 안됨`);
-      const newAccessTokens = await this.authService.refreshToken(refreshToken);
+    response.setHeader('x-access-token', newAccessTokens);
+    request.headers['authorization'] = `Bearer ${newAccessTokens}`;
+    request.user = { id: decodedRefreshToken.sub, email: decodedRefreshToken.username };
 
-      await this.redis.set(passKey, newAccessTokens, 'EX', 5);
-      await this.redis.set(reuseKey, 'used', 'EX', 29 * 60 + 50);
-      await this.redis.del(inProgressKey);
-
-      response.setHeader('x-access-token', newAccessTokens);
-      request.headers['authorization'] = `Bearer ${newAccessTokens}`;
-
-      request.user = { id: decodedRefreshToken.sub, email: decodedRefreshToken.username };
-
-      console.log(`${id}:AT 갱신`);
-      console.log(`${id}:갱신 종료`);
-      return true;
-    } catch {
-      throw new HttpException('로그인이 만료되었습니다.', HttpStatus.UNAUTHORIZED);
-    }
+    return true;
   }
 
   private isSameDevice(storedDevice: any, currentDevice: any): boolean {
