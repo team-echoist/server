@@ -14,7 +14,7 @@ export class AlertController {
 
   @Get('unread')
   @ApiOperation({
-    summary: '안 읽은 알림 여부 확인',
+    summary: '새로운 알림 확인',
     description: `
   사용자가 안 읽은 알림이 있는지 확인합니다.
 

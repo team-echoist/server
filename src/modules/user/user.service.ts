@@ -118,7 +118,6 @@ export class UserService {
       }
     }
 
-
     const updatedUser = await this.userRepository.updateUser(user, data);
     await this.redis.setex(cacheKey, 3600, JSON.stringify(updatedUser));
 
@@ -132,7 +131,10 @@ export class UserService {
 
   async getUserSummaryById(userId: number) {
     const user = await this.fetchUserEntityById(userId);
-    return this.utilsService.transformToDto(UserSummaryResDto, user);
+
+    const filteredUser = await this.userLayoutFilter(user);
+
+    return this.utilsService.transformToDto(UserSummaryResDto, filteredUser);
   }
 
   async getUserProfile(userId: number) {
@@ -219,15 +221,18 @@ export class UserService {
   async getUserInfo(userId: number) {
     const user = await this.fetchUserEntityById(userId);
 
+    const filteredUser = await this.userLayoutFilter(user);
+
+    return this.utilsService.transformToDto(UserSummaryResDto, filteredUser);
+  }
+
+  async userLayoutFilter(user: User) {
     const activeLayout = (user.homeLayouts || []).find((layout) => layout.isActive);
 
-
-    const filteredUser = {
+    return {
       ...user,
       homeLayouts: activeLayout,
     };
-
-    return this.utilsService.transformToDto(UserSummaryResDto, filteredUser);
   }
 
   async updateUserTable(aggregate: Aggregate) {
