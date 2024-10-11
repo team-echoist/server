@@ -71,28 +71,28 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     if (!refreshToken) throw new HttpException('missing x-refresh-token', HttpStatus.UNAUTHORIZED);
 
     const passKey = `recentToken:${refreshToken}`;
-    const inProgressKey = `inProgress:${refreshToken}`;
+    const refreshLockKey = `refreshLockKey:${refreshToken}`;
 
-    await this.preventDuplicateTokenRefresh(inProgressKey);
+    await this.preventDuplicateTokenRefresh(refreshLockKey);
 
     const isPassKey = await this.redis.get(passKey);
     if (isPassKey) {
       return this.usePassKey(isPassKey, request, response);
     }
 
-    return this.refreshAccessToken(refreshToken, request, response, passKey, inProgressKey);
+    return this.refreshAccessToken(refreshToken, request, response, passKey, refreshLockKey);
   }
 
   /** @description 중복 갱신 방지 */
-  private async preventDuplicateTokenRefresh(inProgressKey: string) {
-    const inProgress = await this.redis.get(inProgressKey);
+  private async preventDuplicateTokenRefresh(refreshLockKey: string) {
+    const inProgress = await this.redis.get(refreshLockKey);
 
     if (inProgress) {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      return this.preventDuplicateTokenRefresh(inProgressKey);
+      return this.preventDuplicateTokenRefresh(refreshLockKey);
     }
 
-    await this.redis.set(inProgressKey, 'true', 'PX', 300);
+    await this.redis.set(refreshLockKey, 'true', 'PX', 300);
   }
 
   /** @description 비동기요청에 대한 RT 재사용 처리 */
@@ -111,7 +111,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     request: any,
     response: any,
     passKey: string,
-    inProgressKey: string,
+    refreshLockKey: string,
   ) {
     const decodedRefreshToken = this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
@@ -125,7 +125,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     await this.validateTokenVersion(decodedRefreshToken, user);
     await this.validateDevice(decodedRefreshToken, request, user);
 
-    return this.issueNewAccessToken(decodedRefreshToken, request, response, passKey, inProgressKey);
+    return this.issueNewAccessToken(
+      decodedRefreshToken,
+      request,
+      response,
+      passKey,
+      refreshLockKey,
+    );
   }
 
   private async validateTokenVersion(decodedRefreshToken: any, user: any) {
@@ -150,14 +156,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     request: any,
     response: any,
     passKey: string,
-    inProgressKey: string,
+    refreshLockKey: string,
   ): Promise<boolean> {
     const refreshToken = request.headers['x-refresh-token'];
     const newAccessTokens = await this.authService.refreshToken(refreshToken);
 
     await this.redis.set(passKey, newAccessTokens, 'EX', 5);
     await this.redis.set(`reuseKey:${refreshToken}`, 'used', 'EX', 29 * 60 + 50);
-    await this.redis.del(inProgressKey);
+    await this.redis.del(refreshLockKey);
 
     response.setHeader('x-access-token', newAccessTokens);
     request.headers['authorization'] = `Bearer ${newAccessTokens}`;

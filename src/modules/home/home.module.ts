@@ -14,6 +14,7 @@ import { UtilsModule } from '../utils/utils.module';
 import { UserItem } from '../../entities/userItem.entity';
 import { UserHomeLayout } from '../../entities/userHomeLayout.entity';
 import { UserHomeItem } from '../../entities/userHomeItem.entity';
+import { RedlockProvider } from '../../config/redlock.provider';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { UserHomeItem } from '../../entities/userHomeItem.entity';
     forwardRef(() => UserModule),
   ],
   controllers: [HomeController],
-  providers: [HomeService, HomeRepository],
+  providers: [HomeService, HomeRepository, RedlockProvider],
   exports: [HomeService],
 })
 export class HomeModule {}
