@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  ArrayMaxSize,
+  // ArrayMaxSize,
   IsArray,
   IsEnum,
   IsLatitude,
@@ -67,13 +67,13 @@ export class CreateEssayReqDto {
   location?: string;
 
   @ApiProperty({
-    description: '에세이와 연결시킬 태그들. 최대 4개',
+    description: '에세이와 연결시킬 태그들',
     required: false,
     type: [String],
-    maxItems: 4,
+    // maxItems: 4,
   })
   @IsArray()
-  @ArrayMaxSize(4)
+  // @ArrayMaxSize(4)
   @IsOptional()
   tags?: string[];
 }
