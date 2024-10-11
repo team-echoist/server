@@ -84,12 +84,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
   }
 
   /** @description 중복 갱신 방지 */
-  private async preventDuplicateTokenRefresh(refreshLockKey: string) {
+  private async preventDuplicateTokenRefresh(refreshLockKey: string, retries = 10) {
     const inProgress = await this.redis.get(refreshLockKey);
 
     if (inProgress) {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      return this.preventDuplicateTokenRefresh(refreshLockKey);
+      return this.preventDuplicateTokenRefresh(refreshLockKey, retries - 1);
     }
 
     await this.redis.set(refreshLockKey, 'true', 'PX', 300);
