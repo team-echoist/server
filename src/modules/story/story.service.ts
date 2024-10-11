@@ -44,6 +44,13 @@ export class StoryService {
   @Transactional()
   async saveStory(userId: number, data: CreateStoryReqDto) {
     const user = await this.userService.fetchUserEntityById(userId);
+
+    const stories = await this.storyRepository.findStoriesById(userId);
+    const isNameDuplicate = stories.some((story) => story.name === data.name);
+    if (isNameDuplicate) {
+      throw new HttpException('이미 같은 이름의 스토리가 존재합니다.', HttpStatus.BAD_REQUEST);
+    }
+
     const savedStory = await this.saveStoryWithUser(user, data.name);
 
     if (data.essayIds && data.essayIds.length > 0) {
@@ -58,9 +65,20 @@ export class StoryService {
   @Transactional()
   async updateStory(userId: number, storyId: number, data: UpdateStoryReqDto) {
     const story = await this.storyRepository.findStoryWithEssayById(userId, storyId);
-    if (!story) throw new NotFoundException('Story not found');
+    if (!story) throw new NotFoundException('스토리를 찾을 수 없습니다.');
 
-    if (data.name && data.name !== '') story.name = data.name;
+    if (data.name && data.name.trim() !== '') {
+      const stories = await this.storyRepository.findStoriesById(userId);
+      const isNameDuplicate = stories.some(
+        (existingStory) => existingStory.id !== storyId && existingStory.name === data.name,
+      );
+
+      if (isNameDuplicate) {
+        throw new HttpException('이미 같은 이름의 스토리가 존재합니다.', HttpStatus.BAD_REQUEST);
+      }
+
+      story.name = data.name;
+    }
     await this.storyRepository.saveStory(story);
 
     if (data.essayIds && data.essayIds.length > 0)
