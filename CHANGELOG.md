@@ -1,3 +1,11 @@
+## [1.17.4](https://github.com/team-echoist/server/compare/v1.17.3...v1.17.4) (2024-10-14)
+
+
+### Bug Fixes
+
+* redis connection settings in redlock ([#455](https://github.com/team-echoist/server/issues/455)) ([0787fd1](https://github.com/team-echoist/server/commit/0787fd1e7bc507ee26762c9adc5d209518cc74b5))
+* 키워드 타입 검사 추가 ([#452](https://github.com/team-echoist/server/issues/452)) ([4b4dae5](https://github.com/team-echoist/server/commit/4b4dae55ebd9b2ab892a1b4a46413f8695674129))
+
 ## [1.17.3](https://github.com/team-echoist/server/compare/v1.17.2...v1.17.3) (2024-10-11)
 
 ## [1.17.2](https://github.com/team-echoist/server/compare/v1.17.1...v1.17.2) (2024-10-11)
