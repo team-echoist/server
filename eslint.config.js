@@ -20,9 +20,7 @@ module.exports = [
         tsconfigRootDir: __dirname,
         sourceType: 'module',
       },
-      globals: {
-        // 글로벌 변수를 정의하고 싶다면 여기에서 설정 가능
-      },
+      globals: {},
     },
     plugins: {
       '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
@@ -43,7 +41,6 @@ module.exports = [
       ecmaVersion: 2020,
       sourceType: 'module',
       globals: {
-        // 여기에 node 및 jest 관련 글로벌 변수를 설정
         require: 'readonly',
         module: 'readonly',
         process: 'readonly',

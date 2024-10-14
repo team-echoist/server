@@ -15,9 +15,11 @@ import { UserItem } from '../../entities/userItem.entity';
 import { UserHomeLayout } from '../../entities/userHomeLayout.entity';
 import { UserHomeItem } from '../../entities/userHomeItem.entity';
 import { RedlockProvider } from '../../config/redlock.provider';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature([Item, Theme, UserTheme, UserItem, UserHomeLayout, UserHomeItem]),
     GeulroquisModule,
