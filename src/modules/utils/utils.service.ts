@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import * as moment from 'moment-timezone';
 import * as sanitizeHtml from 'sanitize-html';
@@ -215,6 +215,10 @@ export class UtilsService {
   }
 
   highlightKeywordSnippet(text: string, keyword: string) {
+    if (typeof keyword !== 'string') {
+      throw new HttpException('잘못된 키워드 유형', HttpStatus.BAD_REQUEST);
+    }
+
     const snippetLength = 100;
     const cleanedText = this.cleanText(text);
 
