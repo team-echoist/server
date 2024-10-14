@@ -681,7 +681,12 @@ export class EssayService {
   }
 
   async searchEssays(keyword: string, page: number, limit: number) {
+    if (typeof keyword !== 'string') {
+      throw new HttpException('잘못된 키워드 유형', HttpStatus.BAD_REQUEST);
+    }
+
     const cacheKey = `search:${keyword}:${page}:${limit}`;
+
     const cachedResult = await this.redis.get(cacheKey);
     if (cachedResult) {
       return JSON.parse(cachedResult);
