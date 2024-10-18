@@ -348,7 +348,7 @@ export class EssayService {
     const lockKey = `lock:aggregate:${essay.id}`;
     const lockTimeout = 30;
     const maxAttempts = 5;
-    const retryDelay = 10;
+    const baseRetryDelay = 10;
 
     let lock: string | null = null;
     let attempts = 0;
@@ -358,6 +358,7 @@ export class EssayService {
 
       if (!lock) {
         attempts++;
+        const retryDelay = baseRetryDelay * Math.pow(2, attempts);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
@@ -399,7 +400,7 @@ export class EssayService {
         aggregate.trendScore = newTrendScore;
         aggregate.reputationScore = increaseReputation
           ? (aggregate.reputationScore ?? 0) + 1
-          : aggregate.reputationScore ?? 0;
+          : (aggregate.reputationScore ?? 0);
 
         const savedAggregate = await this.essayRepository.saveAggregate(aggregate);
 
@@ -408,7 +409,7 @@ export class EssayService {
         await this.redis.del(lockKey);
       }
     } else {
-      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 잠금을 획득하지 못했습니다.`);
+      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 락을 획득하지 못했습니다.`);
     }
   }
 
