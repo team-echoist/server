@@ -74,7 +74,8 @@ export class EssayRepository {
       .leftJoinAndSelect('essay.story', 'story')
       .leftJoinAndSelect('essay.tags', 'tags')
       .where('essay.author.id = :userId', { userId })
-      .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT });
+      .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
+      .andWhere('essay.status != :buryStatus', { buryStatus: EssayStatus.BURY });
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
@@ -114,7 +115,8 @@ export class EssayRepository {
       .leftJoinAndSelect('essay.tags', 'tags')
       .where('essay.author.id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
-      .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE });
+      .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE })
+      .andWhere('essay.status != :buryStatus', { buryStatus: EssayStatus.BURY });
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
@@ -158,6 +160,7 @@ export class EssayRepository {
       )
       .leftJoin('essay.tags', 'tags')
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
+      .andWhere('essay.status != :buryStatus', { buryStatus: EssayStatus.BURY })
       .andWhere('essay.deletedDate IS NULL')
       .andWhere(
         new Brackets((qb) => {
@@ -473,7 +476,9 @@ export class EssayRepository {
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.story', 'story')
       .where('essay.author = :userId', { userId })
-      .andWhere('essay.status != :status', { status: EssayStatus.LINKEDOUT });
+      .andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PUBLISHED, EssayStatus.PRIVATE],
+      });
 
     if (storyId) {
       queryBuilder.andWhere(

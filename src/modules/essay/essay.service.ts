@@ -89,9 +89,6 @@ export class EssayService {
       return await this.handleMonitoredUser(user, essayData, data);
     }
 
-    // if (device.os === DeviceOS.ANDROID)
-    //   essayData.content = this.utilsService.wrapContentWithHtmlTemplate(essayData.content);
-
     const savedEssay = await this.essayRepository.saveEssay(essayData);
 
     return this.utilsService.transformToDto(EssayResDto, savedEssay);
@@ -143,9 +140,6 @@ export class EssayService {
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
 
-    const story = await this.storyService.getStoryById(user, data.storyId);
-    const tags = await this.tagService.getTags(data.tags);
-
     const essay = await this.essayRepository.findEssayById(essayId);
     await this.checkEssayPermissions(essay, requester.id);
     await this.checkIfEssayUnderReview(essayId, data);
@@ -153,8 +147,11 @@ export class EssayService {
     let message = '';
     if (requester.status === UserStatus.MONITORED && data.status !== EssayStatus.PRIVATE) {
       await this.reviewService.saveReviewRequest(user, essay, data);
-      message = 'Review request created due to policy violations.';
+      message = '정책 위반으로 인해 요청이 검토됩니다.';
     }
+
+    const story = await this.storyService.getStoryById(user, data.storyId);
+    const tags = await this.tagService.getTags(data.tags);
 
     await this.updateEssayData(essay, data, story, tags, requester);
     void this.badgeService.addExperience(user, tags);
@@ -246,9 +243,6 @@ export class EssayService {
       author: essay.status === EssayStatus.LINKEDOUT ? undefined : essay.author,
       isBookmarked: isBookmarked,
     };
-
-    // if (req.device.os === DeviceOS.ANDROID)
-    //   newEssayData.content = this.utilsService.extractContentFromHtml(newEssayData.content);
 
     return this.utilsService.transformToDto(EssayResDto, newEssayData);
   }

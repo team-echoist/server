@@ -41,6 +41,7 @@ export enum EssayStatus {
   PRIVATE = 'private',
   PUBLISHED = 'published',
   LINKEDOUT = 'linkedout',
+  BURY = 'bury',
 }
 
 export enum ActionType {
