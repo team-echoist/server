@@ -1,3 +1,6 @@
+const { configs } = require('@typescript-eslint/eslint-plugin');
+const typescriptParser = require('@typescript-eslint/parser');
+
 module.exports = [
   {
     files: ['**/*.ts'],
@@ -14,16 +17,15 @@ module.exports = [
       'generate-migration.js',
     ],
     languageOptions: {
-      parser: '@typescript-eslint/parser',
+      parser: typescriptParser,
       parserOptions: {
         project: './tsconfig.json',
         tsconfigRootDir: __dirname,
         sourceType: 'module',
       },
-      globals: {},
     },
     plugins: {
-      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
+      '@typescript-eslint': configs.recommended,
       prettier: require('eslint-plugin-prettier'),
     },
     rules: {
