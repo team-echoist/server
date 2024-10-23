@@ -65,6 +65,14 @@ export class EssayService {
 
   @Transactional()
   async saveEssay(requester: Express.User, deviceDto: DeviceDto, data: CreateEssayReqDto) {
+    if (data.status === EssayStatus.BURIED) {
+      if (!data.latitude || !data.longitude)
+        throw new HttpException(
+          '땅에 묻기 기능을 사용하기 위해선 좌표가 필요합니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+
     const user = await this.userService.fetchUserEntityById(requester.id);
     const tags = await this.tagService.getTags(data.tags);
 
