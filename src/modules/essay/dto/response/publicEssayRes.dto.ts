@@ -59,15 +59,15 @@ export class PublicEssayResDto {
   @Expose()
   content: string;
 
-  @ApiProperty()
-  @IsLatitude()
-  @Expose()
-  latitude: number;
-
-  @ApiProperty()
-  @IsLongitude()
-  @Expose()
-  longitude: number;
+  // @ApiProperty()
+  // @IsLatitude()
+  // @Expose()
+  // latitude: number;
+  //
+  // @ApiProperty()
+  // @IsLongitude()
+  // @Expose()
+  // longitude: number;
 
   @ApiProperty()
   @IsString()

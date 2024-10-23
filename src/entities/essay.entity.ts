@@ -38,11 +38,13 @@ export class Essay {
   @Column({ name: 'linked_out_gauge', nullable: false, default: 0 })
   linkedOutGauge: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-  latitude: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-  longitude: number;
+  @Column({
+    type: 'geometry',
+    spatialFeatureType: 'Point',
+    srid: 4326, // WGS 84 좌표계
+    nullable: true,
+  })
+  coordinates: string;
 
   @Column({ nullable: true })
   location: string;

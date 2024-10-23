@@ -36,13 +36,13 @@ export class EssayInfoResDto {
   @IsNumber()
   linkedOutGauge: number;
 
-  @IsLatitude()
-  @Expose()
-  latitude: number;
-
-  @IsLongitude()
-  @Expose()
-  longitude: number;
+  // @IsLatitude()
+  // @Expose()
+  // latitude: number;
+  //
+  // @IsLongitude()
+  // @Expose()
+  // longitude: number;
 
   @IsString()
   @Expose()
