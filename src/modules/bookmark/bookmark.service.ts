@@ -48,12 +48,15 @@ export class BookmarkService {
     const essay = await this.essayService.getEssayById(essayId);
 
     if (essay.status === EssayStatus.PRIVATE || essay.author.id === userId)
-      throw new HttpException('Bad request.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '자신의 에세이 혹은 비공개 에세이는 북마크할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
 
     const existingBookmark = await this.bookmarkRepository.findBookmark(user, essay);
 
     if (existingBookmark) {
-      throw new HttpException('Bookmark already exists.', HttpStatus.CONFLICT);
+      throw new HttpException('이미 북마크한 에세이 입니다.', HttpStatus.CONFLICT);
     }
 
     await this.bookmarkRepository.addBookmark(user, essay);

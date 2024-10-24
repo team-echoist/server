@@ -45,7 +45,41 @@ export class EssayRepository {
   }
 
   async saveEssay(data: SaveEssayDto) {
-    return this.essayRepository.save(data);
+    const result = await this.essayRepository
+      .createQueryBuilder()
+      .insert()
+      .into('essay')
+      .values({
+        title: data.title,
+        content: data.content,
+        linkedOutGauge: data.linkedOutGauge,
+        status: data.status,
+        device: data.device,
+        author: data.author,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        coordinates:
+          data.longitude && data.latitude
+            ? () => `ST_SetSRID(ST_GeomFromText('POINT(${data.longitude} ${data.latitude})'), 4326)`
+            : null,
+      })
+      .returning('*')
+      .execute();
+
+    const insertedEssayId = result.identifiers[0].id;
+
+    const savedEssay = await this.essayRepository.findOne({
+      where: { id: insertedEssayId },
+      relations: ['tags', 'author', 'device'],
+    });
+
+    if (data.tags && data.tags.length > 0) {
+      savedEssay.tags = data.tags;
+
+      await this.essayRepository.save(savedEssay);
+    }
+
+    return savedEssay;
   }
 
   async saveEssays(essays: Essay[]) {
@@ -75,7 +109,7 @@ export class EssayRepository {
       .leftJoinAndSelect('essay.tags', 'tags')
       .where('essay.author.id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
-      .andWhere('essay.status != :buryStatus', { buryStatus: EssayStatus.BURY });
+      .andWhere('essay.status != :BURIEDStatus', { BURIEDStatus: EssayStatus.BURIED });
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
@@ -116,7 +150,7 @@ export class EssayRepository {
       .where('essay.author.id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
       .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE })
-      .andWhere('essay.status != :buryStatus', { buryStatus: EssayStatus.BURY });
+      .andWhere('essay.status != :BURIEDStatus', { BURIEDStatus: EssayStatus.BURIED });
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
@@ -160,7 +194,7 @@ export class EssayRepository {
       )
       .leftJoin('essay.tags', 'tags')
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
-      .andWhere('essay.status != :buryStatus', { buryStatus: EssayStatus.BURY })
+      .andWhere('essay.status != :BURIEDStatus', { BURIEDStatus: EssayStatus.BURIED })
       .andWhere('essay.deletedDate IS NULL')
       .andWhere(
         new Brackets((qb) => {

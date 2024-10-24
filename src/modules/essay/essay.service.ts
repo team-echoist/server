@@ -38,6 +38,7 @@ import { SupportService } from '../support/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { Request as ExpressRequest } from 'express';
+import { SaveEssayDto } from './dto/saveEssay.dto';
 
 @Injectable()
 export class EssayService {
@@ -64,7 +65,7 @@ export class EssayService {
   }
 
   @Transactional()
-  async saveEssay(requester: Express.User, deviceDto: DeviceDto, data: CreateEssayReqDto) {
+  async saveEssay(requester: Express.User, reqDevice: DeviceDto, data: CreateEssayReqDto) {
     if (data.status === EssayStatus.BURIED) {
       if (!data.latitude || !data.longitude)
         throw new HttpException(
@@ -75,18 +76,17 @@ export class EssayService {
 
     const user = await this.userService.fetchUserEntityById(requester.id);
     const tags = await this.tagService.getTags(data.tags);
-
-    let device = await this.supportService.findDevice(user, deviceDto);
+    let device = await this.supportService.findDevice(user, reqDevice);
 
     if (!device) {
-      device = await this.supportService.newCreateDevice(user, deviceDto);
+      device = await this.supportService.newCreateDevice(user, reqDevice);
     }
 
-    const essayData = {
+    const essayData: SaveEssayDto = {
       ...data,
-      device: device,
+      device,
       author: user,
-      tags: tags,
+      tags,
     };
 
     void this.badgeService.addExperience(user, tags);

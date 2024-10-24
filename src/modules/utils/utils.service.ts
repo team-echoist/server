@@ -277,4 +277,8 @@ export class UtilsService {
 
     return htmlContent;
   }
+
+  coordinatesToGeometry(latitude: number, longitude: number): string {
+    return `ST_SetSRID(ST_GeomFromText('POINT(${longitude} ${latitude})'), 4326)`;
+  }
 }
