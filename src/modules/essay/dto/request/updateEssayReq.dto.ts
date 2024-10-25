@@ -42,7 +42,7 @@ export class UpdateEssayReqDto {
   @IsOptional()
   thumbnail?: string;
 
-  @ApiProperty({ type: 'enum', description: 'private, published, linked_out' })
+  @ApiProperty({ type: 'enum', description: 'private, published, linkedout' })
   @IsEnum(EssayStatus)
   @IsOptional()
   status?: EssayStatus;

@@ -41,15 +41,15 @@ export class FullEssayResDto {
   @IsNumber()
   linkedOutGauge: number;
 
-  @ApiProperty()
-  @IsLatitude()
-  @Expose()
-  latitude: number;
-
-  @ApiProperty()
-  @IsLongitude()
-  @Expose()
-  longitude: number;
+  // @ApiProperty()
+  // @IsLatitude()
+  // @Expose()
+  // latitude: number;
+  //
+  // @ApiProperty()
+  // @IsLongitude()
+  // @Expose()
+  // longitude: number;
 
   @ApiProperty()
   @IsString()

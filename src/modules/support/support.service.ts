@@ -180,6 +180,8 @@ export class SupportService {
       model: device.model,
     });
 
+    await this.redis.del(`user:${user.id}`);
+
     return await this.supportRepository.saveDevice(newDevice);
   }
 

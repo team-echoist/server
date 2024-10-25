@@ -73,78 +73,7 @@ npm install
 
 ## 환경 변수 설정
 서버를 실행하기 전에 환경 변수를 설정해야 합니다. 환경변수는 루트 경로에 `.env`파일에 설정하거나 시스템 환경 변수로 설정할 수 있습니다.
-민감한 데이터의 경우 팀 채널을 확인해주세요.
-```bash
-
-SERVER_PORT=3000
-SWAGGER=true
-ROOT_EMAIL=
-ROOT_PASSWORD=
-ROOT_NAME=
-TZ=Asia/Seoul
-ENV=dev
-SEED=true
-DEFAULT_PROFILE_IMG=https://cdn.linkedoutapp.com/service/profile_icon_01.png
-
-
-#DB
-DB_SSL=true
-DB_HOST=
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
-DB_PORT=
-
-#Redis
-REDIS_HOST=
-REDIS_PORT=
-
-#JWT
-JWT_SECRET=
-JWT_ACCESS_SECRET=
-JWT_REFRESH_SECRET=
-CUSTOM_TOKEN=
-
-#Redirect
-WEB_REGISTER_REDIRECT=http://localhost:8888/web/login
-WEB_CHANGE_EMAIL_REDIRECT=https://linkedoutapp.com
-WEB_PASSWORD_RESET_REDIRECT=https://linkedoutapp.com
-
-#Email
-EMAIL_SERVICE=gmail
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_SECURE=flase
-EMAIL_USER=
-EMAIL_PASSWORD=
-
-#Oauth
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_CLIENT_CALLBACK=https://linkedoutapp.com/api/auth/google/callback
-
-KAKAO_CLIENT_ID=
-KAKAO_CLIENT_CALLBACK=https://linkedoutapp.com/api/auth/kakao
-
-NAVER_CLIENT_ID=
-NAVER_CLIENT_SECRET=
-NAVER_CLIENT_CALLBACK=https://linkedoutapp.com/api/auth/naver/callback
-
-APPLE_CLIENT_ID=
-APPLE_TEAM_ID=
-APPLE_CALLBACK_URL=https://linkedoutapp.com/api/auth/apple/callback
-APPLE_PRIVATE_KEY=
-
-#AWS
-AWS_REGION=
-AWS_S3_ACCESS_KEY=
-AWS_S3_SECRET_ACCESS_KEY=
-AWS_S3_BUCKET_NAME=
-AWS_CLOUD_FRONT=
-AWS_S3_PRIVATE_BUCKET_NAME=
-SERVICE_ACCOUNT_KEY_FILE=
-
-```
+팀 채널을 확인해주세요.
 
 ***
 <br>
@@ -155,14 +84,14 @@ SERVICE_ACCOUNT_KEY_FILE=
 ### 1. PostgreSQL 컨테이너 실행
 - 다음 명령어를 사용하여 PostgreSQL 컨테이너를 실행하세요. 각 항목의 설정을 환경변수에 등록해야하는걸 잊지마세요.
 ```bash
-docker run --name  -e POSTGRES_USER=your_db_user -e POSTGRES_PASSWORD=your_db_password -e POSTGRES_DB=your_db_name -p 5432:5432 -d postgres:13
+docker run --name your_container_name -e POSTGRES_USER=your_db_user -e POSTGRES_PASSWORD=your_db_password -e POSTGRES_DB=your_db_name -p 5432:5432 -d postgres:13
 ```
 - 혹은 Docker desktop 의 GUI를 사용해 컨테이너를 생성/실행 할 수 있습니다. 
 
 ### 3. Redis 컨테이너 실행
 - Redis 컨테이너는 비교적 간단하게 실행할 수 있습니다.
 ```bash
-docker run --name my-redis -p 6379:6379 -d redis:6
+docker run --name your_container_name -p 6379:6379 -d redis:6
 ```
 - 혹은 Docker desktop 의 GUI를 사용해 컨테이너를 생성/실행 할 수 있습니다. 
 
@@ -175,6 +104,11 @@ docker run --name my-redis -p 6379:6379 -d redis:6
 ## 서버 실행
 - 다음 명령어로 서버를 실행합니다.
 - 서버 초기화에 실패할 경우 백엔드 개발자에게 문의해주세요.
+- 마이그레이션에서 특정 부분이 누락되는것을 확인했습니다. 다음 경로에서 옵션을 변경해 서버를 실행하세요.
+<br>
+`/src/config/typeorm.config.ts`
+`synchronize: true`
+
 ```bash
 npm run start:dev
 ```

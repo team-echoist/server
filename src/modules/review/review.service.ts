@@ -24,6 +24,8 @@ export class ReviewService {
         return ReviewQueueType.PUBLISHED;
       case EssayStatus.LINKEDOUT:
         return ReviewQueueType.LINKEDOUT;
+      case EssayStatus.BURIED:
+        return ReviewQueueType.BURIED;
       default:
         return null;
     }

@@ -65,7 +65,8 @@ export class BookmarkController {
   2. 성공 상태를 반환합니다.
     
   **주의 사항:**
-  - 로그인한 사용자가 접근할 수 있습니다.
+  - 자신의 에세이는 마킹할 수 없습니다.
+  - \`private\`상태의 에세이는 마킹할 수 없습니다.
   `,
   })
   @ApiResponse({ status: 201 })

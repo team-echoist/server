@@ -55,13 +55,13 @@ export class EssayDto {
   @IsOptional()
   status?: EssayStatus;
 
-  @IsLatitude()
-  @Expose()
-  latitude: number;
-
-  @IsLongitude()
-  @Expose()
-  longitude: number;
+  // @IsLatitude()
+  // @Expose()
+  // latitude: number;
+  //
+  // @IsLongitude()
+  // @Expose()
+  // longitude: number;
 
   @IsString()
   @Expose()

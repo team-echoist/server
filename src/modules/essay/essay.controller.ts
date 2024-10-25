@@ -52,11 +52,12 @@ export class EssayController {
     - 태그가 처음 사용된 경우 경험치가 증가하며, 경험치가 10에 도달하면 레벨업이 가능합니다.
 
   **모니터링 유저의 경우:**
-  - 에세이가 발행(Published)되거나 링크드아웃(LinkedOut) 상태일 때 리뷰 대기 상태로 전환됩니다.
+  - 에세이가 발행(Published), 링크드아웃(LinkedOut) 혹은 땅에묻기(buried) 상태일 때 리뷰 대기 상태로 전환됩니다.
   - 리뷰 대기 상태에서는 관리자가 에세이를 검토한 후에만 발행됩니다.
 
   **주의 사항:**
   - 요청 바디의 모든 필드 키는 필수이지만 특정 필드는 값이 비어있어도 됩니다(스키마 참고).
+  - buried 요청의 경우 좌표 데이터가 필수로 필요합니다.
   `,
   })
   @ApiResponse({ status: 201, type: EssayResDto })
@@ -245,7 +246,7 @@ export class EssayController {
   3. 에세이 목록을 반환합니다.
 
   **주의 사항:**
-  - 에세이의 상태가 'PRIVATE'인 경우 조회되지 않습니다.
+  - 에세이의 상태가 'PRIVATE', 'BURY' 인 경우 조회되지 않습니다.
   `,
   })
   @ApiResponse({ status: 200, type: PublicEssaysResDto })
@@ -275,7 +276,7 @@ export class EssayController {
 
   **주의 사항:**
   - 팔로우 중인 유저가 없을 경우 빈 배열을 반환합니다.
-  - 에세이의 상태가 'PRIVATE' 또는 'LINKEDOUT' 인 경우 조회되지 않습니다.
+  - 에세이의 상태가 'PRIVATE', 'LINKEDOUT', 'BURY' 인 경우 조회되지 않습니다.
   `,
   })
   @ApiResponse({ status: 200, type: PublicEssaysResDto })

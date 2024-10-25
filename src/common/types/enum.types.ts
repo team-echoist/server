@@ -41,6 +41,7 @@ export enum EssayStatus {
   PRIVATE = 'private',
   PUBLISHED = 'published',
   LINKEDOUT = 'linkedout',
+  BURIED = 'buried',
 }
 
 export enum ActionType {
@@ -61,6 +62,7 @@ export enum ActionType {
 export enum ReviewQueueType {
   LINKEDOUT = 'linkedout',
   PUBLISHED = 'published',
+  BURIED = 'buried',
 }
 
 export enum ServerStatus {

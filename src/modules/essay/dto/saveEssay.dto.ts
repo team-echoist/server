@@ -6,11 +6,13 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 import { User } from '../../../entities/user.entity';
-import { Story } from '../../../entities/story.entity';
 import { Device } from '../../../entities/device.entity';
 import { EssayStatus } from '../../../common/types/enum.types';
+import { Type } from 'class-transformer';
+import { Tag } from '../../../entities/tag.entity';
 
 export class SaveEssayDto {
   @IsNotEmpty()
@@ -24,9 +26,6 @@ export class SaveEssayDto {
   @IsOptional()
   @IsNumber()
   linkedOutGauge?: number;
-
-  @IsOptional()
-  category?: Story;
 
   @IsOptional()
   @IsString()
@@ -53,4 +52,9 @@ export class SaveEssayDto {
 
   @IsNotEmpty()
   author: User;
+
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => Tag)
+  tags?: Tag[];
 }

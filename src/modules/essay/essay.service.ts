@@ -38,6 +38,7 @@ import { SupportService } from '../support/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { Request as ExpressRequest } from 'express';
+import { SaveEssayDto } from './dto/saveEssay.dto';
 
 @Injectable()
 export class EssayService {
@@ -64,21 +65,28 @@ export class EssayService {
   }
 
   @Transactional()
-  async saveEssay(requester: Express.User, deviceDto: DeviceDto, data: CreateEssayReqDto) {
-    const user = await this.userService.fetchUserEntityById(requester.id);
-    const tags = await this.tagService.getTags(data.tags);
-
-    let device = await this.supportService.findDevice(user, deviceDto);
-
-    if (!device) {
-      device = await this.supportService.newCreateDevice(user, deviceDto);
+  async saveEssay(requester: Express.User, reqDevice: DeviceDto, data: CreateEssayReqDto) {
+    if (data.status === EssayStatus.BURIED) {
+      if (!data.latitude || !data.longitude)
+        throw new HttpException(
+          '땅에 묻기 기능을 사용하기 위해선 좌표가 필요합니다.',
+          HttpStatus.BAD_REQUEST,
+        );
     }
 
-    const essayData = {
+    const user = await this.userService.fetchUserEntityById(requester.id);
+    const tags = await this.tagService.getTags(data.tags);
+    let device = await this.supportService.findDevice(user, reqDevice);
+
+    if (!device) {
+      device = await this.supportService.newCreateDevice(user, reqDevice);
+    }
+
+    const essayData: SaveEssayDto = {
       ...data,
-      device: device,
+      device,
       author: user,
-      tags: tags,
+      tags,
     };
 
     void this.badgeService.addExperience(user, tags);
@@ -88,9 +96,6 @@ export class EssayService {
     if (requester.status === UserStatus.MONITORED) {
       return await this.handleMonitoredUser(user, essayData, data);
     }
-
-    // if (device.os === DeviceOS.ANDROID)
-    //   essayData.content = this.utilsService.wrapContentWithHtmlTemplate(essayData.content);
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
 
@@ -143,9 +148,6 @@ export class EssayService {
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
     const user = await this.userService.fetchUserEntityById(requester.id);
 
-    const story = await this.storyService.getStoryById(user, data.storyId);
-    const tags = await this.tagService.getTags(data.tags);
-
     const essay = await this.essayRepository.findEssayById(essayId);
     await this.checkEssayPermissions(essay, requester.id);
     await this.checkIfEssayUnderReview(essayId, data);
@@ -153,8 +155,11 @@ export class EssayService {
     let message = '';
     if (requester.status === UserStatus.MONITORED && data.status !== EssayStatus.PRIVATE) {
       await this.reviewService.saveReviewRequest(user, essay, data);
-      message = 'Review request created due to policy violations.';
+      message = '정책 위반으로 인해 요청이 검토됩니다.';
     }
+
+    const story = await this.storyService.getStoryById(user, data.storyId);
+    const tags = await this.tagService.getTags(data.tags);
 
     await this.updateEssayData(essay, data, story, tags, requester);
     void this.badgeService.addExperience(user, tags);
@@ -246,9 +251,6 @@ export class EssayService {
       author: essay.status === EssayStatus.LINKEDOUT ? undefined : essay.author,
       isBookmarked: isBookmarked,
     };
-
-    // if (req.device.os === DeviceOS.ANDROID)
-    //   newEssayData.content = this.utilsService.extractContentFromHtml(newEssayData.content);
 
     return this.utilsService.transformToDto(EssayResDto, newEssayData);
   }
@@ -348,7 +350,7 @@ export class EssayService {
     const lockKey = `lock:aggregate:${essay.id}`;
     const lockTimeout = 30;
     const maxAttempts = 5;
-    const retryDelay = 10;
+    const baseRetryDelay = 10;
 
     let lock: string | null = null;
     let attempts = 0;
@@ -358,6 +360,7 @@ export class EssayService {
 
       if (!lock) {
         attempts++;
+        const retryDelay = baseRetryDelay * Math.pow(2, attempts);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
@@ -399,7 +402,7 @@ export class EssayService {
         aggregate.trendScore = newTrendScore;
         aggregate.reputationScore = increaseReputation
           ? (aggregate.reputationScore ?? 0) + 1
-          : aggregate.reputationScore ?? 0;
+          : (aggregate.reputationScore ?? 0);
 
         const savedAggregate = await this.essayRepository.saveAggregate(aggregate);
 
@@ -408,7 +411,7 @@ export class EssayService {
         await this.redis.del(lockKey);
       }
     } else {
-      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 잠금을 획득하지 못했습니다.`);
+      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 락을 획득하지 못했습니다.`);
     }
   }
 
