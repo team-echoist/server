@@ -78,11 +78,20 @@ export class AlertService {
       const devices = await this.supportService.getDevicesByUserId(report.reporter.id);
       if (!devices && devices.length === 0) return;
 
+      const deviceIds = devices.map((device) => device.id);
+
+      const allSettings = await Promise.all(
+        deviceIds.map((deviceId) =>
+          this.supportService.fetchSettingEntityById(report.reporter.id, deviceId),
+        ),
+      );
+
+      const settingsMap = new Map(
+        deviceIds.map((deviceId, index) => [deviceId, allSettings[index]]),
+      );
+
       for (const device of devices) {
-        const alertSettings = await this.supportService.fetchSettingEntityById(
-          report.reporter.id,
-          device.id,
-        );
+        const alertSettings = settingsMap.get(device.id);
         if (alertSettings.report) {
           await this.fcmService.sendPushAlert(
             device.fcmToken,
@@ -167,11 +176,17 @@ export class AlertService {
     const devices = await this.supportService.getDevicesByUserId(essay.author.id);
     if (!devices && devices.length === 0) return;
 
+    const deviceIds = devices.map((device) => device.id);
+    const allSettings = await Promise.all(
+      deviceIds.map((deviceId) =>
+        this.supportService.fetchSettingEntityById(essay.author.id, deviceId),
+      ),
+    );
+
+    const settingsMap = new Map(deviceIds.map((deviceId, index) => [deviceId, allSettings[index]]));
+
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.id,
-      );
+      const alertSettings = settingsMap.get(device.id);
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
           device.fcmToken,
@@ -198,11 +213,17 @@ export class AlertService {
     const devices = await this.supportService.getDevicesByUserId(essay.author.id);
     if (!devices && devices.length === 0) return;
 
+    const deviceIds = devices.map((device) => device.id);
+    const allSettings = await Promise.all(
+      deviceIds.map((deviceId) =>
+        this.supportService.fetchSettingEntityById(essay.author.id, deviceId),
+      ),
+    );
+
+    const settingsMap = new Map(deviceIds.map((deviceId, index) => [deviceId, allSettings[index]]));
+
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.id,
-      );
+      const alertSettings = settingsMap.get(device.id);
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
           device.fcmToken,
@@ -238,8 +259,15 @@ export class AlertService {
     const result = actionType === ActionType.APPROVED ? '공개' : '보류';
     const body = `발행 또는 링크드아웃하신 글이 검토 후 ${result} 상태로 전환됐어요.`;
 
+    const deviceIds = devices.map((device) => device.id);
+    const allSettings = await Promise.all(
+      deviceIds.map((deviceId) => this.supportService.fetchSettingEntityById(userId, deviceId)),
+    );
+
+    const settingsMap = new Map(deviceIds.map((deviceId, index) => [deviceId, allSettings[index]]));
+
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(userId, device.id);
+      const alertSettings = settingsMap.get(device.id);
       if (alertSettings.report)
         await this.fcmService.sendPushAlert(
           device.fcmToken,
@@ -273,11 +301,17 @@ export class AlertService {
     const devices = await this.supportService.getDevicesByUserId(essay.author.id);
     if (!devices && devices.length === 0) return;
 
+    const deviceIds = devices.map((device) => device.id);
+    const allSettings = await Promise.all(
+      deviceIds.map((deviceId) =>
+        this.supportService.fetchSettingEntityById(essay.author.id, deviceId),
+      ),
+    );
+
+    const settingsMap = new Map(deviceIds.map((deviceId, index) => [deviceId, allSettings[index]]));
+
     for (const device of devices) {
-      const alertSettings = await this.supportService.fetchSettingEntityById(
-        essay.author.id,
-        device.id,
-      );
+      const alertSettings = settingsMap.get(device.id);
       if (!alertSettings && !alertSettings?.viewed) return;
 
       if (alertSettings.viewed)
@@ -286,6 +320,29 @@ export class AlertService {
           `다른 아무개가 ${essay.author.nickname} 아무개님의 글을 발견!`,
           `사람들이 ${essay.author.nickname} 아무개님의 이야기를 읽기 시작했어요!`,
         );
+    }
+  }
+
+  async sendPushBurialNearby(userId: number) {
+    const devices = await this.supportService.getDevicesByUserId(userId);
+    if (!devices || devices.length === 0) return;
+
+    const deviceIds = devices.map((device) => device.id);
+    const allSettings = await Promise.all(
+      deviceIds.map((deviceId) => this.supportService.fetchSettingEntityById(userId, deviceId)),
+    );
+
+    const settingsMap = new Map(deviceIds.map((deviceId, index) => [deviceId, allSettings[index]]));
+
+    for (const device of devices) {
+      const alertSettings = settingsMap.get(device.id);
+      if (alertSettings?.viewed) {
+        await this.fcmService.sendPushAlert(
+          device.fcmToken,
+          `여기 있던 글이 아무개님을 기다렸어요.`,
+          '지금 주변에 아무개님이 써두었던 글이 숨어있어요. 어떤 추억이 담겨있는지 확인해보세요!',
+        );
+      }
     }
   }
 }
