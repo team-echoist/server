@@ -145,4 +145,33 @@ export class UserRepository {
       { reputation: () => `reputationScore + ${reputation}` },
     );
   }
+
+  async searchUsers(keyword: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+    const useTrigramSearch = keyword.length >= 3;
+
+    const query = this.userRepository.createQueryBuilder('user');
+
+    if (useTrigramSearch) {
+      query
+        .addSelect(`similarity(unaccented_email, :keyword)`, 'relevance')
+        .where('user.deletedDate IS NULL AND unaccented_email ILIKE :wildcardKeyword', {
+          keyword,
+          wildcardKeyword: `%${keyword}%`,
+        });
+    } else {
+      query
+        .addSelect(`ts_rank_cd(search_vector, plainto_tsquery('simple', :keyword))`, 'relevance')
+        .where(
+          'user.deletedDate IS NULL AND (search_vector @@ plainto_tsquery(:keyword) OR unaccented_email ILIKE :wildcardKeyword)',
+          { keyword, wildcardKeyword: `%${keyword}%` },
+        );
+    }
+
+    query.orderBy('relevance', 'DESC').offset(offset).limit(limit);
+
+    const [users, total] = await query.getManyAndCount();
+
+    return { users, total };
+  }
 }

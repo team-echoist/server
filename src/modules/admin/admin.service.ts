@@ -67,6 +67,8 @@ import { CreateItemReqDto } from './dto/request/createItemReq.dto';
 import { Item } from '../../entities/item.entity';
 import { ItemResDto } from '../home/dto/response/itemRes.dto';
 import { ThemeResDto } from '../home/dto/response/themeRes.dto';
+import { UserResDto } from '../user/dto/response/userRes.dto';
+import { EssayService } from '../essay/essay.service';
 
 @Injectable()
 export class AdminService {
@@ -80,6 +82,7 @@ export class AdminService {
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
     private readonly geulroquisRepository: GeulroquisRepository,
+    private readonly essayService: EssayService,
     private readonly nicknameService: NicknameService,
     private readonly mailService: MailService,
     private readonly awsService: AwsService,
@@ -506,10 +509,17 @@ export class AdminService {
     return { users: userDtos, totalPage, page, total };
   }
 
-  async searchUser(email: string) {
-    const user = await this.userRepository.findUserByEmail(email);
+  async searchUsers(keyword: string, page: number, limit: number) {
+    const { users, total } = await this.userRepository.searchUsers(keyword, page, limit);
 
-    return this.utilsService.transformToDto(UserDetailResDto, user);
+    const totalPage: number = Math.ceil(total / limit);
+
+    const usersDto = this.utilsService.transformToDto(UserResDto, users);
+    return { usersDto, total, page, totalPage };
+  }
+
+  async searchEssays(keyword: string, page: number, limit: number) {
+    return await this.essayService.searchEssays(keyword, page, limit);
   }
 
   async getUser(userId: number) {
@@ -552,15 +562,7 @@ export class AdminService {
     const { essays, total } = await this.essayRepository.findFullEssays(page, limit);
     const totalPage: number = Math.ceil(total / limit);
 
-    const data = essays.map((essay) => ({
-      ...essay,
-      authorId: essay.author.id,
-      storyId: essay.story?.id ?? null,
-      reportCount: essay?.reports ? essay.reports.length : null,
-      reviewCount: essay?.createdDate ? essay.reviews.length : null,
-    }));
-
-    const essaysDto = this.utilsService.transformToDto(EssayInfoResDto, data);
+    const essaysDto = this.utilsService.transformToDto(EssayInfoResDto, essays);
     return { essays: essaysDto, total, page, totalPage };
   }
 

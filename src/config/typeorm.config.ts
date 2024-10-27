@@ -25,6 +25,8 @@ export const TypeormConfig: TypeOrmModuleAsyncOptions = {
     },
     extra: {
       max: 9,
+      keepAlive: true,
+      idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     },
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,

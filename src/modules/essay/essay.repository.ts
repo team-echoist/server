@@ -441,20 +441,13 @@ export class EssayRepository {
   async findFullEssays(page: number, limit: number) {
     const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
-      .leftJoinAndSelect('essay.story', 'story')
-      .leftJoinAndSelect('essay.reports', 'reports')
-      .leftJoinAndSelect('essay.reviews', 'reviews')
-      .leftJoinAndSelect(
-        'essay.author',
-        'author',
-        'author.deletedDate IS NOT NULL OR author.deletedDate IS NULL',
-      )
+      .leftJoinAndSelect('essay.author', 'author', 'author.deletedDate IS NULL')
       .withDeleted()
       .orderBy('essay.createdDate', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 
-    const [essays, total] = await queryBuilder.withDeleted().getManyAndCount();
+    const [essays, total] = await queryBuilder.getManyAndCount();
 
     return { essays, total };
   }

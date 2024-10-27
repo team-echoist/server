@@ -181,4 +181,10 @@ export class User {
 
   @OneToMany(() => SeenRelease, (seenRelease) => seenRelease.user, { onDelete: 'CASCADE' })
   seenReleases: SeenRelease[];
+
+  @Column({ type: 'tsvector', select: false, nullable: true })
+  search_vector?: any;
+
+  @Column({ type: 'text', nullable: true, select: false })
+  unaccented_email?: string;
 }
