@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BuryService } from './bury.service';
+import { BurialService } from './burial.service';
 import { Request as ExpressRequest } from 'express';
 import { CoordinateReqDto } from './dto/request/coordinateReq.dto';
 
-@ApiTags('Bury')
+@ApiTags('Burial')
 @Controller('burials')
 @UseGuards(JwtAuthGuard)
-export class BuryController {
-  constructor(private readonly buryService: BuryService) {}
+export class BurialController {
+  constructor(private readonly buryService: BurialService) {}
 
   @Post()
   @ApiOperation({

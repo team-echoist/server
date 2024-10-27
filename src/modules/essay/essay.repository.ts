@@ -8,7 +8,7 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
 import { EssayStatus, PageType } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { SyncStatus } from '../../entities/sysncStatus.entity';
-import { CoordinateReqDto } from '../bury/dto/request/coordinateReq.dto';
+import { CoordinateReqDto } from '../burial/dto/request/coordinateReq.dto';
 
 export class EssayRepository {
   constructor(

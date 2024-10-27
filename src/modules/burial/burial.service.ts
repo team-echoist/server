@@ -4,7 +4,7 @@ import { CoordinateReqDto } from './dto/request/coordinateReq.dto';
 import { AlertService } from '../alert/alert.service';
 
 @Injectable()
-export class BuryService {
+export class BurialService {
   constructor(
     private readonly essayRepository: EssayRepository,
     private readonly alertService: AlertService,

@@ -34,6 +34,7 @@ import { DeviceMiddleware } from './common/middlewares/device.middleware';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import * as process from 'node:process';
 import { RequestIdMiddleware } from './common/middlewares/requestId.middleware';
+import { BurialModule } from './modules/burial/burial.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { RequestIdMiddleware } from './common/middlewares/requestId.middleware';
     AlertModule,
     GeulroquisModule,
     HomeModule,
+    BurialModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ServerGuard },
