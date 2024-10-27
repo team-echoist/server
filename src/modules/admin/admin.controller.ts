@@ -67,6 +67,7 @@ import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
 import { CreateItemReqDto } from './dto/request/createItemReq.dto';
 import { ItemsResDto } from '../home/dto/response/itemsRes.dto';
 import { ThemesResDto } from '../home/dto/response/themesRes.dto';
+import { SummaryEssaysResDto } from '../essay/dto/response/SummaryEssaysRes.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
@@ -436,6 +437,8 @@ export class AdminInfoController {
     
   **쿼리 파라미터:**
   - \`activated\`: 어드민의 활성 상태 (true 또는 false, 선택적)
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 표시할 신고 수 (기본값: 10)
     
   **동작 과정:**
   1. 선택적 쿼리 파라미터 \`activated\`를 기반으로 어드민을 조회합니다.
@@ -447,8 +450,14 @@ export class AdminInfoController {
   })
   @ApiResponse({ status: 200, type: AdminsResDto })
   @ApiQuery({ name: 'activated', required: false })
-  async getAdmins(@Query('activated', OptionalBoolPipe) activated?: boolean) {
-    return this.adminService.getAdmins(activated);
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getAdmins(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('activated', OptionalBoolPipe) activated?: boolean,
+  ) {
+    return this.adminService.getAdmins(page, limit, activated);
   }
 
   @Get('inactive')
@@ -468,6 +477,18 @@ export class AdminInfoController {
   })
   async getInactiveAdmins() {
     return this.adminService.getInactiveAdmins();
+  }
+
+  @Get('my')
+  @ApiOperation({
+    summary: '어드민 본인조회',
+    description: `
+  어드민 자신의 상세 정보를 조회합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: AdminResDto })
+  async getMyAdmin(@Req() req: ExpressRequest) {
+    return this.adminService.getAdmin(req.user.id);
   }
 
   @Get(':adminId')
@@ -1056,25 +1077,26 @@ export class AdminManagementController {
     return this.adminService.getUser(userId);
   }
 
-  @Get('users/search/:email')
+  @Get('users/search/:keyword')
   @ApiOperation({
     summary: '유저 검색 (이메일)',
     description: `
   관리자 권한으로 이메일로 유저를 검색합니다..
   
   **경로 파라미터:**
-  - \`email\`: 조회할 유저의 고유 이메일
-
-  **동작 과정:**
-  1. 해당 유저의 상세 정보를 조회합니다.
+  - \`keyword\`: 검색할 이메일
 
   **주의 사항:**
   - 관리자 권한이 필요합니다.
   `,
   })
   @ApiResponse({ status: 200, type: UserDetailResDto })
-  async searchUser(@Param('email') email: string) {
-    return this.adminService.searchUser(email);
+  async searchUsers(
+    @Param('keyword') email: string,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.searchUsers(email, page, limit);
   }
 
   @Put('users/:userId')
@@ -1103,6 +1125,42 @@ export class AdminManagementController {
     @Body() data: UpdateFullUserReqDto,
   ) {
     return this.adminService.updateUser(req.user.id, userId, data);
+  }
+
+  @Get('essays/search/:keyword')
+  @ApiOperation({
+    summary: '에세이 검색',
+    description: `
+  키워드를 기반으로 에세이를 검색합니다. 
+  
+  **쿼리 파라미터:**
+  - \`keyword\`: 검색할 키워드(필수)
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 보여줄 에세이 수 (기본값: 10)
+
+  **동작 과정:**
+  1. 주어진 키워드를 제목 또는 내용에서 검색합니다.
+  2. 검색된 결과에서 페이징 처리를 합니다.
+  3. 결과는 제목 또는 내용에 키워드가 포함된 에세이의 슬라이스된 내용을 반환합니다.
+
+  **주의 사항:**
+  - 검색 키워드는 URL 인코딩된 문자열이어야 합니다.
+  - 응답에는 제목 또는 본문에 키워드가 포함된 에세이만 포함됩니다.
+  `,
+  })
+  @ApiQuery({ name: 'keyword', required: true })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiResponse({
+    status: 200,
+    type: SummaryEssaysResDto,
+  })
+  async searchEssays(
+    @Query('keyword') keyword: string,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.searchEssays(keyword, page, limit);
   }
 
   @Get('essays')

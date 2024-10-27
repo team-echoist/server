@@ -1,14 +1,5 @@
 import { Expose } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDate,
-  IsEnum,
-  IsLatitude,
-  IsLongitude,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { EssayStatus } from '../../../common/types/enum.types';
 
@@ -54,14 +45,6 @@ export class EssayDto {
   @IsEnum(EssayStatus)
   @IsOptional()
   status?: EssayStatus;
-
-  // @IsLatitude()
-  // @Expose()
-  // latitude: number;
-  //
-  // @IsLongitude()
-  // @Expose()
-  // longitude: number;
 
   @IsString()
   @Expose()
