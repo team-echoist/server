@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/team-echoist/server/compare/v1.17.5...v1.18.0) (2024-10-27)
+
+
+### Features
+
+* 사용자 위치 기반 주변 에세이 알림 추가 ([#458](https://github.com/team-echoist/server/issues/458)) ([524a3ba](https://github.com/team-echoist/server/commit/524a3baa3386355c31ce61d698fa2ded46060823))
+
 ## [1.17.5](https://github.com/team-echoist/server/compare/v1.17.4...v1.17.5) (2024-10-25)
 
 ## [1.17.4](https://github.com/team-echoist/server/compare/v1.17.3...v1.17.4) (2024-10-14)
