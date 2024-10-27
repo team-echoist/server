@@ -288,4 +288,20 @@ export class AlertService {
         );
     }
   }
+
+  async sendPushBurialNearby(userId: number) {
+    const devices = await this.supportService.getDevicesByUserId(userId);
+    if (!devices || devices.length === 0) return;
+
+    for (const device of devices) {
+      const alertSettings = await this.supportService.fetchSettingEntityById(userId, device.id);
+      if (alertSettings.viewed) {
+        await this.fcmService.sendPushAlert(
+          device.fcmToken,
+          `여기 있던 글이 아무개님을 기다렸어요.`,
+          '지금 주변에 아무개님이 써두었던 글이 숨어있어요. 어떤 추억이 담겨있는지 확인해보세요!',
+        );
+      }
+    }
+  }
 }

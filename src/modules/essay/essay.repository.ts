@@ -8,6 +8,7 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
 import { EssayStatus, PageType } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { SyncStatus } from '../../entities/sysncStatus.entity';
+import { CoordinateReqDto } from '../bury/dto/request/coordinateReq.dto';
 
 export class EssayRepository {
   constructor(
@@ -653,10 +654,6 @@ export class EssayRepository {
     return syncStatusRecords[0] || null;
   }
 
-  async updateLastSyncTime(newSyncStatus: SyncStatus) {
-    await this.syncStatusRepository.save(newSyncStatus);
-  }
-
   async findAggregateByLastTime(lastSyncTime: Date, offset: number, limit: number) {
     return this.aggregateRepository.find({
       where: { updatedDate: MoreThan(lastSyncTime) },
@@ -665,13 +662,21 @@ export class EssayRepository {
     });
   }
 
-  async updateEssayTable(aggregate: Aggregate) {
-    await this.essayRepository.update(
-      { id: aggregate.essayId },
-      {
-        views: aggregate.totalViews,
-        trendScore: aggregate.trendScore,
-      },
-    );
+  async findNearbyEssays(userId: number, coordinates: CoordinateReqDto): Promise<number> {
+    const { latitude, longitude } = coordinates;
+
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.author_id = :userId', { userId })
+      .andWhere('essay.coordinates IS NOT NULL')
+      .andWhere(
+        `ST_DWithin(
+          essay.coordinates,
+          ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326),
+          1000
+        )`,
+        { latitude, longitude },
+      )
+      .getCount();
   }
 }

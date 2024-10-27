@@ -34,27 +34,13 @@ async function bootstrap() {
   const allowedOrigins = [
     'https://linkedoutapp.com',
     'https://linkedout-umber.vercel.app',
+    'https://admin.linkedoutapp.com',
     'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:8888',
     'https://appleid.apple.com',
     'https://devtools.nestjs.com',
   ];
-
-  // app.enableCors({
-  //   origin: (origin, callback) => {
-  //     if (allowedOrigins.includes(origin) || !origin) {
-  //       callback(null, origin);
-  //     } else {
-  //       callback(new Error('Not allowed by CORS'));
-  //     }
-  //   },
-  //   allowedHeaders:
-  //     'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, x-access-token, x-refresh-token, Accept, Observe',
-  //   methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
-  //   credentials: true,
-  //   exposeHeaders: ['x-access-token', 'x-refresh-token'],
-  // });
 
   const corsOptions = {
     origin: (origin, callback) => {

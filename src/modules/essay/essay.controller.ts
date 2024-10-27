@@ -81,6 +81,7 @@ export class EssayController {
   - \`tags\` (string[]): 태그 목록
   - \`storyId\` (number): 스토리 ID
   - \`status\` (string): 에세이 상태 (예: published, private, linkedout)
+  - \`location\` (string): 장소 이름
 
   **동작 과정:**
   1. 요청자의 ID로 사용자 엔티티를 조회합니다.
@@ -92,6 +93,7 @@ export class EssayController {
 
   **주의 사항:**
   - 요청자는 에세이의 작성자여야 합니다.
+  - 작성시 등록한 좌표는 변경할 수 없습니다.
   - 에세이가 검토 중인 경우, PRIVATE 상태가 아니면 업데이트가 거부됩니다.
   - 모니터링된 사용자는 PRIVATE 상태 외의 변경에 제약이 있을 수 있습니다.
   `,
