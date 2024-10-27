@@ -436,6 +436,8 @@ export class AdminInfoController {
     
   **쿼리 파라미터:**
   - \`activated\`: 어드민의 활성 상태 (true 또는 false, 선택적)
+  - \`page\`: 페이지 번호 (기본값: 1)
+  - \`limit\`: 한 페이지에 표시할 신고 수 (기본값: 10)
     
   **동작 과정:**
   1. 선택적 쿼리 파라미터 \`activated\`를 기반으로 어드민을 조회합니다.
@@ -447,8 +449,14 @@ export class AdminInfoController {
   })
   @ApiResponse({ status: 200, type: AdminsResDto })
   @ApiQuery({ name: 'activated', required: false })
-  async getAdmins(@Query('activated', OptionalBoolPipe) activated?: boolean) {
-    return this.adminService.getAdmins(activated);
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getAdmins(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('activated', OptionalBoolPipe) activated?: boolean,
+  ) {
+    return this.adminService.getAdmins(page, limit, activated);
   }
 
   @Get('inactive')

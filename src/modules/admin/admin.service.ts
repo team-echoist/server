@@ -649,11 +649,14 @@ export class AdminService {
     return !admin ? null : admin;
   }
 
-  async getAdmins(activated?: boolean) {
-    const admins = await this.adminRepository.findAdmins(activated);
+  async getAdmins(page: number, limit: number, activated?: boolean) {
+    const { admins, total } = await this.adminRepository.findAdmins(activated, page, limit);
+
+    const totalPage: number = Math.ceil(total / limit);
+
     const adminsDto = this.utilsService.transformToDto(AdminResDto, admins);
 
-    return { admins: adminsDto };
+    return { admins: adminsDto, total, page, totalPage };
   }
 
   async getAdmin(adminId: number) {
