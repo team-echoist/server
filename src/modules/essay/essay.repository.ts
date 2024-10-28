@@ -655,9 +655,11 @@ export class EssayRepository {
     });
   }
 
-  async findNearbyEssays(userId: number, coordinates: CoordinateReqDto): Promise<number> {
-    const { latitude, longitude } = coordinates;
-
+  async findNearbyEssaysCount(
+    userId: number,
+    latitude: number,
+    longitude: number,
+  ): Promise<number> {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author_id = :userId', { userId })
@@ -671,5 +673,21 @@ export class EssayRepository {
         { latitude, longitude },
       )
       .getCount();
+  }
+
+  async findNearbyEssays(userId: number, latitude: number, longitude: number): Promise<Essay[]> {
+    return await this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.author_id = :userId', { userId })
+      .andWhere('essay.coordinates IS NOT NULL')
+      .andWhere(
+        `ST_DWithin(
+          essay.coordinates,
+          ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326),
+          1000
+        )`,
+        { latitude, longitude },
+      )
+      .getMany();
   }
 }

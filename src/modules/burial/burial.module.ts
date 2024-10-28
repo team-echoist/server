@@ -9,6 +9,7 @@ import { AlertModule } from '../alert/alert.module';
 import { EssayModule } from '../essay/essay.module';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserModule } from '../user/user.module';
     EssayModule,
     AuthModule,
     UserModule,
+    UtilsModule,
   ],
   controllers: [BurialController],
   providers: [BurialService],
