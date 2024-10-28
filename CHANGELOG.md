@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/team-echoist/server/compare/v1.19.0...v1.20.0) (2024-10-28)
+
+
+### Features
+
+* 위치 기반 인근 에세이 목록 및 에세이 상세조회 페이지타입 추가 ([#460](https://github.com/team-echoist/server/issues/460)) ([8211ea2](https://github.com/team-echoist/server/commit/8211ea278140d7c942a68bfb728e2fc4057c2aea))
+
 # [1.19.0](https://github.com/team-echoist/server/compare/v1.18.0...v1.19.0) (2024-10-27)
 
 
