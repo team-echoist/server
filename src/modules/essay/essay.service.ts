@@ -258,12 +258,19 @@ export class EssayService {
   @Transactional()
   async getEssay(req: ExpressRequest, essayId: number, pageType: PageType, storyId?: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    const essayDto = await this.applyCommonEssayQueryLogic(req, essay);
+    let essayDto: EssayResDto | EssayResDto[];
+    if (pageType === PageType.BURIAL) {
+      essayDto = this.utilsService.transformToDto(EssayResDto, essay);
+    } else {
+      essayDto = await this.applyCommonEssayQueryLogic(req, essay);
+    }
 
     const anotherEssays =
-      pageType === PageType.RECOMMEND
-        ? await this.getRecommendEssays(req.user.id, 6)
-        : await this.previousEssay(req.user.id, essay, pageType, storyId);
+      pageType === PageType.BURIAL
+        ? null
+        : pageType === PageType.RECOMMEND
+          ? await this.getRecommendEssays(req.user.id, 6)
+          : await this.previousEssay(req.user.id, essay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
