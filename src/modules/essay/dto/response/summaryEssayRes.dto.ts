@@ -39,4 +39,9 @@ export class SummaryEssayResDto {
   @Type(() => UserSummaryResDto)
   @Expose()
   author: UserSummaryResDto;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  location: string;
 }

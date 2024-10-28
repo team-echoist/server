@@ -398,7 +398,7 @@ export class EssayController {
   - \`essayId\` (number, required): 조회할 에세이의 ID
   
   **쿼리 파라미터:**
-  - \`pageType\` (required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. \`private\`, \`public\`, \`story\`, \`recommend\` 를 사용할 수 있으며 각각 저장한 글, 발행한 글, 타겟 스토리 의 \`이전 글\`. 그리고 추천 에세이의 \`다른 글\`에 사용됩니다.
+  - \`pageType\` (required): 응답객체의 'anotherEssays' 프로퍼티의 값을 결정합니다. \`private\`, \`public\`, \`story\`, \`recommend\`, \`burial\`를 사용할 수 있으며 각각 저장한 글, 발행한 글, 타겟 스토리, 땅에묻은 글의 \`이전 글\`. 그리고 추천 에세이의 \`다른 글\`에 사용됩니다.
   - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`라면 해당 스토리의 아이디를 쿼리로 추가해야합니다.
   
   **각 페이지 타입에 대한 '이전 글' 동작:**
@@ -407,6 +407,7 @@ export class EssayController {
   - \`public\` 자신 혹은 타인의 '발행한 글' 페이지에 포함된 이전 글을 반환합니다.
   - \`story\` 'storyId' 에 해당하는 이전 글을 반환합니다. 만약 자신의 글이 아닌 경우 'private'상태의 글은 제외합니다.
   - \`recommend\` 랜덤 추천 글을 제공합니다.
+  - \`burial\` 이전 글 또는 다른 글을 제공하지 않습니다.
 
   **동작 과정:**
   1. 요청된 에세이 ID로 에세이를 조회합니다.

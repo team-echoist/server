@@ -4,8 +4,6 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
-  IsLatitude,
-  IsLongitude,
   IsNumber,
   IsOptional,
   IsString,
@@ -58,16 +56,6 @@ export class EssayResDto {
   @IsString()
   @Expose()
   content: string;
-
-  // @ApiProperty()
-  // @IsLatitude()
-  // @Expose()
-  // latitude: number;
-  //
-  // @ApiProperty()
-  // @IsLongitude()
-  // @Expose()
-  // longitude: number;
 
   @ApiProperty()
   @IsString()

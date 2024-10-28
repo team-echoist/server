@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsDateString,
-  IsEnum,
-  IsLatitude,
-  IsLongitude,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
 import { LimitedUserDto } from '../../../user/dto/limitedUser.dto';
@@ -58,16 +50,6 @@ export class PublicEssayResDto {
   @IsString()
   @Expose()
   content: string;
-
-  // @ApiProperty()
-  // @IsLatitude()
-  // @Expose()
-  // latitude: number;
-  //
-  // @ApiProperty()
-  // @IsLongitude()
-  // @Expose()
-  // longitude: number;
 
   @ApiProperty()
   @IsString()
