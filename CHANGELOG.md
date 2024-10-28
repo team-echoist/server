@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/team-echoist/server/compare/v1.18.0...v1.19.0) (2024-10-27)
+
+
+### Features
+
+* 관리자 기능 개선 및 추가 ([#459](https://github.com/team-echoist/server/issues/459)) ([805af60](https://github.com/team-echoist/server/commit/805af60c583d625252ae5384deb678b3462c2b92))
+
 # [1.18.0](https://github.com/team-echoist/server/compare/v1.17.5...v1.18.0) (2024-10-27)
 
 
