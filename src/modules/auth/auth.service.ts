@@ -48,21 +48,12 @@ export class AuthService {
   async checkNickname(nickname: string) {
     const user = await this.authRepository.findByNickname(nickname);
     if (user) throw new HttpException('사용중인 닉네임 입니다.', HttpStatus.CONFLICT);
-    return;
-  }
-
-  async isEmailOwned(email: string) {
-    const emailExists = await this.authRepository.findByEmail(email);
-
-    if (emailExists)
-      throw new HttpException('이미 사용중인 이메일 입니다.', HttpStatus.BAD_REQUEST);
-
-    return;
+    return true;
   }
 
   @Transactional()
   async signingUp(req: ExpressRequest, data: CreateUserReqDto) {
-    await this.isEmailOwned(data.email);
+    await this.checkEmail(data.email);
 
     const code = await this.utilsService.generateSixDigit();
     data.password = await bcrypt.hash(data.password, 12);
@@ -74,7 +65,7 @@ export class AuthService {
 
   @Transactional()
   async verifyEmail(req: ExpressRequest, email: string) {
-    await this.isEmailOwned(email);
+    await this.checkEmail(email);
 
     const userId = req.user.id;
     const code = await this.utilsService.generateSixDigit();
@@ -116,6 +107,7 @@ export class AuthService {
       throw new HttpException('회원 등록 과정에서 오류가 발생했습니다.', HttpStatus.BAD_REQUEST);
 
     const userData = JSON.parse(user);
+
     userData.nickname = await this.nicknameService.generateUniqueNickname();
 
     req.user = await this.authRepository.saveUser(userData);
@@ -187,8 +179,8 @@ export class AuthService {
     let payload = await this.jwtService.verify(refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
-    payload = { username: payload.username, sub: payload.sub };
 
+    payload = { username: payload.username, sub: payload.sub };
     return await this.generateAccessToken(payload);
   }
 
@@ -215,37 +207,37 @@ export class AuthService {
     await this.authRepository.saveUser(user);
   }
 
-  @Transactional()
-  async passwordResetReq(req: ExpressRequest, email: string) {
-    const user = await this.authRepository.findByEmail(email);
-    if (!user)
-      throw new HttpException(
-        '요청하신 이메일로 등록된 사용자를 찾을 수 없습니다.',
-        HttpStatus.BAD_REQUEST,
-      );
+  // @Transactional()
+  // async passwordResetReq(req: ExpressRequest, email: string) {
+  //   const user = await this.authRepository.findByEmail(email);
+  //   if (!user)
+  //     throw new HttpException(
+  //       '요청하신 이메일로 등록된 사용자를 찾을 수 없습니다.',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //
+  //   const code = await this.utilsService.generateSixDigit();
+  //
+  //   await this.redis.set(`${req.ip}:${code}`, JSON.stringify(user), 'EX', 300);
+  //
+  //   await this.mailService.sendVerificationEmail(email, code);
+  // }
 
-    const code = await this.utilsService.generateSixDigit();
-
-    await this.redis.set(`${req.ip}:${code}`, JSON.stringify(user), 'EX', 300);
-
-    await this.mailService.sendVerificationEmail(email, code);
-  }
-
-  @Transactional()
-  async passwordResetVerify(token: string) {
-    const exUser = await this.redis.get(token);
-    if (!exUser)
-      throw new HttpException(
-        '비밀번호 초기화 과정에서 사용자 정보를 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
-    const user = JSON.parse(exUser);
-
-    const newToken = await this.utilsService.generateVerifyToken();
-    await this.redis.set(newToken, JSON.stringify(user), 'EX', 600);
-
-    return newToken;
-  }
+  // @Transactional()
+  // async passwordResetVerify(token: string) {
+  //   const exUser = await this.redis.get(token);
+  //   if (!exUser)
+  //     throw new HttpException(
+  //       '비밀번호 초기화 과정에서 사용자 정보를 찾을 수 없습니다.',
+  //       HttpStatus.NOT_FOUND,
+  //     );
+  //   const user = JSON.parse(exUser);
+  //
+  //   const newToken = await this.utilsService.generateVerifyToken();
+  //   await this.redis.set(newToken, JSON.stringify(user), 'EX', 600);
+  //
+  //   return newToken;
+  // }
 
   @Transactional()
   async passwordReset(email: string) {
@@ -280,6 +272,7 @@ export class AuthService {
         }
       }
       const nickname = await this.nicknameService.generateUniqueNickname();
+
       user = await this.authRepository.saveUser({
         email: oauthUser.email || null,
         platform: oauthUser.platform,

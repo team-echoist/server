@@ -1,46 +1,3 @@
-// jest.mock('bull');
-// jest.mock('../auth.repository');
-// jest.mock('../../utils/utils.service');
-// jest.mock('../../mail/mail.service');
-// jest.mock('../../nickname/nickname.service');
-// jest.mock('@nestjs/config');
-// jest.mock('@nestjs/axios');
-//
-// describe('AuthService', () => {
-//   let authService: AuthService;
-//   let authRepository: jest.Mocked<AuthRepository>;
-//   let utilsService: jest.Mocked<UtilsService>;
-//   let mailService: jest.Mocked<MailService>;
-//   let nicknameService: jest.Mocked<NicknameService>;
-//   const mockRedis = {
-//     get: jest.fn(),
-//     set: jest.fn(),
-//     del: jest.fn(),
-//     getex: jest.fn(),
-//   };
-//
-//   beforeEach(async () => {
-//     const RedisInstance = jest.fn(() => mockRedis);
-//     const module: TestingModule = await Test.createTestingModule({
-//       imports: [HttpService],
-//       providers: [
-//         AuthService,
-//         AuthRepository,
-//         UtilsService,
-//         MailService,
-//         NicknameService,
-//         ConfigService,
-//         HttpService,
-//         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
-//       ],
-//     }).compile();
-//
-//     authService = module.get<AuthService>(AuthService);
-//     authRepository = module.get(AuthRepository);
-//     utilsService = module.get(UtilsService);
-//     mailService = module.get(MailService);
-//     nicknameService = module.get(NicknameService);
-//   });
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
 import { AuthRepository } from '../auth.repository';
@@ -50,12 +7,10 @@ import { NicknameService } from '../../nickname/nickname.service';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { of } from 'rxjs';
-import { Request as ExpressRequest } from 'express';
-import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
-import { OauthDto } from '../dto/oauth.dto';
+import { HomeService } from '../../home/home.service';
+import * as bcrypt from 'bcrypt';
+import { UserStatus } from '../../../common/types/enum.types';
 
 jest.mock('bcrypt');
 jest.mock('typeorm-transactional', () => ({
@@ -63,402 +18,486 @@ jest.mock('typeorm-transactional', () => ({
   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
+jest.mock('../auth.repository');
+jest.mock('../../utils/utils.service');
+jest.mock('../../mail/mail.service');
+jest.mock('../../nickname/nickname.service');
+jest.mock('../../home/home.service');
+jest.mock('@nestjs/axios');
+jest.mock('@nestjs/config');
+jest.mock('@nestjs/jwt');
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let authRepository: AuthRepository;
-  let utilsService: UtilsService;
-  let mailService: MailService;
-  let nicknameService: NicknameService;
-  let httpService: HttpService;
-  let jwtService: JwtService;
-  let configService: ConfigService;
+  let authRepository: jest.Mocked<AuthRepository>;
+  let utilsService: jest.Mocked<UtilsService>;
+  let mailService: jest.Mocked<MailService>;
+  let nicknameService: jest.Mocked<NicknameService>;
+  let homeService: jest.Mocked<HomeService>;
+  let httpService: jest.Mocked<HttpService>;
+  let jwtService: jest.Mocked<JwtService>;
+  let configService: jest.Mocked<ConfigService>;
   const redis = {
     get: jest.fn(),
     set: jest.fn(),
     del: jest.fn(),
     getex: jest.fn(),
+    keys: jest.fn(),
   };
+
+  let code: string;
+  let email: string;
+  let password: string;
+  let user: any;
+  let req: any;
+  let atPayload: any;
+  let rtPayload: any;
 
   beforeEach(async () => {
     const RedisInstance = jest.fn(() => redis);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        {
-          provide: AuthRepository,
-          useValue: {
-            findByEmail: jest.fn(),
-            findByNickname: jest.fn(),
-            findById: jest.fn(),
-            saveUser: jest.fn(),
-            findByPlatformId: jest.fn(),
-            findByIdWithEmail: jest.fn(),
-          },
-        },
-        {
-          provide: UtilsService,
-          useValue: {
-            generateSixDigit: jest.fn(),
-            generateVerifyToken: jest.fn(),
-            getUUID: jest.fn(),
-          },
-        },
-        {
-          provide: MailService,
-          useValue: {
-            sendVerificationEmail: jest.fn(),
-            sendPasswordResetEmail: jest.fn(),
-          },
-        },
-        {
-          provide: NicknameService,
-          useValue: {
-            generateUniqueNickname: jest.fn(),
-          },
-        },
-        {
-          provide: HttpService,
-          useValue: {
-            post: jest.fn(),
-            get: jest.fn(),
-          },
-        },
-        {
-          provide: JwtService,
-          useValue: {
-            sign: jest.fn(),
-            verify: jest.fn(),
-          },
-        },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn(),
-          },
-        },
+        { provide: AuthRepository, useClass: AuthRepository },
+        { provide: UtilsService, useClass: UtilsService },
+        { provide: MailService, useClass: MailService },
+        { provide: NicknameService, useClass: NicknameService },
+        { provide: HttpService, useClass: HttpService },
+        { provide: JwtService, useClass: JwtService },
+        { provide: ConfigService, useClass: ConfigService },
+        { provide: HomeService, useClass: HomeService },
         { provide: 'default_IORedisModuleConnectionToken', useFactory: RedisInstance },
       ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
-    authRepository = module.get<AuthRepository>(AuthRepository);
-    utilsService = module.get<UtilsService>(UtilsService);
-    mailService = module.get<MailService>(MailService);
-    nicknameService = module.get<NicknameService>(NicknameService);
-    httpService = module.get<HttpService>(HttpService);
-    jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
-  });
+    authRepository = module.get(AuthRepository) as jest.Mocked<AuthRepository>;
+    utilsService = module.get(UtilsService) as jest.Mocked<UtilsService>;
+    mailService = module.get(MailService) as jest.Mocked<MailService>;
+    nicknameService = module.get(NicknameService) as jest.Mocked<NicknameService>;
+    homeService = module.get(HomeService) as jest.Mocked<HomeService>;
+    httpService = module.get(HttpService) as jest.Mocked<HttpService>;
+    jwtService = module.get(JwtService) as jest.Mocked<JwtService>;
+    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
 
-  it('이메일 중복 체크', async () => {
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(null);
+    utilsService.transformToDto.mockImplementation((_, any) => any);
 
-    const result = await authService.checkEmail('test@example.com');
-
-    expect(result).toBe(true);
-    expect(authRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
-  });
-
-  it('닉네임 중복 체크', async () => {
-    jest.spyOn(authRepository, 'findByNickname').mockResolvedValue(null);
-
-    const result = await authService.checkNickname('testNickname');
-
-    expect(result).toBeUndefined();
-    expect(authRepository.findByNickname).toHaveBeenCalledWith('testNickname');
-  });
-
-  it('회원가입 과정에서 이메일이 이미 사용 중이면 예외를 발생', async () => {
-    const mockUser = { id: 1 } as any;
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(mockUser);
-
-    await expect(authService.checkEmail('test@example.com')).rejects.toThrow(
-      new HttpException('사용중인 이메일 입니다.', HttpStatus.CONFLICT),
-    );
-  });
-
-  it('회원가입을 처리하고, 이메일로 인증 코드 발송', async () => {
-    const mockReq = { ip: '127.0.0.1' } as ExpressRequest;
-    const mockDto = { email: 'test@example.com', password: 'password123' } as CreateUserReqDto;
-
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(null);
-    jest.spyOn(utilsService, 'generateSixDigit').mockReturnValue('123456' as any);
-    jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed_password' as never);
-    jest.spyOn(redis, 'set').mockResolvedValue('OK');
-    jest.spyOn(mailService, 'sendVerificationEmail').mockResolvedValue(undefined);
-
-    await authService.signingUp(mockReq, mockDto);
-
-    expect(authRepository.findByEmail).toHaveBeenCalledWith(mockDto.email);
-    expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
-    expect(redis.set).toHaveBeenCalledWith(
-      `${mockReq.ip}:123456`,
-      JSON.stringify({ ...mockDto, password: 'hashed_password' }),
-      'EX',
-      300,
-    );
-    expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(mockDto.email, '123456');
-  });
-
-  it('로그인을 처리하고 JWT 토큰 반환', async () => {
-    const mockReq = {
-      user: { email: 'test@example.com', id: 1 },
-    } as ExpressRequest;
-    jest.spyOn(jwtService, 'sign').mockReturnValue('token');
-
-    const result = await authService.login(mockReq);
-
-    expect(jwtService.sign).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({
-      accessToken: 'token',
-      refreshToken: 'token',
-    });
-  });
-
-  it('OAuth 유저를 검증하고 로그인', async () => {
-    const oauthUser = {
-      platform: 'google',
-      platformId: '123',
-      email: 'test@example.com',
-    } as OauthDto;
-    jest.spyOn(authRepository, 'findByPlatformId').mockResolvedValue(null);
-    jest.spyOn(nicknameService, 'generateUniqueNickname').mockResolvedValue('uniqueNickname');
-    jest.spyOn(authRepository, 'saveUser').mockResolvedValue(oauthUser as any);
-
-    const result = await authService.oauthLogin(oauthUser);
-
-    expect(authRepository.findByPlatformId).toHaveBeenCalledWith(
-      oauthUser.platform,
-      oauthUser.platformId,
-    );
-    expect(authRepository.saveUser).toHaveBeenCalledWith({
-      email: oauthUser.email,
-      platform: oauthUser.platform,
-      platformId: oauthUser.platformId,
-      nickname: 'uniqueNickname',
-    });
-    expect(result).toEqual(oauthUser);
-  });
-
-  it('이메일 소유권을 확인', async () => {
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(null);
-
-    const result = await authService.isEmailOwned('test@example.com');
-
-    expect(result).toBeUndefined();
-    expect(authRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
-  });
-
-  it('이메일 소유권이 있을 경우 예외', async () => {
-    const mockUser = { id: 1 } as any;
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(mockUser);
-
-    await expect(authService.isEmailOwned('test@example.com')).rejects.toThrow(
-      new HttpException('이미 사용중인 이메일 입니다.', HttpStatus.BAD_REQUEST),
-    );
-  });
-
-  it('이메일 인증 요청을 처리하고 인증 코드를 발송', async () => {
-    const mockReq = { ip: '127.0.0.1', user: { id: 1 } } as ExpressRequest;
-    const mockEmail = 'test@example.com';
-
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(null);
-    jest.spyOn(utilsService, 'generateSixDigit').mockReturnValue('123456' as any);
-    jest.spyOn(utilsService, 'generateVerifyToken').mockReturnValue('testToken' as any);
-    jest.spyOn(redis, 'set').mockResolvedValue('OK');
-    jest.spyOn(mailService, 'sendVerificationEmail').mockResolvedValue(undefined);
-
-    await authService.verifyEmail(mockReq, mockEmail);
-
-    expect(redis.set).toHaveBeenCalledWith(
-      `${mockReq.ip}:123456`,
-      JSON.stringify({ email: mockEmail, userId: mockReq.user.id }),
-      'EX',
-      300,
-    );
-    expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(mockEmail, 'testToken');
-  });
-
-  it('이메일을 업데이트하고 인증 코드를 확인', async () => {
-    const mockReq = { ip: '127.0.0.1' } as ExpressRequest;
-    const mockCode = '123456';
-    const mockUserEmailData = { email: 'test@example.com', userId: 1 };
-    const mockUser = { id: 1, email: 'old@example.com' } as any;
-
-    jest.spyOn(redis, 'get').mockResolvedValue(JSON.stringify(mockUserEmailData));
-    jest.spyOn(authRepository, 'findById').mockResolvedValue(mockUser);
-    jest.spyOn(authRepository, 'saveUser').mockResolvedValue(mockUser);
-    jest.spyOn(redis, 'set').mockResolvedValue('OK');
-
-    const result = await authService.updateEmail(mockReq, mockCode);
-
-    expect(authRepository.findById).toHaveBeenCalledWith(mockUserEmailData.userId);
-    expect(authRepository.saveUser).toHaveBeenCalledWith(
-      expect.objectContaining({ email: 'test@example.com' }),
-    );
-    expect(redis.set).toHaveBeenCalledWith(
-      `validate_${mockUser.id}`,
-      JSON.stringify(mockUser),
-      'EX',
-      600,
-    );
-    expect(result).toEqual(mockUser);
-  });
-
-  it('회원 등록을 처리하고 로그인', async () => {
-    const mockReq = { ip: '127.0.0.1', user: {} } as ExpressRequest;
-    const mockCode = '123456';
-    const mockUser = { email: 'test@example.com', password: 'hashed_password' } as any;
-
-    jest.spyOn(redis, 'get').mockResolvedValue(JSON.stringify(mockUser));
-    jest.spyOn(nicknameService, 'generateUniqueNickname').mockResolvedValue('nickname');
-    jest.spyOn(authRepository, 'saveUser').mockResolvedValue(mockUser);
-    jest
-      .spyOn(authService, 'login')
-      .mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
-
-    const result = await authService.register(mockReq, mockCode);
-
-    expect(redis.get).toHaveBeenCalledWith(`${mockReq.ip}:${mockCode}`);
-    expect(nicknameService.generateUniqueNickname).toHaveBeenCalled();
-    expect(authRepository.saveUser).toHaveBeenCalledWith(
-      expect.objectContaining({ nickname: 'nickname' }),
-    );
-    expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
-  });
-
-  it('비밀번호 재설정 요청을 처리하고 인증 코드를 발송', async () => {
-    const mockReq = { ip: '127.0.0.1' } as ExpressRequest;
-    const mockEmail = 'test@example.com';
-    const mockUser = { id: 1, email: mockEmail } as any;
-
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(mockUser);
-    jest.spyOn(utilsService, 'generateSixDigit').mockReturnValue('123456' as any);
-    jest.spyOn(redis, 'set').mockResolvedValue('OK');
-    jest.spyOn(mailService, 'sendVerificationEmail').mockResolvedValue(undefined);
-
-    await authService.passwordResetReq(mockReq, mockEmail);
-
-    expect(authRepository.findByEmail).toHaveBeenCalledWith(mockEmail);
-    expect(redis.set).toHaveBeenCalledWith(
-      `${mockReq.ip}:123456`,
-      JSON.stringify(mockUser),
-      'EX',
-      300,
-    );
-    expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(mockEmail, '123456');
-  });
-
-  it('비밀번호 재설정 검증을 처리하고 새로운 토큰을 발급', async () => {
-    const mockToken = 'reset-token';
-    const mockUser = { id: 1, email: 'test@example.com' };
-
-    jest.spyOn(redis, 'get').mockResolvedValue(JSON.stringify(mockUser));
-    jest.spyOn(utilsService, 'generateVerifyToken').mockReturnValue('new-token' as any);
-    jest.spyOn(redis, 'set').mockResolvedValue('OK');
-
-    const result = await authService.passwordResetVerify(mockToken);
-
-    expect(redis.get).toHaveBeenCalledWith(mockToken);
-    expect(utilsService.generateVerifyToken).toHaveBeenCalled();
-    expect(redis.set).toHaveBeenCalledWith('new-token', JSON.stringify(mockUser), 'EX', 600);
-    expect(result).toBe('new-token');
-  });
-
-  it('비밀번호를 재설정하고 이메일로 알림 발송', async () => {
-    const mockEmail = 'test@example.com';
-    const mockUser = { id: 1, email: mockEmail, password: 'hashed_password' } as any;
-
-    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(mockUser);
-    jest.spyOn(utilsService, 'getUUID').mockReturnValue('temporary-password');
-    jest.spyOn(bcrypt, 'hash').mockResolvedValue('new-hashed-password' as never);
-    jest.spyOn(authRepository, 'saveUser').mockResolvedValue(mockUser);
-    jest.spyOn(mailService, 'sendPasswordResetEmail').mockResolvedValue(undefined);
-
-    await authService.passwordReset(mockEmail);
-
-    expect(authRepository.findByEmail).toHaveBeenCalledWith(mockEmail);
-    expect(bcrypt.hash).toHaveBeenCalledWith('temporary-password', 12);
-    expect(authRepository.saveUser).toHaveBeenCalledWith(
-      expect.objectContaining({ password: 'new-hashed-password' }),
-    );
-    expect(mailService.sendPasswordResetEmail).toHaveBeenCalledWith(
-      mockEmail,
-      'temporary-password',
-    );
-  });
-
-  it('Kakao OAuth 유저 검증', async () => {
-    const token = 'kakao-token';
-    const response = {
-      data: {
-        id: 'kakao-id',
-        kakao_account: { email: 'test@kakao.com' },
-      },
+    code = '123456';
+    email = 'test@example.com';
+    password = '1234';
+    user = {
+      id: 1,
+      email,
+      password: 'hashedPassword',
+      platformId: null,
+      platform: null,
+      status: null,
+      tokenVersion: 1,
     };
-
-    jest.spyOn(httpService, 'post').mockReturnValue(of(response) as any);
-    jest.spyOn(authService, 'oauthLogin').mockResolvedValue({ id: 1 } as any);
-
-    const result = await authService.validateKakaoUser(token);
-
-    expect(httpService.post).toHaveBeenCalledWith('https://kapi.kakao.com/v2/user/me', null, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    expect(authService.oauthLogin).toHaveBeenCalledWith(
-      expect.objectContaining({
-        platform: 'kakao',
-        platformId: 'kakao-id',
-        email: 'test@kakao.com',
-      }),
-    );
-    expect(result).toEqual({ id: 1 });
-  });
-
-  it('Naver OAuth 유저 검증', async () => {
-    const token = 'naver-token';
-    const response = {
-      data: {
-        response: { id: 'naver-id', email: 'test@naver.com' },
-      },
+    req = { ip: '127.0.0.1', user, device: 'device123' };
+    atPayload = { username: user.email, sub: user.id };
+    rtPayload = {
+      username: user.email,
+      sub: user.id,
+      tokenVersion: user.version,
+      device: req.device,
     };
-
-    jest.spyOn(httpService, 'get').mockReturnValue(of(response) as any);
-    jest.spyOn(authService, 'oauthLogin').mockResolvedValue({ id: 1 } as any);
-
-    const result = await authService.validateNaverUser(token);
-
-    expect(httpService.get).toHaveBeenCalledWith('https://openapi.naver.com/v1/nid/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    expect(authService.oauthLogin).toHaveBeenCalledWith(
-      expect.objectContaining({
-        platform: 'naver',
-        platformId: 'naver-id',
-        email: 'test@naver.com',
-      }),
-    );
-    expect(result).toEqual({ id: 1 });
   });
 
-  it('Apple OAuth 유저 검증', async () => {
-    const token = 'apple-token';
-    const decodedIdToken = { sub: 'apple-id', email: 'test@apple.com' };
+  describe('checkEmail', () => {
+    it('사용중인 이메일', async () => {
+      authRepository.findByEmail.mockResolvedValue(user);
 
-    jest.spyOn(authService, 'verifyAppleIdToken').mockResolvedValue(decodedIdToken);
-    jest.spyOn(authService, 'oauthLogin').mockResolvedValue({ id: 1 } as any);
+      await expect(authService.checkEmail(email)).rejects.toThrow(
+        new HttpException('사용중인 이메일 입니다.', HttpStatus.CONFLICT),
+      );
+    });
 
-    const result = await authService.validateAppleUser(token);
+    it('사용가능 이메일', async () => {
+      authRepository.findByEmail.mockResolvedValue(null);
 
-    expect(authService.verifyAppleIdToken).toHaveBeenCalledWith(token);
-    expect(authService.oauthLogin).toHaveBeenCalledWith(
-      expect.objectContaining({
-        platform: 'apple',
-        platformId: 'apple-id',
-        email: 'test@apple.com',
-      }),
-    );
-    expect(result).toEqual({ id: 1 });
+      await expect(authService.checkEmail(email)).resolves.toBe(true);
+    });
+  });
+
+  describe('checkNickname', () => {
+    const nickname = 'test';
+    it('닉네임 사용 가능', async () => {
+      authRepository.findByNickname.mockResolvedValue(null);
+
+      await expect(authService.checkNickname(nickname)).resolves.toBe(true);
+    });
+    it('닉네임 사용 불가', async () => {
+      authRepository.findByNickname.mockResolvedValue(user);
+
+      await expect(authService.checkNickname(nickname)).rejects.toThrow(
+        new HttpException('사용중인 닉네임 입니다.', HttpStatus.CONFLICT),
+      );
+    });
+  });
+
+  describe('signinUp', () => {
+    const data = {
+      email: email,
+      password: '1234',
+    } as any;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      jest.spyOn(authService, 'checkEmail').mockResolvedValue(true);
+      utilsService.generateSixDigit = jest.fn().mockReturnValue(code);
+      mailService.sendVerificationEmail = jest.fn().mockResolvedValue(undefined);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
+    });
+
+    it('회원가입 신청 완료', async () => {
+      await authService.signingUp(req, data);
+
+      expect(authService.checkEmail).toHaveBeenCalledWith(data.email);
+      expect(bcrypt.hash).toHaveBeenCalledWith('1234', 12);
+      expect(utilsService.generateSixDigit).toHaveBeenCalled();
+      expect(redis.set).toHaveBeenCalledWith(
+        `${req.ip}:123456`,
+        JSON.stringify({ ...data, password: 'hashedPassword' }),
+        'EX',
+        300,
+      );
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(data.email, '123456');
+    });
+  });
+
+  describe('verifyEmail', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.spyOn(authService, 'checkEmail').mockResolvedValue(true);
+      utilsService.generateSixDigit = jest.fn().mockReturnValue(code);
+      redis.keys = jest.fn().mockResolvedValue([]); // 기존 Redis 키가 없다고 가정
+      redis.set = jest.fn().mockResolvedValue('OK');
+      mailService.sendVerificationEmail = jest.fn().mockResolvedValue(undefined);
+    });
+
+    it('이메일변경 이메일 검증메일 발송', async () => {
+      await authService.verifyEmail(req, email);
+
+      expect(authService.checkEmail).toHaveBeenCalledWith(email);
+
+      expect(utilsService.generateSixDigit).toHaveBeenCalled();
+
+      expect(redis.set).toHaveBeenCalledWith(
+        `${req.ip}:${code}`,
+        JSON.stringify({ email, userId: req.user.id }),
+        'EX',
+        300,
+      );
+
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(email, '123456');
+    });
+
+    it('기존 인증 코드가 있을 경우 삭제하고 새로 저장', async () => {
+      // Mock 설정: 기존 Redis 키가 있을 경우
+      redis.keys = jest.fn().mockResolvedValue(['existingKey']);
+      redis.del = jest.fn().mockResolvedValue(1);
+
+      await authService.verifyEmail(req, email);
+
+      expect(redis.del).toHaveBeenCalledWith(['existingKey']);
+
+      expect(redis.set).toHaveBeenCalledWith(
+        `${req.ip}:${code}`,
+        JSON.stringify({ email, userId: req.user.id }),
+        'EX',
+        300,
+      );
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(email, '123456');
+    });
+  });
+
+  describe('updateEmail', () => {
+    beforeEach(() => {
+      redis.get = jest.fn().mockResolvedValue(JSON.stringify({ email: email, userId: user.id }));
+      authRepository.findById = jest.fn().mockResolvedValue(user);
+      authRepository.saveUser = jest.fn().mockResolvedValue(user);
+    });
+
+    it('이메일변경: 이메일 업데이트 성공', async () => {
+      const result = await authService.updateEmail(req, code);
+
+      expect(redis.get).toHaveBeenCalledWith(`${req.ip}:${code}`);
+      expect(authRepository.findById).toHaveBeenCalledWith(user.id);
+      expect(authRepository.saveUser).toHaveBeenCalledWith(
+        expect.objectContaining({ email: user.email }),
+      );
+      expect(result).toEqual(user);
+    });
+
+    it('이메일변경: 유효하지 않거나 만료된 코드로 요청 시 예외 처리', async () => {
+      redis.get = jest.fn().mockResolvedValue(null);
+
+      await expect(authService.updateEmail(req, code)).rejects.toThrow(
+        new HttpException('유효하지 않거나 만료된 요청입니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('이메일변경: 변경할 레코드가 존재하지 않는 경우 예외 처리', async () => {
+      authRepository.findById.mockResolvedValue(null);
+
+      await expect(authService.updateEmail(req, code)).rejects.toThrow(
+        new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
+
+  describe('register', () => {
+    const userData = { ...user, nickname: 'nickname' } as any;
+
+    it('회원가입: 회원 등록 대기시간 초과', async () => {
+      redis.get.mockResolvedValue(null);
+
+      await expect(authService.register(req, email)).rejects.toThrow(
+        new HttpException('회원 등록 과정에서 오류가 발생했습니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('회원가입: 회원 등록 성공', async () => {
+      redis.get.mockResolvedValue(JSON.stringify(user));
+      nicknameService.generateUniqueNickname.mockResolvedValue('nickname');
+      authRepository.saveUser.mockResolvedValue(userData);
+
+      await authService.register(req, code);
+
+      expect(redis.get).toHaveBeenCalledWith(`${req.ip}:${code}`);
+      expect(nicknameService.generateUniqueNickname).toHaveBeenCalled();
+      expect(authRepository.saveUser).toHaveBeenCalledWith(expect.objectContaining(userData));
+      expect(homeService.createDefaultTheme).toHaveBeenCalledWith(req.user.id);
+    });
+  });
+
+  describe('validateUser', () => {
+    it('로그인: 존재하지 않는 계정', async () => {
+      authRepository.findByEmail.mockResolvedValue(null);
+
+      await expect(authService.validateUser(email, password)).rejects.toThrow(
+        new HttpException('존재하지 않는 계정입니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('로그인: 다른 플랫폼 가입자', async () => {
+      user.platformId = '1';
+      user.platform = 'google';
+      authRepository.findByEmail.mockResolvedValue(user);
+
+      await expect(authService.validateUser(email, password)).rejects.toThrow(
+        new HttpException(
+          `다른 플랫폼 서비스로 가입한 사용자 입니다.(${user.platform})`,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('로그인: 잘못된 이메일&비밀번호', async () => {
+      authRepository.findByEmail.mockResolvedValue(user);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(authService.validateUser(email, password)).rejects.toThrow(
+        new HttpException('이메일 혹은 비밀번호가 잘못되었습니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('로그인: 정지된 계정', async () => {
+      user.status = UserStatus.BANNED;
+      authRepository.findByEmail.mockResolvedValue(user);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(authService.validateUser(email, password)).rejects.toThrow(
+        new HttpException(
+          '정지된 계정입니다. 자세한 내용은 지원팀에 문의하세요.',
+          HttpStatus.FORBIDDEN,
+        ),
+      );
+    });
+    it('로그인: 인증 성공', async () => {
+      authRepository.findByEmail.mockResolvedValue(user);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const result = await authService.validateUser(email, password);
+
+      expect(result).toEqual(user);
+    });
+  });
+
+  describe('login', () => {
+    beforeEach(() => {
+      authService.generateAccessToken = jest.fn().mockResolvedValue('at123');
+      authService.generateRefreshToken = jest.fn().mockResolvedValue('rt123');
+      redis.set = jest.fn().mockResolvedValue('OK');
+    });
+
+    it('로그인: AT, RT 발급', async () => {
+      const result = await authService.login(req);
+
+      expect(authService.generateAccessToken).toHaveBeenCalledWith({
+        username: req.user.email,
+        sub: req.user.id,
+      });
+      expect(authService.generateRefreshToken).toHaveBeenCalledWith({
+        username: req.user.email,
+        sub: req.user.id,
+        device: req.device,
+        tokenVersion: req.user.tokenVersion,
+      });
+      expect(redis.set).toHaveBeenCalledWith(`rt123:${req.user.id}`, 'used', 'EX', 29 * 60 + 50);
+      expect(result).toEqual({
+        accessToken: 'at123',
+        refreshToken: 'rt123',
+      });
+    });
+  });
+
+  describe('generateAccessToken', () => {
+    it('AT생성', async () => {
+      jwtService.sign.mockReturnValue('at123');
+
+      await expect(authService.generateAccessToken(atPayload)).resolves.toBe('at123');
+    });
+  });
+
+  describe('generateRefreshToken', () => {
+    it('RT생성', async () => {
+      jwtService.sign.mockReturnValue('rt123');
+
+      await expect(authService.generateRefreshToken(rtPayload)).resolves.toBe('rt123');
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('RT사용', async () => {
+      const rt = 'rt123';
+      const secret = 'secret';
+
+      configService.get.mockReturnValue(secret);
+      jwtService.verify.mockReturnValue(rtPayload);
+      jest.spyOn(authService, 'generateAccessToken').mockResolvedValue('at123');
+
+      await authService.refreshToken(rt);
+
+      expect(jwtService.verify).toHaveBeenCalledWith(rt, { secret });
+      expect(authService.generateAccessToken).toHaveBeenCalledWith(
+        expect.objectContaining(atPayload),
+      );
+    });
+  });
+
+  describe('validatePayload', () => {
+    it('페이로드검증: 캐시가없다면', async () => {
+      redis.get.mockResolvedValue(JSON.stringify(null));
+      redis.set.mockResolvedValue(true);
+      authRepository.findByIdWithEmail.mockResolvedValue(user);
+
+      const result = await authService.validatePayload(atPayload);
+
+      expect(authRepository.findByIdWithEmail).toHaveBeenCalledWith(atPayload);
+      expect(redis.set).toHaveBeenCalledWith(
+        `user:${atPayload.sub}`,
+        JSON.stringify(user),
+        'EX',
+        600,
+      );
+      expect(result).toEqual(user);
+    });
+
+    it('페이로드검증: 캐시가있다면', async () => {
+      redis.get.mockResolvedValue(JSON.stringify(user));
+
+      const result = await authService.validatePayload(atPayload);
+
+      expect(result).toEqual(user);
+    });
+  });
+
+  describe('incrementTokenVersion', () => {
+    it('인가: 토큰버전증감', async () => {
+      authRepository.saveUser.mockResolvedValue({ ...user, tokenVersion: 2 });
+      await authService.incrementTokenVersion(user);
+
+      expect(authRepository.saveUser).toHaveBeenCalledWith({ ...user, tokenVersion: 2 });
+    });
+  });
+
+  describe('passwordReset', () => {
+    it('비밀번호리셋: 실패', async () => {
+      authRepository.findByEmail.mockResolvedValue(null);
+
+      await expect(authService.passwordReset(user.email)).rejects.toThrow(
+        new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('비밀번호리셋: 임시비번발송', async () => {
+      authRepository.findByEmail.mockResolvedValue(user);
+      utilsService.getUUID.mockReturnValue('1234');
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
+
+      await authService.passwordReset(user.email);
+
+      expect(authRepository.saveUser).toHaveBeenCalledWith({ ...user, password: `hashedPassword` });
+      expect(mailService.sendPasswordResetEmail).toHaveBeenCalledWith(user.email, '1234');
+    });
+  });
+
+  describe('oauthLogin', () => {
+    it('소셜로그인: 올바르지 않은 플랫폼', async () => {
+      await expect(authService.oauthLogin(user)).rejects.toThrow(
+        new HttpException('플랫폼 정보가 올바르지 않습니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('소셜로그인: 타 플랫폼 가입자', async () => {
+      user.platform = 'google';
+      user.platformId = '1';
+
+      authRepository.findByPlatformId.mockReturnValue(null);
+      authRepository.findByEmail.mockResolvedValue(user);
+
+      await expect(authService.oauthLogin(user)).rejects.toThrow(
+        new HttpException('귀하의 계정에 등록된 이메일은 이미 사용 중입니다.', HttpStatus.CONFLICT),
+      );
+    });
+
+    it('소셜로그인: 신규유저', async () => {
+      user.platform = 'google';
+      user.platformId = '1';
+
+      authRepository.findByPlatformId.mockReturnValue(null);
+      authRepository.findByEmail.mockResolvedValue(null);
+      nicknameService.generateUniqueNickname.mockResolvedValue('nickname');
+      authRepository.saveUser.mockResolvedValue(user);
+
+      const result = await authService.oauthLogin(user);
+
+      expect(authRepository.findByPlatformId).toHaveBeenCalledWith(user.platform, user.platformId);
+      expect(nicknameService.generateUniqueNickname).toHaveBeenCalled();
+      expect(authRepository.saveUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: user.email,
+          platform: user.platform,
+          platformId: user.platformId,
+          nickname: 'nickname',
+        }),
+      );
+      expect(result).toEqual(user);
+    });
+
+    it('소셜로그인: 기존유저', async () => {
+      user.platform = 'google';
+      user.platformId = '1';
+
+      authRepository.findByPlatformId.mockReturnValue(user);
+
+      const result = await authService.oauthLogin(user);
+
+      expect(authRepository.findByPlatformId).toHaveBeenCalledWith(user.platform, user.platformId);
+      expect(result).toEqual(user);
+    });
   });
 });
