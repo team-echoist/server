@@ -7,220 +7,260 @@ import { FirebaseService } from '../../firebase/firebase.service';
 import { UserService } from '../../user/user.service';
 import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Alert } from '../../../entities/alert.entity';
-import { ActionType, EssayStatus } from '../../../common/types/enum.types';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
+import { AwsService } from '../../aws/aws.service';
+
+jest.mock('../alert.repository');
+jest.mock('../../utils/utils.service');
+jest.mock('../../support/support.service');
+jest.mock('../../firebase/firebase.service');
+jest.mock('../../user/user.service');
+jest.mock('../../aws/aws.service');
 
 describe('AlertService', () => {
-  let service: AlertService;
-  let alertRepository: AlertRepository;
-  let utilsService: UtilsService;
-  let supportService: SupportService;
-  let fcmService: FirebaseService;
-  let userService: UserService;
-  let alertQueue: Queue;
+  let alertService: AlertService;
+  let alertRepository: jest.Mocked<AlertRepository>;
+  let utilsService: jest.Mocked<UtilsService>;
+  let userService: jest.Mocked<UserService>;
+  let supportService: jest.Mocked<SupportService>;
+  let fcmService: jest.Mocked<FirebaseService>;
+  let awsService: jest.Mocked<AwsService>;
+  let alertQueue: jest.Mocked<Queue>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AlertService,
-        {
-          provide: AlertRepository,
-          useValue: {
-            countingAlert: jest.fn(),
-            findAlerts: jest.fn(),
-            findAlert: jest.fn(),
-            saveAlert: jest.fn(),
-          },
-        },
-        {
-          provide: UtilsService,
-          useValue: {
-            transformToDto: jest.fn(),
-            formatDateToKorean: jest.fn(),
-            extractPartContent: jest.fn(),
-          },
-        },
-        {
-          provide: SupportService,
-          useValue: {
-            getDevicesByUserId: jest.fn(),
-            fetchSettingEntityById: jest.fn(),
-          },
-        },
-        {
-          provide: FirebaseService,
-          useValue: {
-            sendPushAlert: jest.fn(),
-          },
-        },
-        {
-          provide: UserService,
-          useValue: {
-            fetchUserEntityById: jest.fn(),
-          },
-        },
-        {
-          provide: getQueueToken('alert'),
-          useValue: {
-            add: jest.fn(),
-          },
-        },
+        { provide: AlertRepository, useClass: AlertRepository },
+        { provide: UtilsService, useClass: UtilsService },
+        { provide: UserService, useClass: UserService },
+        { provide: SupportService, useClass: SupportService },
+        { provide: FirebaseService, useClass: FirebaseService },
+        { provide: AwsService, useClass: AwsService },
+        { provide: getQueueToken('alert'), useValue: { add: jest.fn() } },
       ],
     }).compile();
 
-    service = module.get<AlertService>(AlertService);
-    alertRepository = module.get<AlertRepository>(AlertRepository);
-    utilsService = module.get<UtilsService>(UtilsService);
-    supportService = module.get<SupportService>(SupportService);
-    fcmService = module.get<FirebaseService>(FirebaseService);
-    userService = module.get<UserService>(UserService);
-    alertQueue = module.get<Queue>(getQueueToken('alert'));
+    alertService = module.get<AlertService>(AlertService);
+    alertRepository = module.get(AlertRepository) as jest.Mocked<AlertRepository>;
+    utilsService = module.get(UtilsService) as jest.Mocked<UtilsService>;
+    userService = module.get(UserService) as jest.Mocked<UserService>;
+    supportService = module.get(SupportService) as jest.Mocked<SupportService>;
+    fcmService = module.get(FirebaseService) as jest.Mocked<FirebaseService>;
+    awsService = module.get(AwsService) as jest.Mocked<AwsService>;
+    alertQueue = module.get(getQueueToken('alert')) as jest.Mocked<Queue>;
+
+    utilsService.transformToDto.mockImplementation((_, any) => any);
   });
 
-  it('신고 처리 알림 생성', async () => {
-    const mockUser = { id: 1 } as any;
-    const mockReport = { essay: { status: EssayStatus.PUBLISHED }, createdDate: new Date() } as any;
-    const mockAlert = new Alert();
-    mockAlert.title = '2024-08-21';
-    jest.spyOn(userService, 'fetchUserEntityById').mockResolvedValue(mockUser);
-    jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
-    jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
+  describe('hasUnreadAlerts', () => {
+    it('읽지 않은 알림이 있으면 true를 반환.', async () => {
+      alertRepository.countingAlert = jest.fn().mockResolvedValue(1);
 
-    const result = await service.createReportProcessedAlert(
-      mockUser,
-      mockReport,
-      ActionType.APPROVED,
-    );
+      const result = await alertService.hasUnreadAlerts(1);
+      expect(result).toBe(true);
+    });
 
-    expect(result).toBe(mockAlert);
-    expect(alertRepository.saveAlert).toHaveBeenCalled();
-    expect(result.title).toContain('2024-08-21');
+    it('읽지 않은 알림이 없으면 false를 반환.', async () => {
+      alertRepository.countingAlert = jest.fn().mockResolvedValue(0);
+
+      const result = await alertService.hasUnreadAlerts(1);
+      expect(result).toBe(false);
+    });
   });
 
-  it('신고 처리 알림 샌드', async () => {
-    const mockReport = {
-      reporter: { id: 1 },
-      essay: { id: 1, status: EssayStatus.PUBLISHED },
-    } as any;
-    const mockDevice = { id: 1, fcmToken: 'token' } as any;
-    const mockAlertSettings = { report: true } as any;
-    const mockUser = { id: 1 } as any;
-    jest.spyOn(userService, 'fetchUserEntityById').mockResolvedValue(mockUser);
-    jest.spyOn(supportService, 'getDevicesByUserId').mockResolvedValue([mockDevice]);
-    jest.spyOn(supportService, 'fetchSettingEntityById').mockResolvedValue(mockAlertSettings);
-    jest.spyOn(fcmService, 'sendPushAlert').mockResolvedValue(undefined);
+  describe('getAlerts', () => {
+    it('페이징 정보가 포함된 알림을 반환.', async () => {
+      const userId = 1;
+      const page = 1;
+      const limit = 10;
+      const total = 25;
+      const alerts = [
+        { id: 1, title: '알림1' },
+        { id: 2, title: '알림2' },
+      ] as any;
 
-    await service.processReportAlerts([mockReport], ActionType.APPROVED);
+      alertRepository.findAlerts.mockResolvedValue({ alerts, total });
 
-    expect(fcmService.sendPushAlert).toHaveBeenCalledWith(
-      'token',
-      '신고 결과를 알려드릴려고 왔어요!',
-      '요청하신 지원에 대한 업데이트가 있어요.',
-    );
+      const result = await alertService.getAlerts(userId, page, limit);
+
+      expect(alertRepository.findAlerts).toHaveBeenCalledWith(userId, page, limit);
+      expect(result).toEqual({
+        alerts,
+        total,
+        page,
+        totalPage: Math.ceil(total / limit),
+      });
+    });
   });
 
-  it('에세이 작성자에게 알림을 생성', async () => {
-    const mockEssay = {
-      id: 1,
-      createdDate: new Date(),
-      author: { id: 1 },
-      status: EssayStatus.PUBLISHED,
-      title: '테스트 글',
-    } as any;
-    const mockAlert = new Alert();
-    mockAlert.title = '2024-08-21';
-    mockAlert.content = '테스트 글';
-    jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
-    jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
+  describe('markAlertAsRead', () => {
+    const userId = 1;
+    const alertId = 1;
+    const alert = { id: 1, title: '알림', read: true } as any;
+    it('알림을 읽음처리', async () => {
+      alertRepository.findAlert.mockResolvedValue(alert);
 
-    const result = await service.createReviewAlerts(mockEssay, EssayStatus.PUBLISHED);
+      await alertService.markAlertAsRead(userId, alertId);
 
-    expect(result).toBe(mockAlert);
-    expect(alertRepository.saveAlert).toHaveBeenCalled();
-    expect(result.title).toContain('2024-08-21');
-    expect(result.content).toContain('테스트 글');
+      expect(alertRepository.findAlert).toHaveBeenCalledWith(userId, alertId);
+      expect(alert.read).toBe(true);
+      expect(alertRepository.saveAlert).toHaveBeenCalledWith(alert);
+    });
+
+    it('알림을 찾을 수 없음', async () => {
+      alertRepository.findAlert.mockResolvedValue(null);
+
+      await expect(alertService.markAlertAsRead(userId, alertId)).rejects.toThrow(
+        new HttpException('알림을 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+
+      expect(alertRepository.saveAlert).not.toHaveBeenCalled();
+    });
   });
 
-  it('에세이 작성자에게 푸시 알림', async () => {
-    const mockEssay = { id: 1, author: { id: 1 } } as any;
-    const mockDevice = { id: 1, fcmToken: 'token' } as any;
-    const mockAlertSettings = { report: true } as any;
-    jest.spyOn(supportService, 'getDevicesByUserId').mockResolvedValue([mockDevice]);
-    jest.spyOn(supportService, 'fetchSettingEntityById').mockResolvedValue(mockAlertSettings);
-    jest.spyOn(fcmService, 'sendPushAlert').mockResolvedValue(undefined);
+  describe('createAndSendReportProcessedAlerts', () => {
+    it('reports를 배치로 나누어 alertQueue에 작업을 추가', async () => {
+      const reports = [
+        { id: 1, message: 'Report 1' },
+        { id: 2, message: 'Report 2' },
+        { id: 3, message: 'Report 3' },
+        { id: 4, message: 'Report 4' },
+        { id: 5, message: 'Report 5' },
+        { id: 6, message: 'Report 6' },
+      ] as any;
+      const type = ActionType.UPDATED;
 
-    await service.sendPushReviewAlert(mockEssay);
+      const addSpy = jest.spyOn(alertService['alertQueue'], 'add').mockResolvedValue(undefined);
 
-    expect(fcmService.sendPushAlert).toHaveBeenCalled();
+      await alertService.createAndSendReportProcessedAlerts(reports, type);
+
+      // 각 배치에 대해 add 호출을 검증
+      expect(addSpy).toHaveBeenCalledTimes(2);
+
+      // 첫 번째 호출
+      expect(addSpy).toHaveBeenCalledWith(
+        'createAndSendReportProcessedAlerts',
+        { batch: reports.slice(0, 5), type },
+        {
+          attempts: 5,
+          backoff: 5000,
+          delay: 0,
+        },
+      );
+
+      // 두 번째 호출
+      expect(addSpy).toHaveBeenCalledWith(
+        'createAndSendReportProcessedAlerts',
+        { batch: reports.slice(5, 6), type },
+        {
+          attempts: 5,
+          backoff: 5000,
+          delay: 15000,
+        },
+      );
+    });
   });
 
-  it('리뷰 결과 알림', async () => {
-    const mockReview = {
-      id: 1,
-      essay: { createdDate: new Date(), author: { id: 1 } },
-      user: { id: 1 },
-    } as any;
-    const mockAlert = new Alert();
-    mockAlert.title = '2024-08-21';
-    mockAlert.content = '공개처리되었습니다.';
-    jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
-    jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
+  describe('processReportAlerts', () => {
+    const mockReports = [
+      {
+        reporter: { id: 1, essay: { status: EssayStatus.PUBLISHED }, createdDate: new Date() },
+      },
+    ] as any;
 
-    const result = await service.createReviewResultAlert(mockReview, ActionType.APPROVED);
+    const type = ActionType.APPROVED;
 
-    expect(result).toBe(mockAlert);
-    expect(alertRepository.saveAlert).toHaveBeenCalled();
-    expect(result.title).toContain('2024-08-21');
-    expect(result.content).toContain('공개처리되었습니다.');
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('사용자가 알림 설정을 허용할 경우 푸시 알림을 전송', async () => {
+      jest.spyOn(alertService, 'createReportProcessedAlert').mockImplementation(
+        async () =>
+          ({
+            id: 1,
+            title: 'Mock Alert',
+            content: 'Mock content',
+          }) as any,
+      );
+
+      // Mock 설정: 사용자를 가져오고 장치를 반환하며, 알림 설정이 허용된 상태로 설정
+      userService.fetchUserEntityById = jest.fn().mockResolvedValue({ id: 1, name: 'User1' });
+      supportService.getDevicesByUserId = jest
+        .fn()
+        .mockResolvedValue([{ id: 1, fcmToken: 'token1' }]);
+      supportService.fetchSettingEntityById = jest.fn().mockResolvedValue({ report: true });
+      fcmService.sendPushAlert = jest.fn();
+
+      await alertService.processReportAlerts(mockReports, type);
+
+      // 호출 검증
+      expect(userService.fetchUserEntityById).toHaveBeenCalledWith(mockReports[0].reporter.id);
+      expect(supportService.getDevicesByUserId).toHaveBeenCalledWith(mockReports[0].reporter.id);
+      expect(supportService.fetchSettingEntityById).toHaveBeenCalledWith(
+        mockReports[0].reporter.id,
+        1,
+      );
+      expect(fcmService.sendPushAlert).toHaveBeenCalledWith(
+        'token1',
+        '신고 결과를 알려드릴려고 왔어요!',
+        '요청하신 지원에 대한 업데이트가 있어요.',
+      );
+    });
+
+    it('사용자의 장치가 없거나 알림 설정이 꺼져 있으면 푸시 알림을 전송하지 않음', async () => {
+      jest.spyOn(alertService, 'createReportProcessedAlert').mockImplementation(
+        async () =>
+          ({
+            id: 1,
+            title: 'Mock Alert',
+            content: 'Mock content',
+          }) as any,
+      );
+
+      // Mock 설정: 장치가 없거나 알림 설정이 꺼져 있는 경우
+      userService.fetchUserEntityById = jest.fn().mockResolvedValue({ id: 1, name: 'User1' });
+      supportService.getDevicesByUserId = jest
+        .fn()
+        .mockResolvedValue([{ id: 1, fcmToken: 'token1' }]);
+      supportService.fetchSettingEntityById = jest.fn().mockResolvedValue({ report: false });
+      fcmService.sendPushAlert = jest.fn();
+
+      await alertService.processReportAlerts(mockReports, type);
+
+      // 호출 검증: sendPushAlert가 호출되지 않아야 함
+      expect(fcmService.sendPushAlert).not.toHaveBeenCalled();
+    });
   });
 
-  it('리뷰 결과에 대한 푸시 알림', async () => {
-    const mockDevice = { id: 1, fcmToken: 'token' } as any;
-    const mockAlertSettings = { report: true } as any;
-    jest.spyOn(supportService, 'getDevicesByUserId').mockResolvedValue([mockDevice]);
-    jest.spyOn(supportService, 'fetchSettingEntityById').mockResolvedValue(mockAlertSettings);
-    jest.spyOn(fcmService, 'sendPushAlert').mockResolvedValue(undefined);
+  describe('createReportProcessedAlerts', () => {
+    const user = { id: 1 } as any;
+    const report = { createdDate: new Date(), essay: { status: EssayStatus.PUBLISHED } } as any;
+    const type = ActionType.APPROVED;
 
-    await service.sendPushReviewResultAlert(1, ActionType.APPROVED);
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-    expect(fcmService.sendPushAlert).toHaveBeenCalled();
-  });
+    it('Alert 객체를 생성하고 saveAlert 메서드를 호출', async () => {
+      utilsService.formatDateToKorean.mockReturnValue('2023년 10월 20일');
+      alertRepository.saveAlert.mockResolvedValue({ id: 1, title: 'mock title' } as any);
 
-  it('에세이 첫 조회에 대한 알림', async () => {
-    const mockEssay = {
-      id: 1,
-      createdDate: new Date(),
-      author: { id: 1 },
-      title: '테스트 글',
-      content: '테스트 내용',
-    } as any;
-    const mockAlert = new Alert();
-    mockAlert.content = '테스트 내용';
-    jest.spyOn(alertRepository, 'saveAlert').mockResolvedValue(mockAlert);
-    jest.spyOn(utilsService, 'formatDateToKorean').mockReturnValue('2024-08-21');
-    jest.spyOn(utilsService, 'extractPartContent').mockReturnValue('테스트 내용');
+      const result = await alertService.createReportProcessedAlert(user, report, type);
 
-    const result = await service.createAlertFirstView(mockEssay);
+      expect(alertRepository.saveAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user,
+          title: '2023년 10월 20일에 요청하신 지원에 대한 내용이 업데이트 되었습니다.',
+          content: '2023년 10월 20일에 신고하신 게시물이 비공개 처리되었습니다.',
+          body: '해당 글을 검토한 결과 커뮤니티 가이드라인을 위반하는 콘텐츠를 포함하고 있어 비공개 처리되었습니다. 신고해주셔서 감사합니다!',
+          type: AlertType.SUPPORT,
+        }),
+      );
 
-    expect(result).toBe(mockAlert);
-    expect(alertRepository.saveAlert).toHaveBeenCalled();
-    expect(result.content).toContain('테스트 내용');
-  });
-
-  it('에세이 첫 조회에 대한 푸시 알림', async () => {
-    const mockEssay = { id: 1, author: { id: 1, nickname: '닉네임' } } as any;
-    const mockDevice = { id: 1, fcmToken: 'token' } as any;
-    const mockAlertSettings = { viewed: true } as any;
-    jest.spyOn(supportService, 'getDevicesByUserId').mockResolvedValue([mockDevice]);
-    jest.spyOn(supportService, 'fetchSettingEntityById').mockResolvedValue(mockAlertSettings);
-    jest.spyOn(fcmService, 'sendPushAlert').mockResolvedValue(undefined);
-
-    await service.sendPushAlertFirstView(mockEssay);
-
-    expect(fcmService.sendPushAlert).toHaveBeenCalledWith(
-      'token',
-      '다른 아무개가 닉네임 아무개님의 글을 발견!',
-      '사람들이 닉네임 아무개님의 이야기를 읽기 시작했어요!',
-    );
+      expect(result).toEqual({ id: 1, title: 'mock title' });
+    });
   });
 });

@@ -123,7 +123,6 @@ export class AlertService {
   async createReportProcessedAlert(user: User, report: ReportQueue, type: ActionType) {
     const alert = new Alert();
     const koreanDate = this.utilsService.formatDateToKorean(report.createdDate);
-
     const contentEnd = this.getContentEnd(report.essay.status, type);
     const result = this.getResult(report.essay.status, type);
     const body = this.getAlertBody(type, result);
