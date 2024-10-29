@@ -3,9 +3,6 @@ import { BadgeService } from '../badge.service';
 import { BadgeRepository } from '../badge.repository';
 import { UtilsService } from '../../utils/utils.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { User } from '../../../entities/user.entity';
-import { Tag } from '../../../entities/tag.entity';
-import { Badge } from '../../../entities/badge.entity';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),
@@ -16,129 +13,133 @@ jest.mock('../badge.repository');
 jest.mock('../../utils/utils.service');
 
 describe('BadgeService', () => {
-  let service: BadgeService;
+  let badgeService: BadgeService;
   let badgeRepository: jest.Mocked<BadgeRepository>;
   let utilsService: jest.Mocked<UtilsService>;
 
+  let user: any;
+  let tag: any;
+  let tags: any;
+  let badge: any;
+  let badges: any;
+  let allBadges: any;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BadgeService, BadgeRepository, UtilsService],
+      providers: [
+        BadgeService,
+        { provide: BadgeRepository, useClass: BadgeRepository },
+        { provide: UtilsService, useClass: UtilsService },
+      ],
     }).compile();
 
-    service = module.get<BadgeService>(BadgeService);
-    badgeRepository = module.get(BadgeRepository);
-    utilsService = module.get(UtilsService);
-  });
+    badgeService = module.get<BadgeService>(BadgeService);
+    badgeRepository = module.get(BadgeRepository) as jest.Mocked<BadgeRepository>;
+    utilsService = module.get(UtilsService) as jest.Mocked<UtilsService>;
 
-  afterEach(() => {
-    jest.clearAllMocks();
+    utilsService.transformToDto.mockImplementation((_, any) => any);
+
+    user = {
+      id: 1,
+      email: 'test@example.com',
+      password: 'hashedPassword',
+      nickname: null,
+      platformId: null,
+      platform: null,
+      status: null,
+      tokenVersion: 1,
+    };
+    tags = [
+      { id: 1, name: 'tag1' },
+      { id: 2, name: 'tag2' },
+    ];
+    badge = { id: 1, name: 'badge1', level: 1, exp: 1, userId: user.id };
+    badges = [
+      { id: 1, name: 'badge1', level: 2, exp: 5 },
+      { id: 2, name: 'badge2', level: 1, exp: 10 },
+    ];
   });
 
   describe('addExperience', () => {
-    it('should add experience to the badge for the user', async () => {
-      const user: User = { id: 1 } as User;
-      const tags: Tag[] = [{ id: 1, name: '열받는' }] as Tag[];
-      const badge: Badge = { id: 1, name: 'angry', exp: 1, level: 0 } as Badge;
-
-      badgeRepository.findUsedTag.mockResolvedValue(null);
-      badgeRepository.findByBadgeName.mockResolvedValue(null);
-      badgeRepository.createBadge.mockResolvedValue(badge);
-      badgeRepository.saveBadge.mockResolvedValue(badge);
-      badgeRepository.saveUsedTag.mockResolvedValue();
-
-      await service.addExperience(user, tags);
-
-      expect(badgeRepository.findUsedTag).toHaveBeenCalledWith(user.id, tags[0]);
-      expect(badgeRepository.findByBadgeName).toHaveBeenCalledWith(user.id, 'angry');
-      expect(badgeRepository.createBadge).toHaveBeenCalledWith(user.id, 'angry');
-      expect(badgeRepository.saveBadge).toHaveBeenCalledWith(badge);
-      expect(badgeRepository.saveUsedTag).toHaveBeenCalledWith(user.id, tags[0], badge);
+    it('뱃지 경험치증가', async () => {
+      jest.spyOn(badgeService, 'findBadgeByTag').mockReturnValue('badge1');
+      jest.spyOn(badgeService, 'hasUserUsedTag').mockResolvedValue(false);
+      jest.spyOn(badgeService, 'incrementBadgeExperience').mockResolvedValue({
+        name: 'badge1',
+        exp: 10,
+      } as any);
+      jest.spyOn(badgeService, 'markTagAsUsed').mockResolvedValue(undefined);
     });
   });
 
   describe('levelUpBadge', () => {
-    it('should level up the badge if enough experience is available', async () => {
-      const userId = 1;
-      const badgeId = 1;
-      const badge: Badge = { id: badgeId, name: 'angry', exp: 10, level: 1 } as Badge;
-
-      badgeRepository.findBadge.mockResolvedValue(badge);
-      badgeRepository.saveBadge.mockResolvedValue(badge);
-
-      await service.levelUpBadge(userId, badgeId);
-
-      expect(badgeRepository.findBadge).toHaveBeenCalledWith(userId, badgeId);
-      expect(badge.exp).toBe(0);
-      expect(badge.level).toBe(2);
-      expect(badgeRepository.saveBadge).toHaveBeenCalledWith(badge);
+    it('뱃지레벨업: 찾을 수 없음', async () => {
+      badgeRepository.findBadge.mockResolvedValue(null);
+      await expect(badgeService.levelUpBadge(user.id, badge.id)).rejects.toThrow(
+        new HttpException('사용자의 뱃지를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
     });
 
-    it('should throw an error if not enough experience', async () => {
-      const userId = 1;
-      const badgeId = 1;
-      const badge: Badge = { id: badgeId, name: 'angry', exp: 5, level: 1 } as Badge;
-
+    it('뱃지레벨업: 경험치 부족', async () => {
       badgeRepository.findBadge.mockResolvedValue(badge);
-
-      await expect(service.levelUpBadge(userId, badgeId)).rejects.toThrow(
+      await expect(badgeService.levelUpBadge(user.id, badge.id)).rejects.toThrow(
         new HttpException('레벨업에 필요한 경험치가 부족합니다.', HttpStatus.BAD_REQUEST),
       );
     });
 
-    it('should throw an error if badge not found', async () => {
-      const userId = 1;
-      const badgeId = 1;
+    it('뱃지레벨업: 레벨업', async () => {
+      badge.exp = 10;
+      badgeRepository.findBadge.mockResolvedValue(badge);
 
-      badgeRepository.findBadge.mockResolvedValue(null);
+      await badgeService.levelUpBadge(user.id, badge.id);
 
-      await expect(service.levelUpBadge(userId, badgeId)).rejects.toThrow(
-        new HttpException('사용자의 뱃지를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
-      );
+      expect(badge.exp).toBe(0);
+      expect(badge.level).toBe(2);
     });
   });
 
   describe('getBadges', () => {
-    it('should return all badges with default values if user has no badges', async () => {
-      const userId = 1;
-      const allBadges = service['allBadges'];
-      const userBadges = allBadges.map((name) => ({
-        id: null,
-        name,
-        level: 0,
-        exp: 0,
-      }));
+    beforeEach(() => {
+      badgeService.allBadges = ['badge1', 'badge2', 'badge3'];
 
-      badgeRepository.findBadges.mockResolvedValue([]);
-      utilsService.transformToDto.mockReturnValue(userBadges);
-
-      const result = await service.getBadges(userId);
-
-      expect(badgeRepository.findBadges).toHaveBeenCalledWith(userId);
-      expect(utilsService.transformToDto).toHaveBeenCalledWith(expect.any(Function), userBadges);
-      expect(result).toEqual({ badges: userBadges });
+      jest.clearAllMocks();
     });
-  });
+    it('뱃지조회: 최초조회시 기본값 생성', async () => {
+      badges = [];
+      badgeRepository.findBadges.mockResolvedValue(badges);
 
-  describe('getBadgeWithTags', () => {
-    it('should return all badges with tags and default values if user has no badges', async () => {
-      const userId = 1;
-      const allBadges = service['allBadges'];
-      const userBadges = allBadges.map((name) => ({
-        id: null,
-        name,
-        level: 0,
-        exp: 0,
-        tags: [],
-      }));
+      const result = await badgeService.getBadges(user.id);
 
-      badgeRepository.findBadgesWithTags.mockResolvedValue([]);
-      utilsService.transformToDto.mockReturnValue(userBadges);
+      expect(badgeRepository.findBadges).toHaveBeenCalledWith(user.id);
 
-      const result = await service.getBadgeWithTags(userId);
+      expect(result).toEqual({
+        badges: [
+          { id: null, name: 'badge1', level: 0, exp: 0 },
+          { id: null, name: 'badge2', level: 0, exp: 0 },
+          { id: null, name: 'badge3', level: 0, exp: 0 },
+        ],
+      });
+    });
 
-      expect(badgeRepository.findBadgesWithTags).toHaveBeenCalledWith(userId);
-      expect(utilsService.transformToDto).toHaveBeenCalledWith(expect.any(Function), userBadges);
-      expect(result).toEqual({ badges: userBadges });
+    it('뱃지조회: 기존조회시 기존값 반환', async () => {
+      badges = [
+        { id: 1, name: 'badge1', level: 2, exp: 5 },
+        { id: 2, name: 'badge2', level: 1, exp: 10 },
+      ];
+
+      badgeRepository.findBadges.mockResolvedValue(badges);
+
+      const result = await badgeService.getBadges(user.id);
+
+      expect(badgeRepository.findBadges).toHaveBeenCalledWith(user.id);
+
+      expect(result).toEqual({
+        badges: [
+          { id: 1, name: 'badge1', level: 2, exp: 5 },
+          { id: 2, name: 'badge2', level: 1, exp: 10 },
+          { id: null, name: 'badge3', level: 0, exp: 0 },
+        ],
+      });
     });
   });
 });

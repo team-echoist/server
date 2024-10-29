@@ -15,7 +15,7 @@ export class BadgeService {
     private readonly utilsService: UtilsService,
   ) {}
 
-  private allBadges = ['angry', 'sad', 'complicated', 'surprised', 'loving'];
+  allBadges = ['angry', 'sad', 'complicated', 'surprised', 'loving'];
 
   private badgeTagMap = {
     angry: [
@@ -196,16 +196,16 @@ export class BadgeService {
     }
   }
 
-  private async hasUserUsedTag(userId: number, tag: Tag): Promise<boolean> {
+  async hasUserUsedTag(userId: number, tag: Tag): Promise<boolean> {
     const tagExp = await this.badgeRepository.findUsedTag(userId, tag);
     return tagExp && tagExp.used;
   }
 
-  private async markTagAsUsed(userId: number, tag: Tag, badge: Badge): Promise<void> {
+  async markTagAsUsed(userId: number, tag: Tag, badge: Badge): Promise<void> {
     await this.badgeRepository.saveUsedTag(userId, tag, badge);
   }
 
-  private async incrementBadgeExperience(userId: number, badgeName: string) {
+  async incrementBadgeExperience(userId: number, badgeName: string) {
     let userBadge = await this.badgeRepository.findByBadgeName(userId, badgeName);
     if (!userBadge) {
       userBadge = await this.badgeRepository.createBadge(userId, badgeName);
@@ -216,7 +216,7 @@ export class BadgeService {
     return await this.badgeRepository.saveBadge(userBadge);
   }
 
-  private findBadgeByTag(tagName: string): string | null {
+  findBadgeByTag(tagName: string): string | null {
     for (const [badgeName, tagNames] of Object.entries(this.badgeTagMap)) {
       if (tagNames.includes(tagName)) {
         return badgeName;
