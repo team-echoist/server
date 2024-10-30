@@ -690,12 +690,12 @@ export class EssayService {
     return { essays: essaysDto, totalPage, page, total };
   }
 
-  async searchEssays(keyword: string, page: number, limit: number) {
+  async searchEssays(pageType: string, keyword: string, page: number, limit: number) {
     if (typeof keyword !== 'string') {
       throw new HttpException('잘못된 키워드 유형', HttpStatus.BAD_REQUEST);
     }
 
-    const cacheKey = `search:${keyword}:${page}:${limit}`;
+    const cacheKey = `search:${pageType}:${keyword}:${page}:${limit}`;
 
     const cachedResult = await this.redis.get(cacheKey);
     if (cachedResult) {
@@ -704,7 +704,31 @@ export class EssayService {
 
     const searchKeyword = this.utilsService.preprocessKeyword(keyword);
 
-    const { essays, total } = await this.essayRepository.searchEssays(searchKeyword, page, limit);
+    let essays: Essay[], total: number;
+    switch (pageType) {
+      case PageType.PRIVATE:
+        ({ essays, total } = await this.essayRepository.searchPrivateEssays(
+          searchKeyword,
+          page,
+          limit,
+        ));
+        break;
+      case PageType.ANY:
+        ({ essays, total } = await this.essayRepository.searchAllEssays(
+          searchKeyword,
+          page,
+          limit,
+        ));
+        break;
+      default:
+        ({ essays, total } = await this.essayRepository.searchPublicEssays(
+          searchKeyword,
+          page,
+          limit,
+        ));
+        break;
+    }
+
     const totalPage: number = Math.ceil(total / limit);
 
     essays.forEach((essay) => {

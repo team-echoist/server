@@ -55,7 +55,7 @@ import { CronService } from '../cron/cron.service';
 import { Server } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { NicknameService } from '../nickname/nickname.service';
-import { ActionType, EssayStatus, UserStatus } from '../../common/types/enum.types';
+import { ActionType, EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
 import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
@@ -519,7 +519,7 @@ export class AdminService {
   }
 
   async searchEssays(keyword: string, page: number, limit: number) {
-    return await this.essayService.searchEssays(keyword, page, limit);
+    return await this.essayService.searchEssays(PageType.ANY, keyword, page, limit);
   }
 
   async getUser(userId: number) {
