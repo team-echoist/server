@@ -359,6 +359,7 @@ export class EssayController {
   키워드를 기반으로 에세이를 검색합니다. 
   
   **쿼리 파라미터:**
+  - \`pageType\`: 페이지 타입. 나만의페이지=private, 커뮤니티=public (필수)
   - \`keyword\`: 검색할 키워드(필수)
   - \`page\`: 페이지 번호 (기본값: 1)
   - \`limit\`: 한 페이지에 보여줄 에세이 수 (기본값: 10)
@@ -373,6 +374,11 @@ export class EssayController {
   - 응답에는 제목 또는 본문에 키워드가 포함된 에세이만 포함됩니다.
   `,
   })
+  @ApiQuery({
+    name: 'pageType',
+    required: false,
+    description: '임시로 타입검사를 제외중입니다. 추후엔 열겨형타입검증이 적용됩니다.',
+  })
   @ApiQuery({ name: 'keyword', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -381,11 +387,16 @@ export class EssayController {
     type: SummaryEssaysResDto,
   })
   async searchEssays(
+    // todo 다음 안드로이드 릴리즈까지 한시적 허용
+    // @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('pageType') pageType: string,
     @Query('keyword') keyword: string,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.essayService.searchEssays(keyword, page, limit);
+    if (pageType !== PageType.ANY)
+      return this.essayService.searchEssays(pageType, keyword, page, limit);
+    return;
   }
 
   @Get(':essayId')

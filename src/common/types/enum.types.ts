@@ -4,6 +4,7 @@ export enum PageType {
   STORY = 'story',
   RECOMMEND = 'recommend',
   BURIAL = 'burial',
+  ANY = 'any',
 }
 
 export enum AlertType {
