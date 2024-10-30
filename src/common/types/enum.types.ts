@@ -8,7 +8,7 @@ export enum PageType {
 }
 
 export enum AlertType {
-  PUBLISHED = 'published',
+  PUBLIC = 'public',
   LINKEDOUT = 'linkedout',
   SUPPORT = 'support',
 }
@@ -18,8 +18,8 @@ export enum AppType {
   ANDROID_TABLET = 'android_tablet',
   IOS_MOBILE = 'ios_mobile',
   IOS_TABLET = 'ios_tablet',
-  DESCKTOP_MAC = 'desktop_mac',
-  DESCKTOP_WINDOWS = 'desktop_windows',
+  DESKTOP_MAC = 'desktop_mac',
+  DESKTOP_WINDOWS = 'desktop_windows',
 }
 
 export enum DeviceOS {
@@ -42,8 +42,9 @@ export enum DeviceType {
 export enum EssayStatus {
   PRIVATE = 'private',
   PUBLISHED = 'published',
+  PUBLIC = 'public',
   LINKEDOUT = 'linkedout',
-  BURIED = 'buried',
+  BURIAL = 'burial',
 }
 
 export enum ActionType {
@@ -52,9 +53,9 @@ export enum ActionType {
   PENDING = 'pending',
   UPDATED = 'updated',
   DELETED = 'deleted',
-  UNPUBLISHED = 'unpublished',
+  UNPUBLIC = 'unpublic',
   UNLINKEDOUT = 'unlinkedout',
-  PUBLISHED = 'published',
+  PUBLIC = 'public',
   LINKEDOUT = 'linkedout',
   BANNED = 'banned',
   MONITORED = 'monitored',
@@ -63,8 +64,8 @@ export enum ActionType {
 
 export enum ReviewQueueType {
   LINKEDOUT = 'linkedout',
-  PUBLISHED = 'published',
-  BURIED = 'buried',
+  PUBLIC = 'public',
+  BURIAL = 'burial',
 }
 
 export enum ServerStatus {

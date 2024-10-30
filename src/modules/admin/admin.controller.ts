@@ -676,7 +676,7 @@ export class AdminTaskController {
   **동작 과정:**
   1. 리뷰 ID를 기반으로 해당 리뷰를 조회합니다.
   2. 리뷰를 처리하고, 처리 유형에 따라 에세이 상태를 업데이트합니다.
-  3. 처리 대상이 published 라면 private 으로, linnkedout 이라면 논리삭제를 진행합니다.
+  3. 처리 대상이 public 라면 private 으로, linnkedout 이라면 논리삭제를 진행합니다.
   4. 처리 기록을 생성하여 저장합니다.
   
   **주의 사항:**
@@ -1224,7 +1224,7 @@ export class AdminManagementController {
 	- \`essayId\`: 상태를 수정할 에세이의 고유 ID
 
 	**요청 바디:**
-	- \`status\`: 수정할 에세이의 새로운 상태 (PUBLISHED, LINKEDOUT, PRIVATE)
+	- \`status\`: 수정할 에세이의 새로운 상태 (PUBLIC, LINKEDOUT, PRIVATE)
 
 	**동작 과정:**
 	1. 관리자 권한으로 특정 에세이의 상태를 수정합니다.
@@ -1273,7 +1273,7 @@ export class AdminOfficeController {
   - \`page\`: 페이지 번호 (기본값: 1)
   - \`limit\`: 페이지당 항목 수 (기본값: 10)
   - \`target\`: 타겟 (report, review, essay, user)
-  - \`action\`: 액션 (approved, rejected, pending, unpublished, unlinkedout, deleted)
+  - \`action\`: 액션 (approved, rejected, pending, unpublic, unlinkedout, deleted)
 
   **동작 과정:**
   1. 관리자 처리 기록을 페이지네이션과 함께 조회합니다.

@@ -98,8 +98,8 @@ export class SeederService {
       { appType: AppType.ANDROID_TABLET, version: '0.0.0', releaseDate: new Date() },
       { appType: AppType.IOS_MOBILE, version: '0.0.0', releaseDate: new Date() },
       { appType: AppType.IOS_TABLET, version: '0.0.0', releaseDate: new Date() },
-      { appType: AppType.DESCKTOP_MAC, version: '0.0.0', releaseDate: new Date() },
-      { appType: AppType.DESCKTOP_WINDOWS, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.DESKTOP_MAC, version: '0.0.0', releaseDate: new Date() },
+      { appType: AppType.DESKTOP_WINDOWS, version: '0.0.0', releaseDate: new Date() },
     ];
 
     await this.appVersionsRepository.save(initialVersions);

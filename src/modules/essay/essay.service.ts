@@ -66,7 +66,7 @@ export class EssayService {
 
   @Transactional()
   async saveEssay(requester: Express.User, reqDevice: DeviceDto, data: CreateEssayReqDto) {
-    if (data.status === EssayStatus.BURIED) {
+    if (data.status === EssayStatus.BURIAL) {
       if (!data.latitude || !data.longitude)
         throw new HttpException(
           '땅에 묻기 기능을 사용하기 위해선 좌표가 필요합니다.',

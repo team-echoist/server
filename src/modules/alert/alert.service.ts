@@ -110,11 +110,13 @@ export class AlertService {
       '저희는 커뮤니티 가이드라인을 바탕으로 콘텐츠를 검토하고 있습니다. 해당 글을 검토한 결과 위반 사항이 없어 별도의 조치가 취해지지 않습니다.',
     contentEnd: {
       [EssayStatus.PUBLISHED]: '비공개 처리되었습니다.',
+      [EssayStatus.PUBLIC]: '비공개 처리되었습니다.',
       [EssayStatus.LINKEDOUT]: '삭제되었습니다.',
       default: '처리되지 않았습니다.',
     },
     result: {
       [EssayStatus.PUBLISHED]: '비공개 처리',
+      [EssayStatus.PUBLIC]: '비공개 처리',
       [EssayStatus.LINKEDOUT]: '삭제',
       default: '',
     },
@@ -279,7 +281,8 @@ export class AlertService {
   async createAlertFirstView(essay: Essay) {
     const createdDate = new Date(essay.createdDate);
     const koreanDate = this.utilsService.formatDateToKorean(createdDate);
-    const status = essay.status === EssayStatus.PUBLISHED ? '발행' : '링크드아웃';
+    const status =
+      essay.status === EssayStatus.PUBLISHED || EssayStatus.PUBLIC ? '발행' : '링크드아웃';
 
     const alert = new Alert();
 
@@ -289,8 +292,8 @@ export class AlertService {
     alert.body = `로 시작하는 글, 기억하시나요?\n\n${koreanDate}에\n${status}한 글이 발견됐어요.`;
     alert.essay = essay;
 
-    essay.status === 'published'
-      ? (alert.type = AlertType.PUBLISHED)
+    essay.status === EssayStatus.PUBLIC || EssayStatus.PUBLISHED
+      ? (alert.type = AlertType.PUBLIC)
       : (alert.type = AlertType.LINKEDOUT);
 
     return this.alertRepository.saveAlert(alert);

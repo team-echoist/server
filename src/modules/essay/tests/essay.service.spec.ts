@@ -154,7 +154,7 @@ describe('EssayService', () => {
     const essayData = { title: '제목', content: '내용' } as any;
 
     it('에세이저장: 좌표없이 땅에 묻기 시도', async () => {
-      essayData.status = EssayStatus.BURIED;
+      essayData.status = EssayStatus.BURIAL;
 
       await expect(essayService.saveEssay(req, req.device, essayData)).rejects.toThrow(
         new HttpException(

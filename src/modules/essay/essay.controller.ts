@@ -52,12 +52,12 @@ export class EssayController {
     - 태그가 처음 사용된 경우 경험치가 증가하며, 경험치가 10에 도달하면 레벨업이 가능합니다.
 
   **모니터링 유저의 경우:**
-  - 에세이가 발행(Published), 링크드아웃(LinkedOut) 혹은 땅에묻기(buried) 상태일 때 리뷰 대기 상태로 전환됩니다.
+  - 에세이가 발행(public), 링크드아웃(linkedOut) 혹은 땅에묻기(burial) 상태일 때 리뷰 대기 상태로 전환됩니다.
   - 리뷰 대기 상태에서는 관리자가 에세이를 검토한 후에만 발행됩니다.
 
   **주의 사항:**
   - 요청 바디의 모든 필드 키는 필수이지만 특정 필드는 값이 비어있어도 됩니다(스키마 참고).
-  - buried 요청의 경우 좌표 데이터가 필수로 필요합니다.
+  - burial 요청의 경우 좌표 데이터가 필수로 필요합니다.
   `,
   })
   @ApiResponse({ status: 201, type: EssayResDto })
@@ -80,7 +80,7 @@ export class EssayController {
   - \`content\` (string): 에세이 내용
   - \`tags\` (string[]): 태그 목록
   - \`storyId\` (number): 스토리 ID
-  - \`status\` (string): 에세이 상태 (예: published, private, linkedout)
+  - \`status\` (string): 에세이 상태 (예: public, private, linkedout)
   - \`location\` (string): 장소 이름
 
   **동작 과정:**
@@ -129,10 +129,6 @@ export class EssayController {
   `,
   })
   @ApiResponse({ status: 200, type: SummaryEssaysResDto })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'published', required: false })
-  @ApiQuery({ name: 'storyId', required: false })
   async getMyEssay(
     @Req() req: ExpressRequest,
     @Query('page', new PagingParseIntPipe(1)) page: number,

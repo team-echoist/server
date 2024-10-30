@@ -55,7 +55,13 @@ import { CronService } from '../cron/cron.service';
 import { Server } from '../../entities/server.entity';
 import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
 import { NicknameService } from '../nickname/nickname.service';
-import { ActionType, EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
+import {
+  ActionType,
+  EssayStatus,
+  PageType,
+  ReviewQueueType,
+  UserStatus,
+} from '../../common/types/enum.types';
 import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
 import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
@@ -138,15 +144,15 @@ export class AdminService {
     if (data.status !== undefined) {
       switch (data.status) {
         case EssayStatus.PRIVATE:
-          return essay.status === EssayStatus.PUBLISHED
-            ? ActionType.UNPUBLISHED
+          return essay.status === EssayStatus.PUBLISHED || EssayStatus.PUBLIC
+            ? ActionType.UNPUBLIC
             : essay.status === EssayStatus.LINKEDOUT
               ? ActionType.UNLINKEDOUT
               : ActionType.UPDATED;
-        case EssayStatus.PUBLISHED:
+        case EssayStatus.PUBLISHED || EssayStatus.PUBLIC:
           return essay.status === EssayStatus.LINKEDOUT
             ? ActionType.UNLINKEDOUT
-            : ActionType.PUBLISHED;
+            : ActionType.PUBLIC;
         case EssayStatus.LINKEDOUT:
           return ActionType.LINKEDOUT;
         default:
@@ -320,7 +326,7 @@ export class AdminService {
     await this.userService.decreaseReputation(essay.author.id, 10);
     if (essay.status === EssayStatus.LINKEDOUT) await this.essayRepository.deleteEssay(essay);
 
-    if (essay.status === EssayStatus.PUBLISHED) {
+    if (essay.status === EssayStatus.PUBLISHED || EssayStatus.PUBLIC) {
       essay.status = EssayStatus.PRIVATE;
       await this.essayRepository.saveEssay(essay);
       await this.alertService.createReportResultAlerts(essay);
@@ -484,8 +490,8 @@ export class AdminService {
 
   private handleReviewAction(review: ReviewQueue, actionType: string) {
     if (actionType === ActionType.APPROVED) {
-      if (review.type === 'published') {
-        review.essay.status = EssayStatus.PUBLISHED;
+      if (review.type === ReviewQueueType.PUBLIC) {
+        review.essay.status = EssayStatus.PUBLIC;
       } else {
         review.essay.status = EssayStatus.LINKEDOUT;
       }

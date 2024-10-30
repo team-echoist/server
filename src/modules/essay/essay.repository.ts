@@ -110,14 +110,16 @@ export class EssayRepository {
       .leftJoinAndSelect('essay.tags', 'tags')
       .where('essay.author.id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
-      .andWhere('essay.status != :BURIEDStatus', { BURIEDStatus: EssayStatus.BURIED });
+      .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL });
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
     }
 
     if (pageType === PageType.PUBLIC) {
-      queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED });
+      queryBuilder
+        .andWhere('essay.status = :publishedStatus', { status: EssayStatus.PUBLISHED })
+        .orWhere('essay.status = :publicStatus', { status: EssayStatus.PUBLIC });
     } else if (pageType === PageType.PRIVATE) {
       queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
     }
@@ -151,7 +153,7 @@ export class EssayRepository {
       .where('essay.author.id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
       .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE })
-      .andWhere('essay.status != :BURIEDStatus', { BURIEDStatus: EssayStatus.BURIED });
+      .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL });
 
     if (storyId !== undefined) {
       queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
@@ -195,7 +197,7 @@ export class EssayRepository {
       )
       .leftJoin('essay.tags', 'tags')
       .where('essay.status != :status', { status: EssayStatus.PRIVATE })
-      .andWhere('essay.status != :BURIEDStatus', { BURIEDStatus: EssayStatus.BURIED })
+      .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL })
       .andWhere('essay.deletedDate IS NULL')
       .andWhere(
         new Brackets((qb) => {
@@ -236,7 +238,7 @@ export class EssayRepository {
       .select('author.id', 'authorId')
       .addSelect('COUNT(*)', 'totalEssays')
       .addSelect(
-        `COUNT(CASE WHEN essay.status = '${EssayStatus.PUBLISHED}' THEN 1 END)`,
+        `COUNT(CASE WHEN essay.status IN ('${EssayStatus.PUBLISHED}', '${EssayStatus.PUBLIC}') THEN 1 END)`,
         'publishedEssays',
       )
       .addSelect(
@@ -254,7 +256,8 @@ export class EssayRepository {
       .createQueryBuilder('essay')
       .leftJoin('essay.author', 'author')
       .where('essay.author.id IN (:...followingIds)', { followingIds })
-      .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
+      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
       .getCount();
 
     const subQueryBuilder = this.essayRepository
@@ -262,7 +265,8 @@ export class EssayRepository {
       .select('essay.id')
       .leftJoin('essay.author', 'author')
       .where('essay.author.id IN (:...followingIds)', { followingIds })
-      .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
+      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
       .orderBy('essay.createdDate', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit);
@@ -296,7 +300,8 @@ export class EssayRepository {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author.id = :authorId', { authorId })
-      .andWhere('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
+      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
       .andWhere('essay.created_date < :createdDate', { createdDate })
       .orderBy('essay.created_date', 'DESC')
       .limit(6)
@@ -326,7 +331,8 @@ export class EssayRepository {
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
       .andWhere('essay.author.id = :authorId', { authorId })
-      .where('essay.status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
+      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
       .andWhere('essay.id > :currentEssayId', { currentEssayId })
       .orderBy('essay.created_date', 'ASC')
       .getOne();
@@ -369,7 +375,9 @@ export class EssayRepository {
   }
 
   async totalPublishedEssays() {
-    return this.essayRepository.count({ where: { status: EssayStatus.PUBLISHED } });
+    return this.essayRepository.count({
+      where: { status: In([EssayStatus.PUBLISHED, EssayStatus.PUBLIC]) },
+    });
   }
 
   async totalLinkedOutEssays() {
@@ -505,7 +513,7 @@ export class EssayRepository {
       .leftJoinAndSelect('essay.story', 'story')
       .where('essay.author = :userId', { userId })
       .andWhere('essay.status IN (:...statuses)', {
-        statuses: [EssayStatus.PUBLISHED, EssayStatus.PRIVATE],
+        statuses: [EssayStatus.PUBLISHED, EssayStatus.PUBLIC, EssayStatus.PRIVATE],
       });
 
     if (storyId) {
@@ -566,7 +574,7 @@ export class EssayRepository {
 
     query
       .andWhere('essay.status IN (:...statuses)', {
-        statuses: [EssayStatus.PUBLISHED, EssayStatus.LINKEDOUT],
+        statuses: [EssayStatus.PUBLISHED, EssayStatus.PUBLIC, EssayStatus.LINKEDOUT],
       })
       .orderBy('relevance', 'DESC')
       .offset(offset)
@@ -613,7 +621,7 @@ export class EssayRepository {
     }
 
     query.andWhere('essay.status NOT IN (:...statuses)', {
-      statuses: [EssayStatus.LINKEDOUT, EssayStatus.BURIED],
+      statuses: [EssayStatus.LINKEDOUT, EssayStatus.BURIAL],
     });
 
     query.orderBy('relevance', 'DESC').offset(offset).limit(limit);
@@ -714,7 +722,8 @@ export class EssayRepository {
       .update(Essay)
       .set({ status: EssayStatus.PRIVATE })
       .where('author_id IN (:...userIds)', { userIds })
-      .andWhere('status = :status', { status: EssayStatus.PUBLISHED })
+      .andWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLISHED })
+      .orWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLIC })
       .execute();
   }
 
