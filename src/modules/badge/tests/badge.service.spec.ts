@@ -22,7 +22,7 @@ describe('BadgeService', () => {
   let tags: any;
   let badge: any;
   let badges: any;
-  let allBadges: any;
+  let userBadges: any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +57,15 @@ describe('BadgeService', () => {
     badges = [
       { id: 1, name: 'badge1', level: 2, exp: 5 },
       { id: 2, name: 'badge2', level: 1, exp: 10 },
+    ];
+    userBadges = [
+      {
+        id: 1,
+        name: 'badge1',
+        level: 2,
+        exp: 5,
+        tagExps: [{ tag: { id: 1, name: 'tag1' } }, { tag: { id: 2, name: 'tag2' } }],
+      },
     ];
   });
 
@@ -138,6 +147,81 @@ describe('BadgeService', () => {
           { id: 1, name: 'badge1', level: 2, exp: 5 },
           { id: 2, name: 'badge2', level: 1, exp: 10 },
           { id: null, name: 'badge3', level: 0, exp: 0 },
+        ],
+      });
+    });
+  });
+
+  describe('getBadgeWithTags', () => {
+    beforeEach(() => {
+      badgeService.allBadges = ['badge1', 'badge2', 'badge3'];
+
+      jest.clearAllMocks();
+    });
+    it('유저가 보유한 뱃지: 태그가 없는 경우', async () => {
+      badgeRepository.findBadgesWithTags.mockResolvedValue(userBadges);
+
+      const result = await badgeService.getBadgeWithTags(user.id);
+
+      expect(badgeRepository.findBadgesWithTags).toHaveBeenCalledWith(user.id);
+
+      expect(result).toEqual({
+        badges: [
+          {
+            id: 1,
+            name: 'badge1',
+            level: 2,
+            exp: 5,
+            tags: ['tag1', 'tag2'],
+          },
+          {
+            id: null,
+            name: 'badge2',
+            level: 0,
+            exp: 0,
+            tags: [],
+          },
+          {
+            id: null,
+            name: 'badge3',
+            level: 0,
+            exp: 0,
+            tags: [],
+          },
+        ],
+      });
+    });
+
+    it('유저가 보유한 뱃지: 태그가 없는 경우', async () => {
+      badgeRepository.findBadgesWithTags.mockResolvedValue([]);
+
+      const result = await badgeService.getBadgeWithTags(user.id);
+
+      expect(badgeRepository.findBadgesWithTags).toHaveBeenCalledWith(user.id);
+
+      expect(result).toEqual({
+        badges: [
+          {
+            id: null,
+            name: 'badge1',
+            level: 0,
+            exp: 0,
+            tags: [],
+          },
+          {
+            id: null,
+            name: 'badge2',
+            level: 0,
+            exp: 0,
+            tags: [],
+          },
+          {
+            id: null,
+            name: 'badge3',
+            level: 0,
+            exp: 0,
+            tags: [],
+          },
         ],
       });
     });
