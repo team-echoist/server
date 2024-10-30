@@ -1127,7 +1127,7 @@ export class AdminManagementController {
     return this.adminService.updateUser(req.user.id, userId, data);
   }
 
-  @Get('essays/search/:keyword')
+  @Get('essays/search')
   @ApiOperation({
     summary: '에세이 검색',
     description: `
