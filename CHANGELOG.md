@@ -1,3 +1,10 @@
+## [1.20.6](https://github.com/team-echoist/server/compare/v1.20.5...v1.20.6) (2024-10-31)
+
+
+### Bug Fixes
+
+* 최후의 수단 ([#470](https://github.com/team-echoist/server/issues/470)) ([17f7c9d](https://github.com/team-echoist/server/commit/17f7c9df4cb6a8b1d857be5d8370abcd39c3652a))
+
 ## [1.20.5](https://github.com/team-echoist/server/compare/v1.20.4...v1.20.5) (2024-10-31)
 
 
