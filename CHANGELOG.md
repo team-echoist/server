@@ -1,3 +1,10 @@
+## [1.20.10](https://github.com/team-echoist/server/compare/v1.20.9...v1.20.10) (2024-10-31)
+
+
+### Bug Fixes
+
+* 데이터베이스 인덱스 및 함수 세팅 ([#475](https://github.com/team-echoist/server/issues/475)) ([76cdd2f](https://github.com/team-echoist/server/commit/76cdd2fe65e57c66644592305cc4cd6c75635599))
+
 ## [1.20.9](https://github.com/team-echoist/server/compare/v1.20.8...v1.20.9) (2024-10-31)
 
 
