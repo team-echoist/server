@@ -1,3 +1,10 @@
+## [1.20.1](https://github.com/team-echoist/server/compare/v1.20.0...v1.20.1) (2024-10-31)
+
+
+### Bug Fixes
+
+* 마이그레이션 수정 ([#464](https://github.com/team-echoist/server/issues/464)) ([7c08b30](https://github.com/team-echoist/server/commit/7c08b30eb17c2fa010003e702166350ad7f58ae5))
+
 # [1.20.0](https://github.com/team-echoist/server/compare/v1.19.0...v1.20.0) (2024-10-28)
 
 
