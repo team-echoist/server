@@ -60,6 +60,8 @@ export class StoryService {
       });
       await this.essayService.saveEssays(essays);
     }
+
+    return this.utilsService.transformToDto(StoryDto, savedStory);
   }
 
   @Transactional()
