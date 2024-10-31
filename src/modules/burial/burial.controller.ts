@@ -9,7 +9,7 @@ import { SummaryEssayResDto } from '../essay/dto/response/summaryEssayRes.dto';
 @Controller('burials')
 @UseGuards(JwtAuthGuard)
 export class BurialController {
-  constructor(private readonly buryService: BurialService) {}
+  constructor(private readonly burialService: BurialService) {}
 
   @Get('notice')
   @ApiOperation({
@@ -41,7 +41,7 @@ export class BurialController {
     @Query('latitude', ParseIntPipe) latitude: number,
     @Query('longitude', ParseIntPipe) longitude: number,
   ) {
-    return this.buryService.notifyIfBurialNearby(req.user.id, latitude, longitude);
+    return this.burialService.notifyIfBurialNearby(req.user.id, latitude, longitude);
   }
 
   @Get()
@@ -73,6 +73,6 @@ export class BurialController {
     @Query('latitude', ParseIntPipe) latitude: number,
     @Query('longitude', ParseIntPipe) longitude: number,
   ) {
-    return this.buryService.findBurialNearby(req.user.id, latitude, longitude);
+    return this.burialService.findBurialNearby(req.user.id, latitude, longitude);
   }
 }

@@ -91,6 +91,7 @@ export class AppModule implements OnModuleInit, NestModule {
       await this.seederService.initializeServer();
       await this.seederService.initializeAdmin();
       await this.seederService.initializeAppVersions();
+      // await this.seederService.initializeNicknames();
     }
 
     this.configService.set('APP_INITIALIZING', false);

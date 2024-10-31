@@ -75,7 +75,7 @@ export class EssayService {
     }
 
     const user = await this.userService.fetchUserEntityById(requester.id);
-    const tags = await this.tagService.getTags(data.tags);
+    const tags = (await this.tagService.getTags(data.tags)) || [];
     let device = await this.supportService.findDevice(user, reqDevice);
 
     if (!device) {
@@ -89,7 +89,7 @@ export class EssayService {
       tags,
     };
 
-    void this.badgeService.addExperience(user, tags);
+    if (tags.length > 0) void this.badgeService.addExperience(user, tags);
 
     await this.evaluateUserReputation(user);
 
@@ -124,24 +124,20 @@ export class EssayService {
     }
   }
 
-  private async handleMonitoredUser(user: User, essayData: any, data: CreateEssayReqDto) {
+  async handleMonitoredUser(user: User, essayData: any, data: CreateEssayReqDto) {
     const adjustedData = {
       ...essayData,
       status: EssayStatus.PRIVATE,
     };
 
     const savedMonitoredEssay = await this.essayRepository.saveEssay(adjustedData);
-
     if (data.status !== EssayStatus.PRIVATE) {
       await this.reviewService.saveReviewRequest(user, savedMonitoredEssay, data);
+      await this.alertService.createReviewAlerts(savedMonitoredEssay, data.status);
+      await this.alertService.sendPushReviewAlert(savedMonitoredEssay);
     }
 
-    const essay = await this.essayRepository.findEssayById(savedMonitoredEssay.id);
-
-    await this.alertService.createReviewAlerts(essay, data.status);
-    await this.alertService.sendPushReviewAlert(essay);
-
-    return this.utilsService.transformToDto(EssayResDto, essay);
+    return this.utilsService.transformToDto(EssayResDto, savedMonitoredEssay);
   }
 
   @Transactional()
@@ -158,8 +154,8 @@ export class EssayService {
       message = '정책 위반으로 인해 요청이 검토됩니다.';
     }
 
-    const story = await this.storyService.getStoryById(user, data.storyId);
-    const tags = await this.tagService.getTags(data.tags);
+    const story = (await this.storyService.getStoryById(user, data.storyId)) || null;
+    const tags = (await this.tagService.getTags(data.tags)) || [];
 
     await this.updateEssayData(essay, data, story, tags, requester);
     void this.badgeService.addExperience(user, tags);
@@ -170,7 +166,7 @@ export class EssayService {
     return { ...resultData, message: message };
   }
 
-  private async checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
+  async checkIfEssayUnderReview(essayId: number, data: UpdateEssayReqDto) {
     const isUnderReview = await this.reviewService.findReviewByEssayId(essayId);
     if (isUnderReview && data.status !== EssayStatus.PRIVATE) {
       throw new HttpException('업데이트 거부: 에세이가 현재 검토중입니다.', HttpStatus.BAD_REQUEST);
@@ -258,6 +254,7 @@ export class EssayService {
   @Transactional()
   async getEssay(req: ExpressRequest, essayId: number, pageType: PageType, storyId?: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
+
     let essayDto: EssayResDto | EssayResDto[];
     if (pageType === PageType.BURIAL) {
       essayDto = this.utilsService.transformToDto(EssayResDto, essay);
@@ -324,7 +321,7 @@ export class EssayService {
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
 
-  private async handleNonAuthorView(userId: number, essay: Essay) {
+  async handleNonAuthorView(userId: number, essay: Essay) {
     const newViews = (essay.views || 0) + 1;
 
     if (essay.status === EssayStatus.PRIVATE) {
@@ -444,7 +441,7 @@ export class EssayService {
     await this.essayRepository.updateTrendScore(essay.id, newTrendScore);
   }
 
-  private async previousEssay(userId: number, essay: Essay, pageType: PageType, storyId?: number) {
+  async previousEssay(userId: number, essay: Essay, pageType: PageType, storyId?: number) {
     let previousEssay: Essay[];
 
     if (pageType === PageType.PUBLIC) {

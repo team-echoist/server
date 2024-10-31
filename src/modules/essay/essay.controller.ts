@@ -244,7 +244,7 @@ export class EssayController {
   3. 에세이 목록을 반환합니다.
 
   **주의 사항:**
-  - 에세이의 상태가 'PRIVATE', 'BURY' 인 경우 조회되지 않습니다.
+  - 에세이의 상태가 'PRIVATE', 'BURIAL' 인 경우 조회되지 않습니다.
   `,
   })
   @ApiResponse({ status: 200, type: PublicEssaysResDto })
@@ -274,7 +274,7 @@ export class EssayController {
 
   **주의 사항:**
   - 팔로우 중인 유저가 없을 경우 빈 배열을 반환합니다.
-  - 에세이의 상태가 'PRIVATE', 'LINKEDOUT', 'BURY' 인 경우 조회되지 않습니다.
+  - 에세이의 상태가 'PRIVATE', 'LINKEDOUT', 'BURIAL' 인 경우 조회되지 않습니다.
   `,
   })
   @ApiResponse({ status: 200, type: PublicEssaysResDto })
