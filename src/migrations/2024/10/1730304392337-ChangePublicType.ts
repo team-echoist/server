@@ -1,24 +1,59 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ChangePublishedToPublic1730304392337 implements MigrationInterface {
-  name = 'ChangePublishedToPublic1730304392337';
+export class ChangePublicType1730304392337 implements MigrationInterface {
+  name = 'ChangePublicType1730304392337';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 1. 새 enum 타입 생성 및 컬럼에 적용
-    await queryRunner.query(
-      `CREATE TYPE "public"."new_review_queue_type_enum" AS ENUM('linkedout', 'public', 'burial')`,
-    );
-    await queryRunner.query(
-      `CREATE TYPE "public"."new_processed_history_action_type_enum" AS ENUM('approved', 'rejected', 'pending', 'updated', 'deleted', 'unpublic', 'unlinkedout', 'public', 'linkedout', 'banned', 'monitored', 'answered')`,
-    );
-    await queryRunner.query(
-      `CREATE TYPE "public"."new_alert_type_enum" AS ENUM('public', 'linkedout', 'support')`,
-    );
-    await queryRunner.query(
-      `CREATE TYPE "public"."new_essay_status_enum" AS ENUM('private', 'published', 'public', 'linkedout', 'burial')`,
-    );
+    // 1. 필요한 enum 값이 이미 있는지 확인 후, 없다면 추가
+    await queryRunner.query(`
+      DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'public' AND enumtypid = 'review_queue_type_enum'::regtype) THEN
+          ALTER TYPE "public"."review_queue_type_enum" ADD VALUE 'public';
+      END IF;
+      END $$;
+    `);
 
-    // 2. `published`를 `public`으로 업데이트
+    await queryRunner.query(`
+      DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'public' AND enumtypid = 'processed_history_action_type_enum'::regtype) THEN
+          ALTER TYPE "public"."processed_history_action_type_enum" ADD VALUE 'public';
+      END IF;
+      END $$;
+    `);
+
+    await queryRunner.query(`
+      DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'unpublic' AND enumtypid = 'processed_history_action_type_enum'::regtype) THEN
+          ALTER TYPE "public"."processed_history_action_type_enum" ADD VALUE 'unpublic';
+      END IF;
+      END $$;
+    `);
+
+    await queryRunner.query(`
+      DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'public' AND enumtypid = 'alert_type_enum'::regtype) THEN
+          ALTER TYPE "public"."alert_type_enum" ADD VALUE 'public';
+      END IF;
+      END $$;
+    `);
+
+    await queryRunner.query(`
+      DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'public' AND enumtypid = 'essay_status_enum'::regtype) THEN
+          ALTER TYPE "public"."essay_status_enum" ADD VALUE 'public';
+      END IF;
+      END $$;
+    `);
+
+    await queryRunner.query(`
+      DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'burial' AND enumtypid = 'essay_status_enum'::regtype) THEN
+          ALTER TYPE "public"."essay_status_enum" ADD VALUE 'burial';
+      END IF;
+      END $$;
+    `);
+
+    // 2. 기존 `published` 및 `unpublished` 값을 각각 `public` 및 `unpublic`으로 업데이트
     await queryRunner.query(
       `UPDATE "review_queue" SET "type" = 'public' WHERE "type" = 'published'`,
     );
@@ -26,100 +61,50 @@ export class ChangePublishedToPublic1730304392337 implements MigrationInterface 
       `UPDATE "processed_history" SET "action_type" = 'public' WHERE "action_type" = 'published'`,
     );
     await queryRunner.query(`UPDATE "alert" SET "type" = 'public' WHERE "type" = 'published'`);
-
-    // 3. 새 enum 타입으로 컬럼 변경
     await queryRunner.query(
-      `ALTER TABLE "review_queue" ALTER COLUMN "type" TYPE "public"."new_review_queue_type_enum" USING "type"::text::"public"."new_review_queue_type_enum"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "processed_history" ALTER COLUMN "action_type" TYPE "public"."new_processed_history_action_type_enum" USING "action_type"::text::"public"."new_processed_history_action_type_enum"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "alert" ALTER COLUMN "type" TYPE "public"."new_alert_type_enum" USING "type"::text::"public"."new_alert_type_enum"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "essay" ALTER COLUMN "status" TYPE "public"."new_essay_status_enum" USING "status"::text::"public"."new_essay_status_enum"`,
+      `UPDATE "processed_history" SET "action_type" = 'unpublic' WHERE "action_type" = 'unpublished'`,
     );
 
-    // 4. 기존 enum 타입 삭제 후 새 enum 타입 이름 변경
-    await queryRunner.query(`DROP TYPE "public"."review_queue_type_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."new_review_queue_type_enum" RENAME TO "review_queue_type_enum"`,
-    );
+    // 3. `published` 및 `unpublished` 값을 `enum`에서 삭제
+    await queryRunner.query(`
+      DELETE FROM pg_enum 
+      WHERE enumlabel = 'published' AND enumtypid = 'review_queue_type_enum'::regtype;
+    `);
 
-    await queryRunner.query(`DROP TYPE "public"."processed_history_action_type_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."new_processed_history_action_type_enum" RENAME TO "processed_history_action_type_enum"`,
-    );
+    await queryRunner.query(`
+      DELETE FROM pg_enum 
+      WHERE enumlabel = 'published' AND enumtypid = 'processed_history_action_type_enum'::regtype;
+    `);
 
-    await queryRunner.query(`DROP TYPE "public"."alert_type_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."new_alert_type_enum" RENAME TO "alert_type_enum"`,
-    );
+    await queryRunner.query(`
+      DELETE FROM pg_enum 
+      WHERE enumlabel = 'published' AND enumtypid = 'alert_type_enum'::regtype;
+    `);
 
-    await queryRunner.query(`DROP TYPE "public"."essay_status_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."new_essay_status_enum" RENAME TO "essay_status_enum"`,
-    );
+    await queryRunner.query(`
+      DELETE FROM pg_enum 
+      WHERE enumlabel = 'unpublished' AND enumtypid = 'processed_history_action_type_enum'::regtype;
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // down: 원래 enum 타입 복원
-    await queryRunner.query(
-      `CREATE TYPE "public"."old_review_queue_type_enum" AS ENUM('linkedout', 'published', 'burial')`,
-    );
-    await queryRunner.query(
-      `CREATE TYPE "public"."old_processed_history_action_type_enum" AS ENUM('approved', 'rejected', 'pending', 'updated', 'deleted', 'unpublished', 'unlinkedout', 'published', 'public', 'linkedout', 'banned', 'monitored', 'answered')`,
-    );
-    await queryRunner.query(
-      `CREATE TYPE "public"."old_alert_type_enum" AS ENUM('published', 'linkedout', 'support')`,
-    );
-    await queryRunner.query(
-      `CREATE TYPE "public"."old_essay_status_enum" AS ENUM('private', 'published')`,
-    );
+    // 다운 마이그레이션: 원래 상태로 복구 (published 및 unpublished 값 추가)
+    await queryRunner.query(`
+      ALTER TYPE "public"."review_queue_type_enum" ADD VALUE 'published';
+    `);
 
-    // 데이터 복원
-    await queryRunner.query(
-      `UPDATE "review_queue" SET "type" = 'published' WHERE "type" = 'public'`,
-    );
-    await queryRunner.query(
-      `UPDATE "processed_history" SET "action_type" = 'published' WHERE "action_type" = 'public'`,
-    );
-    await queryRunner.query(`UPDATE "alert" SET "type" = 'published' WHERE "type" = 'public'`);
+    await queryRunner.query(`
+      ALTER TYPE "public"."processed_history_action_type_enum" ADD VALUE 'published';
+    `);
 
-    // 기존 enum 타입으로 컬럼 복원
-    await queryRunner.query(
-      `ALTER TABLE "review_queue" ALTER COLUMN "type" TYPE "public"."old_review_queue_type_enum" USING "type"::text::"public"."old_review_queue_type_enum"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "processed_history" ALTER COLUMN "action_type" TYPE "public"."old_processed_history_action_type_enum" USING "action_type"::text::"public"."old_processed_history_action_type_enum"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "alert" ALTER COLUMN "type" TYPE "public"."old_alert_type_enum" USING "type"::text::"public"."old_alert_type_enum"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "essay" ALTER COLUMN "status" TYPE "public"."old_essay_status_enum" USING "status"::text::"public"."old_essay_status_enum"`,
-    );
+    await queryRunner.query(`
+      ALTER TYPE "public"."alert_type_enum" ADD VALUE 'published';
+    `);
 
-    // 새 enum 타입 삭제 후 기존 enum 타입 이름 복원
-    await queryRunner.query(`DROP TYPE "public"."review_queue_type_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."old_review_queue_type_enum" RENAME TO "review_queue_type_enum"`,
-    );
+    await queryRunner.query(`
+      ALTER TYPE "public"."processed_history_action_type_enum" ADD VALUE 'unpublished';
+    `);
 
-    await queryRunner.query(`DROP TYPE "public"."processed_history_action_type_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."old_processed_history_action_type_enum" RENAME TO "processed_history_action_type_enum"`,
-    );
-
-    await queryRunner.query(`DROP TYPE "public"."alert_type_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."old_alert_type_enum" RENAME TO "alert_type_enum"`,
-    );
-
-    await queryRunner.query(`DROP TYPE "public"."essay_status_enum"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."old_essay_status_enum" RENAME TO "essay_status_enum"`,
-    );
+    // 복구 시 `public` 및 `unpublic` 값은 그대로 유지됩니다.
   }
 }
