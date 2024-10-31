@@ -11,19 +11,39 @@ export class SetUp1730389363188 implements MigrationInterface {
 
     // 2. 에세이 테이블 인덱스 추가
     await queryRunner.query(`
-      CREATE INDEX "idx_essay_unaccented_content_trgm" ON "essay" USING GIN ("unaccented_content" gin_trgm_ops);
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_essay_unaccented_content_trgm') THEN
+          CREATE INDEX "idx_essay_unaccented_content_trgm" ON "essay" USING GIN ("unaccented_content" gin_trgm_ops);
+        END IF;
+      END $$;
     `);
     await queryRunner.query(`
-      CREATE INDEX "idx_essay_unaccented_title_trgm" ON "essay" USING GIN ("unaccented_title" gin_trgm_ops);
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_essay_unaccented_title_trgm') THEN
+          CREATE INDEX "idx_essay_unaccented_title_trgm" ON "essay" USING GIN ("unaccented_title" gin_trgm_ops);
+        END IF;
+      END $$;
     `);
     await queryRunner.query(`
-      CREATE INDEX "idx_essay_search_vector" ON "essay" USING GIN ("search_vector");
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_essay_search_vector') THEN
+          CREATE INDEX "idx_essay_search_vector" ON "essay" USING GIN ("search_vector");
+        END IF;
+      END $$;
     `);
     await queryRunner.query(`
-      CREATE INDEX "essay_content_trgm_idx" ON "essay" USING GIN ("content" gin_trgm_ops);
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'essay_content_trgm_idx') THEN
+          CREATE INDEX "essay_content_trgm_idx" ON "essay" USING GIN ("content" gin_trgm_ops);
+        END IF;
+      END $$;
     `);
     await queryRunner.query(`
-      CREATE INDEX "essay_title_trgm_idx" ON "essay" USING GIN ("title" gin_trgm_ops);
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'essay_title_trgm_idx') THEN
+          CREATE INDEX "essay_title_trgm_idx" ON "essay" USING GIN ("title" gin_trgm_ops);
+        END IF;
+      END $$;
     `);
 
     // 3. 에세이 테이블의 트리거 함수 생성 및 트리거 등록
@@ -69,6 +89,7 @@ export class SetUp1730389363188 implements MigrationInterface {
       $$ LANGUAGE plpgsql;
     `);
     await queryRunner.query(`
+      DROP TRIGGER IF EXISTS trigger_update_unaccented_email ON "user";
       CREATE TRIGGER trigger_update_unaccented_email
       BEFORE INSERT OR UPDATE OF email ON "user"
       FOR EACH ROW EXECUTE FUNCTION update_unaccented_email();
@@ -76,24 +97,23 @@ export class SetUp1730389363188 implements MigrationInterface {
 
     // 6. 사용자 테이블 인덱스 추가
     await queryRunner.query(`
-      CREATE INDEX "IDX_USER_UNACCENTED_EMAIL" ON "user" USING gin (unaccented_email gin_trgm_ops);
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'IDX_USER_UNACCENTED_EMAIL') THEN
+          CREATE INDEX "IDX_USER_UNACCENTED_EMAIL" ON "user" USING gin (unaccented_email gin_trgm_ops);
+        END IF;
+      END $$;
     `);
     await queryRunner.query(`
-      CREATE INDEX "IDX_USER_SEARCH_VECTOR" ON "user" USING gin (to_tsvector('simple', coalesce(email, '')));
-    `);
-
-    // 7. 인덱스 중복 방지를 위한 조건문 실행
-    await queryRunner.query(`
-      DO $$
-      BEGIN
+      DO $$ BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'IDX_USER_SEARCH_VECTOR') THEN
-          CREATE INDEX "IDX_USER_SEARCH_VECTOR" ON "user" USING gin (search_vector);
+          CREATE INDEX "IDX_USER_SEARCH_VECTOR" ON "user" USING gin (to_tsvector('simple', coalesce(email, '')));
         END IF;
       END $$;
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // 역순으로 삭제
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_USER_SEARCH_VECTOR";`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_USER_UNACCENTED_EMAIL";`);
     await queryRunner.query(`DROP TRIGGER IF EXISTS trigger_update_unaccented_email ON "user";`);
