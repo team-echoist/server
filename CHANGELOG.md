@@ -1,3 +1,10 @@
+## [1.20.8](https://github.com/team-echoist/server/compare/v1.20.7...v1.20.8) (2024-10-31)
+
+
+### Bug Fixes
+
+* 디비야아프지마 ([#472](https://github.com/team-echoist/server/issues/472)) ([62d4717](https://github.com/team-echoist/server/commit/62d4717902f7d76e54df607c02540019a33212cb))
+
 ## [1.20.7](https://github.com/team-echoist/server/compare/v1.20.6...v1.20.7) (2024-10-31)
 
 
