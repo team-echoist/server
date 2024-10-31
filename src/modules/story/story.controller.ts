@@ -21,6 +21,7 @@ import { StoryUpdateEssaysResDto } from '../essay/dto/response/storyUpdateEssays
 import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { StoryDto } from './dto/story.dto';
 
 @ApiTags('Story')
 @Controller('stories')
@@ -69,6 +70,7 @@ export class StoryController {
   })
   @ApiResponse({ status: 201 })
   @ApiBody({ type: CreateStoryReqDto })
+  @ApiResponse({ type: StoryDto })
   async saveStory(@Req() req: ExpressRequest, @Body() data: CreateStoryReqDto) {
     return this.storyService.saveStory(req.user.id, data);
   }
