@@ -1,15 +1,16 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ChangePublicType1730304392337 implements MigrationInterface {
-  name = 'ChangePublicType1730304392337';
+export class ChangePublishedToPublic1730304392337 implements MigrationInterface {
+  name = 'ChangePublishedToPublic1730304392337';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 1. 기존 enum 컬럼을 text 타입으로 임시 변경하여 데이터 업데이트
     await queryRunner.query(`ALTER TABLE "review_queue" ALTER COLUMN "type" TYPE text`);
     await queryRunner.query(`ALTER TABLE "processed_history" ALTER COLUMN "action_type" TYPE text`);
     await queryRunner.query(`ALTER TABLE "alert" ALTER COLUMN "type" TYPE text`);
+    await queryRunner.query(`ALTER TABLE "essay" ALTER COLUMN "status" TYPE text`);
 
-    // 2. 기존 published 데이터를 임시 문자열 값 'temp_value'로 변경
+    // 2. 기존 `published` 데이터를 임시 값 `temp_value`로 변경
     await queryRunner.query(
       `UPDATE "review_queue" SET "type" = 'temp_value' WHERE "type" = 'published'`,
     );
@@ -17,8 +18,12 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `UPDATE "processed_history" SET "action_type" = 'temp_value' WHERE "action_type" = 'published'`,
     );
     await queryRunner.query(`UPDATE "alert" SET "type" = 'temp_value' WHERE "type" = 'published'`);
+    await queryRunner.query(
+      `UPDATE "essay" SET "status" = 'temp_value' WHERE "status" = 'published'`,
+    );
 
     // 3. 새로운 enum 타입 생성 및 적용
+    // review_queue_type_enum 변경
     await queryRunner.query(
       `ALTER TYPE "public"."review_queue_type_enum" RENAME TO "review_queue_type_enum_old"`,
     );
@@ -29,6 +34,7 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `ALTER TABLE "review_queue" ALTER COLUMN "type" TYPE "public"."review_queue_type_enum" USING "type"::"text"::"public"."review_queue_type_enum"`,
     );
 
+    // processed_history_action_type_enum 변경
     await queryRunner.query(
       `ALTER TYPE "public"."processed_history_action_type_enum" RENAME TO "processed_history_action_type_enum_old"`,
     );
@@ -39,6 +45,7 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `ALTER TABLE "processed_history" ALTER COLUMN "action_type" TYPE "public"."processed_history_action_type_enum" USING "action_type"::"text"::"public"."processed_history_action_type_enum"`,
     );
 
+    // alert_type_enum 변경
     await queryRunner.query(
       `ALTER TYPE "public"."alert_type_enum" RENAME TO "alert_type_enum_old"`,
     );
@@ -49,7 +56,18 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `ALTER TABLE "alert" ALTER COLUMN "type" TYPE "public"."alert_type_enum" USING "type"::"text"::"public"."alert_type_enum"`,
     );
 
-    // 4. 임시 값 'temp_value'를 최종 값 'public'으로 업데이트
+    // essay_status_enum 변경
+    await queryRunner.query(
+      `ALTER TYPE "public"."essay_status_enum" RENAME TO "essay_status_enum_old"`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."essay_status_enum" AS ENUM('private', 'public')`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "essay" ALTER COLUMN "status" TYPE "public"."essay_status_enum" USING "status"::"text"::"public"."essay_status_enum"`,
+    );
+
+    // 4. 임시 값 `temp_value`를 최종 값 `public`으로 업데이트
     await queryRunner.query(
       `UPDATE "review_queue" SET "type" = 'public' WHERE "type" = 'temp_value'`,
     );
@@ -57,21 +75,22 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `UPDATE "processed_history" SET "action_type" = 'public' WHERE "action_type" = 'temp_value'`,
     );
     await queryRunner.query(`UPDATE "alert" SET "type" = 'public' WHERE "type" = 'temp_value'`);
+    await queryRunner.query(`UPDATE "essay" SET "status" = 'public' WHERE "status" = 'temp_value'`);
 
     // 5. 기존 enum 타입 삭제
     await queryRunner.query(`DROP TYPE "public"."review_queue_type_enum_old"`);
     await queryRunner.query(`DROP TYPE "public"."processed_history_action_type_enum_old"`);
     await queryRunner.query(`DROP TYPE "public"."alert_type_enum_old"`);
+    await queryRunner.query(`DROP TYPE "public"."essay_status_enum_old"`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // down: 기존 데이터 복원 및 enum 타입 원래대로 복구
-    // 1. 변경된 enum 타입을 text 타입으로 임시 변환
+    // 다운 마이그레이션: 기존 데이터 복원 및 enum 타입 원래대로 복구
     await queryRunner.query(`ALTER TABLE "review_queue" ALTER COLUMN "type" TYPE text`);
     await queryRunner.query(`ALTER TABLE "processed_history" ALTER COLUMN "action_type" TYPE text`);
     await queryRunner.query(`ALTER TABLE "alert" ALTER COLUMN "type" TYPE text`);
+    await queryRunner.query(`ALTER TABLE "essay" ALTER COLUMN "status" TYPE text`);
 
-    // 2. 새 enum 타입을 임시 값 'temp_value'로 변경
     await queryRunner.query(
       `UPDATE "review_queue" SET "type" = 'temp_value' WHERE "type" = 'public'`,
     );
@@ -79,8 +98,8 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `UPDATE "processed_history" SET "action_type" = 'temp_value' WHERE "action_type" = 'public'`,
     );
     await queryRunner.query(`UPDATE "alert" SET "type" = 'temp_value' WHERE "type" = 'public'`);
+    await queryRunner.query(`UPDATE "essay" SET "status" = 'temp_value' WHERE "status" = 'public'`);
 
-    // 3. 이전 enum 타입으로 복구
     await queryRunner.query(
       `CREATE TYPE "public"."review_queue_type_enum_old" AS ENUM('linkedout', 'published', 'burial')`,
     );
@@ -114,7 +133,15 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `ALTER TYPE "public"."alert_type_enum_old" RENAME TO "alert_type_enum"`,
     );
 
-    // 4. 'temp_value' 값을 원래 값 'published'로 복원
+    await queryRunner.query(`CREATE TYPE "public"."essay_status_enum_old" AS ENUM('private')`);
+    await queryRunner.query(
+      `ALTER TABLE "essay" ALTER COLUMN "status" TYPE "public"."essay_status_enum_old" USING "status"::"text"::"public"."essay_status_enum_old"`,
+    );
+    await queryRunner.query(`DROP TYPE "public"."essay_status_enum"`);
+    await queryRunner.query(
+      `ALTER TYPE "public"."essay_status_enum_old" RENAME TO "essay_status_enum"`,
+    );
+
     await queryRunner.query(
       `UPDATE "review_queue" SET "type" = 'published' WHERE "type" = 'temp_value'`,
     );
@@ -122,5 +149,8 @@ export class ChangePublicType1730304392337 implements MigrationInterface {
       `UPDATE "processed_history" SET "action_type" = 'published' WHERE "action_type" = 'temp_value'`,
     );
     await queryRunner.query(`UPDATE "alert" SET "type" = 'published' WHERE "type" = 'temp_value'`);
+    await queryRunner.query(
+      `UPDATE "essay" SET "status" = 'private' WHERE "status" = 'temp_value'`,
+    );
   }
 }
