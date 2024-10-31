@@ -1,3 +1,10 @@
+## [1.20.7](https://github.com/team-echoist/server/compare/v1.20.6...v1.20.7) (2024-10-31)
+
+
+### Bug Fixes
+
+* 스키마 강제동기화 및 함수 재정의 ([#471](https://github.com/team-echoist/server/issues/471)) ([e31d924](https://github.com/team-echoist/server/commit/e31d924f02b03c8617458959e3a241c3dd3f1944))
+
 ## [1.20.6](https://github.com/team-echoist/server/compare/v1.20.5...v1.20.6) (2024-10-31)
 
 
