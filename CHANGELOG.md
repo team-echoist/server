@@ -1,3 +1,10 @@
+## [1.20.4](https://github.com/team-echoist/server/compare/v1.20.3...v1.20.4) (2024-10-31)
+
+
+### Bug Fixes
+
+* 외않되진쨔재뱔한번마 ([#468](https://github.com/team-echoist/server/issues/468)) ([0239d16](https://github.com/team-echoist/server/commit/0239d167fa1554f74afbfe9d0218401b3a6933a2))
+
 ## [1.20.3](https://github.com/team-echoist/server/compare/v1.20.2...v1.20.3) (2024-10-31)
 
 
