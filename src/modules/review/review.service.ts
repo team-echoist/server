@@ -20,12 +20,12 @@ export class ReviewService {
 
   private mapEssayStatusToReviewQueueType(status: EssayStatus): ReviewQueueType | null {
     switch (status) {
-      case EssayStatus.PUBLISHED:
-        return ReviewQueueType.PUBLISHED;
+      case EssayStatus.PUBLISHED || EssayStatus.PUBLIC:
+        return ReviewQueueType.PUBLIC;
       case EssayStatus.LINKEDOUT:
         return ReviewQueueType.LINKEDOUT;
-      case EssayStatus.BURIED:
-        return ReviewQueueType.BURIED;
+      case EssayStatus.BURIAL:
+        return ReviewQueueType.BURIAL;
       default:
         return null;
     }

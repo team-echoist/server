@@ -36,7 +36,7 @@ export class CreateEssayReqDto {
   @IsOptional()
   thumbnail?: string;
 
-  @ApiProperty({ type: 'enum', description: 'private, published, linkedout, bury' })
+  @ApiProperty({ type: 'enum', description: 'private, public, linkedout, burial' })
   @IsEnum(EssayStatus)
   @IsOptional()
   status?: EssayStatus;
