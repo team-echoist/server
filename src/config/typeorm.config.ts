@@ -16,7 +16,7 @@ export const TypeormConfig: TypeOrmModuleAsyncOptions = {
     autoLoadEntities: true,
     timezone: 'Asia/Seoul',
     dropSchema: false,
-    synchronize: false,
+    synchronize: true,
     migrationsRun: true,
     entities: [path.join(__dirname + '/../entities/*.entity.ts')],
     migrations: [path.join(__dirname + '/../migrations/**/*.{js,ts}')],
