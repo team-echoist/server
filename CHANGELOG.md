@@ -1,3 +1,10 @@
+## [1.20.5](https://github.com/team-echoist/server/compare/v1.20.4...v1.20.5) (2024-10-31)
+
+
+### Bug Fixes
+
+* 마이그레이션찐막 ([#469](https://github.com/team-echoist/server/issues/469)) ([1f822ec](https://github.com/team-echoist/server/commit/1f822ec06c51da61590c80d687da0601d22120e2))
+
 ## [1.20.4](https://github.com/team-echoist/server/compare/v1.20.3...v1.20.4) (2024-10-31)
 
 
