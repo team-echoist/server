@@ -1,3 +1,10 @@
+## [1.20.13](https://github.com/team-echoist/server/compare/v1.20.12...v1.20.13) (2024-11-01)
+
+
+### Bug Fixes
+
+* 스토리생성, 수정에 사용하는 에세이리스트 응답구조에 현재 스토리 이름 추가 ([#478](https://github.com/team-echoist/server/issues/478)) ([a8fbfef](https://github.com/team-echoist/server/commit/a8fbfefac2d1e703a8de42beef339dd4f1b37f72))
+
 ## [1.20.12](https://github.com/team-echoist/server/compare/v1.20.11...v1.20.12) (2024-11-01)
 
 
