@@ -195,7 +195,10 @@ export class StoryController {
   @ApiOperation({
     summary: '스토리 생성 또는 수정시 사용될 에세이 리스트',
     description: `
-  본인이 작성한 에세이 중 특정 스토리에 속하거나 스토리가 없는 에세이 목록을 조회합니다.
+  스토리생성(storyId 없음): 스토리가 없는 에세이(linkedout및 burial제외)
+  스토리수정(storyId 있음): 스토리가 없는 에세이(linkedout및 burial제외) + \`storyId\` || \`null\`
+  
+  응답 본문 \`essays\`객체의 필드중 \`storyId\`는 식별을 위하기보단, 현재 수정중인 스토리에 포함 여부를 판단하기 위해 추가되었습니다.
   
   **쿼리 파라미터:**
   - \`storyId\` (number, optional): 조회할 스토리의 고유 ID
