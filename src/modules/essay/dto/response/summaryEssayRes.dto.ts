@@ -18,7 +18,7 @@ export class SummaryEssayResDto {
   @ApiProperty()
   @IsEnum(EssayStatus)
   @Expose()
-  status?: EssayStatus;
+  status: EssayStatus;
 
   @ApiProperty()
   @IsString()
