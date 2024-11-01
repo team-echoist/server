@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseEnumPipe,
   ParseIntPipe,
   Post,
   Put,
@@ -32,6 +31,7 @@ import { SentenceEssaysResDto } from './dto/response/sentenceEssaysRes.dto';
 import { EssayWithAnotherEssayResDto } from './dto/response/essayWithAnotherEssayRes.dto';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { PageType } from '../../common/types/enum.types';
+import { PageTypeEnumPipe } from '../../common/pipes/PageTypeEnum.pipe';
 
 @ApiTags('Essay')
 @UseGuards(JwtAuthGuard)
@@ -133,7 +133,7 @@ export class EssayController {
     @Req() req: ExpressRequest,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
-    @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('pageType', PageTypeEnumPipe) pageType: PageType,
     @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
     return this.essayService.getMyEssays(req.user.id, pageType, page, limit, storyId);
@@ -370,11 +370,6 @@ export class EssayController {
   - 응답에는 제목 또는 본문에 키워드가 포함된 에세이만 포함됩니다.
   `,
   })
-  @ApiQuery({
-    name: 'pageType',
-    required: false,
-    description: '임시로 타입검사를 제외중입니다. 추후엔 열겨형타입검증이 적용됩니다.',
-  })
   @ApiQuery({ name: 'keyword', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -383,9 +378,7 @@ export class EssayController {
     type: SummaryEssaysResDto,
   })
   async searchEssays(
-    // todo 다음 안드로이드 릴리즈까지 한시적 허용
-    // @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
-    @Query('pageType') pageType: string,
+    @Query('pageType', PageTypeEnumPipe) pageType: PageType,
     @Query('keyword') keyword: string,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
@@ -431,7 +424,7 @@ export class EssayController {
   async getEssay(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
-    @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('pageType', PageTypeEnumPipe) pageType: PageType,
     @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
     return this.essayService.getEssay(req, essayId, pageType, storyId);
@@ -474,7 +467,7 @@ export class EssayController {
   async getNextEssay(
     @Req() req: ExpressRequest,
     @Param('essayId', ParseIntPipe) essayId: number,
-    @Query('pageType', new ParseEnumPipe(PageType)) pageType: PageType,
+    @Query('pageType', PageTypeEnumPipe) pageType: PageType,
     @Query('storyId', OptionalParseIntPipe) storyId?: number,
   ) {
     return this.essayService.getNextEssay(req, essayId, pageType, storyId);

@@ -8,7 +8,6 @@ import { ReportQueue } from '../../entities/reportQueue.entity';
 import { EssayStatus, PageType } from '../../common/types/enum.types';
 import { Aggregate } from '../../entities/aggregate.entity';
 import { SyncStatus } from '../../entities/sysncStatus.entity';
-import { CoordinateReqDto } from '../burial/dto/request/coordinateReq.dto';
 
 export class EssayRepository {
   constructor(
@@ -117,9 +116,10 @@ export class EssayRepository {
     }
 
     if (pageType === PageType.PUBLIC) {
-      queryBuilder
-        .andWhere('essay.status = :publishedStatus', { status: EssayStatus.PUBLISHED })
-        .orWhere('essay.status = :publicStatus', { status: EssayStatus.PUBLIC });
+      queryBuilder.andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
+        publishedStatus: EssayStatus.PUBLISHED,
+        publicStatus: EssayStatus.PUBLIC,
+      });
     } else if (pageType === PageType.PRIVATE) {
       queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
     }
@@ -134,7 +134,7 @@ export class EssayRepository {
     const [essays, total] = await this.essayRepository
       .createQueryBuilder('essay')
       .where(`essay.id IN (${subQuery.getQuery()})`)
-      .setParameters(subQuery.getParameters()) // 파라미터 설정
+      .setParameters(subQuery.getParameters())
       .leftJoinAndSelect('essay.author', 'author')
       .leftJoinAndSelect('essay.story', 'story')
       .leftJoinAndSelect('essay.tags', 'tags')
@@ -256,8 +256,10 @@ export class EssayRepository {
       .createQueryBuilder('essay')
       .leftJoin('essay.author', 'author')
       .where('essay.author.id IN (:...followingIds)', { followingIds })
-      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
-      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
+      .andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
+        publishedStatus: EssayStatus.PUBLISHED,
+        publicStatus: EssayStatus.PUBLIC,
+      })
       .getCount();
 
     const subQueryBuilder = this.essayRepository
@@ -265,8 +267,10 @@ export class EssayRepository {
       .select('essay.id')
       .leftJoin('essay.author', 'author')
       .where('essay.author.id IN (:...followingIds)', { followingIds })
-      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
-      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
+      .andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
+        publishedStatus: EssayStatus.PUBLISHED,
+        publicStatus: EssayStatus.PUBLIC,
+      })
       .orderBy('essay.createdDate', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit);
@@ -300,8 +304,10 @@ export class EssayRepository {
     return await this.essayRepository
       .createQueryBuilder('essay')
       .where('essay.author.id = :authorId', { authorId })
-      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
-      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
+      .andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
+        publishedStatus: EssayStatus.PUBLISHED,
+        publicStatus: EssayStatus.PUBLIC,
+      })
       .andWhere('essay.created_date < :createdDate', { createdDate })
       .orderBy('essay.created_date', 'DESC')
       .limit(6)
@@ -331,8 +337,10 @@ export class EssayRepository {
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
       .andWhere('essay.author.id = :authorId', { authorId })
-      .andWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLISHED })
-      .orWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLIC })
+      .andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
+        publishedStatus: EssayStatus.PUBLISHED,
+        publicStatus: EssayStatus.PUBLIC,
+      })
       .andWhere('essay.id > :currentEssayId', { currentEssayId })
       .orderBy('essay.created_date', 'ASC')
       .getOne();
@@ -722,8 +730,10 @@ export class EssayRepository {
       .update(Essay)
       .set({ status: EssayStatus.PRIVATE })
       .where('author_id IN (:...userIds)', { userIds })
-      .andWhere('status = :publicStatus', { publicStatus: EssayStatus.PUBLISHED })
-      .orWhere('status = :publishedStatus', { publishedStatus: EssayStatus.PUBLIC })
+      .andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
+        publishedStatus: EssayStatus.PUBLISHED,
+        publicStatus: EssayStatus.PUBLIC,
+      })
       .execute();
   }
 

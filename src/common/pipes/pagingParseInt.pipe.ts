@@ -8,7 +8,7 @@ export class PagingParseIntPipe implements PipeTransform<string, number | undefi
 
     const val = parseInt(value, 10);
     if (isNaN(val)) {
-      throw new BadRequestException('Validation failed');
+      throw new BadRequestException('페이징 데이터 검증 실패');
     }
     return val;
   }
