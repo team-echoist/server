@@ -535,7 +535,7 @@ export class EssayRepository {
     }
 
     queryBuilder
-      .select(['essay.id', 'essay.title', 'essay.createdDate', 'story.id'])
+      .select(['essay.id', 'essay.title', 'essay.createdDate', 'story.id', 'story.name'])
       .offset((page - 1) * limit)
       .limit(limit)
       .orderBy('essay.createdDate', 'DESC');

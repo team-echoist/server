@@ -142,6 +142,10 @@ export class StoryService {
 
     const essaysDto = this.utilsService.transformToDto(StoryUpdateEssayResDto, transformedEssays);
 
-    return { essays: essaysDto, totalPage, page, total };
+    const storyWithStory = essays.find((essay) => essay.story);
+
+    const currentStoryName = storyWithStory ? storyWithStory.story.name : null;
+
+    return { essays: essaysDto, totalPage, page, total, currentStoryName };
   }
 }
