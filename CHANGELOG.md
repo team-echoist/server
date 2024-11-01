@@ -1,3 +1,10 @@
+## [1.20.12](https://github.com/team-echoist/server/compare/v1.20.11...v1.20.12) (2024-11-01)
+
+
+### Bug Fixes
+
+* 스토리생성, 수정에 사용하는 에세이리스트 조회 api의 쿼리 수정 ([#477](https://github.com/team-echoist/server/issues/477)) ([a6d5e7a](https://github.com/team-echoist/server/commit/a6d5e7a7b08242049228db09fdedcac6390bd917))
+
 ## [1.20.11](https://github.com/team-echoist/server/compare/v1.20.10...v1.20.11) (2024-11-01)
 
 
