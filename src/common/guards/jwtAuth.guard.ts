@@ -69,6 +69,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     const refreshToken = headers['x-refresh-token'];
 
     if (!refreshToken) throw new HttpException('missing x-refresh-token', HttpStatus.UNAUTHORIZED);
+    await this.isTokenExpired(refreshToken);
 
     const passKey = `recentToken:${refreshToken}`;
     const refreshLockKey = `refreshLockKey:${refreshToken}`;
@@ -180,5 +181,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       storedDevice.type === currentDevice.type &&
       storedDevice.model === currentDevice.model
     );
+  }
+
+  private async isTokenExpired(token: string) {
+    const decoded = this.jwtService.decode(token) as { exp: number } | null;
+    if (!decoded || !decoded.exp)
+      throw new HttpException('로그인이 만료되었습니다.', HttpStatus.BAD_REQUEST);
+
+    const currentTime = Date.now() / 1000;
+
+    if (decoded.exp < currentTime)
+      throw new HttpException('로그인이 만료되었습니다.', HttpStatus.BAD_REQUEST);
+
+    return true;
   }
 }

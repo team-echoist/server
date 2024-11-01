@@ -12,7 +12,7 @@ export class OptionalBoolPipe implements PipeTransform<string, boolean | undefin
     if (value === 'true') {
       return true;
     } else {
-      throw new BadRequestException(`Invalid boolean value for ${metadata.data}`);
+      throw new BadRequestException(`${metadata.data}에 대한 부울 값이 잘못되었습니다.`);
     }
   }
 }
