@@ -1,3 +1,10 @@
+## [1.20.11](https://github.com/team-echoist/server/compare/v1.20.10...v1.20.11) (2024-11-01)
+
+
+### Bug Fixes
+
+* PageType Enum 유효성 검사 업데이트 및 RT만료 분기 추가 ([#476](https://github.com/team-echoist/server/issues/476)) ([371a030](https://github.com/team-echoist/server/commit/371a030dbd75efb6859a160c28934cdd3567f9bb))
+
 ## [1.20.10](https://github.com/team-echoist/server/compare/v1.20.9...v1.20.10) (2024-10-31)
 
 
