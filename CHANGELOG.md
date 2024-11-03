@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/team-echoist/server/compare/v1.20.13...v1.21.0) (2024-11-03)
+
+
+### Features
+
+* 스토리 에세이 리스트 조회 신규 경로 추가 ([#479](https://github.com/team-echoist/server/issues/479)) ([ae7de03](https://github.com/team-echoist/server/commit/ae7de0367e92db3b5914181403f837226d5f3c18))
+
 ## [1.20.13](https://github.com/team-echoist/server/compare/v1.20.12...v1.20.13) (2024-11-01)
 
 
