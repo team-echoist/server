@@ -148,4 +148,11 @@ export class StoryService {
 
     return { essays: essaysDto, totalPage, page, total, currentStoryName };
   }
+
+  async getStoryEssays(userId: number, storyId: number, page: number, limit: number) {
+    const storyOwner = await this.storyRepository.findStoryById(userId, storyId);
+    const isOwner = !!storyOwner;
+
+    return await this.essayService.getStoryEssays(storyId, page, limit, isOwner);
+  }
 }

@@ -797,4 +797,27 @@ export class EssayRepository {
       )
       .getMany();
   }
+
+  async findStoryEssays(storyId: number, page: number, limit: number, isOwner: boolean) {
+    const queryBuilder = this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.story', 'story')
+      .where('essay.story_id = :storyId', { storyId });
+
+    if (isOwner) {
+      queryBuilder.andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PRIVATE, EssayStatus.PUBLIC, EssayStatus.PUBLISHED],
+      });
+    } else {
+      queryBuilder.andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PUBLIC, EssayStatus.PUBLISHED],
+      });
+    }
+
+    queryBuilder.skip((page - 1) * limit).take(limit);
+
+    const [essays, total] = await queryBuilder.getManyAndCount();
+    return { essays, total };
+  }
 }

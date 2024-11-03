@@ -774,4 +774,23 @@ export class EssayService {
       limit,
     );
   }
+
+  @Transactional()
+  async getStoryEssays(storyId: number, page: number, limit: number, isOwner: boolean) {
+    const { essays, total } = await this.essayRepository.findStoryEssays(
+      storyId,
+      page,
+      limit,
+      isOwner,
+    );
+
+    const totalPage: number = Math.ceil(total / limit);
+
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractPartContent(essay.content);
+    });
+    const essayDtos = this.utilsService.transformToDto(SummaryEssayResDto, essays);
+
+    return { essays: essayDtos, total, totalPage, page };
+  }
 }

@@ -22,6 +22,7 @@ import { OptionalParseIntPipe } from '../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { StoryDto } from './dto/story.dto';
+import { SummaryEssaysResDto } from '../essay/dto/response/SummaryEssaysRes.dto';
 
 @ApiTags('Story')
 @Controller('stories')
@@ -248,5 +249,39 @@ export class StoryController {
   @ApiResponse({ status: 200, type: StoriesResDto })
   async getUserStories(@Param('userId', ParseIntPipe) userId: number) {
     return this.storyService.getStories(userId);
+  }
+
+  @Get(':storyId/essays')
+  @ApiOperation({
+    summary: '스토리에 포함된 에세이 리스트',
+    description: `
+  제공된 스토리 ID에 포함된 에세이 목록을 조회합니다.
+
+  **경로 파라미터:**
+  - \`storyId\`: 에세이 리스트를 조회할 대상 스토리의 ID.
+
+  **쿼리 파라미터:**
+  - \`page\` (옵션): 페이지 번호 (기본값: 1).
+  - \`limit\` (옵션): 한 페이지당 표시할 에세이 개수 (기본값: 10).
+
+  **동작 과정:**
+  1. 스토리의 소유 여부를 판단하여 에세이의 공개 범위를 결정합니다.
+  - 소유자인 경우: private 및 public 상태의 에세이 모두 반환.
+  - 소유자가 아닌 경우: public 상태의 에세이만 반환.
+  2. 페이징 처리를 통해 요청된 페이지와 제한 개수에 맞는 에세이 목록을 반환합니다.
+
+  **주의 사항:**
+  - 요청자의 사용자 ID와 일치하는 경우, private 에세이도 포함됩니다.
+  - 올바른 스토리 ID와 페이지, 제한 개수를 전달해야 합니다.
+  `,
+  })
+  @ApiResponse({ status: 200, type: SummaryEssaysResDto })
+  async getStoryEssays(
+    @Req() req: ExpressRequest,
+    @Param('storyId', ParseIntPipe) storyId: number,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.storyService.getStoryEssays(req.user.id, storyId, page, limit);
   }
 }
