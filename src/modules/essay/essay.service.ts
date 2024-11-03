@@ -350,73 +350,82 @@ export class EssayService {
     }
   }
 
-  private async updateEssayAggregateData(essay: Essay) {
+  async updateEssayAggregateData(essay: Essay) {
     const lockKey = `lock:aggregate:${essay.id}`;
+    const lock = await this.acquireLock(lockKey);
+
+    if (lock) {
+      try {
+        const newTrendScore = await this.calculateTrendScore(essay);
+        const aggregate = await this.updateAggregateData(essay, newTrendScore);
+
+        await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(aggregate), 'EX', 300);
+      } finally {
+        await this.redis.del(lockKey);
+      }
+    } else {
+      console.log(`락 획득 실패: ${essay.id}`);
+    }
+  }
+
+  async acquireLock(lockKey: string): Promise<string | null> {
     const lockTimeout = 30;
     const maxAttempts = 5;
     const baseRetryDelay = 10;
-
     let lock: string | null = null;
     let attempts = 0;
 
     while (!lock && attempts < maxAttempts) {
       lock = await this.redis.set(lockKey, 'locked', 'PX', lockTimeout, 'NX');
-
       if (!lock) {
         attempts++;
         const retryDelay = baseRetryDelay * Math.pow(2, attempts);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
+    return lock;
+  }
 
-    if (lock) {
-      try {
-        const viewThreshold = 100;
-        const incrementAmount = 1;
-        const decayFactor = 0.995;
+  async calculateTrendScore(essay: Essay) {
+    const incrementAmount = 1;
+    const decayFactor = 0.995;
+    const currentDate = new Date();
+    const createdDate = essay.createdDate;
+    const daysSinceCreation =
+      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
 
-        const currentDate = new Date();
-        const createdDate = essay.createdDate;
-        const daysSinceCreation =
-          (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
-
-        let newTrendScore = essay.trendScore;
-
-        if (daysSinceCreation <= 7) {
-          newTrendScore += incrementAmount;
-        } else {
-          const daysSinceDecay = daysSinceCreation - 7;
-          newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
-          newTrendScore = Math.floor(newTrendScore);
-          newTrendScore += incrementAmount;
-        }
-
-        const increaseReputation = essay.views > 0 && (essay.views + 1) % viewThreshold === 0;
-
-        let aggregate = await this.findAggregate(essay.id);
-        if (aggregate === null) {
-          aggregate = new Aggregate();
-          aggregate.essayId = essay.id;
-          aggregate.userId = essay.author.id;
-          aggregate.totalViews = 0;
-          aggregate.reputationScore = 0;
-          aggregate.trendScore = 0;
-        }
-        aggregate.totalViews += (aggregate.totalViews ?? 0) + 1;
-        aggregate.trendScore = newTrendScore;
-        aggregate.reputationScore = increaseReputation
-          ? (aggregate.reputationScore ?? 0) + 1
-          : (aggregate.reputationScore ?? 0);
-
-        const savedAggregate = await this.essayRepository.saveAggregate(aggregate);
-
-        await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(savedAggregate), 'EX', 300);
-      } finally {
-        await this.redis.del(lockKey);
-      }
+    let newTrendScore = essay.trendScore;
+    if (daysSinceCreation <= 7) {
+      newTrendScore += incrementAmount;
     } else {
-      console.log(`${maxAttempts}번 시도 후 ${essay.id} 에세이에 대한 락을 획득하지 못했습니다.`);
+      const daysSinceDecay = daysSinceCreation - 7;
+      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
+      newTrendScore = Math.floor(newTrendScore) + incrementAmount;
     }
+    return newTrendScore;
+  }
+
+  async updateAggregateData(essay: Essay, newTrendScore: number): Promise<Aggregate> {
+    const viewThreshold = 100;
+    const increaseReputation = essay.views > 0 && (essay.views + 1) % viewThreshold === 0;
+
+    let aggregate = await this.findAggregate(essay.id);
+    if (aggregate === null) {
+      aggregate = new Aggregate();
+      aggregate.essayId = essay.id;
+      aggregate.userId = essay.author.id;
+      aggregate.totalViews = 0;
+      aggregate.reputationScore = 0;
+      aggregate.trendScore = 0;
+    }
+
+    aggregate.totalViews += (aggregate.totalViews ?? 0) + 1;
+    aggregate.trendScore = newTrendScore;
+    aggregate.reputationScore = increaseReputation
+      ? (aggregate.reputationScore ?? 0) + 1
+      : (aggregate.reputationScore ?? 0);
+
+    return this.essayRepository.saveAggregate(aggregate);
   }
 
   private async findAggregate(essayId: number) {
@@ -431,7 +440,7 @@ export class EssayService {
     return aggregate ? aggregate : null;
   }
 
-  private async alertFirstView(essay: Essay) {
+  async alertFirstView(essay: Essay) {
     await this.alertService.createAlertFirstView(essay);
     await this.alertService.sendPushAlertFirstView(essay);
   }
@@ -764,5 +773,24 @@ export class EssayService {
       offset,
       limit,
     );
+  }
+
+  @Transactional()
+  async getStoryEssays(storyId: number, page: number, limit: number, isOwner: boolean) {
+    const { essays, total } = await this.essayRepository.findStoryEssays(
+      storyId,
+      page,
+      limit,
+      isOwner,
+    );
+
+    const totalPage: number = Math.ceil(total / limit);
+
+    essays.forEach((essay) => {
+      essay.content = this.utilsService.extractPartContent(essay.content);
+    });
+    const essayDtos = this.utilsService.transformToDto(SummaryEssayResDto, essays);
+
+    return { essays: essayDtos, total, totalPage, page };
   }
 }
