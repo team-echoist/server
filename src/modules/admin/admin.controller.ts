@@ -475,8 +475,11 @@ export class AdminInfoController {
     status: 200,
     type: AdminsResDto,
   })
-  async getInactiveAdmins() {
-    return this.adminService.getInactiveAdmins();
+  async getInactiveAdmins(
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+  ) {
+    return this.adminService.getInactiveAdmins(page, limit);
   }
 
   @Get('my')

@@ -195,7 +195,7 @@ export class AdminRepository {
     return this.adminRepository.findOne({ where: { name: name } });
   }
 
-  async findAdmins(activated: boolean, page?: number, limit?: number) {
+  async findAdmins(activated: boolean, page: number, limit: number) {
     const [admins, total] = await this.adminRepository.findAndCount({
       where: activated !== undefined ? { activated } : {},
       skip: (page - 1) * limit,

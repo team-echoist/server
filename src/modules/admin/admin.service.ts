@@ -756,8 +756,8 @@ export class AdminService {
     return;
   }
 
-  async getInactiveAdmins() {
-    const admins = await this.adminRepository.findAdmins(false);
+  async getInactiveAdmins(page: number, limit: number) {
+    const admins = await this.adminRepository.findAdmins(false, page, limit);
 
     const adminsDto = this.utilsService.transformToDto(AdminResDto, admins);
 

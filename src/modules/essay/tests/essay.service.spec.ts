@@ -459,4 +459,65 @@ describe('EssayService', () => {
       });
     });
   });
+
+  describe('handleNonAuthorView', () => {
+    const view = { id: 1 } as any;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      jest.spyOn(essayService, 'updateEssayAggregateData').mockResolvedValue();
+      jest.spyOn(essayService, 'alertFirstView').mockResolvedValue();
+    });
+
+    it('평판및점수핸들링: 비공개에세이', async () => {
+      essay.status = EssayStatus.PRIVATE;
+      await expect(essayService.handleNonAuthorView(user.id, essay)).rejects.toThrow(
+        new HttpException('잘못된 요청입니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('평판및점수핸들링: 최초조회', async () => {
+      viewService.findViewRecord.mockReturnValue(null);
+
+      await essayService.handleNonAuthorView(user.id, essay);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(viewService.addViewRecord).toHaveBeenCalled();
+      expect(essayService.updateEssayAggregateData).toHaveBeenCalledWith(essay);
+      expect(redis.get).toHaveBeenCalledWith(`firstViewAlert:${essay.id}`);
+      expect(redis.set).toHaveBeenCalledWith(`firstViewAlert:${essay.id}`, 'true', 'EX', 200);
+      expect(essayService.alertFirstView).toHaveBeenCalledWith(essay);
+    });
+
+    it('평판및점수핸들링: 중복조회', async () => {
+      viewService.findViewRecord.mockReturnValue(view);
+
+      expect(viewService.addViewRecord).not.toHaveBeenCalled();
+      expect(userService.fetchUserEntityById).not.toHaveBeenCalled();
+      expect(essayService.updateEssayAggregateData).not.toHaveBeenCalled();
+      expect(essayService.alertFirstView).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateEssayAggregateData', () => {
+    let lockKey: any;
+    beforeEach(() => {
+      lockKey = `lock:aggregate:${essay.id}`;
+    });
+
+    it('락 획득', async () => {
+      jest.spyOn(essayService, 'acquireLock').mockResolvedValue('true');
+      jest.spyOn(essayService, 'calculateTrendScore').mockResolvedValue(1);
+      jest.spyOn(essayService, 'updateAggregateData').mockResolvedValue({ id: 1 } as any);
+
+      await essayService.updateEssayAggregateData(essay);
+
+      expect(essayService.acquireLock).toHaveBeenCalledWith(lockKey);
+      expect(essayService.calculateTrendScore).toHaveBeenCalledWith(essay);
+      expect(essayService.updateAggregateData).toHaveBeenCalledWith(essay, 1);
+      expect(redis.set).toHaveBeenCalledWith(`aggregate:${essay.id}`, '{"id":1}', 'EX', 300);
+      expect(redis.del).toHaveBeenCalledWith(lockKey);
+    });
+  });
 });
