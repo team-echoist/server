@@ -95,13 +95,7 @@ export class EssayRepository {
     return await this.essayRepository.save(essayData);
   }
 
-  async findEssays(
-    userId: number,
-    pageType: PageType,
-    page: number,
-    limit: number,
-    storyId?: number,
-  ) {
+  async findEssays(userId: number, pageType: PageType, page: number, limit: number) {
     const queryBuilder = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
@@ -111,34 +105,20 @@ export class EssayRepository {
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
       .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL });
 
-    if (storyId !== undefined) {
-      queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
-    }
-
     if (pageType === PageType.PUBLIC) {
-      queryBuilder.andWhere('(essay.status = :publishedStatus OR essay.status = :publicStatus)', {
-        publishedStatus: EssayStatus.PUBLISHED,
-        publicStatus: EssayStatus.PUBLIC,
+      queryBuilder.andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PUBLISHED, EssayStatus.PUBLIC],
       });
     } else if (pageType === PageType.PRIVATE) {
-      queryBuilder.andWhere('essay.status = :status', { status: EssayStatus.PRIVATE });
+      queryBuilder.andWhere('essay.status = :status', {
+        status: EssayStatus.PRIVATE,
+      });
     }
 
-    const subQuery = queryBuilder
-      .clone()
-      .select('essay.id')
+    const [essays, total] = await queryBuilder
       .orderBy('essay.createdDate', 'DESC')
       .skip((page - 1) * limit)
-      .take(limit);
-
-    const [essays, total] = await this.essayRepository
-      .createQueryBuilder('essay')
-      .where(`essay.id IN (${subQuery.getQuery()})`)
-      .setParameters(subQuery.getParameters())
-      .leftJoinAndSelect('essay.author', 'author')
-      .leftJoinAndSelect('essay.story', 'story')
-      .leftJoinAndSelect('essay.tags', 'tags')
-      .orderBy('essay.createdDate', 'DESC')
+      .take(limit)
       .getManyAndCount();
 
     return { essays, total };

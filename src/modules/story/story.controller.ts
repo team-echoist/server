@@ -253,7 +253,7 @@ export class StoryController {
 
   @Get(':storyId/essays')
   @ApiOperation({
-    summary: '스토리에 포함된 에세이 리스트',
+    summary: '[삭제예정] 스토리에 포함된 에세이 리스트',
     description: `
   제공된 스토리 ID에 포함된 에세이 목록을 조회합니다.
 

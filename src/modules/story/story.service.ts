@@ -150,9 +150,16 @@ export class StoryService {
   }
 
   async getStoryEssays(userId: number, storyId: number, page: number, limit: number) {
-    const storyOwner = await this.storyRepository.findStoryById(userId, storyId);
+    const storyOwner = await this.getStoryOwner(userId, storyId);
     const isOwner = !!storyOwner;
 
     return await this.essayService.getStoryEssays(storyId, page, limit, isOwner);
+  }
+
+  async getStoryOwner(userId: number, storyId: number) {
+    const isOwner = await this.storyRepository.findStoryById(userId, storyId);
+    if (!isOwner) throw new HttpException('조회 권한이 없습니다.', HttpStatus.BAD_REQUEST);
+
+    return !!isOwner;
   }
 }
