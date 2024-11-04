@@ -196,15 +196,15 @@ export class EssayService {
     pageType: PageType,
     page: number,
     limit: number,
-    storyId?: number,
+    storyId: number,
   ) {
-    const { essays, total } = await this.essayRepository.findEssays(
-      userId,
-      pageType,
-      page,
-      limit,
-      storyId,
-    );
+    let { essays, total } =
+      pageType === PageType.STORY &&
+      storyId !== undefined &&
+      (await this.storyService.getStoryOwner(userId, storyId))
+        ? await this.essayRepository.findStoryEssays(storyId, page, limit, true)
+        : await this.essayRepository.findEssays(userId, pageType, page, limit);
+
     const totalPage: number = Math.ceil(total / limit);
 
     essays.forEach((essay) => {

@@ -117,8 +117,8 @@ export class EssayController {
   **쿼리 파라미터:**
   - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
   - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 10입니다.
-  - \`pageType\`: '나만의 글'에선 'private', '발행한 글'에선 'public' 를 사용합니다.
-  - \`삭제예정\` \`storyId\`: (number, optional): 특정 스토리에 속한 에세이만 조회
+  - \`pageType\`: '나만의 글'에선 'private', '발행한 글'에선 'public' 를 사용합니다. 'story'인 경우 자신의 에세이인지 검증합니다.
+  - \`storyId\`: (number, optional): \`pageType.STORY\`인 경우 제공.
 
   **동작 과정:**
   1. 사용자가 작성한 에세이를 조회합니다.
@@ -134,7 +134,7 @@ export class EssayController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
     @Query('pageType', PageTypeEnumPipe) pageType: PageType,
-    @Query('storyId', OptionalParseIntPipe) storyId?: number,
+    @Query('storyId', OptionalParseIntPipe) storyId: number,
   ) {
     return this.essayService.getMyEssays(req.user.id, pageType, page, limit, storyId);
   }
@@ -146,15 +146,15 @@ export class EssayController {
   특정 사용자가 작성한 에세이 목록을 조회합니다.
 
   **쿼리 파라미터:**
-  - \`삭제예정\`\`storyId\`: 특정 스토리에 속한 에세이만 조회 (선택 사항)
+  - \`storyId\`: 특정 스토리에 속한 에세이만 조회 (선택 사항)
   - \`page\`: 페이지 번호 (기본값: 1)
   - \`limit\`: 한 페이지에 조회할 에세이 수 (기본값: 10)
 
   **동작 과정:**
   1. 주어진 사용자 ID를 기반으로 해당 사용자가 작성한 에세이를 조회합니다.
   2. 조회된 에세이에서 상태가 'LINKEDOUT' 또는 'PRIVATE'인 에세이는 제외합니다.
-  3. \`삭제예정\` 스토리 ID가 제공된 경우, 해당 스토리에 속한 에세이만 필터링합니다.
-  4. \`삭제예정\` 스토리 ID가 제공되지 않은 경우, 모든 스토리와 상관없이 퍼블릭 에세이를 조회합니다.
+  3. 스토리 ID가 제공된 경우, 해당 스토리에 속한 에세이만 필터링합니다.
+  4. 스토리 ID가 제공되지 않은 경우, 모든 스토리와 상관없이 퍼블릭 에세이를 조회합니다.
   5. 페이지네이션을 적용하여 에세이 목록을 반환합니다.
 
   **주의 사항:**

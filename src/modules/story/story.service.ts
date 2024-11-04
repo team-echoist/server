@@ -150,9 +150,14 @@ export class StoryService {
   }
 
   async getStoryEssays(userId: number, storyId: number, page: number, limit: number) {
-    const storyOwner = await this.storyRepository.findStoryById(userId, storyId);
+    const storyOwner = await this.getStoryOwner(userId, storyId);
     const isOwner = !!storyOwner;
 
     return await this.essayService.getStoryEssays(storyId, page, limit, isOwner);
+  }
+
+  async getStoryOwner(userId: number, storyId: number) {
+    const isOwner = await this.storyRepository.findStoryById(userId, storyId);
+    return !!isOwner;
   }
 }

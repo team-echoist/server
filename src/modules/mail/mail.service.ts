@@ -27,9 +27,9 @@ export class MailService {
     html = html.replace(/{{title}}/g, title);
     html = html.replace(/{{message}}/g, message);
 
-    if (options.startsWith('http://') || options.startsWith('https://')) {
+    if (options && (options.startsWith('http://') || options.startsWith('https://'))) {
       html = html.replace(/{{verificationUrl}}/g, options);
-    } else {
+    } else if (options) {
       html = html.replace(/{{sixDigit}}/g, options);
     }
     return html;
