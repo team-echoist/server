@@ -158,6 +158,8 @@ export class StoryService {
 
   async getStoryOwner(userId: number, storyId: number) {
     const isOwner = await this.storyRepository.findStoryById(userId, storyId);
+    if (!isOwner) throw new HttpException('조회 권한이 없습니다.', HttpStatus.BAD_REQUEST);
+
     return !!isOwner;
   }
 }

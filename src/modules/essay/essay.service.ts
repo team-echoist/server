@@ -199,9 +199,9 @@ export class EssayService {
     storyId: number,
   ) {
     let { essays, total } =
-      pageType === PageType.STORY &&
-      storyId !== undefined &&
-      (await this.storyService.getStoryOwner(userId, storyId))
+      // todo 안드로이드 다음 릴리즈 적용시 해제
+      // pageType === PageType.STORY &&
+      storyId !== undefined && (await this.storyService.getStoryOwner(userId, storyId))
         ? await this.essayRepository.findStoryEssays(storyId, page, limit, true)
         : await this.essayRepository.findEssays(userId, pageType, page, limit);
 
