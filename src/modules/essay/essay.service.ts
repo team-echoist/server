@@ -196,7 +196,7 @@ export class EssayService {
     pageType: PageType,
     page: number,
     limit: number,
-    storyId: number,
+    storyId?: number,
   ) {
     let { essays, total } =
       // todo 안드로이드 다음 릴리즈 적용시 해제
@@ -207,12 +207,16 @@ export class EssayService {
 
     const totalPage: number = Math.ceil(total / limit);
 
+    let currentStoryName: string;
+    if (storyId !== undefined)
+      currentStoryName = await this.utilsService.findStoryNameInEssays(essays);
+
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(SummaryEssayResDto, essays);
 
-    return { essays: essayDtos, total, totalPage, page };
+    return { essays: essayDtos, total, totalPage, page, currentStoryName };
   }
 
   async getTargetUserEssays(userId: number, storyId: number, page: number, limit: number) {
@@ -361,15 +365,17 @@ export class EssayService {
 
         await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(aggregate), 'EX', 300);
       } finally {
-        await this.redis.del(lockKey);
+        if (lock) {
+          await this.redis.del(lockKey);
+        }
       }
     } else {
-      console.log(`락 획득 실패: ${essay.id}`);
+      throw new HttpException(`락 획득 실패: ${essay.id}`, HttpStatus.TOO_MANY_REQUESTS);
     }
   }
 
-  async acquireLock(lockKey: string): Promise<string | null> {
-    const lockTimeout = 30;
+  async acquireLock(lockKey: string) {
+    const lockTimeout = 100;
     const maxAttempts = 5;
     const baseRetryDelay = 10;
     let lock: string | null = null;
@@ -383,7 +389,7 @@ export class EssayService {
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
-    return lock;
+    return !!lock;
   }
 
   async calculateTrendScore(essay: Essay) {

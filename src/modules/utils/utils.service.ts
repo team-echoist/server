@@ -4,6 +4,7 @@ import * as moment from 'moment-timezone';
 import * as sanitizeHtml from 'sanitize-html';
 
 import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { Essay } from '../../entities/essay.entity';
 
 @Injectable()
 export class UtilsService {
@@ -280,5 +281,11 @@ export class UtilsService {
 
   coordinatesToGeometry(latitude: number, longitude: number): string {
     return `ST_SetSRID(ST_GeomFromText('POINT(${longitude} ${latitude})'), 4326)`;
+  }
+
+  async findStoryNameInEssays(essays: Essay[]) {
+    const storyWithStory = essays.find((essay) => essay.story);
+
+    return storyWithStory ? storyWithStory.story.name : null;
   }
 }

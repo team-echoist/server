@@ -18,4 +18,8 @@ export class SummaryEssaysResDto {
   @ApiProperty()
   @Expose()
   page: number;
+
+  @ApiProperty()
+  @Expose()
+  currentStoryName: string;
 }

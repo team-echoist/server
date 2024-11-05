@@ -321,13 +321,7 @@ describe('EssayService', () => {
 
       const result = await essayService.getMyEssays(user.id, PageType.PRIVATE, 1, 10);
 
-      expect(essayRepository.findEssays).toHaveBeenCalledWith(
-        user.id,
-        PageType.PRIVATE,
-        1,
-        10,
-        undefined,
-      );
+      expect(essayRepository.findEssays).toHaveBeenCalledWith(user.id, PageType.PRIVATE, 1, 10);
       expect(result).toEqual({ essays, total: 3, totalPage: 1, page: 1 });
     });
   });
@@ -507,7 +501,7 @@ describe('EssayService', () => {
     });
 
     it('락 획득', async () => {
-      jest.spyOn(essayService, 'acquireLock').mockResolvedValue('true');
+      jest.spyOn(essayService, 'acquireLock').mockResolvedValue(true);
       jest.spyOn(essayService, 'calculateTrendScore').mockResolvedValue(1);
       jest.spyOn(essayService, 'updateAggregateData').mockResolvedValue({ id: 1 } as any);
 
@@ -518,6 +512,14 @@ describe('EssayService', () => {
       expect(essayService.updateAggregateData).toHaveBeenCalledWith(essay, 1);
       expect(redis.set).toHaveBeenCalledWith(`aggregate:${essay.id}`, '{"id":1}', 'EX', 300);
       expect(redis.del).toHaveBeenCalledWith(lockKey);
+    });
+
+    it('락 획득 실패', async () => {
+      jest.spyOn(essayService, 'acquireLock').mockResolvedValue(false);
+
+      await expect(essayService.updateEssayAggregateData(essay)).rejects.toThrow(
+        new HttpException(`락 획득 실패: ${essay.id}`, HttpStatus.TOO_MANY_REQUESTS),
+      );
     });
   });
 });
