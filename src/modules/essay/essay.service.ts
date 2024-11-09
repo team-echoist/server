@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
@@ -360,7 +353,7 @@ export class EssayService {
 
     if (lock) {
       try {
-        const newTrendScore = await this.calculateTrendScore(essay);
+        const newTrendScore = await this.utilsService.calculateTrendScore(essay);
         const aggregate = await this.updateAggregateData(essay, newTrendScore);
 
         await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(aggregate), 'EX', 300);
@@ -390,25 +383,6 @@ export class EssayService {
       }
     }
     return !!lock;
-  }
-
-  async calculateTrendScore(essay: Essay) {
-    const incrementAmount = 1;
-    const decayFactor = 0.995;
-    const currentDate = new Date();
-    const createdDate = essay.createdDate;
-    const daysSinceCreation =
-      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
-
-    let newTrendScore = essay.trendScore;
-    if (daysSinceCreation <= 7) {
-      newTrendScore += incrementAmount;
-    } else {
-      const daysSinceDecay = daysSinceCreation - 7;
-      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
-      newTrendScore = Math.floor(newTrendScore) + incrementAmount;
-    }
-    return newTrendScore;
   }
 
   async updateAggregateData(essay: Essay, newTrendScore: number): Promise<Aggregate> {
@@ -481,6 +455,8 @@ export class EssayService {
         storyId,
         essay.createdDate,
       );
+    } else {
+      throw new HttpException('잘못된 요청입니다.', HttpStatus.BAD_REQUEST);
     }
 
     previousEssay.forEach((essay) => {
@@ -494,6 +470,9 @@ export class EssayService {
   @Transactional()
   async deleteEssay(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
+
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     await this.checkEssayPermissions(essay, userId);
 
     await this.essayRepository.deleteEssay(essay);
@@ -501,7 +480,7 @@ export class EssayService {
 
   @Transactional()
   async saveThumbnail(file: Express.Multer.File, essayId?: number) {
-    const fileName = await this.getFileName(essayId);
+    const fileName = await this.getFileNameByThumbnail(essayId);
     const newExt = file.originalname.split('.').pop();
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
@@ -512,7 +491,7 @@ export class EssayService {
   async deleteThumbnail(essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
     if (!essay.thumbnail) {
-      throw new NotFoundException('No thumbnail to delete');
+      throw new HttpException('삭제할 썸네일이 없습니다.', HttpStatus.NOT_FOUND);
     }
 
     const urlParts = essay.thumbnail.split('/').pop();
@@ -525,7 +504,7 @@ export class EssayService {
     return { message: 'Thumbnail deleted successfully' };
   }
 
-  private async getFileName(essayId?: number): Promise<string> {
+  async getFileNameByThumbnail(essayId?: number): Promise<string> {
     const uuid = this.utilsService.getUUID();
     if (!essayId) {
       return `images/${uuid}`;
@@ -564,6 +543,7 @@ export class EssayService {
       const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
       recentTags = recentTagObjects.map((tag) => tag.tagId);
     }
+
     return recentTags;
   }
 
@@ -605,23 +585,47 @@ export class EssayService {
   }
 
   async saveEssays(essays: Essay[]) {
-    return await this.essayRepository.saveEssays(essays);
+    return this.essayRepository.saveEssays(essays);
   }
 
   async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
-    const exEssayIds = story.essays.map((essay) => essay.id);
+    const exEssayIds = new Set(story.essays.map((essay) => essay.id));
+    const reqEssayIdsSet = new Set(reqEssayIds);
 
-    const addedEssayIds = reqEssayIds.filter((essayId) => !exEssayIds.includes(essayId));
-    const removedEssayIds = exEssayIds.filter((essayId) => !reqEssayIds.includes(essayId));
+    const addedEssayIds = reqEssayIds.filter((essayId) => !exEssayIds.has(essayId));
+    const removedEssayIds = Array.from(exEssayIds).filter(
+      (essayId) => !reqEssayIdsSet.has(essayId),
+    );
+
+    const operations = [];
 
     if (addedEssayIds.length > 0) {
-      await this.addEssaysStory(userId, addedEssayIds, story);
+      operations.push(this.addEssaysStory(userId, addedEssayIds, story));
     }
 
     if (removedEssayIds.length > 0) {
-      await this.deleteEssaysStory(userId, removedEssayIds);
+      operations.push(this.deleteEssaysStory(userId, removedEssayIds));
     }
+
+    await Promise.all(operations);
   }
+
+  // async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
+  //   const exEssayIds: number[] = story.essays.map((essay) => essay.id);
+  //
+  //   const addedEssayIds: number[] = reqEssayIds.filter((essayId) => !exEssayIds.includes(essayId));
+  //   const removedEssayIds: number[] = exEssayIds.filter(
+  //     (essayId) => !reqEssayIds.includes(essayId),
+  //   );
+  //
+  //   if (addedEssayIds.length > 0) {
+  //     await this.addEssaysStory(userId, addedEssayIds, story);
+  //   }
+  //
+  //   if (removedEssayIds.length > 0) {
+  //     await this.deleteEssaysStory(userId, removedEssayIds);
+  //   }
+  // }
 
   async addEssaysStory(userId: number, essayIds: number[], story: Story) {
     const essays = await this.essayRepository.findByIds(userId, essayIds);

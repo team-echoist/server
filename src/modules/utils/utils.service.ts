@@ -288,4 +288,23 @@ export class UtilsService {
 
     return storyWithStory ? storyWithStory.story.name : null;
   }
+
+  async calculateTrendScore(essay: Essay) {
+    const incrementAmount = 1;
+    const decayFactor = 0.995;
+    const currentDate = new Date();
+    const createdDate = essay.createdDate;
+    const daysSinceCreation =
+      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
+
+    let newTrendScore = essay.trendScore;
+    if (daysSinceCreation <= 7) {
+      newTrendScore += incrementAmount;
+    } else {
+      const daysSinceDecay = daysSinceCreation - 7;
+      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
+      newTrendScore = Math.floor(newTrendScore) + incrementAmount;
+    }
+    return newTrendScore;
+  }
 }
