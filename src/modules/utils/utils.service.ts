@@ -4,6 +4,7 @@ import * as moment from 'moment-timezone';
 import * as sanitizeHtml from 'sanitize-html';
 
 import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { Essay } from '../../entities/essay.entity';
 
 @Injectable()
 export class UtilsService {
@@ -280,5 +281,30 @@ export class UtilsService {
 
   coordinatesToGeometry(latitude: number, longitude: number): string {
     return `ST_SetSRID(ST_GeomFromText('POINT(${longitude} ${latitude})'), 4326)`;
+  }
+
+  async findStoryNameInEssays(essays: Essay[]) {
+    const storyWithStory = essays.find((essay) => essay.story);
+
+    return storyWithStory ? storyWithStory.story.name : null;
+  }
+
+  async calculateTrendScore(essay: Essay) {
+    const incrementAmount = 1;
+    const decayFactor = 0.995;
+    const currentDate = new Date();
+    const createdDate = essay.createdDate;
+    const daysSinceCreation =
+      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
+
+    let newTrendScore = essay.trendScore;
+    if (daysSinceCreation <= 7) {
+      newTrendScore += incrementAmount;
+    } else {
+      const daysSinceDecay = daysSinceCreation - 7;
+      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
+      newTrendScore = Math.floor(newTrendScore) + incrementAmount;
+    }
+    return newTrendScore;
   }
 }

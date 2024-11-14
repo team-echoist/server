@@ -124,10 +124,15 @@ export class EssayController {
   1. 사용자가 작성한 에세이를 조회합니다.
   2. 각 에세이의 내용을 일부만 추출하여 반환합니다.
   3. 조회된 에세이 목록과 전체 에세이 수를 반환합니다.
+  4. 올바른 story를 조회했다면 스토리 이름이 추가됩니다. 
   
   **주의 사항:**
   `,
   })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'pageType', required: true })
+  @ApiQuery({ name: 'storyId', required: false })
   @ApiResponse({ status: 200, type: SummaryEssaysResDto })
   async getMyEssay(
     @Req() req: ExpressRequest,

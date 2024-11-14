@@ -142,9 +142,7 @@ export class StoryService {
 
     const essaysDto = this.utilsService.transformToDto(StoryUpdateEssayResDto, transformedEssays);
 
-    const storyWithStory = essays.find((essay) => essay.story);
-
-    const currentStoryName = storyWithStory ? storyWithStory.story.name : null;
+    const currentStoryName = await this.utilsService.findStoryNameInEssays(essays);
 
     return { essays: essaysDto, totalPage, page, total, currentStoryName };
   }

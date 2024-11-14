@@ -66,8 +66,10 @@ describe('EssayService', () => {
   let essay: any;
   let anotherEssay: any;
   let essays: any;
+  let tags: any;
   let req: any;
   let device: any;
+  let file: Express.Multer.File;
 
   beforeEach(async () => {
     const RedisInstance = jest.fn(() => redis);
@@ -134,6 +136,8 @@ describe('EssayService', () => {
       content: '내용1',
       author: user,
       status: EssayStatus.PUBLIC,
+      createdDate: new Date(),
+      thumbnail: null,
     } as any;
 
     anotherEssay = {
@@ -159,6 +163,23 @@ describe('EssayService', () => {
         author: user,
       },
     ] as any;
+
+    tags = [
+      {
+        id: 1,
+        name: 'tag1',
+      },
+      {
+        id: 2,
+        name: 'tag2',
+      },
+    ];
+
+    file = {
+      originalname: 'example.jpg',
+      buffer: Buffer.from('sample buffer data'),
+      mimetype: 'image/jpeg',
+    } as Express.Multer.File;
   });
 
   describe('saveEssay', () => {
@@ -321,13 +342,7 @@ describe('EssayService', () => {
 
       const result = await essayService.getMyEssays(user.id, PageType.PRIVATE, 1, 10);
 
-      expect(essayRepository.findEssays).toHaveBeenCalledWith(
-        user.id,
-        PageType.PRIVATE,
-        1,
-        10,
-        undefined,
-      );
+      expect(essayRepository.findEssays).toHaveBeenCalledWith(user.id, PageType.PRIVATE, 1, 10);
       expect(result).toEqual({ essays, total: 3, totalPage: 1, page: 1 });
     });
   });
@@ -507,17 +522,257 @@ describe('EssayService', () => {
     });
 
     it('락 획득', async () => {
-      jest.spyOn(essayService, 'acquireLock').mockResolvedValue('true');
-      jest.spyOn(essayService, 'calculateTrendScore').mockResolvedValue(1);
+      jest.spyOn(essayService, 'acquireLock').mockResolvedValue(true);
+      jest.spyOn(utilsService, 'calculateTrendScore').mockResolvedValue(1);
       jest.spyOn(essayService, 'updateAggregateData').mockResolvedValue({ id: 1 } as any);
 
       await essayService.updateEssayAggregateData(essay);
 
       expect(essayService.acquireLock).toHaveBeenCalledWith(lockKey);
-      expect(essayService.calculateTrendScore).toHaveBeenCalledWith(essay);
+      expect(utilsService.calculateTrendScore).toHaveBeenCalledWith(essay);
       expect(essayService.updateAggregateData).toHaveBeenCalledWith(essay, 1);
       expect(redis.set).toHaveBeenCalledWith(`aggregate:${essay.id}`, '{"id":1}', 'EX', 300);
       expect(redis.del).toHaveBeenCalledWith(lockKey);
     });
+
+    it('락 획득 실패', async () => {
+      jest.spyOn(essayService, 'acquireLock').mockResolvedValue(false);
+
+      await expect(essayService.updateEssayAggregateData(essay)).rejects.toThrow(
+        new HttpException(`락 획득 실패: ${essay.id}`, HttpStatus.TOO_MANY_REQUESTS),
+      );
+    });
+  });
+
+  describe('previousEssay', () => {
+    it('이전에세이: 퍼블릭페이지', async () => {
+      essayRepository.findPreviousPublishEssay.mockResolvedValue(essays);
+
+      await essayService.previousEssay(user.id, essay, PageType.PUBLIC, undefined);
+
+      expect(essayRepository.findPreviousPublishEssay).toHaveBeenCalledWith(
+        essay.author.id,
+        essay.createdDate,
+      );
+    });
+
+    it('이전에세이: 비공개페이지 권한없음', async () => {
+      await expect(
+        essayService.previousEssay(2, essay, PageType.PRIVATE, undefined),
+      ).rejects.toThrow(
+        new HttpException('비공개 이전 글은 본인만 조회할 수 있습니다.', HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('이전에세이: 비공개페이지 ', async () => {
+      essayRepository.findPreviousPrivateEssay.mockResolvedValue(essays);
+
+      await essayService.previousEssay(user.id, essay, PageType.PRIVATE, undefined);
+
+      expect(essayRepository.findPreviousPrivateEssay).toHaveBeenCalledWith(
+        user.id,
+        essay.createdDate,
+      );
+    });
+
+    it('이전에세이: 스토리페이지', async () => {
+      essayRepository.findPreviousStoryEssay.mockResolvedValue(essays);
+
+      await essayService.previousEssay(user.id, essay, PageType.STORY, 1);
+
+      expect(essayRepository.findPreviousStoryEssay).toHaveBeenCalledWith(
+        user.id,
+        essay.author.id,
+        1,
+        essay.createdDate,
+      );
+    });
+  });
+
+  describe('deleteEssay', () => {
+    it('에세이 삭제 실패', async () => {
+      essayRepository.findEssayById.mockResolvedValue(null);
+
+      await expect(essayService.deleteEssay(user.id, essay.id)).rejects.toThrow(
+        new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('에세이 삭제', async () => {
+      essayRepository.findEssayById.mockResolvedValue(essay);
+      jest.spyOn(essayService, 'checkEssayPermissions').mockResolvedValue();
+
+      await essayService.deleteEssay(user.id, essay.id);
+
+      expect(essayRepository.findEssayById).toHaveBeenCalledWith(essay.id);
+      expect(essayService.checkEssayPermissions).toHaveBeenCalledWith(essay, user.id);
+      expect(essayRepository.deleteEssay).toHaveBeenCalledWith(essay);
+    });
+  });
+
+  describe('saveThumbnail', () => {
+    it('썸네일 경로 생성 및 S3 업로드', async () => {
+      jest.spyOn(essayService, 'getFileNameByThumbnail').mockResolvedValue('images/uuid');
+      jest
+        .spyOn(awsService, 'imageUploadToS3')
+        .mockResolvedValue('https://s3.amazonaws.com/bucket/images/uuid');
+
+      const result = await essayService.saveThumbnail(file, 1);
+
+      expect(essayService.getFileNameByThumbnail).toHaveBeenCalledWith(1);
+      expect(awsService.imageUploadToS3).toHaveBeenCalledWith('images/uuid', file, 'jpg');
+      expect(result).toEqual({ imageUrl: 'https://s3.amazonaws.com/bucket/images/uuid' });
+    });
+  });
+
+  describe('deleteThumbnail', () => {
+    it('썸네일 경로 삭제 및 S3 업데이트', async () => {
+      essay.thumbnail = 'https://s3.amazonaws.com/bucket/images/uuid';
+      essayRepository.findEssayById.mockResolvedValue(essay);
+      awsService.deleteImageFromS3.mockResolvedValue();
+      essayRepository.saveEssay.mockResolvedValue(essay);
+
+      await essayService.deleteThumbnail(essay.id);
+
+      expect(essayRepository.findEssayById).toHaveBeenCalledWith(essay.id);
+      expect(awsService.deleteImageFromS3).toHaveBeenCalledWith('images/uuid');
+      expect(essayRepository.saveEssay).toHaveBeenCalledWith(essay);
+    });
+
+    it('썸네일 경로 삭제 및 S3 업데이트: 썸네일 찾을 수 없음', async () => {
+      essayRepository.findEssayById.mockResolvedValue(essay);
+
+      await expect(essayService.deleteThumbnail(essay.id)).rejects.toThrow(
+        new HttpException('삭제할 썸네일이 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
+
+  describe('getRecommendEssays', () => {
+    it('에세이 추천 리스트', async () => {
+      jest.spyOn(essayService, 'getRecentTags').mockResolvedValue([]);
+      essayRepository.getRecommendEssays.mockResolvedValue(essays);
+
+      const result = await essayService.getRecommendEssays(user.id, 10);
+
+      expect(essayService.getRecentTags).toHaveBeenCalledWith(user.id);
+      expect(essayRepository.getRecommendEssays).toHaveBeenCalledWith(user.id, []);
+      expect(result).toEqual({ essays: essays });
+    });
+  });
+
+  describe('getRecentTags', () => {
+    it('최근 사용한 태그 조회: 1개 이상', async () => {
+      viewService.getRecentEssayIds.mockResolvedValue([1, 2]);
+      essayRepository.getRecentTags.mockResolvedValue([{ tagId: 1 }, { tagId: 2 }]);
+
+      const result = await essayService.getRecentTags(user.id);
+
+      expect(viewService.getRecentEssayIds).toHaveBeenCalledWith(user.id, 5);
+      expect(essayRepository.getRecentTags).toHaveBeenCalledWith([1, 2]);
+      expect(result).toEqual([1, 2]);
+    });
+
+    it('최근 사용한 태그 조회: 없음', async () => {
+      viewService.getRecentEssayIds.mockResolvedValue([]);
+
+      const result = await essayService.getRecentTags(user.id);
+
+      expect(viewService.getRecentEssayIds).toHaveBeenCalledWith(user.id, 5);
+      expect(essayRepository.getRecentTags).not.toHaveBeenCalled();
+      expect(result).toEqual(undefined);
+    });
+  });
+
+  describe('getFollowingsEssays', () => {
+    it('팔로잉 에세이 조회: 팔로워 없음', async () => {
+      followService.getAllFollowings.mockResolvedValue([]);
+
+      const result = await essayService.getFollowingsEssays(user.id, 1, 10);
+
+      expect(essayRepository.getFollowingsEssays).not.toHaveBeenCalled();
+      expect(result).toEqual({ essays: [] });
+    });
+
+    it('팔로잉 에세이 조회: 팔로워 있음', async () => {
+      followService.getAllFollowings.mockResolvedValue([
+        { id: 1, follower: { id: 1 }, following: { id: 2 } },
+      ] as any);
+
+      essayRepository.getFollowingsEssays.mockResolvedValue({ essays, total: 1 });
+
+      const result = await essayService.getFollowingsEssays(user.id, 1, 10);
+
+      expect(followService.getAllFollowings).toHaveBeenCalledWith(user.id);
+      expect(essayRepository.getFollowingsEssays).toHaveBeenCalledWith([2], 1, 10);
+      expect(result).toEqual({ essays, total: 1, totalPage: 1, page: 1 });
+    });
+  });
+
+  describe('getEssaysByIds', () => {
+    it('에세이들 조회', async () => {
+      essayRepository.findByIds.mockResolvedValue(essays);
+
+      const result = await essayService.getEssaysByIds(user.id, [1, 2]);
+
+      expect(essayRepository.findByIds).toHaveBeenCalledWith(user.id, [1, 2]);
+      expect(result).toEqual(essays);
+    });
+  });
+
+  describe('saveEssays', () => {
+    it('에세이들 저장', async () => {
+      essayRepository.saveEssays.mockResolvedValue(essays);
+
+      const result = await essayService.saveEssays(essays);
+
+      expect(result).toEqual(essays);
+    });
+  });
+
+  describe('updatedEssaysOfStory', () => {
+    it('스토리 에세이 전체 업데이트', async () => {
+      const story = { id: 1, essays: [{ id: 1 }, { id: 2 }, { id: 3 }] } as any;
+      const reqEssayIdsSet = [2, 3, 4];
+
+      jest.spyOn(essayService, 'addEssaysStory').mockResolvedValue();
+      jest.spyOn(essayService, 'deleteEssaysStory').mockResolvedValue();
+
+      await essayService.updatedEssaysOfStory(user.id, story, reqEssayIdsSet);
+
+      expect(essayService.addEssaysStory).toHaveBeenCalledWith(user.id, [4], story);
+      expect(essayService.deleteEssaysStory).toHaveBeenCalledWith(user.id, [1]);
+    });
+  });
+
+  describe('addEssaysStory', () => {
+    it('스토리에 에세이 추가', async () => {
+      const story = { id: 1, essays: [{ id: 2 }, { id: 3 }] } as any;
+      essayRepository.findByIds.mockResolvedValue(essays);
+
+      await essayService.addEssaysStory(user.id, [1], story);
+
+      expect(essayRepository.saveEssays).toHaveBeenCalledWith(essays);
+    });
+  });
+
+  describe('deleteEssaysStory', () => {
+    it('에세이의 스토리 삭제', async () => {
+      essayRepository.findByIds.mockResolvedValue(essays);
+
+      await essayService.deleteEssaysStory(user.id, [1]);
+
+      expect(essayRepository.saveEssays).toHaveBeenCalledWith(essays);
+    });
+  });
+
+  describe('getSentenceEssays', () => {
+    it('첫 문장 가져오기', async () => {
+      jest.spyOn(essayService, 'getRecentTags').mockResolvedValue([]);
+      essayRepository.getRecommendEssays.mockResolvedValue(essays);
+
+      utilsService.extractFirstSentences.mockResolvedValue();
+    });
+    it('마지막 문장 가져오기', async () => {});
   });
 });

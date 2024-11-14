@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
@@ -196,7 +189,7 @@ export class EssayService {
     pageType: PageType,
     page: number,
     limit: number,
-    storyId: number,
+    storyId?: number,
   ) {
     let { essays, total } =
       // todo 안드로이드 다음 릴리즈 적용시 해제
@@ -207,12 +200,16 @@ export class EssayService {
 
     const totalPage: number = Math.ceil(total / limit);
 
+    let currentStoryName: string;
+    if (storyId !== undefined)
+      currentStoryName = await this.utilsService.findStoryNameInEssays(essays);
+
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
     });
     const essayDtos = this.utilsService.transformToDto(SummaryEssayResDto, essays);
 
-    return { essays: essayDtos, total, totalPage, page };
+    return { essays: essayDtos, total, totalPage, page, currentStoryName };
   }
 
   async getTargetUserEssays(userId: number, storyId: number, page: number, limit: number) {
@@ -356,20 +353,22 @@ export class EssayService {
 
     if (lock) {
       try {
-        const newTrendScore = await this.calculateTrendScore(essay);
+        const newTrendScore = await this.utilsService.calculateTrendScore(essay);
         const aggregate = await this.updateAggregateData(essay, newTrendScore);
 
         await this.redis.set(`aggregate:${essay.id}`, JSON.stringify(aggregate), 'EX', 300);
       } finally {
-        await this.redis.del(lockKey);
+        if (lock) {
+          await this.redis.del(lockKey);
+        }
       }
     } else {
-      console.log(`락 획득 실패: ${essay.id}`);
+      throw new HttpException(`락 획득 실패: ${essay.id}`, HttpStatus.TOO_MANY_REQUESTS);
     }
   }
 
-  async acquireLock(lockKey: string): Promise<string | null> {
-    const lockTimeout = 30;
+  async acquireLock(lockKey: string) {
+    const lockTimeout = 100;
     const maxAttempts = 5;
     const baseRetryDelay = 10;
     let lock: string | null = null;
@@ -383,26 +382,7 @@ export class EssayService {
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
-    return lock;
-  }
-
-  async calculateTrendScore(essay: Essay) {
-    const incrementAmount = 1;
-    const decayFactor = 0.995;
-    const currentDate = new Date();
-    const createdDate = essay.createdDate;
-    const daysSinceCreation =
-      (currentDate.getTime() - new Date(createdDate).getTime()) / (1000 * 3600 * 24);
-
-    let newTrendScore = essay.trendScore;
-    if (daysSinceCreation <= 7) {
-      newTrendScore += incrementAmount;
-    } else {
-      const daysSinceDecay = daysSinceCreation - 7;
-      newTrendScore = essay.trendScore * Math.pow(decayFactor, daysSinceDecay);
-      newTrendScore = Math.floor(newTrendScore) + incrementAmount;
-    }
-    return newTrendScore;
+    return !!lock;
   }
 
   async updateAggregateData(essay: Essay, newTrendScore: number): Promise<Aggregate> {
@@ -475,6 +455,8 @@ export class EssayService {
         storyId,
         essay.createdDate,
       );
+    } else {
+      throw new HttpException('잘못된 요청입니다.', HttpStatus.BAD_REQUEST);
     }
 
     previousEssay.forEach((essay) => {
@@ -488,6 +470,9 @@ export class EssayService {
   @Transactional()
   async deleteEssay(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
+
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     await this.checkEssayPermissions(essay, userId);
 
     await this.essayRepository.deleteEssay(essay);
@@ -495,7 +480,7 @@ export class EssayService {
 
   @Transactional()
   async saveThumbnail(file: Express.Multer.File, essayId?: number) {
-    const fileName = await this.getFileName(essayId);
+    const fileName = await this.getFileNameByThumbnail(essayId);
     const newExt = file.originalname.split('.').pop();
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
@@ -506,7 +491,7 @@ export class EssayService {
   async deleteThumbnail(essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
     if (!essay.thumbnail) {
-      throw new NotFoundException('No thumbnail to delete');
+      throw new HttpException('삭제할 썸네일이 없습니다.', HttpStatus.NOT_FOUND);
     }
 
     const urlParts = essay.thumbnail.split('/').pop();
@@ -519,7 +504,7 @@ export class EssayService {
     return { message: 'Thumbnail deleted successfully' };
   }
 
-  private async getFileName(essayId?: number): Promise<string> {
+  async getFileNameByThumbnail(essayId?: number): Promise<string> {
     const uuid = this.utilsService.getUUID();
     if (!essayId) {
       return `images/${uuid}`;
@@ -558,10 +543,11 @@ export class EssayService {
       const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
       recentTags = recentTagObjects.map((tag) => tag.tagId);
     }
+
     return recentTags;
   }
 
-  private getRandomElements<T>(array: T[], count: number): T[] {
+  getRandomElements<T>(array: T[], count: number): T[] {
     const shuffled = array.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
@@ -599,22 +585,33 @@ export class EssayService {
   }
 
   async saveEssays(essays: Essay[]) {
-    return await this.essayRepository.saveEssays(essays);
+    return this.essayRepository.saveEssays(essays);
   }
 
   async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
-    const exEssayIds = story.essays.map((essay) => essay.id);
+    // 수정할 스토리에 포함된 에세이 아이디 셋
+    const essayIdsByStory = new Set(story.essays.map((essay) => essay.id));
+    // 요청으로 들어온 에세이 아이디 셋
+    const reqEssayIdsSet = new Set(reqEssayIds);
 
-    const addedEssayIds = reqEssayIds.filter((essayId) => !exEssayIds.includes(essayId));
-    const removedEssayIds = exEssayIds.filter((essayId) => !reqEssayIds.includes(essayId));
+    // 스토리에서 추가되어야 하는 에세이 아이디
+    const addedEssayIds = reqEssayIds.filter((essayId) => !essayIdsByStory.has(essayId));
+    // 스토리에서 제거되어야 하는 에세이 아이디
+    const removedEssayIds = Array.from(essayIdsByStory).filter(
+      (essayId) => !reqEssayIdsSet.has(essayId),
+    );
+
+    const operations = [];
 
     if (addedEssayIds.length > 0) {
-      await this.addEssaysStory(userId, addedEssayIds, story);
+      operations.push(this.addEssaysStory(userId, addedEssayIds, story));
     }
 
     if (removedEssayIds.length > 0) {
-      await this.deleteEssaysStory(userId, removedEssayIds);
+      operations.push(this.deleteEssaysStory(userId, removedEssayIds));
     }
+
+    await Promise.all(operations);
   }
 
   async addEssaysStory(userId: number, essayIds: number[], story: Story) {
