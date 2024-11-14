@@ -731,6 +731,48 @@ describe('EssayService', () => {
   });
 
   describe('updatedEssaysOfStory', () => {
-    it('에세이 스토리 업데이트: 스토리없가 없');
+    it('스토리 에세이 전체 업데이트', async () => {
+      const story = { id: 1, essays: [{ id: 1 }, { id: 2 }, { id: 3 }] } as any;
+      const reqEssayIdsSet = [2, 3, 4];
+
+      jest.spyOn(essayService, 'addEssaysStory').mockResolvedValue();
+      jest.spyOn(essayService, 'deleteEssaysStory').mockResolvedValue();
+
+      await essayService.updatedEssaysOfStory(user.id, story, reqEssayIdsSet);
+
+      expect(essayService.addEssaysStory).toHaveBeenCalledWith(user.id, [4], story);
+      expect(essayService.deleteEssaysStory).toHaveBeenCalledWith(user.id, [1]);
+    });
+  });
+
+  describe('addEssaysStory', () => {
+    it('스토리에 에세이 추가', async () => {
+      const story = { id: 1, essays: [{ id: 2 }, { id: 3 }] } as any;
+      essayRepository.findByIds.mockResolvedValue(essays);
+
+      await essayService.addEssaysStory(user.id, [1], story);
+
+      expect(essayRepository.saveEssays).toHaveBeenCalledWith(essays);
+    });
+  });
+
+  describe('deleteEssaysStory', () => {
+    it('에세이의 스토리 삭제', async () => {
+      essayRepository.findByIds.mockResolvedValue(essays);
+
+      await essayService.deleteEssaysStory(user.id, [1]);
+
+      expect(essayRepository.saveEssays).toHaveBeenCalledWith(essays);
+    });
+  });
+
+  describe('getSentenceEssays', () => {
+    it('첫 문장 가져오기', async () => {
+      jest.spyOn(essayService, 'getRecentTags').mockResolvedValue([]);
+      essayRepository.getRecommendEssays.mockResolvedValue(essays);
+
+      utilsService.extractFirstSentences.mockResolvedValue();
+    });
+    it('마지막 문장 가져오기', async () => {});
   });
 });

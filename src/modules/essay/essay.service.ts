@@ -547,7 +547,7 @@ export class EssayService {
     return recentTags;
   }
 
-  private getRandomElements<T>(array: T[], count: number): T[] {
+  getRandomElements<T>(array: T[], count: number): T[] {
     const shuffled = array.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
@@ -589,11 +589,15 @@ export class EssayService {
   }
 
   async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
-    const exEssayIds = new Set(story.essays.map((essay) => essay.id));
+    // 수정할 스토리에 포함된 에세이 아이디 셋
+    const essayIdsByStory = new Set(story.essays.map((essay) => essay.id));
+    // 요청으로 들어온 에세이 아이디 셋
     const reqEssayIdsSet = new Set(reqEssayIds);
 
-    const addedEssayIds = reqEssayIds.filter((essayId) => !exEssayIds.has(essayId));
-    const removedEssayIds = Array.from(exEssayIds).filter(
+    // 스토리에서 추가되어야 하는 에세이 아이디
+    const addedEssayIds = reqEssayIds.filter((essayId) => !essayIdsByStory.has(essayId));
+    // 스토리에서 제거되어야 하는 에세이 아이디
+    const removedEssayIds = Array.from(essayIdsByStory).filter(
       (essayId) => !reqEssayIdsSet.has(essayId),
     );
 
@@ -609,23 +613,6 @@ export class EssayService {
 
     await Promise.all(operations);
   }
-
-  // async updatedEssaysOfStory(userId: number, story: Story, reqEssayIds: number[]) {
-  //   const exEssayIds: number[] = story.essays.map((essay) => essay.id);
-  //
-  //   const addedEssayIds: number[] = reqEssayIds.filter((essayId) => !exEssayIds.includes(essayId));
-  //   const removedEssayIds: number[] = exEssayIds.filter(
-  //     (essayId) => !reqEssayIds.includes(essayId),
-  //   );
-  //
-  //   if (addedEssayIds.length > 0) {
-  //     await this.addEssaysStory(userId, addedEssayIds, story);
-  //   }
-  //
-  //   if (removedEssayIds.length > 0) {
-  //     await this.deleteEssaysStory(userId, removedEssayIds);
-  //   }
-  // }
 
   async addEssaysStory(userId: number, essayIds: number[], story: Story) {
     const essays = await this.essayRepository.findByIds(userId, essayIds);
