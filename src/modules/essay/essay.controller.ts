@@ -383,13 +383,14 @@ export class EssayController {
     type: SummaryEssaysResDto,
   })
   async searchEssays(
+    @Req() req: ExpressRequest,
     @Query('pageType', PageTypeEnumPipe) pageType: PageType,
     @Query('keyword') keyword: string,
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     if (pageType !== PageType.ANY)
-      return this.essayService.searchEssays(pageType, keyword, page, limit);
+      return this.essayService.searchEssays(req.user.id, pageType, keyword, page, limit);
     return;
   }
 
