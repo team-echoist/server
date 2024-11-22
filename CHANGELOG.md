@@ -1,3 +1,10 @@
+## [1.21.3](https://github.com/team-echoist/server/compare/v1.21.2...v1.21.3) (2024-11-22)
+
+
+### Bug Fixes
+
+* 팔로우 에세이 리스트 예외처리 추가 ([#484](https://github.com/team-echoist/server/issues/484)) ([25f8991](https://github.com/team-echoist/server/commit/25f89911922ea5725503097f64d03cc55c438f7a))
+
 ## [1.21.2](https://github.com/team-echoist/server/compare/v1.21.1...v1.21.2) (2024-11-22)
 
 
