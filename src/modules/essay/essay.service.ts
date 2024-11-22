@@ -559,11 +559,9 @@ export class EssayService {
 
   async getFollowingsEssays(userId: number, page: number, limit: number) {
     const followings = await this.followService.getAllFollowings(userId);
-    const followingIds = followings.map((follow) => follow.following.id);
+    if (followings.length > 0) return { essays: [] };
 
-    if (followingIds.length === 0) {
-      return { essays: [] };
-    }
+    const followingIds = followings.map((follow) => follow.following.id);
 
     const { essays, total } = await this.essayRepository.getFollowingsEssays(
       followingIds,
