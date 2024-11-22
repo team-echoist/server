@@ -1,3 +1,10 @@
+## [1.21.4](https://github.com/team-echoist/server/compare/v1.21.3...v1.21.4) (2024-11-22)
+
+
+### Bug Fixes
+
+* 비공개 에세이 조회 where절 누락 ([#485](https://github.com/team-echoist/server/issues/485)) ([120194e](https://github.com/team-echoist/server/commit/120194ee0f891f273802dc3f7d03cd94f31eae74))
+
 ## [1.21.3](https://github.com/team-echoist/server/compare/v1.21.2...v1.21.3) (2024-11-22)
 
 
