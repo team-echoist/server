@@ -573,7 +573,7 @@ export class EssayRepository {
     return { essays, total };
   }
 
-  async searchPrivateEssays(keyword: string, page: number, limit: number) {
+  async searchPrivateEssays(userId: number, keyword: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
     const useTrigramSearch = keyword.length >= 3;
     const query = this.essayRepository.createQueryBuilder('essay');
@@ -607,6 +607,8 @@ export class EssayRepository {
           { keyword, wildcardKeyword: `%${keyword}%` },
         );
     }
+
+    query.andWhere('essay.author.id = :userId', { userId });
 
     query.andWhere('essay.status NOT IN (:...statuses)', {
       statuses: [EssayStatus.LINKEDOUT, EssayStatus.BURIAL],

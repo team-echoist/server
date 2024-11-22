@@ -691,7 +691,13 @@ export class EssayService {
     return { essays: essaysDto, totalPage, page, total };
   }
 
-  async searchEssays(pageType: string, keyword: string, page: number, limit: number) {
+  async searchEssays(
+    userId: number,
+    pageType: string,
+    keyword: string,
+    page: number,
+    limit: number,
+  ) {
     if (typeof keyword !== 'string') {
       throw new HttpException('잘못된 키워드 유형', HttpStatus.BAD_REQUEST);
     }
@@ -709,6 +715,7 @@ export class EssayService {
     switch (pageType) {
       case PageType.PRIVATE:
         ({ essays, total } = await this.essayRepository.searchPrivateEssays(
+          userId,
           searchKeyword,
           page,
           limit,
