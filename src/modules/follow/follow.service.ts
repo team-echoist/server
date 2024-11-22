@@ -35,6 +35,8 @@ export class FollowService {
     const follower = await this.userService.fetchUserEntityById(followerId);
     const following = await this.userService.fetchUserEntityById(followingId);
 
+    if (!following) throw new HttpException('대상을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     await this.followRepository.follow(follower, following);
   }
 
