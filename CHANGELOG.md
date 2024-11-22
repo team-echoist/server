@@ -1,3 +1,10 @@
+## [1.21.2](https://github.com/team-echoist/server/compare/v1.21.1...v1.21.2) (2024-11-22)
+
+
+### Bug Fixes
+
+* 팔로우 대상 존재여부 예외처리 추가 ([#483](https://github.com/team-echoist/server/issues/483)) ([378efae](https://github.com/team-echoist/server/commit/378efae02b5e0417c52e7d3c5849e5301ba7f4e3))
+
 ## [1.21.1](https://github.com/team-echoist/server/compare/v1.21.0...v1.21.1) (2024-11-04)
 
 # [1.21.0](https://github.com/team-echoist/server/compare/v1.20.13...v1.21.0) (2024-11-03)
