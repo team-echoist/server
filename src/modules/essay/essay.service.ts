@@ -692,21 +692,22 @@ export class EssayService {
   }
 
   async searchEssays(
-    userId: number,
     pageType: string,
     keyword: string,
     page: number,
     limit: number,
+    userId?: number,
   ) {
     if (typeof keyword !== 'string') {
       throw new HttpException('잘못된 키워드 유형', HttpStatus.BAD_REQUEST);
     }
+    let cacheKey = `search:${pageType}:${keyword}:${page}:${limit}`;
 
-    const cacheKey = `search:${pageType}:${keyword}:${page}:${limit}`;
-
-    const cachedResult = await this.redis.get(cacheKey);
-    if (cachedResult) {
-      return JSON.parse(cachedResult);
+    if (pageType !== PageType.PRIVATE && pageType !== PageType.ANY) {
+      const cachedResult = await this.redis.get(cacheKey);
+      if (cachedResult) {
+        return JSON.parse(cachedResult);
+      }
     }
 
     const searchKeyword = this.utilsService.preprocessKeyword(keyword);

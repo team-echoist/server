@@ -390,7 +390,7 @@ export class EssayController {
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     if (pageType !== PageType.ANY)
-      return this.essayService.searchEssays(req.user.id, pageType, keyword, page, limit);
+      return this.essayService.searchEssays(pageType, keyword, page, limit, req.user.id);
     return;
   }
 
