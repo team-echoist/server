@@ -1,6 +1,7 @@
 export enum PageType {
   PRIVATE = 'private',
   PUBLIC = 'public',
+  MYPUBLIC = 'mypublic',
   STORY = 'story',
   RECOMMEND = 'recommend',
   BURIAL = 'burial',

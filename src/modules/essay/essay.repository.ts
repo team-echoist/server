@@ -525,7 +525,7 @@ export class EssayRepository {
     return { essays, total };
   }
 
-  async searchPublicEssays(keyword: string, page: number, limit: number) {
+  async searchMyPublicEssays(userId: number, keyword: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
     const useTrigramSearch = keyword.length >= 3;
     const query = this.essayRepository.createQueryBuilder('essay');
@@ -536,7 +536,7 @@ export class EssayRepository {
           `0.5 * (
         similarity(unaccented_title, :keyword) +
         similarity(unaccented_content, :keyword)
-      )`,
+      ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -550,7 +550,57 @@ export class EssayRepository {
        0.5 * (
          similarity(unaccented_title, :keyword) +
          similarity(unaccented_content, :keyword)
-       )`,
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
+          'relevance',
+        )
+        .where(
+          'essay.deleted_date IS NULL AND (search_vector @@ plainto_tsquery(:keyword) OR ' +
+            'unaccented_title ILIKE :wildcardKeyword OR unaccented_content ILIKE :wildcardKeyword)',
+          { keyword, wildcardKeyword: `%${keyword}%` },
+        );
+    }
+
+    query.andWhere('essay.author.id = :userId', { userId });
+
+    query
+      .andWhere('essay.status IN (:...statuses)', {
+        statuses: [EssayStatus.PUBLISHED, EssayStatus.PUBLIC],
+      })
+      .orderBy('relevance', 'DESC')
+      .offset(offset)
+      .limit(limit);
+
+    const [essays, total] = await query.getManyAndCount();
+
+    return { essays, total };
+  }
+
+  async searchPublicEssays(keyword: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+    const useTrigramSearch = keyword.length >= 3;
+    const query = this.essayRepository.createQueryBuilder('essay');
+
+    if (useTrigramSearch) {
+      query
+        .addSelect(
+          `0.5 * (
+        similarity(unaccented_title, :keyword) +
+        similarity(unaccented_content, :keyword)
+      ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
+          'relevance',
+        )
+        .where(
+          'essay.deleted_date IS NULL AND (unaccented_title ILIKE :wildcardKeyword OR unaccented_content ILIKE :wildcardKeyword)',
+          { keyword, wildcardKeyword: `%${keyword}%` },
+        );
+    } else {
+      query
+        .addSelect(
+          `0.5 * ts_rank_cd(search_vector, plainto_tsquery('simple', :keyword)) +
+       0.5 * (
+         similarity(unaccented_title, :keyword) +
+         similarity(unaccented_content, :keyword)
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -598,7 +648,7 @@ export class EssayRepository {
        0.5 * (
          similarity(unaccented_title, :keyword) +
          similarity(unaccented_content, :keyword)
-       )`,
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -634,7 +684,7 @@ export class EssayRepository {
           `0.5 * (
         similarity(unaccented_title, :keyword) +
         similarity(unaccented_content, :keyword)
-      )`,
+      ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -648,7 +698,7 @@ export class EssayRepository {
        0.5 * (
          similarity(unaccented_title, :keyword) +
          similarity(unaccented_content, :keyword)
-       )`,
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
