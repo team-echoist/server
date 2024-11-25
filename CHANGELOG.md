@@ -1,3 +1,10 @@
+## [1.21.5](https://github.com/team-echoist/server/compare/v1.21.4...v1.21.5) (2024-11-23)
+
+
+### Bug Fixes
+
+* 비공개 에세이 조회 캐싱전략 변경 ([#486](https://github.com/team-echoist/server/issues/486)) ([5f2afcc](https://github.com/team-echoist/server/commit/5f2afccc748aedcdad25741ecdc9524fd2eeff13))
+
 ## [1.21.4](https://github.com/team-echoist/server/compare/v1.21.3...v1.21.4) (2024-11-22)
 
 
