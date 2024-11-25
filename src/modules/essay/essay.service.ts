@@ -703,11 +703,7 @@ export class EssayService {
     }
     let cacheKey = `search:${pageType}:${keyword}:${page}:${limit}`;
 
-    if (
-      pageType !== PageType.PRIVATE &&
-      pageType !== PageType.ANY &&
-      pageType !== PageType.MYPUBLIC
-    ) {
+    if (pageType !== PageType.PRIVATE && pageType !== PageType.ANY) {
       const cachedResult = await this.redis.get(cacheKey);
       if (cachedResult) {
         return JSON.parse(cachedResult);
@@ -726,14 +722,7 @@ export class EssayService {
           limit,
         ));
         break;
-      case PageType.MYPUBLIC:
-        ({ essays, total } = await this.essayRepository.searchMyPublicEssays(
-          userId,
-          searchKeyword,
-          page,
-          limit,
-        ));
-        break;
+
       case PageType.ANY:
         ({ essays, total } = await this.essayRepository.searchAllEssays(
           searchKeyword,
@@ -741,6 +730,7 @@ export class EssayService {
           limit,
         ));
         break;
+
       default:
         ({ essays, total } = await this.essayRepository.searchPublicEssays(
           searchKeyword,
