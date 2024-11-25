@@ -1,3 +1,10 @@
+## [1.21.6](https://github.com/team-echoist/server/compare/v1.21.5...v1.21.6) (2024-11-25)
+
+
+### Bug Fixes
+
+* 검색 페이지타입 조정 ([#487](https://github.com/team-echoist/server/issues/487)) ([efbe31f](https://github.com/team-echoist/server/commit/efbe31f11a1f20469498336e079a3aa2e0d9ac24))
+
 ## [1.21.5](https://github.com/team-echoist/server/compare/v1.21.4...v1.21.5) (2024-11-23)
 
 
