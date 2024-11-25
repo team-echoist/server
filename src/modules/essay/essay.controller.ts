@@ -360,7 +360,7 @@ export class EssayController {
   키워드를 기반으로 에세이를 검색합니다. 
   
   **쿼리 파라미터:**
-  - \`pageType\`: 페이지 타입. 나만의페이지=private, 커뮤니티=public (필수)
+  - \`pageType\`: 페이지 타입. 나만의글=private, 커뮤니티=public (필수)
   - \`keyword\`: 검색할 키워드(필수)
   - \`page\`: 페이지 번호 (기본값: 1)
   - \`limit\`: 한 페이지에 보여줄 에세이 수 (기본값: 10)

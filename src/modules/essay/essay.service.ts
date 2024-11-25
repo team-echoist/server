@@ -722,6 +722,7 @@ export class EssayService {
           limit,
         ));
         break;
+
       case PageType.ANY:
         ({ essays, total } = await this.essayRepository.searchAllEssays(
           searchKeyword,
@@ -729,6 +730,7 @@ export class EssayService {
           limit,
         ));
         break;
+
       default:
         ({ essays, total } = await this.essayRepository.searchPublicEssays(
           searchKeyword,

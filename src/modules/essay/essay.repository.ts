@@ -536,7 +536,7 @@ export class EssayRepository {
           `0.5 * (
         similarity(unaccented_title, :keyword) +
         similarity(unaccented_content, :keyword)
-      )`,
+      ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -550,7 +550,7 @@ export class EssayRepository {
        0.5 * (
          similarity(unaccented_title, :keyword) +
          similarity(unaccented_content, :keyword)
-       )`,
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -598,7 +598,7 @@ export class EssayRepository {
        0.5 * (
          similarity(unaccented_title, :keyword) +
          similarity(unaccented_content, :keyword)
-       )`,
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -634,7 +634,7 @@ export class EssayRepository {
           `0.5 * (
         similarity(unaccented_title, :keyword) +
         similarity(unaccented_content, :keyword)
-      )`,
+      ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
@@ -648,7 +648,7 @@ export class EssayRepository {
        0.5 * (
          similarity(unaccented_title, :keyword) +
          similarity(unaccented_content, :keyword)
-       )`,
+       ) +  0.6 * (1 / EXTRACT(EPOCH FROM (NOW() - essay.created_date)))`,
           'relevance',
         )
         .where(
