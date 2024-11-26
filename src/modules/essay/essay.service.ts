@@ -559,10 +559,10 @@ export class EssayService {
 
   async getFollowingsEssays(userId: number, page: number, limit: number) {
     const followings = await this.followService.getAllFollowings(userId);
-    console.log(followings);
-    console.log(followings.length);
-    if (followings.length < 0) return { essays: [] };
-    const followingIds = followings.map((follow) => follow.following.id);
+    if (followings.length === 0) return { essays: [] };
+    const followingIds = followings
+      .filter((follow) => follow.following && follow.following.id)
+      .map((follow) => follow.following.id);
 
     const { essays, total } = await this.essayRepository.getFollowingsEssays(
       followingIds,
