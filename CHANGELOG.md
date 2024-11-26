@@ -1,3 +1,10 @@
+## [1.21.7](https://github.com/team-echoist/server/compare/v1.21.6...v1.21.7) (2024-11-25)
+
+
+### Bug Fixes
+
+* 팔로우 에세이 리스트 조회 분기 재설정 ([#488](https://github.com/team-echoist/server/issues/488)) ([0514062](https://github.com/team-echoist/server/commit/0514062ef9ab3d728f9d7185e4433159b08d7791))
+
 ## [1.21.6](https://github.com/team-echoist/server/compare/v1.21.5...v1.21.6) (2024-11-25)
 
 
