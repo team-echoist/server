@@ -1,3 +1,10 @@
+## [1.21.8](https://github.com/team-echoist/server/compare/v1.21.7...v1.21.8) (2024-11-26)
+
+
+### Bug Fixes
+
+* 팔로우에세이리스트 필터링 추가 ([#489](https://github.com/team-echoist/server/issues/489)) ([fab62ea](https://github.com/team-echoist/server/commit/fab62ea7fe1fd59102f9e25efb164e909b1a0c60))
+
 ## [1.21.7](https://github.com/team-echoist/server/compare/v1.21.6...v1.21.7) (2024-11-25)
 
 
