@@ -1,10 +1,10 @@
 import { Controller, Get, Param, ParseIntPipe, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AlertService } from './alert.service';
+import { AlertService } from '../service/alert.service';
 import { Request as ExpressRequest } from 'express';
-import { AlertsResDto } from './dto/response/alertsRes.dto';
-import { PagingParseIntPipe } from '../../common/pipes/pagingParseInt.pipe';
-import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { AlertsResDto } from '../dto/response/alertsRes.dto';
+import { PagingParseIntPipe } from '../../../common/pipes/pagingParseInt.pipe';
+import { JwtAuthGuard } from '../../../common/guards/jwtAuth.guard';
 
 @Controller('alerts')
 @ApiTags('Alert')

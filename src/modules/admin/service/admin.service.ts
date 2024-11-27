@@ -49,7 +49,7 @@ import { Release } from '../../../entities/release.entity';
 import { ReleaseResDto } from '../../support/dto/response/releaseRes.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { AlertService } from '../../alert/alert.service';
+import { AlertService } from '../../alert/service/alert.service';
 import { GeulroquisService } from '../../geulroquis/geulroquis.service';
 import { CronService } from '../../cron/cron.service';
 import { Server } from '../../../entities/server.entity';

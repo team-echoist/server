@@ -11,7 +11,7 @@ import { FollowService } from '../../follow/follow.service';
 import { BadgeService } from '../../badge/badge.service';
 import { ViewService } from '../../view/view.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
-import { AlertService } from '../../alert/alert.service';
+import { AlertService } from '../../alert/service/alert.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { SupportService } from '../../support/support.service';
@@ -35,7 +35,7 @@ jest.mock('../../follow/follow.service');
 jest.mock('../../badge/badge.service');
 jest.mock('../../view/view.service');
 jest.mock('../../bookmark/bookmark.service');
-jest.mock('../../alert/alert.service');
+jest.mock('../../alert/service/alert.service');
 jest.mock('../../support/support.service');
 
 describe('EssayService', () => {

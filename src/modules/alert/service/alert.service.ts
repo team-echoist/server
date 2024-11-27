@@ -1,23 +1,24 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { AlertRepository } from './alert.repository';
-import { Essay } from '../../entities/essay.entity';
-import { Alert } from '../../entities/alert.entity';
-import { UtilsService } from '../utils/utils.service';
-import { AlertResDto } from './dto/response/alertRes.dto';
-import { SupportService } from '../support/support.service';
-import { FirebaseService } from '../firebase/firebase.service';
+import { AlertRepository } from '../repository/alert.repository';
+import { Essay } from '../../../entities/essay.entity';
+import { Alert } from '../../../entities/alert.entity';
+import { UtilsService } from '../../utils/utils.service';
+import { AlertResDto } from '../dto/response/alertRes.dto';
+import { SupportService } from '../../support/support.service';
+import { FirebaseService } from '../../firebase/firebase.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { UserService } from '../user/user.service';
-import { User } from '../../entities/user.entity';
-import { ReportQueue } from '../../entities/reportQueue.entity';
-import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { ActionType, AlertType, EssayStatus } from '../../common/types/enum.types';
+import { UserService } from '../../user/user.service';
+import { User } from '../../../entities/user.entity';
+import { ReportQueue } from '../../../entities/reportQueue.entity';
+import { ReviewQueue } from '../../../entities/reviewQueue.entity';
+import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
+import { IAlertRepository } from '../repository/ialert.repository';
 
 @Injectable()
 export class AlertService {
   constructor(
-    private readonly alertRepository: AlertRepository,
+    @Inject('IAlertRepository') private readonly alertRepository: IAlertRepository,
     private readonly utilsService: UtilsService,
     private readonly supportService: SupportService,
     private readonly fcmService: FirebaseService,

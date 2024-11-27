@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AlertService } from '../alert.service';
-import { AlertRepository } from '../alert.repository';
+import { AlertService } from '../service/alert.service';
+import { AlertRepository } from '../repository/alert.repository';
 import { UtilsService } from '../../utils/utils.service';
 import { SupportService } from '../../support/support.service';
 import { FirebaseService } from '../../firebase/firebase.service';
@@ -11,7 +11,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
 import { AwsService } from '../../aws/aws.service';
 
-jest.mock('../alert.repository');
+jest.mock('../repository/alert.repository');
 jest.mock('../../utils/utils.service');
 jest.mock('../../support/support.service');
 jest.mock('../../firebase/firebase.service');

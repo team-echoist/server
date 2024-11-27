@@ -3,7 +3,7 @@ import { BurialService } from '../burial.service';
 import { UtilsService } from '../../utils/utils.service';
 import { UserService } from '../../user/user.service';
 import { EssayRepository } from '../../essay/essay.repository';
-import { AlertService } from '../../alert/alert.service';
+import { AlertService } from '../../alert/service/alert.service';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
@@ -11,7 +11,7 @@ jest.mock('typeorm-transactional', () => ({
 jest.mock('../../utils/utils.service');
 jest.mock('../../essay/essay.repository');
 jest.mock('../../user/user.service');
-jest.mock('../../alert/alert.service');
+jest.mock('../../alert/service/alert.service');
 
 describe('BurialService', () => {
   let burialService: BurialService;

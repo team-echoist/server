@@ -25,7 +25,7 @@ import { EssayStatsDto } from './dto/essayStats.dto';
 import { SummaryEssayResDto } from './dto/response/summaryEssayRes.dto';
 import { SentenceEssayResDto } from './dto/response/sentenceEssayRes.dto';
 import { WeeklyEssayCountResDto } from './dto/response/weeklyEssayCountRes.dto';
-import { AlertService } from '../alert/alert.service';
+import { AlertService } from '../alert/service/alert.service';
 import { DeviceDto } from '../support/dto/device.dto';
 import { SupportService } from '../support/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../common/types/enum.types';
