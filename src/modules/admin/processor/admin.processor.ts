@@ -1,8 +1,8 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
-import { AdminService } from './admin.service';
-import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ReportQueue } from '../../entities/reportQueue.entity';
+import { AdminService } from '../service/admin.service';
+import { ProcessReqDto } from '../dto/request/processReq.dto';
+import { ReportQueue } from '../../../entities/reportQueue.entity';
 import { DataSource } from 'typeorm';
 
 @Processor('admin')

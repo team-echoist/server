@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AdminService } from '../admin.service';
-import { AdminRepository } from '../admin.repository';
+import { AdminService } from '../service/admin.service';
+import { AdminRepository } from '../repository/admin.repository';
 import { UserRepository } from '../../user/user.repository';
 import { EssayRepository } from '../../essay/essay.repository';
 import { UserService } from '../../user/user.service';
@@ -20,7 +20,7 @@ jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
 jest.mock('bull');
-jest.mock('../admin.repository');
+jest.mock('../repository/admin.repository');
 jest.mock('../../user/user.service');
 jest.mock('../../user/user.repository');
 jest.mock('../../essay/essay.repository');

@@ -1,24 +1,25 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, FindManyOptions, Repository } from 'typeorm';
-import { Subscription } from '../../entities/subscription.entity';
-import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { ReportQueue } from '../../entities/reportQueue.entity';
-import { ProcessedHistory } from '../../entities/processedHistory.entity';
-import { Admin } from '../../entities/admin.entity';
-import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
-import { CreateAdminDto } from './dto/createAdmin.dto';
-import { Server } from '../../entities/server.entity';
+import { Subscription } from '../../../entities/subscription.entity';
+import { ReviewQueue } from '../../../entities/reviewQueue.entity';
+import { ReportQueue } from '../../../entities/reportQueue.entity';
+import { ProcessedHistory } from '../../../entities/processedHistory.entity';
+import { Admin } from '../../../entities/admin.entity';
+import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
+import { CreateAdminDto } from '../dto/createAdmin.dto';
+import { Server } from '../../../entities/server.entity';
 import { Transactional } from 'typeorm-transactional';
-import { Theme } from '../../entities/theme.entity';
-import { Item } from '../../entities/item.entity';
+import { Theme } from '../../../entities/theme.entity';
+import { Item } from '../../../entities/item.entity';
+import { IAdminRepository } from './iadmin.repository';
 
-export class AdminRepository {
+export class AdminRepository implements IAdminRepository {
   constructor(
-    @InjectRepository(Subscription)
-    private readonly subscriptionRepository: Repository<Subscription>,
+    @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>,
     @InjectRepository(ReportQueue) private readonly reportRepository: Repository<ReportQueue>,
     @InjectRepository(ReviewQueue) private readonly reviewRepository: Repository<ReviewQueue>,
-    @InjectRepository(Admin) private readonly adminRepository: Repository<Admin>,
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepository: Repository<Subscription>,
     @InjectRepository(ProcessedHistory)
     private readonly processedRepository: Repository<ProcessedHistory>,
     @InjectRepository(Server)
@@ -27,7 +28,6 @@ export class AdminRepository {
     private readonly themeRepository: Repository<Theme>,
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
-
     private readonly dataSource: DataSource,
   ) {}
 

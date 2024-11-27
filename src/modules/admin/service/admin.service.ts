@@ -1,85 +1,86 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { FindManyOptions } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { ProcessedHistory } from '../../entities/processedHistory.entity';
-import { ReportQueue } from '../../entities/reportQueue.entity';
-import { ReviewQueue } from '../../entities/reviewQueue.entity';
-import { Essay } from '../../entities/essay.entity';
-import { Admin } from '../../entities/admin.entity';
-import { MailService } from '../mail/mail.service';
-import { UserService } from '../user/user.service';
-import { UtilsService } from '../utils/utils.service';
-import { AdminRepository } from './admin.repository';
-import { UserRepository } from '../user/user.repository';
-import { EssayRepository } from '../essay/essay.repository';
-import { DashboardResDto } from './dto/response/dashboardRes.dto';
-import { ReportResDto } from './dto/response/reportRes.dto';
-import { ReportDetailResDto } from './dto/response/reportDetailRes.dto';
-import { ProcessReqDto } from './dto/request/processReq.dto';
-import { ReviewResDto } from './dto/response/reviewRes.dto';
-import { ReportsResDto } from './dto/response/reportsRes.dto';
-import { DetailReviewResDto } from './dto/response/detailReviewRes.dto';
-import { HistoriesResDto } from './dto/response/historiesRes.dto';
-import { FullUserResDto } from './dto/response/fullUserRes.dto';
-import { UserDetailResDto } from './dto/response/userDetailRes.dto';
-import { UpdateFullUserReqDto } from './dto/request/updateFullUserReq.dto';
-import { CreateAdminReqDto } from './dto/request/createAdminReq.dto';
-import { CreateAdminDto } from './dto/createAdmin.dto';
-import { SavedAdminResDto } from './dto/response/savedAdminRes.dto';
-import { EssayInfoResDto } from './dto/response/essayInfoRes.dto';
-import { FullEssayResDto } from './dto/response/fullEssayRes.dto';
-import { UpdateEssayStatusReqDto } from './dto/request/updateEssayStatusReq.dto';
-import { AdminResDto } from './dto/response/adminRes.dto';
-import { AdminUpdateReqDto } from './dto/request/adminUpdateReq.dto';
-import { ProfileImageUrlResDto } from '../user/dto/response/profileImageUrlRes.dto';
-import { AwsService } from '../aws/aws.service';
-import { AdminRegisterReqDto } from './dto/request/adminRegisterReq.dto';
-import { CreateNoticeReqDto } from './dto/request/createNoticeReq.dto';
-import { Notice } from '../../entities/notice.entity';
-import { UpdateNoticeReqDto } from './dto/request/updateNoticeReq.dto';
-import { SupportRepository } from '../support/support.repository';
-import { SupportService } from '../support/support.service';
-import { NoticeWithProcessorResDto } from './dto/response/noticeWithProcessorRes.dto';
-import { InquirySummaryResDto } from '../support/dto/response/inquirySummaryRes.dto';
-import { FullInquiryResDto } from './dto/response/fullInquiryRes.dto';
-import { Release } from '../../entities/release.entity';
-import { ReleaseResDto } from '../support/dto/response/releaseRes.dto';
+import { ProcessedHistory } from '../../../entities/processedHistory.entity';
+import { ReportQueue } from '../../../entities/reportQueue.entity';
+import { ReviewQueue } from '../../../entities/reviewQueue.entity';
+import { Essay } from '../../../entities/essay.entity';
+import { Admin } from '../../../entities/admin.entity';
+import { MailService } from '../../mail/mail.service';
+import { UserService } from '../../user/user.service';
+import { UtilsService } from '../../utils/utils.service';
+import { AdminRepository } from '../repository/admin.repository';
+import { UserRepository } from '../../user/user.repository';
+import { EssayRepository } from '../../essay/essay.repository';
+import { DashboardResDto } from '../dto/response/dashboardRes.dto';
+import { ReportResDto } from '../dto/response/reportRes.dto';
+import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
+import { ProcessReqDto } from '../dto/request/processReq.dto';
+import { ReviewResDto } from '../dto/response/reviewRes.dto';
+import { ReportsResDto } from '../dto/response/reportsRes.dto';
+import { DetailReviewResDto } from '../dto/response/detailReviewRes.dto';
+import { HistoriesResDto } from '../dto/response/historiesRes.dto';
+import { FullUserResDto } from '../dto/response/fullUserRes.dto';
+import { UserDetailResDto } from '../dto/response/userDetailRes.dto';
+import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
+import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
+import { CreateAdminDto } from '../dto/createAdmin.dto';
+import { SavedAdminResDto } from '../dto/response/savedAdminRes.dto';
+import { EssayInfoResDto } from '../dto/response/essayInfoRes.dto';
+import { FullEssayResDto } from '../dto/response/fullEssayRes.dto';
+import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
+import { AdminResDto } from '../dto/response/adminRes.dto';
+import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
+import { ProfileImageUrlResDto } from '../../user/dto/response/profileImageUrlRes.dto';
+import { AwsService } from '../../aws/aws.service';
+import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
+import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
+import { Notice } from '../../../entities/notice.entity';
+import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
+import { SupportRepository } from '../../support/support.repository';
+import { SupportService } from '../../support/support.service';
+import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
+import { InquirySummaryResDto } from '../../support/dto/response/inquirySummaryRes.dto';
+import { FullInquiryResDto } from '../dto/response/fullInquiryRes.dto';
+import { Release } from '../../../entities/release.entity';
+import { ReleaseResDto } from '../../support/dto/response/releaseRes.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { AlertService } from '../alert/alert.service';
-import { GeulroquisService } from '../geulroquis/geulroquis.service';
-import { CronService } from '../cron/cron.service';
-import { Server } from '../../entities/server.entity';
-import { VersionsResDto } from '../support/dto/response/versionsRes.dto';
-import { NicknameService } from '../nickname/nickname.service';
+import { AlertService } from '../../alert/alert.service';
+import { GeulroquisService } from '../../geulroquis/geulroquis.service';
+import { CronService } from '../../cron/cron.service';
+import { Server } from '../../../entities/server.entity';
+import { VersionsResDto } from '../../support/dto/response/versionsRes.dto';
+import { NicknameService } from '../../nickname/nickname.service';
 import {
   ActionType,
   EssayStatus,
   PageType,
   ReviewQueueType,
   UserStatus,
-} from '../../common/types/enum.types';
-import { GeulroquisCountResDto } from '../geulroquis/dto/response/geulroquisCountRes.dto';
-import { GeulroquisRepository } from '../geulroquis/geulroquis.repository';
+} from '../../../common/types/enum.types';
+import { GeulroquisCountResDto } from '../../geulroquis/dto/response/geulroquisCountRes.dto';
+import { GeulroquisRepository } from '../../geulroquis/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
-import { CreateThemeReqDto } from './dto/request/createThemeReq.dto';
-import { Theme } from '../../entities/theme.entity';
-import { CreateItemReqDto } from './dto/request/createItemReq.dto';
-import { Item } from '../../entities/item.entity';
-import { ItemResDto } from '../home/dto/response/itemRes.dto';
-import { ThemeResDto } from '../home/dto/response/themeRes.dto';
-import { UserResDto } from '../user/dto/response/userRes.dto';
-import { EssayService } from '../essay/essay.service';
+import { CreateThemeReqDto } from '../dto/request/createThemeReq.dto';
+import { Theme } from '../../../entities/theme.entity';
+import { CreateItemReqDto } from '../dto/request/createItemReq.dto';
+import { Item } from '../../../entities/item.entity';
+import { ItemResDto } from '../../home/dto/response/itemRes.dto';
+import { ThemeResDto } from '../../home/dto/response/themeRes.dto';
+import { UserResDto } from '../../user/dto/response/userRes.dto';
+import { EssayService } from '../../essay/essay.service';
+import { IAdminRepository } from '../repository/iadmin.repository';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly adminRepository: AdminRepository,
+    @Inject('IAdminRepository') private readonly adminRepository: IAdminRepository,
     private readonly userRepository: UserRepository,
     private readonly essayRepository: EssayRepository,
     private readonly userService: UserService,
