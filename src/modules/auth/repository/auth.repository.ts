@@ -1,9 +1,10 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../entities/user.entity';
-import { CreateUserReqDto } from './dto/request/createUserReq.dto';
+import { User } from '../../../entities/user.entity';
+import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
+import { IAuthRepository } from './iauth.repository';
 
-export class AuthRepository {
+export class AuthRepository implements IAuthRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

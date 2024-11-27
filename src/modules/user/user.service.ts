@@ -20,7 +20,7 @@ import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import { User } from '../../entities/user.entity';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../auth/service/auth.service';
 import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
 import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { Transactional } from 'typeorm-transactional';

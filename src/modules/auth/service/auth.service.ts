@@ -1,13 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { UtilsService } from '../utils/utils.service';
-import { MailService } from '../mail/mail.service';
-import { NicknameService } from '../nickname/nickname.service';
-import { AuthRepository } from './auth.repository';
-import { CreateUserReqDto } from './dto/request/createUserReq.dto';
-import { OauthDto } from './dto/oauth.dto';
+import { UtilsService } from '../../utils/utils.service';
+import { MailService } from '../../mail/mail.service';
+import { NicknameService } from '../../nickname/nickname.service';
+import { AuthRepository } from '../repository/auth.repository';
+import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
+import { OauthDto } from '../dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 import { Transactional } from 'typeorm-transactional';
@@ -16,16 +16,17 @@ import { firstValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
 import { JwtService } from '@nestjs/jwt';
-import { UserStatus } from '../../common/types/enum.types';
+import { UserStatus } from '../../../common/types/enum.types';
 import { Request as ExpressRequest } from 'express';
-import { User } from '../../entities/user.entity';
-import { HomeService } from '../home/home.service';
+import { User } from '../../../entities/user.entity';
+import { HomeService } from '../../home/home.service';
+import { IAuthRepository } from '../repository/iauth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
-    private readonly authRepository: AuthRepository,
+    @Inject('IAuthRepository') private readonly authRepository: IAuthRepository,
     private readonly mailService: MailService,
     private readonly utilsService: UtilsService,
     private readonly nicknameService: NicknameService,

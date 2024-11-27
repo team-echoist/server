@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilsModule } from '../utils/utils.module';
 import { MailModule } from '../mail/mail.module';
 import { NicknameModule } from '../nickname/nickname.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { AuthRepository } from './auth.repository';
+import { AuthController } from './controller/auth.controller';
+import { AuthService } from './service/auth.service';
+import { AuthRepository } from './repository/auth.repository';
 import { User } from '../../entities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import * as strategies from '../../common/guards/strategies';
@@ -31,13 +31,13 @@ import { HomeModule } from '../home/home.module';
   controllers: [AuthController],
   providers: [
     AuthService,
-    AuthRepository,
+    { provide: 'IAuthRepository', useClass: AuthRepository },
     strategies.LocalStrategy,
     strategies.GoogleStrategy,
     strategies.KakaoStrategy,
     strategies.NaverStrategy,
     strategies.AppleStrategy,
   ],
-  exports: [AuthService, AuthRepository],
+  exports: [AuthService, { provide: 'IAuthRepository', useClass: AuthRepository }],
 })
 export class AuthModule {}

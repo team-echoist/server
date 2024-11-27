@@ -13,7 +13,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { AuthService } from '../../modules/auth/auth.service';
+import { AuthService } from '../../modules/auth/service/auth.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
