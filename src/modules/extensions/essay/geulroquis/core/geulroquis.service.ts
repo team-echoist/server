@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { GeulroquisRepository } from '../infrastructure/geulroquis.repository';
 import { Geulroquis } from '../../../../../entities/geulroguis.entity';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { GeulroquisDto } from '../dto/response/geulroquis.dto';

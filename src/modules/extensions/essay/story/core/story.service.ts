@@ -6,7 +6,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { StoryRepository } from '../infrastructure/story.repository';
 import { User } from '../../../../../entities/user.entity';
 import { Story } from '../../../../../entities/story.entity';
 import { StoryDto } from '../dto/story.dto';

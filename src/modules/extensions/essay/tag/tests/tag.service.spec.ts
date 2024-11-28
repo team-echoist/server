@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TagService } from '../tag.service';
-import { TagRepository } from '../tag.repository';
+import { TagService } from '../core/tag.service';
+import { TagRepository } from '../infrastructure/tag.repository';
 import { Tag } from '../../../../../entities/tag.entity';
 
-jest.mock('../tag.repository');
+jest.mock('../infrastructure/tag.repository');
 
 describe('TagService', () => {
   let service: TagService;

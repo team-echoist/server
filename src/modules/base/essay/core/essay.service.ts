@@ -11,7 +11,7 @@ import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { ReviewService } from '../../../extensions/management/review/review.service';
 import { StoryService } from '../../../extensions/essay/story/core/story.service';
 import { UserService } from '../../user/core/user.service';
-import { TagService } from '../../../extensions/essay/tag/tag.service';
+import { TagService } from '../../../extensions/essay/tag/core/tag.service';
 import { FollowService } from '../../../extensions/user/follow/follow.service';
 import { BadgeService } from '../../../extensions/essay/badge/core/badge.service';
 import { ViewService } from '../../../extensions/essay/view/view.service';

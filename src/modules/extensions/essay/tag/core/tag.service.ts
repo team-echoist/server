@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { TagRepository } from './tag.repository';
-import { Tag } from '../../../../entities/tag.entity';
+import { Inject, Injectable } from '@nestjs/common';
+import { Tag } from '../../../../../entities/tag.entity';
+import { ITagRepository } from '../infrastructure/itag.repository';
 
 @Injectable()
 export class TagService {
-  constructor(private readonly tagRepository: TagRepository) {}
+  constructor(@Inject('ITagRepository') private readonly tagRepository: ITagRepository) {}
 
   async getTags(tagNames: string[]) {
     if (!tagNames || tagNames.length === 0) return [];
