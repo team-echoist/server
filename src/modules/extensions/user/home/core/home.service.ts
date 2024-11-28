@@ -1,24 +1,24 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { HomeRepository } from './home.repository';
-import { GeulroquisService } from '../../essay/geulroquis/core/geulroquis.service';
-import { UserService } from '../../../base/user/core/user.service';
-import { UserTheme } from '../../../../entities/userTheme.entity';
+import { GeulroquisService } from '../../../essay/geulroquis/core/geulroquis.service';
+import { UserService } from '../../../../base/user/core/user.service';
+import { UserTheme } from '../../../../../entities/userTheme.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import Redlock, { Lock } from 'redlock';
-import { ToolService } from '../../../utils/tool/tool.service';
-import { ThemeResDto } from './dto/response/themeRes.dto';
-import { Theme } from '../../../../entities/theme.entity';
+import { ToolService } from '../../../../utils/tool/tool.service';
+import { ThemeResDto } from '../dto/response/themeRes.dto';
+import { Theme } from '../../../../../entities/theme.entity';
 import { Transactional } from 'typeorm-transactional';
-import { Item } from '../../../../entities/item.entity';
-import { ItemResDto } from './dto/response/itemRes.dto';
-import { UserHomeLayout } from '../../../../entities/userHomeLayout.entity';
-import { UserHomeItem } from '../../../../entities/userHomeItem.entity';
+import { Item } from '../../../../../entities/item.entity';
+import { ItemResDto } from '../dto/response/itemRes.dto';
+import { UserHomeLayout } from '../../../../../entities/userHomeLayout.entity';
+import { UserHomeItem } from '../../../../../entities/userHomeItem.entity';
+import { IHomeRepository } from '../infrastructure/ihome.repository';
 
 @Injectable()
 export class HomeService {
   constructor(
-    private readonly homeRepository: HomeRepository,
+    @Inject('IHomeRepository') private readonly homeRepository: IHomeRepository,
     private readonly geulroquisService: GeulroquisService,
     private readonly userService: UserService,
     private readonly utilsService: ToolService,

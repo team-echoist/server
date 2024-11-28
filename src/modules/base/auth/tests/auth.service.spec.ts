@@ -8,7 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { HomeService } from '../../../extensions/user/home/home.service';
+import { HomeService } from '../../../extensions/user/home/core/home.service';
 import * as bcrypt from 'bcrypt';
 import { UserStatus } from '../../../../common/types/enum.types';
 

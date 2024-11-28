@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { HomeController } from './home.controller';
-import { HomeService } from './home.service';
-import { HomeRepository } from './home.repository';
+import { HomeController } from './api/home.controller';
+import { HomeService } from './core/home.service';
+import { HomeRepository } from './infrastructure/home.repository';
 import { GeulroquisModule } from '../../essay/geulroquis/geulroquis.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from '../../../base/auth/auth.module';
@@ -28,7 +28,11 @@ import { ConfigModule } from '@nestjs/config';
     forwardRef(() => UserModule),
   ],
   controllers: [HomeController],
-  providers: [HomeService, HomeRepository, RedlockProvider],
+  providers: [
+    HomeService,
+    { provide: 'IHomeRepository', useClass: HomeRepository },
+    RedlockProvider,
+  ],
   exports: [HomeService],
 })
 export class HomeModule {}

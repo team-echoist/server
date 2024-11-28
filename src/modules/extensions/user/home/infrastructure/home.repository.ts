@@ -1,14 +1,15 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Item } from '../../../../entities/item.entity';
-import { Theme } from '../../../../entities/theme.entity';
-import { UserTheme } from '../../../../entities/userTheme.entity';
-import { UserItem } from '../../../../entities/userItem.entity';
-import { UserHomeLayout } from '../../../../entities/userHomeLayout.entity';
-import { UserHomeItem } from '../../../../entities/userHomeItem.entity';
-import { User } from '../../../../entities/user.entity';
+import { Item } from '../../../../../entities/item.entity';
+import { Theme } from '../../../../../entities/theme.entity';
+import { UserTheme } from '../../../../../entities/userTheme.entity';
+import { UserItem } from '../../../../../entities/userItem.entity';
+import { UserHomeLayout } from '../../../../../entities/userHomeLayout.entity';
+import { UserHomeItem } from '../../../../../entities/userHomeItem.entity';
+import { User } from '../../../../../entities/user.entity';
+import { IHomeRepository } from './ihome.repository';
 
-export class HomeRepository {
+export class HomeRepository implements IHomeRepository {
   constructor(
     @InjectRepository(Item) private readonly itemRepository: Repository<Item>,
     @InjectRepository(Theme) private readonly themeRepository: Repository<Theme>,
