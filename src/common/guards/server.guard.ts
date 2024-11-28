@@ -1,6 +1,6 @@
 import { ExecutionContext, Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminService } from '../../modules/admin/admin.service';
+import { AdminService } from '../../modules/base/admin/core/admin.service';
 import { ServerStatus } from '../types/enum.types';
 
 @Injectable()

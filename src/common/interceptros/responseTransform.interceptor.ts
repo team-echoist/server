@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UtilsService } from '../../modules/utils/utils.service';
+import { ToolService } from '../../modules/utils/tool/tool.service';
 import { UserStatus } from '../types/enum.types';
 
 @Injectable()
 export class ResponseTransformInterceptor implements NestInterceptor {
-  constructor(private readonly utilsService: UtilsService) {}
+  constructor(private readonly utilsService: ToolService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();

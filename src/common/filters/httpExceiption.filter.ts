@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { UtilsService } from '../../modules/utils/utils.service';
+import { ToolService } from '../../modules/utils/tool/tool.service';
 
 interface CustomError {
   message: string | string[];
@@ -17,7 +17,7 @@ interface CustomError {
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly utilsService: UtilsService) {}
+  constructor(private readonly utilsService: ToolService) {}
 
   private readonly logger = new Logger(HttpExceptionFilter.name);
   catch(exception: HttpException, host: ArgumentsHost) {
