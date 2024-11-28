@@ -4,7 +4,7 @@ import { AlertRepository } from '../infrastructure/alert.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { SupportService } from '../../support/support.service';
 import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { HttpException, HttpStatus } from '@nestjs/common';

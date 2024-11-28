@@ -9,7 +9,7 @@ import {
 import { FollowRepository } from './follow.repository';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { UserSummaryResDto } from '../../../base/user/dto/response/userSummaryRes.dto';
-import { UserService } from '../../../base/user/user.service';
+import { UserService } from '../../../base/user/core/user.service';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()

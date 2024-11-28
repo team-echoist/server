@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { HomeRepository } from './home.repository';
 import { GeulroquisService } from '../../essay/geulroquis/geulroquis.service';
-import { UserService } from '../../../base/user/user.service';
+import { UserService } from '../../../base/user/core/user.service';
 import { UserTheme } from '../../../../entities/userTheme.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';

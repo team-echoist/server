@@ -5,7 +5,7 @@ import { NoticeSummaryResDto } from './dto/response/noticeSummaryRes.dto';
 import { NoticeResDto } from './dto/response/noticeRes.dto';
 import { InquiryReqDto } from './dto/request/inquiryReq.dto';
 import { Inquiry } from '../../../../entities/inquiry.entity';
-import { UserService } from '../../../base/user/user.service';
+import { UserService } from '../../../base/user/core/user.service';
 import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
 import { InquiryResDto } from './dto/response/inquiryRes.dto';
 import { ReleaseResDto } from './dto/response/releaseRes.dto';

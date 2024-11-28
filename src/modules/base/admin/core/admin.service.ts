@@ -10,9 +10,8 @@ import { ReviewQueue } from '../../../../entities/reviewQueue.entity';
 import { Essay } from '../../../../entities/essay.entity';
 import { Admin } from '../../../../entities/admin.entity';
 import { MailService } from '../../../utils/mail/mail.service';
-import { UserService } from '../../user/user.service';
+import { UserService } from '../../user/core/user.service';
 import { ToolService } from '../../../utils/tool/tool.service';
-import { UserRepository } from '../../user/user.repository';
 import { DashboardResDto } from '../dto/response/dashboardRes.dto';
 import { ReportResDto } from '../dto/response/reportRes.dto';
 import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
@@ -75,12 +74,13 @@ import { UserResDto } from '../../user/dto/response/userRes.dto';
 import { EssayService } from '../../essay/core/essay.service';
 import { IAdminRepository } from '../infrastructure/iadmin.repository';
 import { IEssayRepository } from '../../essay/infrastructure/iessay.repository';
+import { IUserRepository } from '../../user/infrastructure/iuser.repository';
 
 @Injectable()
 export class AdminService {
   constructor(
     @Inject('IAdminRepository') private readonly adminRepository: IAdminRepository,
-    private readonly userRepository: UserRepository,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     @Inject('IEssayRepository') private readonly essayRepository: IEssayRepository,
     private readonly userService: UserService,
     private readonly supportService: SupportService,

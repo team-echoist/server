@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SupportService } from '../support.service';
 import { SupportRepository } from '../support.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { InquiryReqDto } from '../dto/request/inquiryReq.dto';
 import { Request as ExpressRequest } from 'express';

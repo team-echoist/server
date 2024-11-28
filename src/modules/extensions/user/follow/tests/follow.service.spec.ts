@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FollowService } from '../follow.service';
 import { FollowRepository } from '../follow.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { User } from '../../../../../entities/user.entity';
 import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';

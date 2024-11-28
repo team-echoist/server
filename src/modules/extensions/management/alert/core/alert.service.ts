@@ -8,7 +8,7 @@ import { SupportService } from '../../support/support.service';
 import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { User } from '../../../../../entities/user.entity';
 import { ReportQueue } from '../../../../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';

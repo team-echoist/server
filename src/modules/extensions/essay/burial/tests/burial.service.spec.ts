@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BurialService } from '../burial.service';
 import { ToolService } from '../../../../utils/tool/tool.service';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { EssayRepository } from '../../../../base/essay/infrastructure/essay.repository';
 import { AlertService } from '../../../management/alert/core/alert.service';
 

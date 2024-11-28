@@ -11,7 +11,7 @@ import { User } from '../../../../entities/user.entity';
 import { Story } from '../../../../entities/story.entity';
 import { StoryDto } from './dto/story.dto';
 import { ToolService } from '../../../utils/tool/tool.service';
-import { UserService } from '../../../base/user/user.service';
+import { UserService } from '../../../base/user/core/user.service';
 import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
 import { EssayService } from '../../../base/essay/core/essay.service';
 import { Transactional } from 'typeorm-transactional';

@@ -3,7 +3,7 @@ import { BookmarkService } from '../core/bookmark.service';
 import { BookmarkRepository } from '../infrastructure/bookmark.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { EssayService } from '../../../../base/essay/core/essay.service';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EssayStatus } from '../../../../../common/types/enum.types';

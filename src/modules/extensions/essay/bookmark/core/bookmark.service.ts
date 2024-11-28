@@ -5,7 +5,7 @@ import { Essay } from '../../../../../entities/essay.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Bookmark } from '../../../../../entities/bookmark.entity';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { SummaryEssayResDto } from '../../../../base/essay/dto/response/summaryEssayRes.dto';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { Transactional } from 'typeorm-transactional';

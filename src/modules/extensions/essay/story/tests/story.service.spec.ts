@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StoryService } from '../story.service';
 import { StoryRepository } from '../story.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
-import { UserService } from '../../../../base/user/user.service';
+import { UserService } from '../../../../base/user/core/user.service';
 import { EssayService } from '../../../../base/essay/core/essay.service';
 import { User } from '../../../../../entities/user.entity';
 import { Story } from '../../../../../entities/story.entity';

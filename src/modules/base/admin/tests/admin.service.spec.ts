@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from '../core/admin.service';
 import { AdminRepository } from '../infrastructure/admin.repository';
-import { UserRepository } from '../../user/user.repository';
+import { UserRepository } from '../../user/infrastructure/user.repository';
 import { EssayRepository } from '../../essay/infrastructure/essay.repository';
-import { UserService } from '../../user/user.service';
+import { UserService } from '../../user/core/user.service';
 import { MailService } from '../../../utils/mail/mail.service';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
@@ -21,8 +21,8 @@ jest.mock('typeorm-transactional', () => ({
 }));
 jest.mock('bull');
 jest.mock('../infrastructure/admin.repository');
-jest.mock('../../user/user.service');
-jest.mock('../../user/user.repository');
+jest.mock('../../user/core/user.service');
+jest.mock('../../user/infrastructure/user.repository');
 jest.mock('../../essay/infrastructure/essay.repository');
 jest.mock('../../support/support.repository');
 jest.mock('../../util/util.service');

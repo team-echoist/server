@@ -9,30 +9,30 @@ import {
 import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { ToolService } from '../../utils/tool/tool.service';
-import { EssayService } from '../essay/core/essay.service';
-import { AwsService } from '../../adapters/aws/core/aws.service';
-import { NicknameService } from '../../utils/nickname/nickname.service';
-import { UserRepository } from './user.repository';
-import { UserResDto } from './dto/response/userRes.dto';
-import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
-import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto';
-import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
-import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
-import { User } from '../../../entities/user.entity';
-import { AuthService } from '../auth/core/auth.service';
-import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
-import { DeactivationReason } from '../../../entities/deactivationReason.entity';
+import { ToolService } from '../../../utils/tool/tool.service';
+import { EssayService } from '../../essay/core/essay.service';
+import { AwsService } from '../../../adapters/aws/core/aws.service';
+import { NicknameService } from '../../../utils/nickname/nickname.service';
+import { UserResDto } from '../dto/response/userRes.dto';
+import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
+import { UpdateFullUserReqDto } from '../../admin/dto/request/updateFullUserReq.dto';
+import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
+import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
+import { User } from '../../../../entities/user.entity';
+import { AuthService } from '../../auth/core/auth.service';
+import { DeactivateReqDto } from '../dto/request/deacvivateReq.dto';
+import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { Transactional } from 'typeorm-transactional';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Aggregate } from '../../../entities/aggregate.entity';
+import { Aggregate } from '../../../../entities/aggregate.entity';
+import { IUserRepository } from '../infrastructure/iuser.repository';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
-    private readonly userRepository: UserRepository,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     private readonly utilsService: ToolService,
     private readonly awsService: AwsService,
     private readonly nicknameService: NicknameService,

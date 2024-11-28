@@ -15,16 +15,16 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request as ExpressRequest } from 'express';
-import { UserService } from './user.service';
-import { ProfileImageReqDto } from './dto/request/profileImageReq.dto';
-import { UpdateUserReqDto } from './dto/request/updateUserReq.dto';
-import { UserResDto } from './dto/response/userRes.dto';
-import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
-import { UserSummaryWithStatsResDto } from './dto/response/userSummaryWithStatsRes.dto';
-import { UserSummaryWithCountResDto } from './dto/response/userSummaryWithCountRes.dto';
-import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
-import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
-import { JwtAuthGuard } from '../../../common/guards/jwtAuth.guard';
+import { UserService } from '../core/user.service';
+import { ProfileImageReqDto } from '../dto/request/profileImageReq.dto';
+import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
+import { UserResDto } from '../dto/response/userRes.dto';
+import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
+import { UserSummaryWithStatsResDto } from '../dto/response/userSummaryWithStatsRes.dto';
+import { UserSummaryWithCountResDto } from '../dto/response/userSummaryWithCountRes.dto';
+import { DeactivateReqDto } from '../dto/request/deacvivateReq.dto';
+import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
+import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
 
 @ApiTags('User')
 @UseGuards(JwtAuthGuard)

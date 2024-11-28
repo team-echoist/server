@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from '../user.service';
-import { UserRepository } from '../user.repository';
+import { UserService } from '../core/user.service';
+import { UserRepository } from '../infrastructure/user.repository';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { NicknameService } from '../../../utils/nickname/nickname.service';
@@ -24,7 +24,7 @@ jest.mock('typeorm-transactional', () => ({
 jest.mock('ioredis');
 jest.mock('bull');
 jest.mock('bcrypt');
-jest.mock('../user.repository');
+jest.mock('../infrastructure/user.repository');
 jest.mock('../../util/util.service');
 jest.mock('../../aws/core/aws.service');
 jest.mock('../../nickname/nickname.service');
