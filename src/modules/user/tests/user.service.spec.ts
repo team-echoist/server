@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../user.service';
 import { UserRepository } from '../user.repository';
 import { UtilsService } from '../../utils/utils.service';
-import { AwsService } from '../../aws/service/aws.service';
+import { AwsService } from '../../aws/core/aws.service';
 import { NicknameService } from '../../nickname/nickname.service';
-import { AuthService } from '../../auth/service/auth.service';
+import { AuthService } from '../../auth/core/auth.service';
 import { EssayService } from '../../essay/essay.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
@@ -26,9 +26,9 @@ jest.mock('bull');
 jest.mock('bcrypt');
 jest.mock('../user.repository');
 jest.mock('../../utils/utils.service');
-jest.mock('../../aws/service/aws.service');
+jest.mock('../../aws/core/aws.service');
 jest.mock('../../nickname/nickname.service');
-jest.mock('../../auth/service/auth.service');
+jest.mock('../../auth/core/auth.service');
 jest.mock('../../essay/essay.service');
 
 describe('UserService', () => {

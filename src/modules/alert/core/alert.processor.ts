@@ -1,6 +1,6 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
-import { AlertService } from '../service/alert.service';
+import { AlertService } from './alert.service';
 import { ReportQueue } from '../../../entities/reportQueue.entity';
 import { DataSource } from 'typeorm';
 import { ActionType } from '../../../common/types/enum.types';

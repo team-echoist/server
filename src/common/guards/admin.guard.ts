@@ -13,7 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { AdminService } from '../../modules/admin/service/admin.service';
+import { AdminService } from '../../modules/admin/core/admin.service';
 
 @Injectable()
 export class AdminGuard extends AuthGuard('admin-jwt') implements CanActivate {

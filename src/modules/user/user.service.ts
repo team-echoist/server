@@ -11,7 +11,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { UtilsService } from '../utils/utils.service';
 import { EssayService } from '../essay/essay.service';
-import { AwsService } from '../aws/service/aws.service';
+import { AwsService } from '../aws/core/aws.service';
 import { NicknameService } from '../nickname/nickname.service';
 import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';
@@ -20,7 +20,7 @@ import { UpdateFullUserReqDto } from '../admin/dto/request/updateFullUserReq.dto
 import { ProfileImageUrlResDto } from './dto/response/profileImageUrlRes.dto';
 import { UserSummaryResDto } from './dto/response/userSummaryRes.dto';
 import { User } from '../../entities/user.entity';
-import { AuthService } from '../auth/service/auth.service';
+import { AuthService } from '../auth/core/auth.service';
 import { DeactivateReqDto } from './dto/request/deacvivateReq.dto';
 import { DeactivationReason } from '../../entities/deactivationReason.entity';
 import { Transactional } from 'typeorm-transactional';

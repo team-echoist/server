@@ -5,7 +5,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { UtilsService } from '../../utils/utils.service';
 import { MailService } from '../../mail/mail.service';
 import { NicknameService } from '../../nickname/nickname.service';
-import { AuthRepository } from '../repository/auth.repository';
+import { AuthRepository } from '../infrastructure/auth.repository';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { OauthDto } from '../dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
@@ -20,7 +20,7 @@ import { UserStatus } from '../../../common/types/enum.types';
 import { Request as ExpressRequest } from 'express';
 import { User } from '../../../entities/user.entity';
 import { HomeService } from '../../home/home.service';
-import { IAuthRepository } from '../repository/iauth.repository';
+import { IAuthRepository } from '../infrastructure/iauth.repository';
 
 @Injectable()
 export class AuthService {

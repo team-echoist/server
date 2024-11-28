@@ -1,5 +1,5 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { AlertRepository } from '../repository/alert.repository';
+import { AlertRepository } from '../infrastructure/alert.repository';
 import { Essay } from '../../../entities/essay.entity';
 import { Alert } from '../../../entities/alert.entity';
 import { UtilsService } from '../../utils/utils.service';
@@ -13,7 +13,7 @@ import { User } from '../../../entities/user.entity';
 import { ReportQueue } from '../../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../../entities/reviewQueue.entity';
 import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
-import { IAlertRepository } from '../repository/ialert.repository';
+import { IAlertRepository } from '../infrastructure/ialert.repository';
 
 @Injectable()
 export class AlertService {

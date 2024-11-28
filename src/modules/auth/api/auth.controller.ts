@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../service/auth.service';
+import { AuthService } from '../core/auth.service';
 import { LoginReqDto } from '../dto/request/loginReq.dto';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { OauthMobileReqDto } from '../dto/request/OauthMobileReq.dto';

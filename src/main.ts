@@ -18,7 +18,7 @@ import * as cors from 'cors';
 
 import { join } from 'path';
 import { UtilsService } from './modules/utils/utils.service';
-import { AdminService } from './modules/admin/service/admin.service';
+import { AdminService } from './modules/admin/core/admin.service';
 import { UserStatusInterceptor } from './common/interceptros/userStatus.interceptor';
 
 dotenv.config();

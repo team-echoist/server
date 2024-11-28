@@ -12,7 +12,7 @@ import { Admin } from '../../../entities/admin.entity';
 import { MailService } from '../../mail/mail.service';
 import { UserService } from '../../user/user.service';
 import { UtilsService } from '../../utils/utils.service';
-import { AdminRepository } from '../repository/admin.repository';
+import { AdminRepository } from '../infrastructure/admin.repository';
 import { UserRepository } from '../../user/user.repository';
 import { EssayRepository } from '../../essay/essay.repository';
 import { DashboardResDto } from '../dto/response/dashboardRes.dto';
@@ -35,7 +35,7 @@ import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto
 import { AdminResDto } from '../dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../../user/dto/response/profileImageUrlRes.dto';
-import { AwsService } from '../../aws/service/aws.service';
+import { AwsService } from '../../aws/core/aws.service';
 import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
 import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
 import { Notice } from '../../../entities/notice.entity';
@@ -49,7 +49,7 @@ import { Release } from '../../../entities/release.entity';
 import { ReleaseResDto } from '../../support/dto/response/releaseRes.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { AlertService } from '../../alert/service/alert.service';
+import { AlertService } from '../../alert/core/alert.service';
 import { GeulroquisService } from '../../geulroquis/geulroquis.service';
 import { CronService } from '../../cron/cron.service';
 import { Server } from '../../../entities/server.entity';
@@ -75,7 +75,7 @@ import { ItemResDto } from '../../home/dto/response/itemRes.dto';
 import { ThemeResDto } from '../../home/dto/response/themeRes.dto';
 import { UserResDto } from '../../user/dto/response/userRes.dto';
 import { EssayService } from '../../essay/essay.service';
-import { IAdminRepository } from '../repository/iadmin.repository';
+import { IAdminRepository } from '../infrastructure/iadmin.repository';
 
 @Injectable()
 export class AdminService {

@@ -11,14 +11,14 @@ import {
   AdminManagementController,
   AdminSupportController,
   AdminRootController,
-} from './controller/admin.controller';
+} from './api/admin.controller';
 import { UserModule } from '../user/user.module';
 import { EssayModule } from '../essay/essay.module';
 import { MailModule } from '../mail/mail.module';
 import { UtilsModule } from '../utils/utils.module';
 import { AwsModule } from '../aws/aws.module';
-import { AdminService } from './service/admin.service';
-import { AdminRepository } from './repository/admin.repository';
+import { AdminService } from './core/admin.service';
+import { AdminRepository } from './infrastructure/admin.repository';
 import { ReviewQueue } from '../../entities/reviewQueue.entity';
 import { ReportQueue } from '../../entities/reportQueue.entity';
 import { User } from '../../entities/user.entity';
@@ -33,7 +33,7 @@ import { SupportModule } from '../support/support.module';
 import { Release } from '../../entities/release.entity';
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
-import { AdminProcessor } from './processor/admin.processor';
+import { AdminProcessor } from './core/admin.processor';
 import { AlertModule } from '../alert/alert.module';
 import { CronModule } from '../cron/cron.module';
 import { GeulroquisModule } from '../geulroquis/geulroquis.module';

@@ -1,13 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilsModule } from '../utils/utils.module';
-import { BadgeService } from './service/badge.service';
-import { BadgeRepository } from './repository/badge.repository';
+import { BadgeService } from './core/badge.service';
+import { BadgeRepository } from './infrastructure/badge.repository';
 import { User } from '../../entities/user.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Badge } from '../../entities/badge.entity';
 import { TagExp } from '../../entities/tagExp.entity';
-import { BadgeController } from './controller/badge.controller';
+import { BadgeController } from './api/badge.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AlertService } from '../service/alert.service';
-import { AlertRepository } from '../repository/alert.repository';
+import { AlertService } from '../core/alert.service';
+import { AlertRepository } from '../infrastructure/alert.repository';
 import { UtilsService } from '../../utils/utils.service';
 import { SupportService } from '../../support/support.service';
 import { FirebaseService } from '../../firebase/firebase.service';
@@ -9,14 +9,14 @@ import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
-import { AwsService } from '../../aws/service/aws.service';
+import { AwsService } from '../../aws/core/aws.service';
 
-jest.mock('../repository/alert.repository');
+jest.mock('../infrastructure/alert.repository');
 jest.mock('../../utils/utils.service');
 jest.mock('../../support/support.service');
 jest.mock('../../firebase/firebase.service');
 jest.mock('../../user/user.service');
-jest.mock('../../aws/service/aws.service');
+jest.mock('../../aws/core/aws.service');
 
 describe('AlertService', () => {
   let alertService: AlertService;

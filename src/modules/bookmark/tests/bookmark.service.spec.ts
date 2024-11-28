@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BookmarkService } from '../bookmark.service';
-import { BookmarkRepository } from '../bookmark.repository';
+import { BookmarkService } from '../core/bookmark.service';
+import { BookmarkRepository } from '../infrastructure/bookmark.repository';
 import { UtilsService } from '../../utils/utils.service';
 import { EssayService } from '../../essay/essay.service';
 import { UserService } from '../../user/user.service';

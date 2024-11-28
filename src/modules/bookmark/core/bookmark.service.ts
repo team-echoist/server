@@ -1,16 +1,16 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BookmarkRepository } from './bookmark.repository';
-import { User } from '../../entities/user.entity';
-import { Essay } from '../../entities/essay.entity';
+import { BookmarkRepository } from '../infrastructure/bookmark.repository';
+import { User } from '../../../entities/user.entity';
+import { Essay } from '../../../entities/essay.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Bookmark } from '../../entities/bookmark.entity';
-import { UserService } from '../user/user.service';
-import { SummaryEssayResDto } from '../essay/dto/response/summaryEssayRes.dto';
-import { UtilsService } from '../utils/utils.service';
+import { Bookmark } from '../../../entities/bookmark.entity';
+import { UserService } from '../../user/user.service';
+import { SummaryEssayResDto } from '../../essay/dto/response/summaryEssayRes.dto';
+import { UtilsService } from '../../utils/utils.service';
 import { Transactional } from 'typeorm-transactional';
-import { EssayService } from '../essay/essay.service';
-import { EssayStatus } from '../../common/types/enum.types';
+import { EssayService } from '../../essay/essay.service';
+import { EssayStatus } from '../../../common/types/enum.types';
 
 @Injectable()
 export class BookmarkService {

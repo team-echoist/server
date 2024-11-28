@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as dotenv from 'dotenv';
-import { AdminService } from '../../../modules/admin/service/admin.service';
+import { AdminService } from '../../../modules/admin/core/admin.service';
 import { ConfigService } from '@nestjs/config';
 
 dotenv.config();

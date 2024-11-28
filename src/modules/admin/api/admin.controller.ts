@@ -16,7 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AdminService } from '../service/admin.service';
+import { AdminService } from '../core/admin.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
 import { PagingParseIntPipe } from '../../../common/pipes/pagingParseInt.pipe';
