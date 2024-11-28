@@ -5,7 +5,7 @@ import { ToolService } from '../../../utils/tool/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { NicknameService } from '../../../utils/nickname/nickname.service';
 import { AuthService } from '../../auth/core/auth.service';
-import { EssayService } from '../../essay/essay.service';
+import { EssayService } from '../../essay/core/essay.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -29,7 +29,7 @@ jest.mock('../../util/util.service');
 jest.mock('../../aws/core/aws.service');
 jest.mock('../../nickname/nickname.service');
 jest.mock('../../auth/core/auth.service');
-jest.mock('../../essay/essay.service');
+jest.mock('../../essay/core/essay.service');
 
 describe('UserService', () => {
   let service: UserService;

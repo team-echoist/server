@@ -13,7 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AwsModule } from '../../adapters/aws/aws.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
-import { HomeModule } from '../../features/account/home/home.module';
+import { HomeModule } from '../../extensions/user/home/home.module';
 
 @Module({
   imports: [

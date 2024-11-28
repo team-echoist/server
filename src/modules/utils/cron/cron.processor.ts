@@ -1,6 +1,6 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
-import { EssayService } from '../../base/essay/essay.service';
+import { EssayService } from '../../base/essay/core/essay.service';
 import { forwardRef, Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Essay } from '../../../entities/essay.entity';

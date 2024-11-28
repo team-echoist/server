@@ -1,20 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EssayService } from '../essay.service';
-import { EssayRepository } from '../essay.repository';
+import { EssayService } from '../core/essay.service';
+import { EssayRepository } from '../infrastructure/essay.repository';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
-import { ReviewService } from '../../../features/contact/review/review.service';
-import { StoryService } from '../../../features/content/story/story.service';
+import { ReviewService } from '../../../extensions/management/review/review.service';
+import { StoryService } from '../../../extensions/essay/story/story.service';
 import { UserService } from '../../user/user.service';
-import { TagService } from '../../../features/content/tag/tag.service';
-import { FollowService } from '../../../features/account/follow/follow.service';
-import { BadgeService } from '../../../features/content/badge/core/badge.service';
-import { ViewService } from '../../../features/content/view/view.service';
-import { BookmarkService } from '../../../features/content/bookmark/core/bookmark.service';
-import { AlertService } from '../../../features/contact/alert/core/alert.service';
+import { TagService } from '../../../extensions/essay/tag/tag.service';
+import { FollowService } from '../../../extensions/user/follow/follow.service';
+import { BadgeService } from '../../../extensions/essay/badge/core/badge.service';
+import { ViewService } from '../../../extensions/essay/view/view.service';
+import { BookmarkService } from '../../../extensions/essay/bookmark/core/bookmark.service';
+import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SupportService } from '../../../features/contact/support/support.service';
+import { SupportService } from '../../../extensions/management/support/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({
@@ -24,7 +24,7 @@ jest.mock('typeorm-transactional', () => ({
 }));
 jest.mock('ioredis');
 jest.mock('bull');
-jest.mock('../essay.repository');
+jest.mock('../infrastructure/essay.repository');
 jest.mock('../../util/util.service');
 jest.mock('../../aws/core/aws.service');
 jest.mock('../../review/review.service');

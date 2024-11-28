@@ -11,7 +11,7 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { StoryInfoDto } from '../../../../features/content/story/dto/storyInfo.dto';
+import { StoryInfoDto } from '../../../../extensions/essay/story/dto/storyInfo.dto';
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
 import { ReviewResDto } from './reviewRes.dto';

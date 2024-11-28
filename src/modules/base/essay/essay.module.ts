@@ -5,28 +5,28 @@ import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../../utils/mail/mail.module';
 import { UserModule } from '../user/user.module';
 import { ToolModule } from '../../utils/tool/tool.module';
-import { ReportModule } from '../../features/contact/report/report.module';
-import { ReviewModule } from '../../features/contact/review/review.module';
-import { StoryModule } from '../../features/content/story/story.module';
-import { TagModule } from '../../features/content/tag/tag.module';
+import { ReportModule } from '../../extensions/management/report/report.module';
+import { ReviewModule } from '../../extensions/management/review/review.module';
+import { StoryModule } from '../../extensions/essay/story/story.module';
+import { TagModule } from '../../extensions/essay/tag/tag.module';
 import { AwsModule } from '../../adapters/aws/aws.module';
-import { FollowModule } from '../../features/account/follow/follow.module';
-import { BadgeModule } from '../../features/content/badge/badge.module';
-import { EssayController } from './essay.controller';
-import { EssayService } from './essay.service';
-import { EssayRepository } from './essay.repository';
+import { FollowModule } from '../../extensions/user/follow/follow.module';
+import { BadgeModule } from '../../extensions/essay/badge/badge.module';
+import { EssayController } from './api/essay.controller';
+import { EssayService } from './core/essay.service';
+import { EssayRepository } from './infrastructure/essay.repository';
 import { User } from '../../../entities/user.entity';
 import { Essay } from '../../../entities/essay.entity';
 import { ReviewQueue } from '../../../entities/reviewQueue.entity';
 import { Story } from '../../../entities/story.entity';
 import { Tag } from '../../../entities/tag.entity';
 import * as strategies from '../../../common/guards/strategies';
-import { ViewModule } from '../../features/content/view/view.module';
-import { BookmarkModule } from '../../features/content/bookmark/bookmark.module';
+import { ViewModule } from '../../extensions/essay/view/view.module';
+import { BookmarkModule } from '../../extensions/essay/bookmark/bookmark.module';
 import { ConfigModule } from '@nestjs/config';
 import { ViewRecord } from '../../../entities/viewRecord.entity';
-import { AlertModule } from '../../features/contact/alert/alert.module';
-import { SupportModule } from '../../features/contact/support/support.module';
+import { AlertModule } from '../../extensions/management/alert/alert.module';
+import { SupportModule } from '../../extensions/management/support/support.module';
 import { Aggregate } from '../../../entities/aggregate.entity';
 import { SyncStatus } from '../../../entities/sysncStatus.entity';
 
@@ -61,7 +61,11 @@ import { SyncStatus } from '../../../entities/sysncStatus.entity';
     forwardRef(() => UserModule),
   ],
   controllers: [EssayController],
-  providers: [EssayService, EssayRepository, strategies.JwtStrategy],
-  exports: [EssayService, EssayRepository],
+  providers: [
+    EssayService,
+    { provide: 'IEssayRepository', useClass: EssayRepository },
+    strategies.JwtStrategy,
+  ],
+  exports: [EssayService, { provide: 'IEssayRepository', useClass: EssayRepository }],
 })
 export class EssayModule {}

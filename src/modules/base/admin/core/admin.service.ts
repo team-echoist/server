@@ -13,7 +13,6 @@ import { MailService } from '../../../utils/mail/mail.service';
 import { UserService } from '../../user/user.service';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { UserRepository } from '../../user/user.repository';
-import { EssayRepository } from '../../essay/essay.repository';
 import { DashboardResDto } from '../dto/response/dashboardRes.dto';
 import { ReportResDto } from '../dto/response/reportRes.dto';
 import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
@@ -39,20 +38,20 @@ import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
 import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
 import { Notice } from '../../../../entities/notice.entity';
 import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
-import { SupportRepository } from '../../../features/contact/support/support.repository';
-import { SupportService } from '../../../features/contact/support/support.service';
+import { SupportRepository } from '../../../extensions/management/support/support.repository';
+import { SupportService } from '../../../extensions/management/support/support.service';
 import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
-import { InquirySummaryResDto } from '../../../features/contact/support/dto/response/inquirySummaryRes.dto';
+import { InquirySummaryResDto } from '../../../extensions/management/support/dto/response/inquirySummaryRes.dto';
 import { FullInquiryResDto } from '../dto/response/fullInquiryRes.dto';
 import { Release } from '../../../../entities/release.entity';
-import { ReleaseResDto } from '../../../features/contact/support/dto/response/releaseRes.dto';
+import { ReleaseResDto } from '../../../extensions/management/support/dto/response/releaseRes.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { AlertService } from '../../../features/contact/alert/core/alert.service';
-import { GeulroquisService } from '../../../features/content/geulroquis/geulroquis.service';
+import { AlertService } from '../../../extensions/management/alert/core/alert.service';
+import { GeulroquisService } from '../../../extensions/essay/geulroquis/geulroquis.service';
 import { CronService } from '../../../utils/cron/cron.service';
 import { Server } from '../../../../entities/server.entity';
-import { VersionsResDto } from '../../../features/contact/support/dto/response/versionsRes.dto';
+import { VersionsResDto } from '../../../extensions/management/support/dto/response/versionsRes.dto';
 import { NicknameService } from '../../../utils/nickname/nickname.service';
 import {
   ActionType,
@@ -61,8 +60,8 @@ import {
   ReviewQueueType,
   UserStatus,
 } from '../../../../common/types/enum.types';
-import { GeulroquisCountResDto } from '../../../features/content/geulroquis/dto/response/geulroquisCountRes.dto';
-import { GeulroquisRepository } from '../../../features/content/geulroquis/geulroquis.repository';
+import { GeulroquisCountResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisCountRes.dto';
+import { GeulroquisRepository } from '../../../extensions/essay/geulroquis/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
@@ -70,18 +69,19 @@ import { CreateThemeReqDto } from '../dto/request/createThemeReq.dto';
 import { Theme } from '../../../../entities/theme.entity';
 import { CreateItemReqDto } from '../dto/request/createItemReq.dto';
 import { Item } from '../../../../entities/item.entity';
-import { ItemResDto } from '../../../features/account/home/dto/response/itemRes.dto';
-import { ThemeResDto } from '../../../features/account/home/dto/response/themeRes.dto';
+import { ItemResDto } from '../../../extensions/user/home/dto/response/itemRes.dto';
+import { ThemeResDto } from '../../../extensions/user/home/dto/response/themeRes.dto';
 import { UserResDto } from '../../user/dto/response/userRes.dto';
-import { EssayService } from '../../essay/essay.service';
+import { EssayService } from '../../essay/core/essay.service';
 import { IAdminRepository } from '../infrastructure/iadmin.repository';
+import { IEssayRepository } from '../../essay/infrastructure/iessay.repository';
 
 @Injectable()
 export class AdminService {
   constructor(
     @Inject('IAdminRepository') private readonly adminRepository: IAdminRepository,
     private readonly userRepository: UserRepository,
-    private readonly essayRepository: EssayRepository,
+    @Inject('IEssayRepository') private readonly essayRepository: IEssayRepository,
     private readonly userService: UserService,
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
@@ -93,7 +93,7 @@ export class AdminService {
     private readonly mailService: MailService,
     private readonly awsService: AwsService,
     private readonly cronService: CronService,
-    private readonly utilsService: ToolService,
+    private readonly toolService: ToolService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @InjectRedis() private readonly redis: Redis,
@@ -108,8 +108,8 @@ export class AdminService {
   @Transactional()
   async dashboard() {
     const today = new Date();
-    const todayStart = this.utilsService.startOfDay(today);
-    const todayEnd = this.utilsService.endOfDay(today);
+    const todayStart = this.toolService.startOfDay(today);
+    const todayEnd = this.toolService.endOfDay(today);
 
     const totalUser = await this.userRepository.usersCount();
     const currentSubscriber = await this.adminRepository.totalSubscriberCount(today);
@@ -121,7 +121,7 @@ export class AdminService {
     const unprocessedReports = await this.adminRepository.unprocessedReports();
     const unprocessedReviews = await this.adminRepository.unprocessedReviews();
 
-    return this.utilsService.transformToDto(DashboardResDto, {
+    return this.toolService.transformToDto(DashboardResDto, {
       totalUser,
       currentSubscriber,
       todaySubscribers,
@@ -205,7 +205,7 @@ export class AdminService {
     };
     const savedAdmin = await this.adminRepository.saveAdmin(newAdmin);
 
-    return this.utilsService.transformToDto(SavedAdminResDto, savedAdmin);
+    return this.toolService.transformToDto(SavedAdminResDto, savedAdmin);
   }
 
   async countEssaysByDailyThisMonth(queryYear: number, queryMonth: number) {
@@ -222,7 +222,7 @@ export class AdminService {
       lastDayOfMonth,
     );
 
-    return await this.utilsService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
+    return await this.toolService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
   }
 
   async countEssaysByMonthlyThisYear(queryYear?: number) {
@@ -230,7 +230,7 @@ export class AdminService {
 
     const rawData = await this.essayRepository.countEssaysByMonthlyThisYear(year);
 
-    return this.utilsService.formatMonthlyData(rawData);
+    return this.toolService.formatMonthlyData(rawData);
   }
 
   async countDailyRegistrations(queryYear: number, queryMonth: number) {
@@ -246,14 +246,14 @@ export class AdminService {
       lastDayOfMonth,
     );
 
-    return await this.utilsService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
+    return await this.toolService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
   }
 
   async countMonthlyRegistrations(queryYear: number) {
     const year = queryYear ? queryYear : new Date().getUTCFullYear();
     const rawData = await this.userRepository.countMonthlyRegistrations(year);
 
-    return this.utilsService.formatMonthlyData(rawData);
+    return this.toolService.formatMonthlyData(rawData);
   }
 
   async countMonthlySubscriptionPayments(queryYear: number, queryMonth: number) {
@@ -269,14 +269,14 @@ export class AdminService {
       lastDayOfMonth,
     );
 
-    return await this.utilsService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
+    return await this.toolService.formatDailyData(rawData, firstDayOfMonth, lastDayOfMonth);
   }
 
   async countYearlySubscriptionPayments(queryYear: number) {
     const year = queryYear ? queryYear : new Date().getUTCFullYear();
     const rawData = await this.adminRepository.countYearlySubscriptionPayments(year);
 
-    return await this.utilsService.formatMonthlyData(rawData);
+    return await this.toolService.formatMonthlyData(rawData);
   }
 
   @Transactional()
@@ -287,7 +287,7 @@ export class AdminService {
       limit,
     );
     const totalPage: number = Math.ceil(totalEssay / limit);
-    const reportDtos = this.utilsService.transformToDto(ReportResDto, reports) as ReportResDto[];
+    const reportDtos = this.toolService.transformToDto(ReportResDto, reports) as ReportResDto[];
 
     return { reports: reportDtos, totalReports, totalEssay, totalPage, page };
   }
@@ -295,7 +295,7 @@ export class AdminService {
   async getReportDetails(essayId: number) {
     const essayWithReports = await this.essayRepository.getReportDetails(essayId);
 
-    return this.utilsService.transformToDto(ReportDetailResDto, {
+    return this.toolService.transformToDto(ReportDetailResDto, {
       ...essayWithReports,
       authorId: essayWithReports.author ? essayWithReports.author.id : null,
       reports: essayWithReports.reports.map((report) => ({
@@ -442,7 +442,7 @@ export class AdminService {
     const { reviews, total } = await this.adminRepository.getReviews(page, limit);
     const totalPage: number = Math.ceil(total / limit);
 
-    const reviewsDto = this.utilsService.transformToDto(
+    const reviewsDto = this.toolService.transformToDto(
       ReviewResDto,
       reviews.map((review) => ({
         id: review.id,
@@ -461,7 +461,7 @@ export class AdminService {
 
   async detailReview(reviewId: number) {
     const review = await this.adminRepository.getReview(reviewId);
-    return this.utilsService.transformToDto(DetailReviewResDto, review);
+    return this.toolService.transformToDto(DetailReviewResDto, review);
   }
 
   @Transactional()
@@ -510,7 +510,7 @@ export class AdminService {
     });
 
     const totalPage: number = Math.ceil(total / limit);
-    const userDtos = this.utilsService.transformToDto(FullUserResDto, processedUsers);
+    const userDtos = this.toolService.transformToDto(FullUserResDto, processedUsers);
 
     return { users: userDtos, totalPage, page, total };
   }
@@ -520,7 +520,7 @@ export class AdminService {
 
     const totalPage: number = Math.ceil(total / limit);
 
-    const usersDto = this.utilsService.transformToDto(UserResDto, users);
+    const usersDto = this.toolService.transformToDto(UserResDto, users);
     return { usersDto, total, page, totalPage };
   }
 
@@ -539,7 +539,7 @@ export class AdminService {
       essayCount: user.essays.length,
       reviewCount: user.reviews.length,
     };
-    return this.utilsService.transformToDto(UserDetailResDto, data);
+    return this.toolService.transformToDto(UserDetailResDto, data);
   }
 
   @Transactional()
@@ -568,7 +568,7 @@ export class AdminService {
     const { essays, total } = await this.essayRepository.findFullEssays(page, limit);
     const totalPage: number = Math.ceil(total / limit);
 
-    const essaysDto = this.utilsService.transformToDto(EssayInfoResDto, essays);
+    const essaysDto = this.toolService.transformToDto(EssayInfoResDto, essays);
     return { essays: essaysDto, total, page, totalPage };
   }
 
@@ -577,7 +577,7 @@ export class AdminService {
     if (essay.author.deletedDate) {
       essay.author.nickname = 'deleted_user';
     }
-    return this.utilsService.transformToDto(FullEssayResDto, essay);
+    return this.toolService.transformToDto(FullEssayResDto, essay);
   }
 
   @Transactional()
@@ -620,7 +620,7 @@ export class AdminService {
 
     const { histories, total } = await this.adminRepository.getHistories(query);
     const totalPage: number = Math.ceil(total / limit);
-    const historiesDto = this.utilsService.transformToDto(HistoriesResDto, histories);
+    const historiesDto = this.toolService.transformToDto(HistoriesResDto, histories);
 
     return { histories: historiesDto, totalPage, page, total };
   }
@@ -662,14 +662,14 @@ export class AdminService {
 
     const totalPage: number = Math.ceil(total / limit);
 
-    const adminsDto = this.utilsService.transformToDto(AdminResDto, admins);
+    const adminsDto = this.toolService.transformToDto(AdminResDto, admins);
 
     return { admins: adminsDto, total, page, totalPage };
   }
 
   async getAdmin(adminId: number) {
     const admin = await this.adminRepository.findAdmin(adminId);
-    return this.utilsService.transformToDto(AdminResDto, admin);
+    return this.toolService.transformToDto(AdminResDto, admin);
   }
 
   async updateAdmin(adminId: number, data: AdminUpdateReqDto) {
@@ -678,7 +678,7 @@ export class AdminService {
       data.password = await bcrypt.hash(data.password, 12);
     }
     const updatedAdmin = await this.adminRepository.updateAdmin(admin, data);
-    return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
+    return this.toolService.transformToDto(AdminResDto, updatedAdmin);
   }
 
   async saveProfileImage(adminId: number, file: Express.Multer.File) {
@@ -690,7 +690,7 @@ export class AdminService {
       const urlParts = admin.profileImage.split('/').pop();
       fileName = `profile/${urlParts}`;
     } else {
-      const imageName = this.utilsService.getUUID();
+      const imageName = this.toolService.getUUID();
       fileName = `profile/${imageName}`;
     }
 
@@ -698,7 +698,7 @@ export class AdminService {
     admin.profileImage = imageUrl;
     await this.adminRepository.saveAdmin(admin);
 
-    return this.utilsService.transformToDto(ProfileImageUrlResDto, { imageUrl });
+    return this.toolService.transformToDto(ProfileImageUrlResDto, { imageUrl });
   }
 
   async deleteProfileImage(adminId: number) {
@@ -730,7 +730,7 @@ export class AdminService {
 
     if (activated === true) await this.mailService.sendActiveComplete(admin.email);
 
-    return this.utilsService.transformToDto(AdminResDto, updatedAdmin);
+    return this.toolService.transformToDto(AdminResDto, updatedAdmin);
   }
 
   @Transactional()
@@ -759,7 +759,7 @@ export class AdminService {
   async getInactiveAdmins(page: number, limit: number) {
     const admins = await this.adminRepository.findAdmins(false, page, limit);
 
-    const adminsDto = this.utilsService.transformToDto(AdminResDto, admins);
+    const adminsDto = this.toolService.transformToDto(AdminResDto, admins);
 
     return { admins: adminsDto };
   }
@@ -785,7 +785,7 @@ export class AdminService {
 
     await this.redis.del('latestNotice');
 
-    return this.utilsService.transformToDto(NoticeWithProcessorResDto, savedNotice);
+    return this.toolService.transformToDto(NoticeWithProcessorResDto, savedNotice);
   }
 
   @Transactional()
@@ -812,7 +812,7 @@ export class AdminService {
 
     await this.redis.del('latestNotice');
 
-    return this.utilsService.transformToDto(NoticeWithProcessorResDto, savedNotice);
+    return this.toolService.transformToDto(NoticeWithProcessorResDto, savedNotice);
   }
 
   @Transactional()
@@ -845,7 +845,7 @@ export class AdminService {
   async getNotice(noticeId: number) {
     const notice = await this.supportRepository.findNotice(noticeId);
 
-    return this.utilsService.transformToDto(NoticeWithProcessorResDto, notice);
+    return this.toolService.transformToDto(NoticeWithProcessorResDto, notice);
   }
 
   async getInquiries(page: number, limit: number, status: 'all' | 'unprocessed') {
@@ -856,7 +856,7 @@ export class AdminService {
     );
 
     const totalPage: number = Math.ceil(total / limit);
-    const inquiriesDto = this.utilsService.transformToDto(InquirySummaryResDto, inquiries);
+    const inquiriesDto = this.toolService.transformToDto(InquirySummaryResDto, inquiries);
 
     return { inquiries: inquiriesDto, total, page, totalPage };
   }
@@ -864,7 +864,7 @@ export class AdminService {
   async getInquiry(inquiryId: number) {
     const inquiry = await this.supportRepository.findInquiryById(inquiryId);
 
-    return this.utilsService.transformToDto(FullInquiryResDto, inquiry);
+    return this.toolService.transformToDto(FullInquiryResDto, inquiry);
   }
 
   async createAnswer(adminId: number, inquiryId: number, answer: string) {
@@ -944,7 +944,7 @@ export class AdminService {
     const { releases, total } = await this.supportRepository.findReleases(page, limit);
 
     const totalPage = Math.ceil(total / limit);
-    const releasesDto = this.utilsService.transformToDto(ReleaseResDto, releases);
+    const releasesDto = this.toolService.transformToDto(ReleaseResDto, releases);
 
     return { releases: releasesDto, total, page, totalPage };
   }
@@ -952,7 +952,7 @@ export class AdminService {
   async getRelease(releaseId: number) {
     const release = await this.supportRepository.findRelease(releaseId);
 
-    return this.utilsService.transformToDto(ReleaseResDto, release);
+    return this.toolService.transformToDto(ReleaseResDto, release);
   }
 
   async deleteUser(adminId: number, userId: number) {
@@ -975,7 +975,7 @@ export class AdminService {
   async saveGeulroquisImages(files: Express.Multer.File[]) {
     const uploadPromises = files.map(async (file) => {
       const newExt = file.originalname.split('.').pop();
-      const imageName = this.utilsService.getUUID();
+      const imageName = this.toolService.getUUID();
       const fileName = `geulroquis/${imageName}.${newExt}`;
       return await this.awsService.geulroquisUploadToS3(fileName, file, newExt);
     });
@@ -995,7 +995,7 @@ export class AdminService {
     const total = await this.geulroquisRepository.countTotalGeulroquis();
     const available = await this.geulroquisRepository.countAvailableGeulroquis();
 
-    return this.utilsService.transformToDto(GeulroquisCountResDto, { total, available });
+    return this.toolService.transformToDto(GeulroquisCountResDto, { total, available });
   }
 
   @Transactional()
@@ -1059,7 +1059,7 @@ export class AdminService {
   async getAppVersions() {
     const versions = await this.supportService.findAllVersions();
 
-    return this.utilsService.transformToDto(VersionsResDto, versions);
+    return this.toolService.transformToDto(VersionsResDto, versions);
   }
 
   async deleteAllDevice(adminId: number) {
@@ -1076,7 +1076,7 @@ export class AdminService {
 
     const admin = await this.adminRepository.findAdmin(adminId);
 
-    const token = await this.utilsService.generateVerifyToken();
+    const token = await this.toolService.generateVerifyToken();
 
     const adminData = { email: admin.email, id: admin.id };
 
@@ -1156,7 +1156,7 @@ export class AdminService {
   }
 
   async clearRootAdminVerify() {
-    const token = await this.utilsService.generateVerifyToken();
+    const token = await this.toolService.generateVerifyToken();
 
     await this.redis.set(token, '이게뭔일이람', 'EX', 600);
 
@@ -1178,7 +1178,7 @@ export class AdminService {
   async getThemes() {
     const themes = await this.adminRepository.findThemes();
 
-    const themesDto = this.utilsService.transformToDto(ThemeResDto, themes);
+    const themesDto = this.toolService.transformToDto(ThemeResDto, themes);
 
     return { themes: themesDto };
   }
@@ -1200,7 +1200,7 @@ export class AdminService {
   async getItems(themeName?: string) {
     const items = await this.adminRepository.findItems(themeName);
 
-    return this.utilsService.transformToDto(ItemResDto, items);
+    return this.toolService.transformToDto(ItemResDto, items);
   }
 
   async createItem(data: CreateItemReqDto) {

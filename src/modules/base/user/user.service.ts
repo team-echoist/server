@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ToolService } from '../../utils/tool/tool.service';
-import { EssayService } from '../essay/essay.service';
+import { EssayService } from '../essay/core/essay.service';
 import { AwsService } from '../../adapters/aws/core/aws.service';
 import { NicknameService } from '../../utils/nickname/nickname.service';
 import { UserRepository } from './user.repository';

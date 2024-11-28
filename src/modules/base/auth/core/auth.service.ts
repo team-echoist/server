@@ -19,7 +19,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '../../../../common/types/enum.types';
 import { Request as ExpressRequest } from 'express';
 import { User } from '../../../../entities/user.entity';
-import { HomeService } from '../../../features/account/home/home.service';
+import { HomeService } from '../../../extensions/user/home/home.service';
 import { IAuthRepository } from '../infrastructure/iauth.repository';
 
 @Injectable()

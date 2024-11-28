@@ -6,8 +6,8 @@ import { ReviewResDto } from './reviewRes.dto';
 import { UserDto } from '../../../user/dto/user.dto';
 import { EssayDto } from '../../../essay/dto/essay.dto';
 import { AdminResDto } from './adminRes.dto';
-import { NoticeResDto } from '../../../../features/contact/support/dto/response/noticeRes.dto';
-import { InquiryResDto } from '../../../../features/contact/support/dto/response/inquiryRes.dto';
+import { NoticeResDto } from '../../../../extensions/management/support/dto/response/noticeRes.dto';
+import { InquiryResDto } from '../../../../extensions/management/support/dto/response/inquiryRes.dto';
 import { ActionType } from '../../../../../common/types/enum.types';
 
 export class HistoriesResDto {

@@ -14,7 +14,7 @@ import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { Device } from '../../../entities/device.entity';
 import { UserStatus } from '../../../common/types/enum.types';
-import { EssayService } from '../../base/essay/essay.service';
+import { EssayService } from '../../base/essay/core/essay.service';
 
 @Injectable()
 export class CronService {

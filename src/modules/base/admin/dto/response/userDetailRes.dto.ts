@@ -1,7 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { AlertSettingsResDto } from '../../../../features/contact/support/dto/response/alertSettingsRes.dto';
+import { AlertSettingsResDto } from '../../../../extensions/management/support/dto/response/alertSettingsRes.dto';
 import { UserStatus } from '../../../../../common/types/enum.types';
 
 export class UserDetailResDto {

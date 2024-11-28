@@ -10,9 +10,9 @@ import {
 } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
 import { TagDto } from '../tag.dto';
-import { StoryDto } from '../../../../features/content/story/dto/story.dto';
+import { StoryDto } from '../../../../extensions/essay/story/dto/story.dto';
 import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';
-import { ReviewResDto } from '../../../../features/contact/review/dto/response/reviewRes.dto';
+import { ReviewResDto } from '../../../../extensions/management/review/dto/response/reviewRes.dto';
 import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 import { EssayStatus } from '../../../../../common/types/enum.types';
 
