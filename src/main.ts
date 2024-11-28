@@ -17,7 +17,7 @@ import { writeFileSync } from 'fs';
 import * as cors from 'cors';
 
 import { join } from 'path';
-import { ToolService } from './modules/utils/tool/tool.service';
+import { ToolService } from './modules/utils/tool/core/tool.service';
 import { AdminService } from './modules/base/admin/core/admin.service';
 import { UserStatusInterceptor } from './common/interceptros/userStatus.interceptor';
 

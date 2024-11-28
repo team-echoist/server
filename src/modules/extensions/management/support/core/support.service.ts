@@ -1,5 +1,5 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { NoticeSummaryResDto } from '../dto/response/noticeSummaryRes.dto';
 import { NoticeResDto } from '../dto/response/noticeRes.dto';
 import { InquiryReqDto } from '../dto/request/inquiryReq.dto';

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AlertService } from '../core/alert.service';
 import { AlertRepository } from '../infrastructure/alert.repository';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { SupportService } from '../../support/core/support.service';
 import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
 import { UserService } from '../../../../base/user/core/user.service';
@@ -12,7 +12,7 @@ import { ActionType, AlertType, EssayStatus } from '../../../../../common/types/
 import { AwsService } from '../../../../adapters/aws/core/aws.service';
 
 jest.mock('../infrastructure/alert.repository');
-jest.mock('../../../../utils/tool/tool.service');
+jest.mock('../../../../utils/tool/core/tool.service');
 jest.mock('../../../../support/support.service');
 jest.mock('../../../../adapters/firebase/core/firebase.service');
 jest.mock('../../user/user.service');

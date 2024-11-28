@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EssayService } from '../core/essay.service';
 import { EssayRepository } from '../infrastructure/essay.repository';
-import { ToolService } from '../../../utils/tool/tool.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { ReviewService } from '../../../extensions/management/review/core/review.service';
 import { StoryService } from '../../../extensions/essay/story/core/story.service';

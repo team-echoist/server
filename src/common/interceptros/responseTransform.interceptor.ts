@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ToolService } from '../../modules/utils/tool/tool.service';
+import { ToolService } from '../../modules/utils/tool/core/tool.service';
 import { UserStatus } from '../types/enum.types';
 
 @Injectable()

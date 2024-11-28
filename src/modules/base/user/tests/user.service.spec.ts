@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../core/user.service';
 import { UserRepository } from '../infrastructure/user.repository';
-import { ToolService } from '../../../utils/tool/tool.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
-import { NicknameService } from '../../../utils/nickname/nickname.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
 import { AuthService } from '../../auth/core/auth.service';
 import { EssayService } from '../../essay/core/essay.service';
 import { getQueueToken } from '@nestjs/bull';

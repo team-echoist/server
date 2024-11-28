@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BookmarkService } from '../core/bookmark.service';
 import { BookmarkRepository } from '../infrastructure/bookmark.repository';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { EssayService } from '../../../../base/essay/core/essay.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { getQueueToken } from '@nestjs/bull';
@@ -13,7 +13,7 @@ jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
 jest.mock('../bookmark.repository');
-jest.mock('../../../../utils/tool/tool.service');
+jest.mock('../../../../utils/tool/core/tool.service');
 jest.mock('../../essay/essay.service');
 jest.mock('../../user/user.service');
 

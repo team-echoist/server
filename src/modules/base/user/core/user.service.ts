@@ -9,10 +9,10 @@ import {
 import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { ToolService } from '../../../utils/tool/tool.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { EssayService } from '../../essay/core/essay.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
-import { NicknameService } from '../../../utils/nickname/nickname.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
 import { UserResDto } from '../dto/response/userRes.dto';
 import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 import { UpdateFullUserReqDto } from '../../admin/dto/request/updateFullUserReq.dto';

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AlertService } from '../../../management/alert/core/alert.service';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { SummaryEssayResDto } from '../../../../base/essay/dto/response/summaryEssayRes.dto';
 import { IEssayRepository } from '../../../../base/essay/infrastructure/iessay.repository';
 

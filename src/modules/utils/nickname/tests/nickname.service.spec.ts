@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NicknameService } from '../nickname.service';
-import { NicknameRepository } from '../nickname.repository';
+import { NicknameService } from '../core/nickname.service';
+import { NicknameRepository } from '../infrastructure/nickname.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 jest.mock('typeorm-transactional', () => ({
@@ -8,7 +8,7 @@ jest.mock('typeorm-transactional', () => ({
   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
-jest.mock('../nickname.repository');
+jest.mock('../infrastructure/nickname.repository');
 
 describe('NicknameService', () => {
   let service: NicknameService;

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SupportService } from '../core/support.service';
 import { SupportRepository } from '../infrastructure/support.repository';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { InquiryReqDto } from '../dto/request/inquiryReq.dto';

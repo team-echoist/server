@@ -1,7 +1,7 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Essay } from '../../../../../entities/essay.entity';
 import { Alert } from '../../../../../entities/alert.entity';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { AlertResDto } from '../dto/response/alertRes.dto';
 import { SupportService } from '../../support/core/support.service';
 import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';

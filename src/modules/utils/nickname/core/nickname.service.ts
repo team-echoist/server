@@ -1,10 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { NicknameRepository } from './nickname.repository';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
+import { INicknameRepository } from '../infrastructure/inickname.repository';
 
 @Injectable()
 export class NicknameService {
-  constructor(private readonly nicknameRepository: NicknameRepository) {}
+  constructor(
+    @Inject('INicknameRepository') private readonly nicknameRepository: INicknameRepository,
+  ) {}
 
   @Transactional()
   async generateUniqueNickname(): Promise<string> {

@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../core/auth.service';
 import { AuthRepository } from '../infrastructure/auth.repository';
-import { ToolService } from '../../../utils/tool/tool.service';
-import { MailService } from '../../../utils/mail/mail.service';
-import { NicknameService } from '../../../utils/nickname/nickname.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
+import { MailService } from '../../../utils/mail/core/mail.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';

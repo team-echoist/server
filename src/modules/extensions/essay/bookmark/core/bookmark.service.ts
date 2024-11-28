@@ -7,7 +7,7 @@ import { Queue } from 'bull';
 import { Bookmark } from '../../../../../entities/bookmark.entity';
 import { UserService } from '../../../../base/user/core/user.service';
 import { SummaryEssayResDto } from '../../../../base/essay/dto/response/summaryEssayRes.dto';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { Transactional } from 'typeorm-transactional';
 import { EssayService } from '../../../../base/essay/core/essay.service';
 import { EssayStatus } from '../../../../../common/types/enum.types';

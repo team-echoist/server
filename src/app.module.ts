@@ -18,7 +18,7 @@ import { AwsModule } from './modules/adapters/aws/aws.module';
 import { ReviewModule } from './modules/extensions/management/review/review.module';
 import { UserModule } from './modules/base/user/user.module';
 import { ReportModule } from './modules/extensions/management/report/report.module';
-import { SeederService } from './modules/utils/seeder/seeder.service';
+import { SeederService } from './modules/utils/seeder/core/seeder.service';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
 import { ViewModule } from './modules/extensions/essay/view/view.module';

@@ -6,7 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';
 import { UserService } from '../../../../base/user/core/user.service';
 import { Transactional } from 'typeorm-transactional';

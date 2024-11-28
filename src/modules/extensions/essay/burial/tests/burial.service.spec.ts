@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BurialService } from '../core/burial.service';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { EssayRepository } from '../../../../base/essay/infrastructure/essay.repository';
 import { AlertService } from '../../../management/alert/core/alert.service';
@@ -8,7 +8,7 @@ import { AlertService } from '../../../management/alert/core/alert.service';
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
-jest.mock('../../../../utils/tool/tool.service');
+jest.mock('../../../../utils/tool/core/tool.service');
 jest.mock('../../essay/essay.repository');
 jest.mock('../../user/user.service');
 jest.mock('../../../management/alert/core/alert.service');

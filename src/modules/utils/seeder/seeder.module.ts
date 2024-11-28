@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SeederService } from './seeder.service';
+import { SeederService } from './core/seeder.service';
 import { ToolModule } from '../tool/tool.module';
 import { Admin } from '../../../entities/admin.entity';
 import { BasicNickname } from '../../../entities/basicNickname.entity';

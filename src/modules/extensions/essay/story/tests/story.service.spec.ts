@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StoryService } from '../core/story.service';
 import { StoryRepository } from '../infrastructure/story.repository';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { EssayService } from '../../../../base/essay/core/essay.service';
 import { User } from '../../../../../entities/user.entity';
@@ -18,7 +18,7 @@ jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
 jest.mock('../infrastructure/story.repository');
-jest.mock('../../../../utils/tool/tool.service');
+jest.mock('../../../../utils/tool/core/tool.service');
 jest.mock('../../user/user.service');
 jest.mock('../../essay/essay.service');
 

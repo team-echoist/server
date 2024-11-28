@@ -4,15 +4,15 @@ import { AdminRepository } from '../infrastructure/admin.repository';
 import { UserRepository } from '../../user/infrastructure/user.repository';
 import { EssayRepository } from '../../essay/infrastructure/essay.repository';
 import { UserService } from '../../user/core/user.service';
-import { MailService } from '../../../utils/mail/mail.service';
-import { ToolService } from '../../../utils/tool/tool.service';
+import { MailService } from '../../../utils/mail/core/mail.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { SupportService } from '../../../extensions/management/support/core/support.service';
 import { SupportRepository } from '../../../extensions/management/support/infrastructure/support.repository';
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { GeulroquisService } from '../../../extensions/essay/geulroquis/core/geulroquis.service';
-import { CronService } from '../../../utils/cron/cron.service';
-import { NicknameService } from '../../../utils/nickname/nickname.service';
+import { CronService } from '../../../utils/cron/core/cron.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

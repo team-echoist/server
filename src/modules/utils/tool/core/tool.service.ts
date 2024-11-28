@@ -4,7 +4,7 @@ import * as moment from 'moment-timezone';
 import * as sanitizeHtml from 'sanitize-html';
 
 import { ClassConstructor, plainToInstance } from 'class-transformer';
-import { Essay } from '../../../entities/essay.entity';
+import { Essay } from '../../../../entities/essay.entity';
 
 @Injectable()
 export class ToolService {

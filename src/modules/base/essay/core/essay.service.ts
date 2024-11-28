@@ -6,7 +6,7 @@ import { Essay } from '../../../../entities/essay.entity';
 import { Tag } from '../../../../entities/tag.entity';
 import { Story } from '../../../../entities/story.entity';
 import { User } from '../../../../entities/user.entity';
-import { ToolService } from '../../../utils/tool/tool.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { ReviewService } from '../../../extensions/management/review/core/review.service';
 import { StoryService } from '../../../extensions/essay/story/core/story.service';

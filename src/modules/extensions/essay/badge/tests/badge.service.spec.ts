@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadgeService } from '../core/badge.service';
 import { BadgeRepository } from '../infrastructure/badge.repository';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 jest.mock('typeorm-transactional', () => ({
@@ -10,7 +10,7 @@ jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
 jest.mock('../infrastructure/badge.repository');
-jest.mock('../../../../utils/tool/tool.service');
+jest.mock('../../../../utils/tool/core/tool.service');
 
 describe('BadgeService', () => {
   let badgeService: BadgeService;

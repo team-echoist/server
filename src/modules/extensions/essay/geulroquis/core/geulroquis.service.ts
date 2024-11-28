@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Geulroquis } from '../../../../../entities/geulroguis.entity';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { GeulroquisDto } from '../dto/response/geulroquis.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';

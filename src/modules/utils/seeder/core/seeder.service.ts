@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { ToolService } from '../tool/tool.service';
-import { Admin } from '../../../entities/admin.entity';
-import { BasicNickname } from '../../../entities/basicNickname.entity';
-import { Server } from '../../../entities/server.entity';
-import { AppVersions } from '../../../entities/appVersions.entity';
-import { AppType, ServerStatus } from '../../../common/types/enum.types';
+import { ToolService } from '../../tool/core/tool.service';
+import { Admin } from '../../../../entities/admin.entity';
+import { BasicNickname } from '../../../../entities/basicNickname.entity';
+import { Server } from '../../../../entities/server.entity';
+import { AppVersions } from '../../../../entities/appVersions.entity';
+import { AppType, ServerStatus } from '../../../../common/types/enum.types';
 
 @Injectable()
 export class SeederService {

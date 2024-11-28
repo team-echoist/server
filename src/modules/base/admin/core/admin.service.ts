@@ -9,9 +9,9 @@ import { ReportQueue } from '../../../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../../../entities/reviewQueue.entity';
 import { Essay } from '../../../../entities/essay.entity';
 import { Admin } from '../../../../entities/admin.entity';
-import { MailService } from '../../../utils/mail/mail.service';
+import { MailService } from '../../../utils/mail/core/mail.service';
 import { UserService } from '../../user/core/user.service';
-import { ToolService } from '../../../utils/tool/tool.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { DashboardResDto } from '../dto/response/dashboardRes.dto';
 import { ReportResDto } from '../dto/response/reportRes.dto';
 import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
@@ -47,10 +47,10 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { GeulroquisService } from '../../../extensions/essay/geulroquis/core/geulroquis.service';
-import { CronService } from '../../../utils/cron/cron.service';
+import { CronService } from '../../../utils/cron/core/cron.service';
 import { Server } from '../../../../entities/server.entity';
 import { VersionsResDto } from '../../../extensions/management/support/dto/response/versionsRes.dto';
-import { NicknameService } from '../../../utils/nickname/nickname.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
 import {
   ActionType,
   EssayStatus,

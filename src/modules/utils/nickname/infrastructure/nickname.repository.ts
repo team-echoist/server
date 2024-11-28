@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { BasicNickname } from '../../../entities/basicNickname.entity';
+import { BasicNickname } from '../../../../entities/basicNickname.entity';
 import { Repository } from 'typeorm';
+import { INicknameRepository } from './inickname.repository';
 
-export class NicknameRepository {
+export class NicknameRepository implements INicknameRepository {
   constructor(
     @InjectRepository(BasicNickname) private readonly nicknameRepository: Repository<BasicNickname>,
   ) {}

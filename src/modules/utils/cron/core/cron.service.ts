@@ -1,20 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
-import { User } from '../../../entities/user.entity';
-import { CronLog } from '../../../entities/cronLog.entity';
+import { User } from '../../../../entities/user.entity';
+import { CronLog } from '../../../../entities/cronLog.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Geulroquis } from '../../../entities/geulroguis.entity';
+import { Geulroquis } from '../../../../entities/geulroguis.entity';
 import { Cron } from '@nestjs/schedule';
-import { ToolService } from '../tool/tool.service';
-import { CronLogResDto } from './dto/response/cronLogRes.dto';
+import { ToolService } from '../../tool/core/tool.service';
+import { CronLogResDto } from '../dto/response/cronLogRes.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
-import { Device } from '../../../entities/device.entity';
-import { UserStatus } from '../../../common/types/enum.types';
-import { EssayService } from '../../base/essay/core/essay.service';
+import { Device } from '../../../../entities/device.entity';
+import { UserStatus } from '../../../../common/types/enum.types';
+import { EssayService } from '../../../base/essay/core/essay.service';
 
 @Injectable()
 export class CronService {

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ToolService } from './tool.service';
+import { ToolService } from './core/tool.service';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({

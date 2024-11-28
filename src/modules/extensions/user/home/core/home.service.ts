@@ -5,7 +5,7 @@ import { UserTheme } from '../../../../../entities/userTheme.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import Redlock, { Lock } from 'redlock';
-import { ToolService } from '../../../../utils/tool/tool.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { ThemeResDto } from '../dto/response/themeRes.dto';
 import { Theme } from '../../../../../entities/theme.entity';
 import { Transactional } from 'typeorm-transactional';
