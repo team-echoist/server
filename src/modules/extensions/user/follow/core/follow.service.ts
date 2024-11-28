@@ -6,19 +6,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FollowRepository } from './follow.repository';
-import { ToolService } from '../../../utils/tool/tool.service';
-import { UserSummaryResDto } from '../../../base/user/dto/response/userSummaryRes.dto';
-import { UserService } from '../../../base/user/core/user.service';
+import { ToolService } from '../../../../utils/tool/tool.service';
+import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';
+import { UserService } from '../../../../base/user/core/user.service';
 import { Transactional } from 'typeorm-transactional';
+import { IFollowRepository } from '../infrastructure/ifollow.repository';
 
 @Injectable()
 export class FollowService {
   constructor(
-    private readonly followRepository: FollowRepository,
-    private readonly utilsService: ToolService,
+    @Inject('IFollowRepository') private readonly followRepository: IFollowRepository,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    private readonly toolService: ToolService,
   ) {}
 
   @Transactional()
@@ -57,7 +57,7 @@ export class FollowService {
     const totalPage: number = Math.ceil(total / limit);
 
     const followingsDto = followings.map((follow) => {
-      return this.utilsService.transformToDto(UserSummaryResDto, follow.following);
+      return this.toolService.transformToDto(UserSummaryResDto, follow.following);
     });
     return { followings: followingsDto, total, totalPage, page };
   }

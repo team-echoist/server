@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FollowService } from '../follow.service';
-import { FollowRepository } from '../follow.repository';
+import { FollowService } from '../core/follow.service';
+import { FollowRepository } from '../infrastructure/follow.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
@@ -13,7 +13,7 @@ jest.mock('typeorm-transactional', () => ({
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
 
-jest.mock('../follow.repository');
+jest.mock('../infrastructure/follow.repository');
 jest.mock('../../../../utils/tool/tool.service');
 jest.mock('../../user/user.service');
 

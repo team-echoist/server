@@ -7,7 +7,7 @@ import { ReviewService } from '../../../extensions/management/review/core/review
 import { StoryService } from '../../../extensions/essay/story/core/story.service';
 import { UserService } from '../../user/core/user.service';
 import { TagService } from '../../../extensions/essay/tag/core/tag.service';
-import { FollowService } from '../../../extensions/user/follow/follow.service';
+import { FollowService } from '../../../extensions/user/follow/core/follow.service';
 import { BadgeService } from '../../../extensions/essay/badge/core/badge.service';
 import { ViewService } from '../../../extensions/essay/view/core/view.service';
 import { BookmarkService } from '../../../extensions/essay/bookmark/core/bookmark.service';

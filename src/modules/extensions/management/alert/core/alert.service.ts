@@ -1,5 +1,4 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { AlertRepository } from '../infrastructure/alert.repository';
 import { Essay } from '../../../../../entities/essay.entity';
 import { Alert } from '../../../../../entities/alert.entity';
 import { ToolService } from '../../../../utils/tool/tool.service';

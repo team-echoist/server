@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FollowController } from '../follow.controller';
-import { FollowService } from '../follow.service';
+import { FollowController } from '../api/follow.controller';
+import { FollowService } from '../core/follow.service';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { Request as ExpressRequest } from 'express';
 
-jest.mock('../follow.service');
+jest.mock('../core/follow.service');
 
 describe('FollowController', () => {
   let controller: FollowController;
