@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { ViewRecord } from '../../../../entities/viewRecord.entity';
+import { ViewRecord } from '../../../../../entities/viewRecord.entity';
 import { Repository } from 'typeorm';
+import { IViewRepository } from './iview.repository';
 
-export class ViewRepository {
+export class ViewRepository implements IViewRepository {
   constructor(
     @InjectRepository(ViewRecord)
     private readonly viewRepository: Repository<ViewRecord>,

@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { ViewRepository } from './view.repository';
-import { User } from '../../../../entities/user.entity';
-import { Essay } from '../../../../entities/essay.entity';
-import { ViewRecord } from '../../../../entities/viewRecord.entity';
+import { Inject, Injectable } from '@nestjs/common';
+import { User } from '../../../../../entities/user.entity';
+import { Essay } from '../../../../../entities/essay.entity';
+import { ViewRecord } from '../../../../../entities/viewRecord.entity';
 import { Transactional } from 'typeorm-transactional';
+import { IViewRepository } from '../infrastructure/iview.repository';
 
 @Injectable()
 export class ViewService {
-  constructor(private readonly viewRepository: ViewRepository) {}
+  constructor(@Inject('IViewRepository') private readonly viewRepository: IViewRepository) {}
 
   async findViewRecord(userId: number, essayId: number) {
     return await this.viewRepository.findViewRecord(userId, essayId);

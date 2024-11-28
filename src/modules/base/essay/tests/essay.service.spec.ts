@@ -9,7 +9,7 @@ import { UserService } from '../../user/core/user.service';
 import { TagService } from '../../../extensions/essay/tag/core/tag.service';
 import { FollowService } from '../../../extensions/user/follow/follow.service';
 import { BadgeService } from '../../../extensions/essay/badge/core/badge.service';
-import { ViewService } from '../../../extensions/essay/view/view.service';
+import { ViewService } from '../../../extensions/essay/view/core/view.service';
 import { BookmarkService } from '../../../extensions/essay/bookmark/core/bookmark.service';
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { getQueueToken } from '@nestjs/bull';

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ViewService } from '../view.service';
-import { ViewRepository } from '../view.repository';
+import { ViewService } from '../core/view.service';
+import { ViewRepository } from '../infrastructure/view.repository';
 import { User } from '../../../../../entities/user.entity';
 import { Essay } from '../../../../../entities/essay.entity';
 import { ViewRecord } from '../../../../../entities/viewRecord.entity';
@@ -10,7 +10,7 @@ jest.mock('typeorm-transactional', () => ({
   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
-jest.mock('../view.repository');
+jest.mock('../infrastructure/view.repository');
 
 describe('ViewService', () => {
   let service: ViewService;
