@@ -3,7 +3,7 @@ import { EssayService } from '../core/essay.service';
 import { EssayRepository } from '../infrastructure/essay.repository';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
-import { ReviewService } from '../../../extensions/management/review/review.service';
+import { ReviewService } from '../../../extensions/management/review/core/review.service';
 import { StoryService } from '../../../extensions/essay/story/core/story.service';
 import { UserService } from '../../user/core/user.service';
 import { TagService } from '../../../extensions/essay/tag/core/tag.service';

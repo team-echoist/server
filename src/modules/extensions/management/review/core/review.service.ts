@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { ReviewRepository } from './review.repository';
-import { CreateEssayReqDto } from '../../../base/essay/dto/request/createEssayReq.dto';
-import { User } from '../../../../entities/user.entity';
-import { Essay } from '../../../../entities/essay.entity';
-import { UpdateEssayReqDto } from '../../../base/essay/dto/request/updateEssayReq.dto';
-import { EssayStatus, ReviewQueueType } from '../../../../common/types/enum.types';
+import { Inject, Injectable } from '@nestjs/common';
+import { CreateEssayReqDto } from '../../../../base/essay/dto/request/createEssayReq.dto';
+import { User } from '../../../../../entities/user.entity';
+import { Essay } from '../../../../../entities/essay.entity';
+import { UpdateEssayReqDto } from '../../../../base/essay/dto/request/updateEssayReq.dto';
+import { EssayStatus, ReviewQueueType } from '../../../../../common/types/enum.types';
+import { IReviewRepository } from '../infrastructure/ireview.repository';
 
 @Injectable()
 export class ReviewService {
-  constructor(private readonly reviewRepository: ReviewRepository) {}
+  constructor(@Inject('IReviewRepository') private readonly reviewRepository: IReviewRepository) {}
 
   async saveReviewRequest(user: User, essay: Essay, data: CreateEssayReqDto | UpdateEssayReqDto) {
     const reviewType = this.mapEssayStatusToReviewQueueType(data.status);

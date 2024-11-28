@@ -3,12 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../../../entities/user.entity';
 import { Essay } from '../../../../entities/essay.entity';
 import { ReviewQueue } from '../../../../entities/reviewQueue.entity';
-import { ReviewService } from './review.service';
-import { ReviewRepository } from './review.repository';
+import { ReviewService } from './core/review.service';
+import { ReviewRepository } from './infrastructure/review.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Essay, ReviewQueue])],
-  providers: [ReviewService, ReviewRepository],
-  exports: [ReviewService, ReviewRepository],
+  providers: [ReviewService, { provide: 'IReviewRepository', useClass: ReviewRepository }],
+  exports: [ReviewService, { provide: 'IReviewRepository', useClass: ReviewRepository }],
 })
 export class ReviewModule {}

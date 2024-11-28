@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReportController } from '../report.controller';
-import { ReportService } from '../report.service';
+import { ReportController } from '../api/report.controller';
+import { ReportService } from '../core/report.service';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { Request as ExpressRequest } from 'express';
 import { CreateReportReqDto } from '../dto/request/createReportReq.dto';
 
-jest.mock('../report.service');
+jest.mock('../core/report.service');
 
 describe('ReportController', () => {
   let controller: ReportController;

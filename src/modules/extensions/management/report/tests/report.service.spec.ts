@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReportService } from '../report.service';
-import { ReportRepository } from '../report.repository';
+import { ReportService } from '../core/report.service';
+import { ReportRepository } from '../infrastructure/report.repository';
 import { EssayService } from '../../../../base/essay/core/essay.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ReportQueue } from '../../../../../entities/reportQueue.entity';
@@ -13,7 +13,7 @@ jest.mock('typeorm-transactional', () => ({
   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
-jest.mock('../report.repository');
+jest.mock('../infrastructure/report.repository');
 jest.mock('../../essay/essay.service');
 
 describe('ReportService', () => {

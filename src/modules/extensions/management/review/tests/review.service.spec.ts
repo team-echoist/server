@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReviewService } from '../review.service';
-import { ReviewRepository } from '../review.repository';
+import { ReviewService } from '../core/review.service';
+import { ReviewRepository } from '../infrastructure/review.repository';
 
-jest.mock('../review.repository');
+jest.mock('../infrastructure/review.repository');
 
 describe('ReviewService', () => {
   let service: ReviewService;

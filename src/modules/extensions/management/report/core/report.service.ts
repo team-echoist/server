@@ -1,16 +1,16 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ReportRepository } from './report.repository';
-import { ReportQueue } from '../../../../entities/reportQueue.entity';
-import { User } from '../../../../entities/user.entity';
-import { Essay } from '../../../../entities/essay.entity';
-import { EssayService } from '../../../base/essay/core/essay.service';
-import { CreateReportReqDto } from './dto/request/createReportReq.dto';
+import { ReportQueue } from '../../../../../entities/reportQueue.entity';
+import { User } from '../../../../../entities/user.entity';
+import { Essay } from '../../../../../entities/essay.entity';
+import { EssayService } from '../../../../base/essay/core/essay.service';
+import { CreateReportReqDto } from '../dto/request/createReportReq.dto';
 import { Transactional } from 'typeorm-transactional';
+import { IReporter } from '../infrastructure/ireport.repository';
 
 @Injectable()
 export class ReportService {
   constructor(
-    private readonly reportRepository: ReportRepository,
+    @Inject('IReporter') private readonly reportRepository: IReporter,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,
   ) {}
 

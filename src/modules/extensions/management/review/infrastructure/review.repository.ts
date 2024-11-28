@@ -1,11 +1,12 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReviewQueue } from '../../../../entities/reviewQueue.entity';
+import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';
 import { Repository } from 'typeorm';
-import { User } from '../../../../entities/user.entity';
-import { Essay } from '../../../../entities/essay.entity';
-import { ReviewQueueType } from '../../../../common/types/enum.types';
+import { User } from '../../../../../entities/user.entity';
+import { Essay } from '../../../../../entities/essay.entity';
+import { ReviewQueueType } from '../../../../../common/types/enum.types';
+import { IReviewRepository } from './ireview.repository';
 
-export class ReviewRepository {
+export class ReviewRepository implements IReviewRepository {
   constructor(
     @InjectRepository(ReviewQueue)
     private readonly reviewRepository: Repository<ReviewQueue>,
