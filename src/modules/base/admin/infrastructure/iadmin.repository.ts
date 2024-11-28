@@ -8,6 +8,7 @@ import { CreateAdminDto } from '../dto/createAdmin.dto';
 import { Server } from '../../../../entities/server.entity';
 import { Theme } from '../../../../entities/theme.entity';
 import { Item } from '../../../../entities/item.entity';
+import { AppVersions } from '../../../../entities/appVersions.entity';
 
 export interface IAdminRepository {
   totalSubscriberCount(today: Date): Promise<number>;
@@ -83,4 +84,10 @@ export interface IAdminRepository {
   saveItem(newItem: Item): Promise<Item>;
 
   deleteItem(itemId: number): Promise<DeleteResult>;
+
+  findAllVersions(): Promise<AppVersions[]>;
+
+  findVersion(versionId: number): Promise<AppVersions>;
+
+  saveVersion(version: AppVersions): Promise<AppVersions>;
 }

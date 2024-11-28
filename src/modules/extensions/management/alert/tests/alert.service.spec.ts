@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AlertService } from '../core/alert.service';
 import { AlertRepository } from '../infrastructure/alert.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
-import { SupportService } from '../../support/support.service';
+import { SupportService } from '../../support/core/support.service';
 import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { getQueueToken } from '@nestjs/bull';

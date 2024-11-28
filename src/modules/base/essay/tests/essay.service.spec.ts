@@ -14,7 +14,7 @@ import { BookmarkService } from '../../../extensions/essay/bookmark/core/bookmar
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SupportService } from '../../../extensions/management/support/support.service';
+import { SupportService } from '../../../extensions/management/support/core/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../../../common/types/enum.types';
 
 jest.mock('typeorm-transactional', () => ({

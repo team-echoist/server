@@ -1,19 +1,20 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notice } from '../../../../entities/notice.entity';
+import { Notice } from '../../../../../entities/notice.entity';
 import { Repository } from 'typeorm';
-import { Inquiry } from '../../../../entities/inquiry.entity';
-import { Release } from '../../../../entities/release.entity';
-import { AlertSettings } from '../../../../entities/alertSettings.entity';
-import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
-import { Device } from '../../../../entities/device.entity';
-import { User } from '../../../../entities/user.entity';
-import { DeviceDto } from './dto/device.dto';
-import { AppVersions } from '../../../../entities/appVersions.entity';
-import { SeenNotice } from '../../../../entities/seenNotice.entity';
-import { DeviceOS, DeviceType } from '../../../../common/types/enum.types';
-import { SeenRelease } from '../../../../entities/seenRelease.entity';
+import { Inquiry } from '../../../../../entities/inquiry.entity';
+import { Release } from '../../../../../entities/release.entity';
+import { AlertSettings } from '../../../../../entities/alertSettings.entity';
+import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
+import { Device } from '../../../../../entities/device.entity';
+import { User } from '../../../../../entities/user.entity';
+import { DeviceDto } from '../dto/device.dto';
+import { AppVersions } from '../../../../../entities/appVersions.entity';
+import { SeenNotice } from '../../../../../entities/seenNotice.entity';
+import { DeviceOS, DeviceType } from '../../../../../common/types/enum.types';
+import { SeenRelease } from '../../../../../entities/seenRelease.entity';
+import { ISupportRepository } from './isupport.repository';
 
-export class SupportRepository {
+export class SupportRepository implements ISupportRepository {
   constructor(
     @InjectRepository(Inquiry) private readonly inquiryRepository: Repository<Inquiry>,
     @InjectRepository(Notice) private readonly noticeRepository: Repository<Notice>,
@@ -183,16 +184,16 @@ export class SupportRepository {
     return this.appVersionsRepository.find();
   }
 
-  async deleteAllDevice() {
-    return this.deviceRepository.delete({});
-  }
-
   async findVersion(versionId: number) {
     return this.appVersionsRepository.findOne({ where: { id: versionId } });
   }
 
   async saveVersion(version: AppVersions) {
     return this.appVersionsRepository.save(version);
+  }
+
+  async deleteAllDevice() {
+    return this.deviceRepository.delete({});
   }
 
   async findLatestNotice() {

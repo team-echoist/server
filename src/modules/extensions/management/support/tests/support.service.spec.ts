@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SupportService } from '../support.service';
-import { SupportRepository } from '../support.repository';
+import { SupportService } from '../core/support.service';
+import { SupportRepository } from '../infrastructure/support.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
@@ -12,7 +12,7 @@ jest.mock('typeorm-transactional', () => ({
   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
-jest.mock('../support.repository');
+jest.mock('../infrastructure/support.repository');
 jest.mock('../../utils/tool/tool.service');
 jest.mock('../../user/user.service');
 jest.mock('ioredis');

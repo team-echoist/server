@@ -26,7 +26,7 @@ import { SentenceEssayResDto } from '../dto/response/sentenceEssayRes.dto';
 import { WeeklyEssayCountResDto } from '../dto/response/weeklyEssayCountRes.dto';
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { DeviceDto } from '../../../extensions/management/support/dto/device.dto';
-import { SupportService } from '../../../extensions/management/support/support.service';
+import { SupportService } from '../../../extensions/management/support/core/support.service';
 import { EssayStatus, PageType, UserStatus } from '../../../../common/types/enum.types';
 import { Aggregate } from '../../../../entities/aggregate.entity';
 import { Request as ExpressRequest } from 'express';

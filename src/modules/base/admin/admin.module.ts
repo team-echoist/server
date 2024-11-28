@@ -45,6 +45,7 @@ import { UserItem } from '../../../entities/userItem.entity';
 import { UserHomeItem } from '../../../entities/userHomeItem.entity';
 import { UserHomeLayout } from '../../../entities/userHomeLayout.entity';
 import { UserTheme } from '../../../entities/userTheme.entity';
+import { AppVersions } from '../../../entities/appVersions.entity';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { UserTheme } from '../../../entities/userTheme.entity';
       UserHomeItem,
       UserHomeLayout,
       UserTheme,
+      AppVersions,
     ]),
     BullModule.registerQueueAsync({
       name: 'admin',

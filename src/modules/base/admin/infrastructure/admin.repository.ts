@@ -12,6 +12,7 @@ import { Transactional } from 'typeorm-transactional';
 import { Theme } from '../../../../entities/theme.entity';
 import { Item } from '../../../../entities/item.entity';
 import { IAdminRepository } from './iadmin.repository';
+import { AppVersions } from '../../../../entities/appVersions.entity';
 
 export class AdminRepository implements IAdminRepository {
   constructor(
@@ -28,6 +29,8 @@ export class AdminRepository implements IAdminRepository {
     private readonly themeRepository: Repository<Theme>,
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
+    @InjectRepository(AppVersions)
+    private readonly appVersionsRepository: Repository<AppVersions>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -322,5 +325,17 @@ export class AdminRepository implements IAdminRepository {
 
   async deleteItem(itemId: number) {
     return this.itemRepository.delete(itemId);
+  }
+
+  async findAllVersions() {
+    return this.appVersionsRepository.find();
+  }
+
+  async findVersion(versionId: number) {
+    return this.appVersionsRepository.findOne({ where: { id: versionId } });
+  }
+
+  async saveVersion(version: AppVersions) {
+    return this.appVersionsRepository.save(version);
   }
 }

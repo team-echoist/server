@@ -4,7 +4,7 @@ import { Essay } from '../../../../../entities/essay.entity';
 import { Alert } from '../../../../../entities/alert.entity';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { AlertResDto } from '../dto/response/alertRes.dto';
-import { SupportService } from '../../support/support.service';
+import { SupportService } from '../../support/core/support.service';
 import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';

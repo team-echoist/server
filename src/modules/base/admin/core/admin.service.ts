@@ -37,8 +37,7 @@ import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
 import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
 import { Notice } from '../../../../entities/notice.entity';
 import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
-import { SupportRepository } from '../../../extensions/management/support/support.repository';
-import { SupportService } from '../../../extensions/management/support/support.service';
+import { SupportService } from '../../../extensions/management/support/core/support.service';
 import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
 import { InquirySummaryResDto } from '../../../extensions/management/support/dto/response/inquirySummaryRes.dto';
 import { FullInquiryResDto } from '../dto/response/fullInquiryRes.dto';
@@ -60,7 +59,6 @@ import {
   UserStatus,
 } from '../../../../common/types/enum.types';
 import { GeulroquisCountResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisCountRes.dto';
-import { GeulroquisRepository } from '../../../extensions/essay/geulroquis/infrastructure/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';
@@ -76,6 +74,7 @@ import { IAdminRepository } from '../infrastructure/iadmin.repository';
 import { IEssayRepository } from '../../essay/infrastructure/iessay.repository';
 import { IUserRepository } from '../../user/infrastructure/iuser.repository';
 import { IGeulroquisRepository } from '../../../extensions/essay/geulroquis/infrastructure/igeulroquis.repository';
+import { ISupportRepository } from '../../../extensions/management/support/infrastructure/isupport.repository';
 
 @Injectable()
 export class AdminService {
@@ -84,9 +83,9 @@ export class AdminService {
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     @Inject('IEssayRepository') private readonly essayRepository: IEssayRepository,
     @Inject('IGeulroquisRepository') private readonly geulroquisRepository: IGeulroquisRepository,
+    @Inject('ISupportRepository') private readonly supportRepository: ISupportRepository,
     private readonly userService: UserService,
     private readonly supportService: SupportService,
-    private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
     private readonly essayService: EssayService,
@@ -1058,18 +1057,26 @@ export class AdminService {
   }
 
   async getAppVersions() {
-    const versions = await this.supportService.findAllVersions();
+    const versions = await this.adminRepository.findAllVersions();
 
     return this.toolService.transformToDto(VersionsResDto, versions);
+  }
+
+  @Transactional()
+  async updateAppVersion(versionId: number, version: string) {
+    const foundVersion = await this.adminRepository.findVersion(versionId);
+    if (!foundVersion) throw new HttpException('버전ID를 확인해주세요', HttpStatus.BAD_REQUEST);
+
+    foundVersion.version = version;
+
+    await this.adminRepository.saveVersion(foundVersion);
+
+    await this.redis.del('versions');
   }
 
   async deleteAllDevice(adminId: number) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     return this.supportRepository.deleteAllDevice();
-  }
-
-  async updateAppVersion(versionId: number, version: string) {
-    await this.supportService.updateAppVersion(versionId, version);
   }
 
   async requestClearDatabase(adminId: number) {

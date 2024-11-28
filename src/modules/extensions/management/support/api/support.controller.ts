@@ -10,21 +10,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
-import { SupportService } from './support.service';
+import { SupportService } from '../core/support.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { PagingParseIntPipe } from '../../../../common/pipes/pagingParseInt.pipe';
-import { NoticeResDto } from './dto/response/noticeRes.dto';
-import { NoticesSummaryResDto } from './dto/response/noticesSummaryRes.dto';
-import { InquiryReqDto } from './dto/request/inquiryReq.dto';
-import { InquirySummaryResDto } from './dto/response/inquirySummaryRes.dto';
-import { ReleasesResDto } from './dto/response/releasesRes.dto';
-import { UpdateAlertSettingsReqDto } from './dto/request/updateAlertSettings.dto';
-import { AlertSettingsResDto } from './dto/response/alertSettingsRes.dto';
-import { RegisterDeviceReqDto } from './dto/request/registerDeviceReq.dto';
-import { InquiryResDto } from './dto/response/inquiryRes.dto';
-import { VersionsSummaryResDto } from './dto/response/versionsSummaryRes.dto';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
-import { Public } from '../../../../common/decorators/public.decorator';
+import { PagingParseIntPipe } from '../../../../../common/pipes/pagingParseInt.pipe';
+import { NoticeResDto } from '../dto/response/noticeRes.dto';
+import { NoticesSummaryResDto } from '../dto/response/noticesSummaryRes.dto';
+import { InquiryReqDto } from '../dto/request/inquiryReq.dto';
+import { InquirySummaryResDto } from '../dto/response/inquirySummaryRes.dto';
+import { ReleasesResDto } from '../dto/response/releasesRes.dto';
+import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
+import { AlertSettingsResDto } from '../dto/response/alertSettingsRes.dto';
+import { RegisterDeviceReqDto } from '../dto/request/registerDeviceReq.dto';
+import { InquiryResDto } from '../dto/response/inquiryRes.dto';
+import { VersionsSummaryResDto } from '../dto/response/versionsSummaryRes.dto';
+import { JwtAuthGuard } from '../../../../../common/guards/jwtAuth.guard';
+import { Public } from '../../../../../common/decorators/public.decorator';
 
 @ApiTags('Support')
 @UseGuards(JwtAuthGuard)
