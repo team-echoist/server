@@ -10,7 +10,7 @@ import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { SupportService } from '../../../extensions/management/support/support.service';
 import { SupportRepository } from '../../../extensions/management/support/support.repository';
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
-import { GeulroquisService } from '../../../extensions/essay/geulroquis/geulroquis.service';
+import { GeulroquisService } from '../../../extensions/essay/geulroquis/core/geulroquis.service';
 import { CronService } from '../../../utils/cron/cron.service';
 import { NicknameService } from '../../../utils/nickname/nickname.service';
 

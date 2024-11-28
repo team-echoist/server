@@ -47,7 +47,7 @@ import { ReleaseResDto } from '../../../extensions/management/support/dto/respon
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AlertService } from '../../../extensions/management/alert/core/alert.service';
-import { GeulroquisService } from '../../../extensions/essay/geulroquis/geulroquis.service';
+import { GeulroquisService } from '../../../extensions/essay/geulroquis/core/geulroquis.service';
 import { CronService } from '../../../utils/cron/cron.service';
 import { Server } from '../../../../entities/server.entity';
 import { VersionsResDto } from '../../../extensions/management/support/dto/response/versionsRes.dto';
@@ -60,7 +60,7 @@ import {
   UserStatus,
 } from '../../../../common/types/enum.types';
 import { GeulroquisCountResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisCountRes.dto';
-import { GeulroquisRepository } from '../../../extensions/essay/geulroquis/geulroquis.repository';
+import { GeulroquisRepository } from '../../../extensions/essay/geulroquis/infrastructure/geulroquis.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest } from 'express';

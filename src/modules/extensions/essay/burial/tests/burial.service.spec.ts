@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BurialService } from '../burial.service';
+import { BurialService } from '../core/burial.service';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { EssayRepository } from '../../../../base/essay/infrastructure/essay.repository';

@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Geulroquis } from '../../../../entities/geulroguis.entity';
+import { Geulroquis } from '../../../../../entities/geulroguis.entity';
 import { Repository } from 'typeorm';
+import { IGeulroquisRepository } from './igeulroquis.repository';
 
-export class GeulroquisRepository {
+export class GeulroquisRepository implements IGeulroquisRepository {
   constructor(
     @InjectRepository(Geulroquis) private readonly geulroquisRepository: Repository<Geulroquis>,
   ) {}

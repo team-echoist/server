@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { GeulroquisRepository } from './geulroquis.repository';
-import { Geulroquis } from '../../../../entities/geulroguis.entity';
-import { ToolService } from '../../../utils/tool/tool.service';
-import { GeulroquisDto } from './dto/response/geulroquis.dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { GeulroquisRepository } from '../infrastructure/geulroquis.repository';
+import { Geulroquis } from '../../../../../entities/geulroguis.entity';
+import { ToolService } from '../../../../utils/tool/tool.service';
+import { GeulroquisDto } from '../dto/response/geulroquis.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { GeulroquisUrlResDto } from './dto/response/geulroquisUrlRes.dto';
+import { GeulroquisUrlResDto } from '../dto/response/geulroquisUrlRes.dto';
 import { Transactional } from 'typeorm-transactional';
+import { IGeulroquisRepository } from '../infrastructure/igeulroquis.repository';
 
 @Injectable()
 export class GeulroquisService {
   constructor(
-    private readonly geulroquisRepository: GeulroquisRepository,
+    @Inject('IGeulroquisRepository') private readonly geulroquisRepository: IGeulroquisRepository,
     private readonly utilsService: ToolService,
     @InjectRedis() private readonly redis: Redis,
   ) {}

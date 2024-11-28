@@ -1,9 +1,9 @@
 import { Controller, Get, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+import { JwtAuthGuard } from '../../../../../common/guards/jwtAuth.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BurialService } from './burial.service';
+import { BurialService } from '../core/burial.service';
 import { Request as ExpressRequest } from 'express';
-import { SummaryEssayResDto } from '../../../base/essay/dto/response/summaryEssayRes.dto';
+import { SummaryEssayResDto } from '../../../../base/essay/dto/response/summaryEssayRes.dto';
 
 @ApiTags('Burial')
 @Controller('burials')
