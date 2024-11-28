@@ -9,7 +9,7 @@ import { User } from '../../../../entities/user.entity';
 import { ToolService } from '../../../utils/tool/tool.service';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { ReviewService } from '../../../extensions/management/review/review.service';
-import { StoryService } from '../../../extensions/essay/story/story.service';
+import { StoryService } from '../../../extensions/essay/story/core/story.service';
 import { UserService } from '../../user/core/user.service';
 import { TagService } from '../../../extensions/essay/tag/tag.service';
 import { FollowService } from '../../../extensions/user/follow/follow.service';

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { StoryService } from '../story.service';
-import { StoryRepository } from '../story.repository';
+import { StoryService } from '../core/story.service';
+import { StoryRepository } from '../infrastructure/story.repository';
 import { ToolService } from '../../../../utils/tool/tool.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { EssayService } from '../../../../base/essay/core/essay.service';
@@ -17,7 +17,7 @@ jest.mock('typeorm-transactional', () => ({
   patchTypeORMRepositoryWithBaseRepository: jest.fn(),
   Transactional: () => (target, key, descriptor: any) => descriptor,
 }));
-jest.mock('../story.repository');
+jest.mock('../infrastructure/story.repository');
 jest.mock('../../../../utils/tool/tool.service');
 jest.mock('../../user/user.service');
 jest.mock('../../essay/essay.service');

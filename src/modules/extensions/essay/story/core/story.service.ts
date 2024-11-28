@@ -6,22 +6,23 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { StoryRepository } from './story.repository';
-import { User } from '../../../../entities/user.entity';
-import { Story } from '../../../../entities/story.entity';
-import { StoryDto } from './dto/story.dto';
-import { ToolService } from '../../../utils/tool/tool.service';
-import { UserService } from '../../../base/user/core/user.service';
-import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
-import { EssayService } from '../../../base/essay/core/essay.service';
+import { StoryRepository } from '../infrastructure/story.repository';
+import { User } from '../../../../../entities/user.entity';
+import { Story } from '../../../../../entities/story.entity';
+import { StoryDto } from '../dto/story.dto';
+import { ToolService } from '../../../../utils/tool/tool.service';
+import { UserService } from '../../../../base/user/core/user.service';
+import { CreateStoryReqDto } from '../dto/repuest/createStoryReq.dto';
+import { EssayService } from '../../../../base/essay/core/essay.service';
 import { Transactional } from 'typeorm-transactional';
-import { StoryUpdateEssayResDto } from '../../../base/essay/dto/response/storyUpdateEssayRes.dto';
-import { UpdateStoryReqDto } from './dto/repuest/updateStoryReq.dto';
+import { StoryUpdateEssayResDto } from '../../../../base/essay/dto/response/storyUpdateEssayRes.dto';
+import { UpdateStoryReqDto } from '../dto/repuest/updateStoryReq.dto';
+import { IStoryRepository } from '../infrastructure/istory.repository';
 
 @Injectable()
 export class StoryService {
   constructor(
-    private readonly storyRepository: StoryRepository,
+    @Inject('IStoryRepository') private readonly storyRepository: IStoryRepository,
     private readonly utilsService: ToolService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @Inject(forwardRef(() => EssayService)) private readonly essayService: EssayService,

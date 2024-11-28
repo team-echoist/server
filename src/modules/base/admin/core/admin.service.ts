@@ -75,6 +75,7 @@ import { EssayService } from '../../essay/core/essay.service';
 import { IAdminRepository } from '../infrastructure/iadmin.repository';
 import { IEssayRepository } from '../../essay/infrastructure/iessay.repository';
 import { IUserRepository } from '../../user/infrastructure/iuser.repository';
+import { IGeulroquisRepository } from '../../../extensions/essay/geulroquis/infrastructure/igeulroquis.repository';
 
 @Injectable()
 export class AdminService {
@@ -82,12 +83,12 @@ export class AdminService {
     @Inject('IAdminRepository') private readonly adminRepository: IAdminRepository,
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     @Inject('IEssayRepository') private readonly essayRepository: IEssayRepository,
+    @Inject('IGeulroquisRepository') private readonly geulroquisRepository: IGeulroquisRepository,
     private readonly userService: UserService,
     private readonly supportService: SupportService,
     private readonly supportRepository: SupportRepository,
     private readonly alertService: AlertService,
     private readonly geulroquisService: GeulroquisService,
-    private readonly geulroquisRepository: GeulroquisRepository,
     private readonly essayService: EssayService,
     private readonly nicknameService: NicknameService,
     private readonly mailService: MailService,

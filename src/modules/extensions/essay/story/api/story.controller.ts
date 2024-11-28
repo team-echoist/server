@@ -12,17 +12,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StoryService } from './story.service';
-import { StoriesResDto } from './dto/response/storiesRes.dto';
+import { StoryService } from '../core/story.service';
+import { StoriesResDto } from '../dto/response/storiesRes.dto';
 import { Request as ExpressRequest } from 'express';
-import { CreateStoryReqDto } from './dto/repuest/createStoryReq.dto';
-import { UpdateStoryReqDto } from './dto/repuest/updateStoryReq.dto';
-import { StoryUpdateEssaysResDto } from '../../../base/essay/dto/response/storyUpdateEssaysRes.dto';
-import { OptionalParseIntPipe } from '../../../../common/pipes/optionalParseInt.pipe';
-import { PagingParseIntPipe } from '../../../../common/pipes/pagingParseInt.pipe';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
-import { StoryDto } from './dto/story.dto';
-import { SummaryEssaysResDto } from '../../../base/essay/dto/response/SummaryEssaysRes.dto';
+import { CreateStoryReqDto } from '../dto/repuest/createStoryReq.dto';
+import { UpdateStoryReqDto } from '../dto/repuest/updateStoryReq.dto';
+import { StoryUpdateEssaysResDto } from '../../../../base/essay/dto/response/storyUpdateEssaysRes.dto';
+import { OptionalParseIntPipe } from '../../../../../common/pipes/optionalParseInt.pipe';
+import { PagingParseIntPipe } from '../../../../../common/pipes/pagingParseInt.pipe';
+import { JwtAuthGuard } from '../../../../../common/guards/jwtAuth.guard';
+import { StoryDto } from '../dto/story.dto';
+import { SummaryEssaysResDto } from '../../../../base/essay/dto/response/SummaryEssaysRes.dto';
 
 @ApiTags('Story')
 @Controller('stories')
