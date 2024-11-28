@@ -11,7 +11,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { UtilsService } from '../utils/utils.service';
 import { EssayService } from '../essay/essay.service';
-import { AwsService } from '../aws/aws.service';
+import { AwsService } from '../aws/service/aws.service';
 import { NicknameService } from '../nickname/nickname.service';
 import { UserRepository } from './user.repository';
 import { UserResDto } from './dto/response/userRes.dto';

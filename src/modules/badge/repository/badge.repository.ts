@@ -1,10 +1,11 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Badge } from '../../entities/badge.entity';
-import { TagExp } from '../../entities/tagExp.entity';
-import { Tag } from '../../entities/tag.entity';
+import { Badge } from '../../../entities/badge.entity';
+import { TagExp } from '../../../entities/tagExp.entity';
+import { Tag } from '../../../entities/tag.entity';
+import { IBadgeRepository } from './ibadge.repository';
 
-export class BadgeRepository {
+export class BadgeRepository implements IBadgeRepository {
   constructor(
     @InjectRepository(Badge)
     private readonly badgeRepository: Repository<Badge>,

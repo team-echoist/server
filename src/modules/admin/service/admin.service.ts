@@ -35,7 +35,7 @@ import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto
 import { AdminResDto } from '../dto/response/adminRes.dto';
 import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { ProfileImageUrlResDto } from '../../user/dto/response/profileImageUrlRes.dto';
-import { AwsService } from '../../aws/aws.service';
+import { AwsService } from '../../aws/service/aws.service';
 import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
 import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
 import { Notice } from '../../../entities/notice.entity';

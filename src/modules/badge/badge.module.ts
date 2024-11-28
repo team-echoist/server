@@ -1,13 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilsModule } from '../utils/utils.module';
-import { BadgeService } from './badge.service';
-import { BadgeRepository } from './badge.repository';
+import { BadgeService } from './service/badge.service';
+import { BadgeRepository } from './repository/badge.repository';
 import { User } from '../../entities/user.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Badge } from '../../entities/badge.entity';
 import { TagExp } from '../../entities/tagExp.entity';
-import { BadgeController } from './badge.controller';
+import { BadgeController } from './controller/badge.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
@@ -21,7 +21,7 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => UserModule),
   ],
   controllers: [BadgeController],
-  providers: [BadgeService, BadgeRepository],
-  exports: [BadgeService, BadgeRepository],
+  providers: [BadgeService, { provide: 'IBadgeRepository', useClass: BadgeRepository }],
+  exports: [BadgeService, { provide: 'IBadgeRepository', useClass: BadgeRepository }],
 })
 export class BadgeModule {}

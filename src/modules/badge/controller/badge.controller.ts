@@ -1,10 +1,10 @@
 import { Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BadgeService } from './badge.service';
+import { BadgeService } from '../service/badge.service';
 import { Request as ExpressRequest } from 'express';
-import { BadgesResDto } from './dto/response/badgesRes.dto';
-import { BadgesWithTagsResDto } from './dto/response/badgesWithTagsRes.dto';
-import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import { BadgesResDto } from '../dto/response/badgesRes.dto';
+import { BadgesWithTagsResDto } from '../dto/response/badgesWithTagsRes.dto';
+import { JwtAuthGuard } from '../../../common/guards/jwtAuth.guard';
 
 @ApiTags('Badge')
 @Controller('badges')

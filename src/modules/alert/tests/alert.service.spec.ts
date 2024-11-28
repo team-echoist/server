@@ -9,14 +9,14 @@ import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ActionType, AlertType, EssayStatus } from '../../../common/types/enum.types';
-import { AwsService } from '../../aws/aws.service';
+import { AwsService } from '../../aws/service/aws.service';
 
 jest.mock('../repository/alert.repository');
 jest.mock('../../utils/utils.service');
 jest.mock('../../support/support.service');
 jest.mock('../../firebase/firebase.service');
 jest.mock('../../user/user.service');
-jest.mock('../../aws/aws.service');
+jest.mock('../../aws/service/aws.service');
 
 describe('AlertService', () => {
   let alertService: AlertService;
