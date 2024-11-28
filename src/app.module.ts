@@ -4,37 +4,37 @@ import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/co
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.module';
-import { EssayModule } from './modules/essay/essay.module';
-import { AdminModule } from './modules/admin/admin.module';
-import { MailModule } from './modules/mail/mail.module';
-import { UtilsModule } from './modules/utils/utils.module';
-import { TagModule } from './modules/tag/tag.module';
-import { StoryModule } from './modules/story/story.module';
-import { SeederModule } from './modules/seeder/seeder.module';
-import { FollowModule } from './modules/follow/follow.module';
-import { BadgeModule } from './modules/badge/badge.module';
-import { AwsModule } from './modules/aws/aws.module';
-import { ReviewModule } from './modules/review/review.module';
-import { UserModule } from './modules/user/user.module';
-import { ReportModule } from './modules/report/report.module';
-import { SeederService } from './modules/seeder/seeder.service';
+import { AuthModule } from './modules/base/auth/auth.module';
+import { EssayModule } from './modules/base/essay/essay.module';
+import { AdminModule } from './modules/base/admin/admin.module';
+import { MailModule } from './modules/utils/mail/mail.module';
+import { ToolModule } from './modules/utils/tool/tool.module';
+import { TagModule } from './modules/features/content/tag/tag.module';
+import { StoryModule } from './modules/features/content/story/story.module';
+import { SeederModule } from './modules/utils/seeder/seeder.module';
+import { FollowModule } from './modules/features/account/follow/follow.module';
+import { BadgeModule } from './modules/features/content/badge/badge.module';
+import { AwsModule } from './modules/adapters/aws/aws.module';
+import { ReviewModule } from './modules/features/contact/review/review.module';
+import { UserModule } from './modules/base/user/user.module';
+import { ReportModule } from './modules/features/contact/report/report.module';
+import { SeederService } from './modules/utils/seeder/seeder.service';
 import { TimezoneMiddleware } from './common/middlewares/timezone.middleware';
 import { TypeormConfig } from './config/typeorm.config';
-import { ViewModule } from './modules/view/view.module';
-import { BookmarkModule } from './modules/bookmark/bookmark.module';
-import { CronModule } from './modules/cron/cron.module';
-import { SupportModule } from './modules/support/support.module';
-import { AlertModule } from './modules/alert/alert.module';
-import { GeulroquisModule } from './modules/geulroquis/geulroquis.module';
-import { HomeModule } from './modules/home/home.module';
+import { ViewModule } from './modules/features/content/view/view.module';
+import { BookmarkModule } from './modules/features/content/bookmark/bookmark.module';
+import { CronModule } from './modules/utils/cron/cron.module';
+import { SupportModule } from './modules/features/contact/support/support.module';
+import { AlertModule } from './modules/features/contact/alert/alert.module';
+import { GeulroquisModule } from './modules/features/content/geulroquis/geulroquis.module';
+import { HomeModule } from './modules/features/account/home/home.module';
 import { ServerGuard } from './common/guards/server.guard';
 import * as strategies from './common/guards/strategies';
 import { DeviceMiddleware } from './common/middlewares/device.middleware';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import * as process from 'node:process';
 import { RequestIdMiddleware } from './common/middlewares/requestId.middleware';
-import { BurialModule } from './modules/burial/burial.module';
+import { BurialModule } from './modules/features/content/burial/burial.module';
 
 @Module({
   imports: [
@@ -59,7 +59,7 @@ import { BurialModule } from './modules/burial/burial.module';
     StoryModule,
     MailModule,
     RedisModule,
-    UtilsModule,
+    ToolModule,
     AwsModule,
     BadgeModule,
     ViewModule,

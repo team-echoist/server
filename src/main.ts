@@ -17,8 +17,8 @@ import { writeFileSync } from 'fs';
 import * as cors from 'cors';
 
 import { join } from 'path';
-import { UtilsService } from './modules/utils/utils.service';
-import { AdminService } from './modules/admin/core/admin.service';
+import { ToolService } from './modules/utils/tool/tool.service';
+import { AdminService } from './modules/base/admin/core/admin.service';
 import { UserStatusInterceptor } from './common/interceptros/userStatus.interceptor';
 
 dotenv.config();
@@ -27,7 +27,7 @@ declare const module: any;
 async function bootstrap() {
   initializeTransactionalContext();
 
-  const utilsService = new UtilsService();
+  const utilsService = new ToolService();
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { snapshot: true });
 
