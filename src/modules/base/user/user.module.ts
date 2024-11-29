@@ -14,6 +14,7 @@ import { DeactivationReason } from '../../../entities/deactivationReason.entity'
 import { Essay } from '../../../entities/essay.entity';
 import { User } from '../../../entities/user.entity';
 import { AwsModule } from '../../adapters/aws/aws.module';
+import { HomeModule } from '../../extensions/user/home/home.module';
 import { MailModule } from '../../utils/mail/mail.module';
 import { NicknameModule } from '../../utils/nickname/nickname.module';
 import { ToolModule } from '../../utils/tool/tool.module';
@@ -35,18 +36,19 @@ import { EssayModule } from '../essay/essay.module';
       }),
       inject: [ConfigService],
     }),
-    MailModule,
     AwsModule,
     ToolModule,
+    MailModule,
     NicknameModule,
+    forwardRef(() => HomeModule),
     forwardRef(() => AuthModule),
     forwardRef(() => EssayModule),
   ],
   controllers: [UserQueryController, UserCommandController],
   providers: [
     UserService,
-    { provide: 'IUserRepository', useClass: UserRepository },
     UserProcessor,
+    { provide: 'IUserRepository', useClass: UserRepository },
     strategies.JwtStrategy,
   ],
   exports: [UserService, { provide: 'IUserRepository', useClass: UserRepository }],

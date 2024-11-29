@@ -29,7 +29,7 @@ import { UserModule } from '../user/user.module';
     ToolModule,
     NicknameModule,
     AwsModule,
-    HomeModule,
+    forwardRef(() => HomeModule),
     forwardRef(() => UserModule),
   ],
   controllers: [AuthLocalController, AuthOauthController, AuthManagementController],

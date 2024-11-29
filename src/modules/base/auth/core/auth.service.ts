@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
@@ -30,7 +30,7 @@ export class AuthService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
-    private readonly userService: UserService,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly utilsService: ToolService,
     private readonly nicknameService: NicknameService,
