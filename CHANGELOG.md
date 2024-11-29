@@ -1,3 +1,5 @@
+## [1.21.9](https://github.com/team-echoist/server/compare/v1.21.8...v1.21.9) (2024-11-29)
+
 ## [1.21.8](https://github.com/team-echoist/server/compare/v1.21.7...v1.21.8) (2024-11-26)
 
 
