@@ -47,8 +47,8 @@ export class EssayService {
     private readonly badgeService: BadgeService,
     private readonly viewService: ViewService,
     private readonly bookmarkService: BookmarkService,
-    private readonly alertService: AlertService,
     private readonly supportService: SupportService,
+    @Inject(forwardRef(() => AlertService)) private readonly alertService: AlertService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
   ) {}

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import Redlock, { Lock } from 'redlock';
@@ -21,8 +21,8 @@ export class HomeService {
   constructor(
     @Inject('IHomeRepository') private readonly homeRepository: IHomeRepository,
     private readonly geulroquisService: GeulroquisService,
-    private readonly userService: UserService,
-    private readonly utilsService: ToolService,
+    private readonly toolService: ToolService,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @Inject('REDLOCK') private readonly redlock: Redlock,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -86,7 +86,7 @@ export class HomeService {
       isActive: theme.id === activeThemeId,
     }));
 
-    const themesDto = this.utilsService.transformToDto(ThemeResDto, themesWithOwnershipAndActive);
+    const themesDto = this.toolService.transformToDto(ThemeResDto, themesWithOwnershipAndActive);
     return { themes: themesDto };
   }
 
@@ -173,7 +173,7 @@ export class HomeService {
       owned: userItemIds.has(item.id),
     }));
 
-    const itemsDto = this.utilsService.transformToDto(ItemResDto, itemsWithOwnership);
+    const itemsDto = this.toolService.transformToDto(ItemResDto, itemsWithOwnership);
     return { items: itemsDto };
   }
 

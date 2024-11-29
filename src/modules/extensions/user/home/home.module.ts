@@ -23,10 +23,10 @@ import { GeulroquisModule } from '../../essay/geulroquis/geulroquis.module';
     ConfigModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature([Item, Theme, UserTheme, UserItem, UserHomeLayout, UserHomeItem]),
-    GeulroquisModule,
     ToolModule,
+    UserModule,
+    forwardRef(() => GeulroquisModule),
     forwardRef(() => AuthModule),
-    forwardRef(() => UserModule),
   ],
   controllers: [HomeController],
   providers: [
