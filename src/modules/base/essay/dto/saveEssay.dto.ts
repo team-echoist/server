@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsLatitude,
@@ -8,11 +9,11 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { User } from '../../../../entities/user.entity';
-import { Device } from '../../../../entities/device.entity';
+
 import { EssayStatus } from '../../../../common/types/enum.types';
-import { Type } from 'class-transformer';
+import { Device } from '../../../../entities/device.entity';
 import { Tag } from '../../../../entities/tag.entity';
+import { User } from '../../../../entities/user.entity';
 
 export class SaveEssayDto {
   @IsNotEmpty()

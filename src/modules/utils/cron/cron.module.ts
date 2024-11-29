@@ -1,19 +1,20 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../../../entities/user.entity';
-import { Essay } from '../../../entities/essay.entity';
-import { CronLog } from '../../../entities/cronLog.entity';
-import { CronService } from './core/cron.service';
 import { BullModule } from '@nestjs/bull';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DeactivationReason } from '../../../entities/deactivationReason.entity';
-import { EssayModule } from '../../base/essay/essay.module';
-import { CronProcessor } from './core/cron.processor';
-import { Geulroquis } from '../../../entities/geulroguis.entity';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ToolModule } from '../tool/tool.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { CronProcessor } from './core/cron.processor';
+import { CronService } from './core/cron.service';
+import { CronLog } from '../../../entities/cronLog.entity';
+import { DeactivationReason } from '../../../entities/deactivationReason.entity';
 import { Device } from '../../../entities/device.entity';
+import { Essay } from '../../../entities/essay.entity';
+import { Geulroquis } from '../../../entities/geulroguis.entity';
 import { SyncStatus } from '../../../entities/sysncStatus.entity';
+import { User } from '../../../entities/user.entity';
+import { EssayModule } from '../../base/essay/essay.module';
+import { ToolModule } from '../tool/tool.module';
 
 @Module({
   imports: [

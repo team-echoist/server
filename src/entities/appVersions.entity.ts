@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { AppType } from '../common/types/enum.types';
 
 @Entity('app_versions')

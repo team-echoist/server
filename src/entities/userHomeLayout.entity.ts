@@ -7,8 +7,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+
 import { Theme } from './theme.entity';
+import { User } from './user.entity';
 import { UserHomeItem } from './userHomeItem.entity';
 
 @Entity('user_home_layout')

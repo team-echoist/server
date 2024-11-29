@@ -1,17 +1,18 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Essay } from '../../../../../entities/essay.entity';
-import { Alert } from '../../../../../entities/alert.entity';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { AlertResDto } from '../dto/response/alertRes.dto';
-import { SupportService } from '../../support/core/support.service';
-import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
 import { InjectQueue } from '@nestjs/bull';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { UserService } from '../../../../base/user/core/user.service';
-import { User } from '../../../../../entities/user.entity';
+
+import { ActionType, AlertType, EssayStatus } from '../../../../../common/types/enum.types';
+import { Alert } from '../../../../../entities/alert.entity';
+import { Essay } from '../../../../../entities/essay.entity';
 import { ReportQueue } from '../../../../../entities/reportQueue.entity';
 import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';
-import { ActionType, AlertType, EssayStatus } from '../../../../../common/types/enum.types';
+import { User } from '../../../../../entities/user.entity';
+import { FirebaseService } from '../../../../adapters/firebase/core/firebase.service';
+import { UserService } from '../../../../base/user/core/user.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
+import { SupportService } from '../../support/core/support.service';
+import { AlertResDto } from '../dto/response/alertRes.dto';
 import { IAlertRepository } from '../infrastructure/ialert.repository';
 
 @Injectable()

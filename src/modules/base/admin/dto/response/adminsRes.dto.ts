@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AdminResDto } from './adminRes.dto';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
+
+import { AdminResDto } from './adminRes.dto';
 
 export class AdminsResDto {
   @ApiProperty({ type: [AdminResDto] })

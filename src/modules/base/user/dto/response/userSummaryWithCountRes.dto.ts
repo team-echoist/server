@@ -1,7 +1,8 @@
-import { WeeklyEssayCountResDto } from '../../../essay/dto/response/weeklyEssayCountRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { IsDateString, IsNumber, IsString } from 'class-validator';
+
+import { WeeklyEssayCountResDto } from '../../../essay/dto/response/weeklyEssayCountRes.dto';
 
 export class UserSummaryWithCountResDto {
   @ApiProperty()

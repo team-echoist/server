@@ -1,6 +1,6 @@
+import { Badge } from '../../../../../entities/badge.entity';
 import { Tag } from '../../../../../entities/tag.entity';
 import { TagExp } from '../../../../../entities/tagExp.entity';
-import { Badge } from '../../../../../entities/badge.entity';
 
 export interface IBadgeRepository {
   findUsedTag(userId: number, tag: Tag): Promise<TagExp>;

@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { BadgeRepository } from '../infrastructure/badge.repository';
+
+import { Badge } from '../../../../../entities/badge.entity';
 import { Tag } from '../../../../../entities/tag.entity';
 import { User } from '../../../../../entities/user.entity';
-import { Badge } from '../../../../../entities/badge.entity';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { BadgeResDto } from '../dto/response/badgeRes.dto';
 import { BadgeWithTagResDto } from '../dto/response/badgeWithTagRes.dto';
 import { IBadgeRepository } from '../infrastructure/ibadge.repository';

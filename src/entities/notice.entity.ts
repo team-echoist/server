@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { Admin } from './admin.entity';
 import { ProcessedHistory } from './processedHistory.entity';
 import { SeenNotice } from './seenNotice.entity';

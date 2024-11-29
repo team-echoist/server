@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+
 import { AwsService } from '../../aws/core/aws.service';
 
 @Injectable()

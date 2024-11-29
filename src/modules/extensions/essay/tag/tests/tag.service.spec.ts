@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { Tag } from '../../../../../entities/tag.entity';
 import { TagService } from '../core/tag.service';
 import { TagRepository } from '../infrastructure/tag.repository';
-import { Tag } from '../../../../../entities/tag.entity';
 
 jest.mock('../infrastructure/tag.repository');
 

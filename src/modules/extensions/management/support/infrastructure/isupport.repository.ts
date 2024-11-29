@@ -1,15 +1,16 @@
-import { Notice } from '../../../../../entities/notice.entity';
-import { Inquiry } from '../../../../../entities/inquiry.entity';
-import { Release } from '../../../../../entities/release.entity';
-import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
+import { DeleteResult, UpdateResult } from 'typeorm';
+
 import { AlertSettings } from '../../../../../entities/alertSettings.entity';
-import { User } from '../../../../../entities/user.entity';
-import { DeviceDto } from '../dto/device.dto';
-import { Device } from '../../../../../entities/device.entity';
 import { AppVersions } from '../../../../../entities/appVersions.entity';
+import { Device } from '../../../../../entities/device.entity';
+import { Inquiry } from '../../../../../entities/inquiry.entity';
+import { Notice } from '../../../../../entities/notice.entity';
+import { Release } from '../../../../../entities/release.entity';
 import { SeenNotice } from '../../../../../entities/seenNotice.entity';
 import { SeenRelease } from '../../../../../entities/seenRelease.entity';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { User } from '../../../../../entities/user.entity';
+import { DeviceDto } from '../dto/device.dto';
+import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
 
 export interface ISupportRepository {
   saveNotice(newNotice: Notice): Promise<Notice>;

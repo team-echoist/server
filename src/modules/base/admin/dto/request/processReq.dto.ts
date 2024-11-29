@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+
 import { ActionType } from '../../../../../common/types/enum.types';
 
 export class ProcessReqDto {

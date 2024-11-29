@@ -1,16 +1,17 @@
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { StoryService } from '../core/story.service';
-import { StoryRepository } from '../infrastructure/story.repository';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { UserService } from '../../../../base/user/core/user.service';
-import { EssayService } from '../../../../base/essay/core/essay.service';
-import { User } from '../../../../../entities/user.entity';
+
 import { Story } from '../../../../../entities/story.entity';
+import { User } from '../../../../../entities/user.entity';
+import { EssayService } from '../../../../base/essay/core/essay.service';
+import { StoryUpdateEssayResDto } from '../../../../base/essay/dto/response/storyUpdateEssayRes.dto';
+import { UserService } from '../../../../base/user/core/user.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
+import { StoryService } from '../core/story.service';
 import { CreateStoryReqDto } from '../dto/repuest/createStoryReq.dto';
 import { UpdateStoryReqDto } from '../dto/repuest/updateStoryReq.dto';
-import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { StoryDto } from '../dto/story.dto';
-import { StoryUpdateEssayResDto } from '../../../../base/essay/dto/response/storyUpdateEssayRes.dto';
+import { StoryRepository } from '../infrastructure/story.repository';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

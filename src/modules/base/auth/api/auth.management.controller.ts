@@ -1,9 +1,10 @@
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Post, Req, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
-import { AuthService } from '../core/auth.service';
-import { DeactivateReqDto } from '../../user/dto/request/deacvivateReq.dto';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
+
+import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+import { DeactivateReqDto } from '../../user/dto/request/deacvivateReq.dto';
+import { AuthService } from '../core/auth.service';
 
 @ApiTags('Auth-management')
 @UseGuards(JwtAuthGuard)

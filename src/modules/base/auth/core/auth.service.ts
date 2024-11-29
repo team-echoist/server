@@ -1,28 +1,29 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
-import * as bcrypt from 'bcrypt';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { ToolService } from '../../../utils/tool/core/tool.service';
-import { MailService } from '../../../utils/mail/core/mail.service';
-import { NicknameService } from '../../../utils/nickname/core/nickname.service';
-import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
-import { OauthDto } from '../dto/oauth.dto';
-import { OAuth2Client } from 'google-auth-library';
-import { ConfigService } from '@nestjs/config';
-import { Transactional } from 'typeorm-transactional';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import * as bcrypt from 'bcrypt';
+import { Request as ExpressRequest } from 'express';
+import { OAuth2Client } from 'google-auth-library';
+import Redis from 'ioredis';
 import * as jwt from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
-import { JwtService } from '@nestjs/jwt';
+import { firstValueFrom } from 'rxjs';
+import { Transactional } from 'typeorm-transactional';
+
 import { UserStatus } from '../../../../common/types/enum.types';
-import { Request as ExpressRequest } from 'express';
+import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { User } from '../../../../entities/user.entity';
 import { HomeService } from '../../../extensions/user/home/core/home.service';
-import { DeactivateReqDto } from '../../user/dto/request/deacvivateReq.dto';
-import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
+import { MailService } from '../../../utils/mail/core/mail.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { UserService } from '../../user/core/user.service';
+import { DeactivateReqDto } from '../../user/dto/request/deacvivateReq.dto';
 import { IUserRepository } from '../../user/infrastructure/iuser.repository';
+import { OauthDto } from '../dto/oauth.dto';
+import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 
 @Injectable()
 export class AuthService {

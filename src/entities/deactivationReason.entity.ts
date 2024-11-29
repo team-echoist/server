@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { User } from './user.entity';
 
 @Entity('deactivation_reason')

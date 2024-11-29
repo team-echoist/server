@@ -1,14 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
+
 import { ReportDto } from '../report.dto';
-import { ReviewResDto } from './reviewRes.dto';
-import { UserDto } from '../../../user/dto/user.dto';
-import { EssayDto } from '../../../essay/dto/essay.dto';
 import { AdminResDto } from './adminRes.dto';
-import { NoticeResDto } from '../../../../extensions/management/support/dto/response/noticeRes.dto';
-import { InquiryResDto } from '../../../../extensions/management/support/dto/response/inquiryRes.dto';
+import { ReviewResDto } from './reviewRes.dto';
 import { ActionType } from '../../../../../common/types/enum.types';
+import { InquiryResDto } from '../../../../extensions/management/support/dto/response/inquiryRes.dto';
+import { NoticeResDto } from '../../../../extensions/management/support/dto/response/noticeRes.dto';
+import { EssayDto } from '../../../essay/dto/essay.dto';
+import { UserDto } from '../../../user/dto/user.dto';
 
 export class HistoriesResDto {
   @ApiProperty()

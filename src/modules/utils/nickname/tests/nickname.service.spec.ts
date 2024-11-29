@@ -1,7 +1,8 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { NicknameService } from '../core/nickname.service';
 import { NicknameRepository } from '../infrastructure/nickname.repository';
-import { HttpException, HttpStatus } from '@nestjs/common';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

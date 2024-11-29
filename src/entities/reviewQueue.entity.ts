@@ -8,9 +8,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { Essay } from './essay.entity';
-import { User } from './user.entity';
 import { ProcessedHistory } from './processedHistory.entity';
+import { User } from './user.entity';
 import { ReviewQueueType } from '../common/types/enum.types';
 
 @Entity('review_queue')

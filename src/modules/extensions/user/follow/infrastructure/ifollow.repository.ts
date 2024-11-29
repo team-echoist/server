@@ -1,5 +1,5 @@
-import { User } from '../../../../../entities/user.entity';
 import { Follow } from '../../../../../entities/follow.entity';
+import { User } from '../../../../../entities/user.entity';
 
 export interface IFollowRepository {
   follow(follower: User, following: User): Promise<void>;

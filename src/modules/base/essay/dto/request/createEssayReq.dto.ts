@@ -11,6 +11,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
+
 import { EssayStatus } from '../../../../../common/types/enum.types';
 
 export class CreateEssayReqDto {

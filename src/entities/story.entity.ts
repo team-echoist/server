@@ -8,8 +8,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+
 import { Essay } from './essay.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Story {

@@ -1,6 +1,6 @@
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-naver';
-import { Injectable } from '@nestjs/common';
 
 // 타입 확인 필요
 type VerifyCallback = (error: any, user?: any, info?: any) => void;

@@ -1,19 +1,20 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { Bookmark } from '../../../../entities/bookmark.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ToolModule } from '../../../utils/tool/tool.module';
 import { BullModule } from '@nestjs/bull';
-import { BookmarkService } from './core/bookmark.service';
-import { BookmarkRepository } from './infrastructure/bookmark.repository';
-import { Essay } from '../../../../entities/essay.entity';
-import { User } from '../../../../entities/user.entity';
-import { UserModule } from '../../../base/user/user.module';
-import { BookmarkProcessor } from './core/bookmark.processor';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BookmarkController } from './api/bookmark.controller';
+
 import { EssayModule } from '../../../base/essay/essay.module';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BookmarkController } from './api/bookmark.controller';
+import { BookmarkProcessor } from './core/bookmark.processor';
+import { BookmarkService } from './core/bookmark.service';
+import { BookmarkRepository } from './infrastructure/bookmark.repository';
+import { Bookmark } from '../../../../entities/bookmark.entity';
+import { Essay } from '../../../../entities/essay.entity';
+import { User } from '../../../../entities/user.entity';
 import { AuthModule } from '../../../base/auth/auth.module';
+import { UserModule } from '../../../base/user/user.module';
+import { ToolModule } from '../../../utils/tool/tool.module';
 
 @Module({
   imports: [

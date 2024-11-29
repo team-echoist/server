@@ -1,7 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { UserTheme } from './userTheme.entity';
-import { UserHomeLayout } from './userHomeLayout.entity';
+
 import { Item } from './item.entity';
+import { UserHomeLayout } from './userHomeLayout.entity';
+import { UserTheme } from './userTheme.entity';
 
 @Entity()
 export class Theme {

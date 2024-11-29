@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './user.entity';
+
 import { TagExp } from './tagExp.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Badge {

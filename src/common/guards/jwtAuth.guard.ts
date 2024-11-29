@@ -7,14 +7,15 @@ import {
   forwardRef,
   Inject,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { AuthService } from '../../modules/base/auth/core/auth.service';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+
+import { AuthService } from '../../modules/base/auth/core/auth.service';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {

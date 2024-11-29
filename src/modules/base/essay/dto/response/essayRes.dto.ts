@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -8,13 +9,13 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Expose, Type } from 'class-transformer';
-import { TagDto } from '../tag.dto';
-import { StoryDto } from '../../../../extensions/essay/story/dto/story.dto';
-import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';
-import { ReviewResDto } from '../../../../extensions/management/review/dto/response/reviewRes.dto';
+
 import { EssayStatus } from '../../../../../common/types/enum.types';
+import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';
+import { StoryDto } from '../../../../extensions/essay/story/dto/story.dto';
+import { ReviewResDto } from '../../../../extensions/management/review/dto/response/reviewRes.dto';
 import { UserLimitedInfoResDto } from '../../../user/dto/response/userLimitedInfoRes.dto';
+import { TagDto } from '../tag.dto';
 
 export class EssayResDto {
   @ApiProperty()

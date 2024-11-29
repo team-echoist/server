@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -8,7 +9,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { Expose } from 'class-transformer';
+
 import { EssayStatus } from '../../../../../common/types/enum.types';
 
 export class UpdateEssayReqDto {

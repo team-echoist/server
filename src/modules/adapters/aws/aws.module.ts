@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AwsService } from './core/aws.service';
 import { ConfigModule } from '@nestjs/config';
+
+import { AwsService } from './core/aws.service';
 
 @Module({
   imports: [ConfigModule],

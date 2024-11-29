@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportResDto } from './reportRes.dto';
 import { Expose } from 'class-transformer';
+
+import { ReportResDto } from './reportRes.dto';
 
 export class ReportsResDto {
   @ApiProperty({ type: [ReportResDto] })

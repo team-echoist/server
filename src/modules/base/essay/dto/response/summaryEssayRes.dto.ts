@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
+import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
+
 import { EssayStatus } from '../../../../../common/types/enum.types';
 import { UserLimitedInfoResDto } from '../../../user/dto/response/userLimitedInfoRes.dto';
 

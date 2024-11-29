@@ -11,12 +11,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BookmarkService } from '../core/bookmark.service';
-import { SummaryEssaysResDto } from '../../../../base/essay/dto/response/SummaryEssaysRes.dto';
 import { Request as ExpressRequest } from 'express';
-import { PagingParseIntPipe } from '../../../../../common/pipes/pagingParseInt.pipe';
-import { EssayIdsReqDto } from '../dto/request/essayIdsReq.dto';
+
 import { JwtAuthGuard } from '../../../../../common/guards/jwtAuth.guard';
+import { PagingParseIntPipe } from '../../../../../common/pipes/pagingParseInt.pipe';
+import { SummaryEssaysResDto } from '../../../../base/essay/dto/response/SummaryEssaysRes.dto';
+import { BookmarkService } from '../core/bookmark.service';
+import { EssayIdsReqDto } from '../dto/request/essayIdsReq.dto';
 
 @ApiTags('Bookmark')
 @Controller('bookmarks')

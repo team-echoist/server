@@ -1,7 +1,7 @@
 import { Provider } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import Redlock from 'redlock';
-import { ConfigService } from '@nestjs/config';
 
 export const RedlockProvider: Provider = {
   provide: 'REDLOCK',

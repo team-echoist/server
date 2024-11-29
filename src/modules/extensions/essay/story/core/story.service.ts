@@ -6,16 +6,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '../../../../../entities/user.entity';
-import { Story } from '../../../../../entities/story.entity';
-import { StoryDto } from '../dto/story.dto';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { UserService } from '../../../../base/user/core/user.service';
-import { CreateStoryReqDto } from '../dto/repuest/createStoryReq.dto';
-import { EssayService } from '../../../../base/essay/core/essay.service';
 import { Transactional } from 'typeorm-transactional';
+
+import { Story } from '../../../../../entities/story.entity';
+import { User } from '../../../../../entities/user.entity';
+import { EssayService } from '../../../../base/essay/core/essay.service';
 import { StoryUpdateEssayResDto } from '../../../../base/essay/dto/response/storyUpdateEssayRes.dto';
+import { UserService } from '../../../../base/user/core/user.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
+import { CreateStoryReqDto } from '../dto/repuest/createStoryReq.dto';
 import { UpdateStoryReqDto } from '../dto/repuest/updateStoryReq.dto';
+import { StoryDto } from '../dto/story.dto';
 import { IStoryRepository } from '../infrastructure/istory.repository';
 
 @Injectable()

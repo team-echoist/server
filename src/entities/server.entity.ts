@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+
 import { ServerStatus } from '../common/types/enum.types';
 
 @Entity()

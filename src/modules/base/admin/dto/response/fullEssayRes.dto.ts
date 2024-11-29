@@ -11,11 +11,12 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { StoryInfoDto } from '../../../../extensions/essay/story/dto/storyInfo.dto';
+
 import { FullUserResDto } from './fullUserRes.dto';
 import { ReportDto } from '../report.dto';
 import { ReviewResDto } from './reviewRes.dto';
 import { EssayStatus } from '../../../../../common/types/enum.types';
+import { StoryInfoDto } from '../../../../extensions/essay/story/dto/storyInfo.dto';
 
 export class FullEssayResDto {
   @ApiProperty()

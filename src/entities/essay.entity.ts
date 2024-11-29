@@ -12,16 +12,17 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
-import { ReportQueue } from './reportQueue.entity';
-import { Story } from './story.entity';
-import { ReviewQueue } from './reviewQueue.entity';
-import { ProcessedHistory } from './processedHistory.entity';
-import { Tag } from './tag.entity';
-import { ViewRecord } from './viewRecord.entity';
-import { Bookmark } from './bookmark.entity';
+
 import { Alert } from './alert.entity';
+import { Bookmark } from './bookmark.entity';
 import { Device } from './device.entity';
+import { ProcessedHistory } from './processedHistory.entity';
+import { ReportQueue } from './reportQueue.entity';
+import { ReviewQueue } from './reviewQueue.entity';
+import { Story } from './story.entity';
+import { Tag } from './tag.entity';
+import { User } from './user.entity';
+import { ViewRecord } from './viewRecord.entity';
 import { EssayStatus } from '../common/types/enum.types';
 
 @Entity()

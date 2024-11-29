@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsString } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
+import { IsDateString, IsString } from 'class-validator';
+
 import { AdminResDto } from './adminRes.dto';
 
 export class NoticeWithProcessorResDto {

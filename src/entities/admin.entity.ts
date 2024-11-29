@@ -6,8 +6,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProcessedHistory } from './processedHistory.entity';
+
 import { Notice } from './notice.entity';
+import { ProcessedHistory } from './processedHistory.entity';
 import { Release } from './release.entity';
 
 @Entity()

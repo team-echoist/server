@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EssayInfoResDto } from './essayInfoRes.dto';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
+
+import { EssayInfoResDto } from './essayInfoRes.dto';
 
 export class EssaysInfoResDto {
   @ApiProperty({ type: [EssayInfoResDto] })

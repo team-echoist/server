@@ -1,8 +1,9 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
+import { DataSource } from 'typeorm';
+
 import { BookmarkService } from './bookmark.service';
 import { Bookmark } from '../../../../../entities/bookmark.entity';
-import { DataSource } from 'typeorm';
 
 @Processor('bookmark')
 export class BookmarkProcessor {

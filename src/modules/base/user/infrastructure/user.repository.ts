@@ -1,12 +1,13 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../../../entities/user.entity';
-import { MoreThan, Repository } from 'typeorm';
-import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
-import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { ConfigService } from '@nestjs/config';
-import { UserStatus } from '../../../../common/types/enum.types';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MoreThan, Repository } from 'typeorm';
+
 import { IUserRepository } from './iuser.repository';
+import { UserStatus } from '../../../../common/types/enum.types';
+import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
+import { User } from '../../../../entities/user.entity';
 import { CreateUserReqDto } from '../../auth/dto/request/createUserReq.dto';
+import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 
 export class UserRepository implements IUserRepository {
   constructor(

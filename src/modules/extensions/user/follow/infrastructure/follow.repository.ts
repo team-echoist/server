@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Follow } from '../../../../../entities/follow.entity';
 import { Repository } from 'typeorm';
-import { User } from '../../../../../entities/user.entity';
+
 import { IFollowRepository } from './ifollow.repository';
+import { Follow } from '../../../../../entities/follow.entity';
+import { User } from '../../../../../entities/user.entity';
 
 export class FollowRepository implements IFollowRepository {
   constructor(

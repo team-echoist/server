@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, Index, ManyToOne } from 'typeorm';
-import { User } from './user.entity';
+
 import { Device } from './device.entity';
+import { User } from './user.entity';
 
 @Entity('alert_settings')
 export class AlertSettings {

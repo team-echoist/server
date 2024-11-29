@@ -1,7 +1,8 @@
-import { UserSummaryResDto } from './userSummaryRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
+
+import { UserSummaryResDto } from './userSummaryRes.dto';
 
 export class UsersSummaryResDto {
   @ApiProperty({ type: [UserSummaryResDto] })

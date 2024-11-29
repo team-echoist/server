@@ -1,16 +1,17 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BookmarkRepository } from '../infrastructure/bookmark.repository';
-import { User } from '../../../../../entities/user.entity';
-import { Essay } from '../../../../../entities/essay.entity';
 import { InjectQueue } from '@nestjs/bull';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { Bookmark } from '../../../../../entities/bookmark.entity';
-import { UserService } from '../../../../base/user/core/user.service';
-import { SummaryEssayResDto } from '../../../../base/essay/dto/response/summaryEssayRes.dto';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { Transactional } from 'typeorm-transactional';
-import { EssayService } from '../../../../base/essay/core/essay.service';
+
 import { EssayStatus } from '../../../../../common/types/enum.types';
+import { Bookmark } from '../../../../../entities/bookmark.entity';
+import { Essay } from '../../../../../entities/essay.entity';
+import { User } from '../../../../../entities/user.entity';
+import { EssayService } from '../../../../base/essay/core/essay.service';
+import { SummaryEssayResDto } from '../../../../base/essay/dto/response/summaryEssayRes.dto';
+import { UserService } from '../../../../base/user/core/user.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
+import { BookmarkRepository } from '../infrastructure/bookmark.repository';
 
 @Injectable()
 export class BookmarkService {

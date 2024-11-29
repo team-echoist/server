@@ -1,7 +1,8 @@
-import { AlertResDto } from './alertRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { IsNumber } from 'class-validator';
+
+import { AlertResDto } from './alertRes.dto';
 
 export class AlertsResDto {
   @ApiProperty({ type: [AlertResDto] })

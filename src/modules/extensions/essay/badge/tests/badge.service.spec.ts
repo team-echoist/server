@@ -1,8 +1,9 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { BadgeService } from '../core/badge.service';
 import { BadgeRepository } from '../infrastructure/badge.repository';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { HttpException, HttpStatus } from '@nestjs/common';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

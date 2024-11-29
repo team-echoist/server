@@ -1,5 +1,6 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { NicknameService } from './core/nickname.service';
 import { NicknameRepository } from './infrastructure/nickname.repository';
 import { BasicNickname } from '../../../entities/basicNickname.entity';

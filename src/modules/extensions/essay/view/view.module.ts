@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../../../../entities/user.entity';
-import { Essay } from '../../../../entities/essay.entity';
-import { ViewRecord } from '../../../../entities/viewRecord.entity';
+
 import { ViewService } from './core/view.service';
 import { ViewRepository } from './infrastructure/view.repository';
+import { Essay } from '../../../../entities/essay.entity';
+import { User } from '../../../../entities/user.entity';
+import { ViewRecord } from '../../../../entities/viewRecord.entity';
 import { ToolModule } from '../../../utils/tool/tool.module';
 
 @Module({

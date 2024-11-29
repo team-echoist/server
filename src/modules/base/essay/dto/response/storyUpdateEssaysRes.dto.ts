@@ -1,7 +1,8 @@
-import { StoryUpdateEssayResDto } from './storyUpdateEssayRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
+
+import { StoryUpdateEssayResDto } from './storyUpdateEssayRes.dto';
 
 export class StoryUpdateEssaysResDto {
   @ApiProperty({ type: [StoryUpdateEssayResDto] })

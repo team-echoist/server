@@ -1,18 +1,19 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notice } from '../../../../../entities/notice.entity';
 import { Repository } from 'typeorm';
-import { Inquiry } from '../../../../../entities/inquiry.entity';
-import { Release } from '../../../../../entities/release.entity';
+
+import { ISupportRepository } from './isupport.repository';
+import { DeviceOS, DeviceType } from '../../../../../common/types/enum.types';
 import { AlertSettings } from '../../../../../entities/alertSettings.entity';
-import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
+import { AppVersions } from '../../../../../entities/appVersions.entity';
 import { Device } from '../../../../../entities/device.entity';
+import { Inquiry } from '../../../../../entities/inquiry.entity';
+import { Notice } from '../../../../../entities/notice.entity';
+import { Release } from '../../../../../entities/release.entity';
+import { SeenNotice } from '../../../../../entities/seenNotice.entity';
+import { SeenRelease } from '../../../../../entities/seenRelease.entity';
 import { User } from '../../../../../entities/user.entity';
 import { DeviceDto } from '../dto/device.dto';
-import { AppVersions } from '../../../../../entities/appVersions.entity';
-import { SeenNotice } from '../../../../../entities/seenNotice.entity';
-import { DeviceOS, DeviceType } from '../../../../../common/types/enum.types';
-import { SeenRelease } from '../../../../../entities/seenRelease.entity';
-import { ISupportRepository } from './isupport.repository';
+import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
 
 export class SupportRepository implements ISupportRepository {
   constructor(

@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Story } from '../../../../../entities/story.entity';
-import { Essay } from '../../../../../entities/essay.entity';
+
 import { IStoryRepository } from './istory.repository';
+import { Essay } from '../../../../../entities/essay.entity';
+import { Story } from '../../../../../entities/story.entity';
 
 export class StoryRepository implements IStoryRepository {
   constructor(

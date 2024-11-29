@@ -1,7 +1,8 @@
-import { Repository } from 'typeorm';
-import { ReportQueue } from '../../../../../entities/reportQueue.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { IReporter } from './ireport.repository';
+import { ReportQueue } from '../../../../../entities/reportQueue.entity';
 
 export class ReportRepository implements IReporter {
   constructor(

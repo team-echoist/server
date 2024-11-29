@@ -1,7 +1,8 @@
+import * as process from 'node:process';
+
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
-import { Injectable } from '@nestjs/common';
-import * as process from 'node:process';
 
 type VerifyCallback = (error: any, user?: any, info?: any) => void;
 

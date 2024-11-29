@@ -1,6 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsBoolean, IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+
 import { DeviceResDto } from '../../../../extensions/management/support/dto/response/deviceRes.dto';
 import { LayoutResDto } from '../../../../extensions/user/home/dto/response/layoutRes.dto';
 

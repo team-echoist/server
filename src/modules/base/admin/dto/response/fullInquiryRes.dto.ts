@@ -1,7 +1,8 @@
-import { FullUserResDto } from './fullUserRes.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
+
+import { FullUserResDto } from './fullUserRes.dto';
 
 export class FullInquiryResDto {
   @ApiProperty()

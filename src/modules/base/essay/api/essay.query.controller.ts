@@ -1,4 +1,3 @@
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   DefaultValuePipe,
@@ -9,17 +8,19 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { EssayService } from '../core/essay.service';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
+
+import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
 import { OptionalParseIntPipe } from '../../../../common/pipes/optionalParseInt.pipe';
+import { PageTypeEnumPipe } from '../../../../common/pipes/PageTypeEnum.pipe';
 import { PagingParseIntPipe } from '../../../../common/pipes/pagingParseInt.pipe';
-import { SummaryEssaysResDto } from '../dto/response/SummaryEssaysRes.dto';
+import { PageType } from '../../../../common/types/enum.types';
+import { EssayService } from '../core/essay.service';
+import { EssayWithAnotherEssayResDto } from '../dto/response/essayWithAnotherEssayRes.dto';
 import { PublicEssaysResDto } from '../dto/response/publicEssaysRes.dto';
 import { SentenceEssaysResDto } from '../dto/response/sentenceEssaysRes.dto';
-import { EssayWithAnotherEssayResDto } from '../dto/response/essayWithAnotherEssayRes.dto';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
-import { PageType } from '../../../../common/types/enum.types';
-import { PageTypeEnumPipe } from '../../../../common/pipes/PageTypeEnum.pipe';
+import { SummaryEssaysResDto } from '../dto/response/SummaryEssaysRes.dto';
 
 @ApiTags('Essay-query')
 @UseGuards(JwtAuthGuard)

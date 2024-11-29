@@ -1,10 +1,11 @@
+import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Request as ExpressRequest } from 'express';
+
 import { FollowController } from '../api/follow.controller';
 import { FollowService } from '../core/follow.service';
-import { AuthGuard } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import { Request as ExpressRequest } from 'express';
 
 jest.mock('../core/follow.service');
 

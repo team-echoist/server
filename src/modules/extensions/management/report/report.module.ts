@@ -1,14 +1,15 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { forwardRef, Module } from '@nestjs/common';
-import { User } from '../../../../entities/user.entity';
-import { Essay } from '../../../../entities/essay.entity';
-import { ReportQueue } from '../../../../entities/reportQueue.entity';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ReportController } from './api/report.controller';
 import { ReportService } from './core/report.service';
 import { ReportRepository } from './infrastructure/report.repository';
-import { EssayModule } from '../../../base/essay/essay.module';
-import { ReportController } from './api/report.controller';
-import { JwtModule } from '@nestjs/jwt';
+import { Essay } from '../../../../entities/essay.entity';
+import { ReportQueue } from '../../../../entities/reportQueue.entity';
+import { User } from '../../../../entities/user.entity';
 import { AuthModule } from '../../../base/auth/auth.module';
+import { EssayModule } from '../../../base/essay/essay.module';
 import { UserModule } from '../../../base/user/user.module';
 
 @Module({

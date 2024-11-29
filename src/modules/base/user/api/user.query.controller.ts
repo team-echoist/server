@@ -1,14 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
-import { UserService } from '../core/user.service';
-import { UserSummaryWithStatsResDto } from '../dto/response/userSummaryWithStatsRes.dto';
-import { UserSummaryWithCountResDto } from '../dto/response/userSummaryWithCountRes.dto';
-import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+
 import { Public } from '../../../../common/decorators/public.decorator';
-import { CheckEmailReqDto } from '../../auth/dto/request/checkEmailReq.dto';
-import { CheckNicknameReqDto } from '../../auth/dto/request/checkNicknameReq.dto';
+import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+import { UserService } from '../core/user.service';
+import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
+import { UserSummaryWithCountResDto } from '../dto/response/userSummaryWithCountRes.dto';
+import { UserSummaryWithStatsResDto } from '../dto/response/userSummaryWithStatsRes.dto';
 
 @ApiTags('User-query')
 @UseGuards(JwtAuthGuard)

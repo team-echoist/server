@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
+
 import { INicknameRepository } from '../infrastructure/inickname.repository';
 
 @Injectable()

@@ -1,7 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Alert } from '../../../../../entities/alert.entity';
 import { Repository } from 'typeorm';
+
 import { IAlertRepository } from './ialert.repository';
+import { Alert } from '../../../../../entities/alert.entity';
 
 export class AlertRepository implements IAlertRepository {
   constructor(@InjectRepository(Alert) private readonly alertRepository: Repository<Alert>) {}

@@ -1,4 +1,3 @@
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -12,16 +11,18 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
+
 import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+import { OptionalParseIntPipe } from '../../../../common/pipes/optionalParseInt.pipe';
 import { EssayService } from '../core/essay.service';
 import { CreateEssayReqDto } from '../dto/request/createEssayReq.dto';
-import { EssayResDto } from '../dto/response/essayRes.dto';
-import { Request as ExpressRequest } from 'express';
-import { UpdateEssayReqDto } from '../dto/request/updateEssayReq.dto';
-import { ThumbnailResDto } from '../dto/response/ThumbnailRes.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ThumbnailReqDto } from '../dto/request/ThumbnailReq.dto';
-import { OptionalParseIntPipe } from '../../../../common/pipes/optionalParseInt.pipe';
+import { UpdateEssayReqDto } from '../dto/request/updateEssayReq.dto';
+import { EssayResDto } from '../dto/response/essayRes.dto';
+import { ThumbnailResDto } from '../dto/response/ThumbnailRes.dto';
 
 @ApiTags('Essay-command')
 @UseGuards(JwtAuthGuard)

@@ -1,5 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import * as useragent from 'useragent';
+
 import { DeviceOS, DeviceType } from '../types/enum.types';
 
 @Injectable()

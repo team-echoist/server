@@ -1,14 +1,15 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { forwardRef, Module } from '@nestjs/common';
-import { User } from '../../../../entities/user.entity';
-import { Follow } from '../../../../entities/follow.entity';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { FollowController } from './api/follow.controller';
 import { FollowService } from './core/follow.service';
 import { FollowRepository } from './infrastructure/follow.repository';
-import { ToolModule } from '../../../utils/tool/tool.module';
-import { FollowController } from './api/follow.controller';
-import { UserModule } from '../../../base/user/user.module';
-import { JwtModule } from '@nestjs/jwt';
+import { Follow } from '../../../../entities/follow.entity';
+import { User } from '../../../../entities/user.entity';
 import { AuthModule } from '../../../base/auth/auth.module';
+import { UserModule } from '../../../base/user/user.module';
+import { ToolModule } from '../../../utils/tool/tool.module';
 
 @Module({
   imports: [

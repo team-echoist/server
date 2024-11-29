@@ -1,11 +1,12 @@
 import { Processor, Process } from '@nestjs/bull';
-import { Job } from 'bull';
-import { EssayService } from '../../../base/essay/core/essay.service';
 import { forwardRef, Inject } from '@nestjs/common';
+import { Job } from 'bull';
 import { DataSource } from 'typeorm';
-import { Essay } from '../../../../entities/essay.entity';
+
 import { Aggregate } from '../../../../entities/aggregate.entity';
+import { Essay } from '../../../../entities/essay.entity';
 import { User } from '../../../../entities/user.entity';
+import { EssayService } from '../../../base/essay/core/essay.service';
 
 @Processor('{cron}cron')
 export class CronProcessor {

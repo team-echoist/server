@@ -1,6 +1,7 @@
-import { StoryDto } from '../story.dto';
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+
+import { StoryDto } from '../story.dto';
 
 export class StoriesResDto {
   @ApiProperty({ type: [StoryDto] })

@@ -1,25 +1,26 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { Request as ExpressRequest } from 'express';
+import Redis from 'ioredis';
+import { Transactional } from 'typeorm-transactional';
+
+import { DeviceOS, DeviceType } from '../../../../../common/types/enum.types';
+import { AlertSettings } from '../../../../../entities/alertSettings.entity';
+import { Device } from '../../../../../entities/device.entity';
+import { Inquiry } from '../../../../../entities/inquiry.entity';
+import { User } from '../../../../../entities/user.entity';
+import { UserService } from '../../../../base/user/core/user.service';
 import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { NoticeSummaryResDto } from '../dto/response/noticeSummaryRes.dto';
 import { NoticeResDto } from '../dto/response/noticeRes.dto';
 import { InquiryReqDto } from '../dto/request/inquiryReq.dto';
-import { Inquiry } from '../../../../../entities/inquiry.entity';
-import { UserService } from '../../../../base/user/core/user.service';
 import { InquirySummaryResDto } from '../dto/response/inquirySummaryRes.dto';
 import { InquiryResDto } from '../dto/response/inquiryRes.dto';
 import { ReleaseResDto } from '../dto/response/releaseRes.dto';
 import { UpdateAlertSettingsReqDto } from '../dto/request/updateAlertSettings.dto';
-import { AlertSettings } from '../../../../../entities/alertSettings.entity';
 import { AlertSettingsResDto } from '../dto/response/alertSettingsRes.dto';
-import { Transactional } from 'typeorm-transactional';
-import { Request as ExpressRequest } from 'express';
-import { Device } from '../../../../../entities/device.entity';
-import { User } from '../../../../../entities/user.entity';
 import { DeviceDto } from '../dto/device.dto';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
 import { VersionsSummaryResDto } from '../dto/response/versionsSummaryRes.dto';
-import { DeviceOS, DeviceType } from '../../../../../common/types/enum.types';
 import { ISupportRepository } from '../infrastructure/isupport.repository';
 
 @Injectable()

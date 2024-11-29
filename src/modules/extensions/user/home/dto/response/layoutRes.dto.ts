@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsNumber } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsNumber } from 'class-validator';
+
 import { HomeItemResDto } from './homeItemRes.dto';
 
 export class LayoutResDto {

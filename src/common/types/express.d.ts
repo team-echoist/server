@@ -1,6 +1,7 @@
 import { Request as ExpressRequest } from 'express';
-import { UserStatus } from '../../entities/user.entity';
+
 import { DeviceType, DeviceOS } from '../../entities/device.entity';
+import { UserStatus } from '../../entities/user.entity';
 
 declare global {
   namespace Express {

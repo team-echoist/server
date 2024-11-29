@@ -1,16 +1,17 @@
+import { HttpService } from '@nestjs/axios';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../core/auth.service';
-import { UserRepository } from '../../user/infrastructure/user.repository';
-import { ToolService } from '../../../utils/tool/core/tool.service';
+import * as bcrypt from 'bcrypt';
+
+import { UserStatus } from '../../../../common/types/enum.types';
+import { HomeService } from '../../../extensions/user/home/core/home.service';
 import { MailService } from '../../../utils/mail/core/mail.service';
 import { NicknameService } from '../../../utils/nickname/core/nickname.service';
-import { HttpService } from '@nestjs/axios';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { HomeService } from '../../../extensions/user/home/core/home.service';
-import * as bcrypt from 'bcrypt';
-import { UserStatus } from '../../../../common/types/enum.types';
+import { ToolService } from '../../../utils/tool/core/tool.service';
+import { UserRepository } from '../../user/infrastructure/user.repository';
+import { AuthService } from '../core/auth.service';
 
 jest.mock('bcrypt');
 jest.mock('typeorm-transactional', () => ({

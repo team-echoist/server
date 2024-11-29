@@ -1,20 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from '../core/user.service';
-import { UserRepository } from '../infrastructure/user.repository';
-import { ToolService } from '../../../utils/tool/core/tool.service';
-import { AwsService } from '../../../adapters/aws/core/aws.service';
-import { NicknameService } from '../../../utils/nickname/core/nickname.service';
-import { AuthService } from '../../auth/core/auth.service';
-import { EssayService } from '../../essay/core/essay.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
+
 import { User } from '../../../../entities/user.entity';
+import { AwsService } from '../../../adapters/aws/core/aws.service';
+import { NicknameService } from '../../../utils/nickname/core/nickname.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
+import { AuthService } from '../../auth/core/auth.service';
+import { EssayService } from '../../essay/core/essay.service';
+import { UserService } from '../core/user.service';
+import { DeactivateReqDto } from '../dto/request/deacvivateReq.dto';
+import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
 import { UserResDto } from '../dto/response/userRes.dto';
-import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
-import { DeactivateReqDto } from '../dto/request/deacvivateReq.dto';
 import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
+import { UserRepository } from '../infrastructure/user.repository';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

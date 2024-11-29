@@ -1,8 +1,9 @@
-import { User } from '../../../../entities/user.entity';
-import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
-import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { DeleteResult } from 'typeorm';
+
+import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
+import { User } from '../../../../entities/user.entity';
 import { CreateUserReqDto } from '../../auth/dto/request/createUserReq.dto';
+import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 
 export interface IUserRepository {
   findUserById(userId: number): Promise<User>;

@@ -9,6 +9,7 @@ import {
   Length,
   Matches,
 } from 'class-validator';
+
 import { UserStatus } from '../../../../../common/types/enum.types';
 
 export class UpdateFullUserReqDto {

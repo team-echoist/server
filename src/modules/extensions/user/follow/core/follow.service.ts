@@ -6,10 +6,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';
-import { UserService } from '../../../../base/user/core/user.service';
 import { Transactional } from 'typeorm-transactional';
+
+import { UserService } from '../../../../base/user/core/user.service';
+import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { IFollowRepository } from '../infrastructure/ifollow.repository';
 
 @Injectable()

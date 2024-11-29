@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateEssayReqDto } from '../../../../base/essay/dto/request/createEssayReq.dto';
-import { User } from '../../../../../entities/user.entity';
-import { Essay } from '../../../../../entities/essay.entity';
-import { UpdateEssayReqDto } from '../../../../base/essay/dto/request/updateEssayReq.dto';
+
 import { EssayStatus, ReviewQueueType } from '../../../../../common/types/enum.types';
+import { Essay } from '../../../../../entities/essay.entity';
+import { User } from '../../../../../entities/user.entity';
+import { CreateEssayReqDto } from '../../../../base/essay/dto/request/createEssayReq.dto';
+import { UpdateEssayReqDto } from '../../../../base/essay/dto/request/updateEssayReq.dto';
 import { IReviewRepository } from '../infrastructure/ireview.repository';
 
 @Injectable()

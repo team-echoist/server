@@ -8,28 +8,29 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Essay } from './essay.entity';
-import { Subscription } from './subscription.entity';
-import { ReportQueue } from './reportQueue.entity';
-import { Story } from './story.entity';
-import { ReviewQueue } from './reviewQueue.entity';
-import { ProcessedHistory } from './processedHistory.entity';
-import { Follow } from './follow.entity';
+
+import { Alert } from './alert.entity';
+import { AlertSettings } from './alertSettings.entity';
 import { Badge } from './badge.entity';
-import { TagExp } from './tagExp.entity';
-import { ViewRecord } from './viewRecord.entity';
 import { Bookmark } from './bookmark.entity';
 import { DeactivationReason } from './deactivationReason.entity';
-import { Inquiry } from './inquiry.entity';
-import { AlertSettings } from './alertSettings.entity';
 import { Device } from './device.entity';
-import { Alert } from './alert.entity';
+import { Essay } from './essay.entity';
+import { Follow } from './follow.entity';
+import { Inquiry } from './inquiry.entity';
+import { ProcessedHistory } from './processedHistory.entity';
+import { ReportQueue } from './reportQueue.entity';
+import { ReviewQueue } from './reviewQueue.entity';
 import { SeenNotice } from './seenNotice.entity';
-import { UserStatus } from '../common/types/enum.types';
 import { SeenRelease } from './seenRelease.entity';
-import { UserTheme } from './userTheme.entity';
-import { UserItem } from './userItem.entity';
+import { Story } from './story.entity';
+import { Subscription } from './subscription.entity';
+import { TagExp } from './tagExp.entity';
 import { UserHomeLayout } from './userHomeLayout.entity';
+import { UserItem } from './userItem.entity';
+import { UserTheme } from './userTheme.entity';
+import { ViewRecord } from './viewRecord.entity';
+import { UserStatus } from '../common/types/enum.types';
 
 @Entity()
 export class User {

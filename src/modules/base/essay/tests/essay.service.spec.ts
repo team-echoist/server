@@ -1,21 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { EssayService } from '../core/essay.service';
-import { EssayRepository } from '../infrastructure/essay.repository';
-import { ToolService } from '../../../utils/tool/core/tool.service';
-import { AwsService } from '../../../adapters/aws/core/aws.service';
-import { ReviewService } from '../../../extensions/management/review/core/review.service';
-import { StoryService } from '../../../extensions/essay/story/core/story.service';
-import { UserService } from '../../user/core/user.service';
-import { TagService } from '../../../extensions/essay/tag/core/tag.service';
-import { FollowService } from '../../../extensions/user/follow/core/follow.service';
-import { BadgeService } from '../../../extensions/essay/badge/core/badge.service';
-import { ViewService } from '../../../extensions/essay/view/core/view.service';
-import { BookmarkService } from '../../../extensions/essay/bookmark/core/bookmark.service';
-import { AlertService } from '../../../extensions/management/alert/core/alert.service';
 import { getQueueToken } from '@nestjs/bull';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SupportService } from '../../../extensions/management/support/core/support.service';
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { EssayStatus, PageType, UserStatus } from '../../../../common/types/enum.types';
+import { AwsService } from '../../../adapters/aws/core/aws.service';
+import { BadgeService } from '../../../extensions/essay/badge/core/badge.service';
+import { BookmarkService } from '../../../extensions/essay/bookmark/core/bookmark.service';
+import { StoryService } from '../../../extensions/essay/story/core/story.service';
+import { TagService } from '../../../extensions/essay/tag/core/tag.service';
+import { ViewService } from '../../../extensions/essay/view/core/view.service';
+import { AlertService } from '../../../extensions/management/alert/core/alert.service';
+import { ReviewService } from '../../../extensions/management/review/core/review.service';
+import { SupportService } from '../../../extensions/management/support/core/support.service';
+import { FollowService } from '../../../extensions/user/follow/core/follow.service';
+import { ToolService } from '../../../utils/tool/core/tool.service';
+import { UserService } from '../../user/core/user.service';
+import { EssayService } from '../core/essay.service';
+import { EssayRepository } from '../infrastructure/essay.repository';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

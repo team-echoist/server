@@ -1,8 +1,9 @@
-import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
-import { addTransactionalDataSource } from 'typeorm-transactional';
-import { DataSource } from 'typeorm';
-import * as dotenv from 'dotenv';
 import * as path from 'node:path';
+
+import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
+import * as dotenv from 'dotenv';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 dotenv.config();
 export const TypeormConfig: TypeOrmModuleAsyncOptions = {

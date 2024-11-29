@@ -1,10 +1,11 @@
-import { SaveEssayDto } from '../dto/saveEssay.dto';
-import { Essay } from '../../../../entities/essay.entity';
-import { UpdateEssayDto } from '../dto/updateEssay.dto';
+import { UpdateResult } from 'typeorm';
+
 import { PageType } from '../../../../common/types/enum.types';
 import { Aggregate } from '../../../../entities/aggregate.entity';
+import { Essay } from '../../../../entities/essay.entity';
 import { SyncStatus } from '../../../../entities/sysncStatus.entity';
-import { UpdateResult } from 'typeorm';
+import { SaveEssayDto } from '../dto/saveEssay.dto';
+import { UpdateEssayDto } from '../dto/updateEssay.dto';
 
 export interface IEssayRepository {
   totalEssayCount(): Promise<number>;

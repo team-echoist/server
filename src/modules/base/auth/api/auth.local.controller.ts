@@ -1,17 +1,18 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
-import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../core/auth.service';
-import { LoginReqDto } from '../dto/request/loginReq.dto';
-import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
-import { CheckNicknameReqDto } from '../dto/request/checkNicknameReq.dto';
-import { CheckEmailReqDto } from '../dto/request/checkEmailReq.dto';
-import { EmailReqDto } from '../dto/request/emailReq.dto';
-import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+
 import { Public } from '../../../../common/decorators/public.decorator';
-import { JwtResDto } from '../dto/response/jwtRes.dto';
+import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
+import { AuthService } from '../core/auth.service';
+import { CheckEmailReqDto } from '../dto/request/checkEmailReq.dto';
+import { CheckNicknameReqDto } from '../dto/request/checkNicknameReq.dto';
+import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
+import { EmailReqDto } from '../dto/request/emailReq.dto';
+import { LoginReqDto } from '../dto/request/loginReq.dto';
 import { VerifyCodeReqDto } from '../dto/request/verifyCodeReq.dto';
+import { JwtResDto } from '../dto/response/jwtRes.dto';
 
 @ApiTags('Auth-local')
 @UseGuards(JwtAuthGuard)

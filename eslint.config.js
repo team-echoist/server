@@ -53,9 +53,18 @@ module.exports = [
   {
     plugins: {
       prettier: require('eslint-plugin-prettier'),
+      import: require('eslint-plugin-import'),
     },
     rules: {
       'prettier/prettier': 'error',
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
     },
   },
 ];

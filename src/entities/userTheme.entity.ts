@@ -1,6 +1,7 @@
 import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './user.entity';
+
 import { Theme } from './theme.entity';
+import { User } from './user.entity';
 
 @Entity('user_theme')
 export class UserTheme {

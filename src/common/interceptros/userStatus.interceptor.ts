@@ -6,8 +6,9 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, tap } from 'rxjs';
 import { Response } from 'express';
+import { Observable, tap } from 'rxjs';
+
 import { UserStatus } from '../types/enum.types';
 
 @Injectable()

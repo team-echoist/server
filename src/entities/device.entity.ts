@@ -9,9 +9,10 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { User } from './user.entity';
-import { Essay } from './essay.entity';
+
 import { AlertSettings } from './alertSettings.entity';
+import { Essay } from './essay.entity';
+import { User } from './user.entity';
 import { DeviceOS, DeviceType } from '../common/types/enum.types';
 
 @Entity()

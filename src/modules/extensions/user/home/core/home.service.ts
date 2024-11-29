@@ -1,18 +1,19 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { GeulroquisService } from '../../../essay/geulroquis/core/geulroquis.service';
-import { UserService } from '../../../../base/user/core/user.service';
-import { UserTheme } from '../../../../../entities/userTheme.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import Redlock, { Lock } from 'redlock';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { ThemeResDto } from '../dto/response/themeRes.dto';
-import { Theme } from '../../../../../entities/theme.entity';
 import { Transactional } from 'typeorm-transactional';
+
 import { Item } from '../../../../../entities/item.entity';
-import { ItemResDto } from '../dto/response/itemRes.dto';
-import { UserHomeLayout } from '../../../../../entities/userHomeLayout.entity';
+import { Theme } from '../../../../../entities/theme.entity';
 import { UserHomeItem } from '../../../../../entities/userHomeItem.entity';
+import { UserHomeLayout } from '../../../../../entities/userHomeLayout.entity';
+import { UserTheme } from '../../../../../entities/userTheme.entity';
+import { UserService } from '../../../../base/user/core/user.service';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
+import { GeulroquisService } from '../../../essay/geulroquis/core/geulroquis.service';
+import { ItemResDto } from '../dto/response/itemRes.dto';
+import { ThemeResDto } from '../dto/response/themeRes.dto';
 import { IHomeRepository } from '../infrastructure/ihome.repository';
 
 @Injectable()

@@ -1,8 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+
 import { EssayDto } from '../../../essay/dto/essay.dto';
 import { UserDto } from '../../../user/dto/user.dto';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Expose, Type } from 'class-transformer';
 
 export class DetailReviewResDto {
   @ApiProperty()

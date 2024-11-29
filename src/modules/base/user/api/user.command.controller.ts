@@ -1,4 +1,3 @@
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -10,15 +9,17 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
+
 import { JwtAuthGuard } from '../../../../common/guards/jwtAuth.guard';
 import { UserService } from '../core/user.service';
 import { DeactivateReqDto } from '../dto/request/deacvivateReq.dto';
-import { Request as ExpressRequest } from 'express';
-import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
 import { ProfileImageReqDto } from '../dto/request/profileImageReq.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { UserResDto } from '../dto/response/userRes.dto';
 import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
+import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
+import { UserResDto } from '../dto/response/userRes.dto';
 
 @ApiTags('User-command')
 @UseGuards(JwtAuthGuard)

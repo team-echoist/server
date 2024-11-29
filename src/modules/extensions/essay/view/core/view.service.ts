@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from '../../../../../entities/user.entity';
-import { Essay } from '../../../../../entities/essay.entity';
-import { ViewRecord } from '../../../../../entities/viewRecord.entity';
 import { Transactional } from 'typeorm-transactional';
+
+import { Essay } from '../../../../../entities/essay.entity';
+import { User } from '../../../../../entities/user.entity';
+import { ViewRecord } from '../../../../../entities/viewRecord.entity';
 import { IViewRepository } from '../infrastructure/iview.repository';
 
 @Injectable()

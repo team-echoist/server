@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import {
   forwardRef,
   HttpException,
@@ -6,26 +7,25 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import * as bcrypt from 'bcrypt';
+import { Queue } from 'bull';
 import Redis from 'ioredis';
-import { ToolService } from '../../../utils/tool/core/tool.service';
-import { EssayService } from '../../essay/core/essay.service';
+import { Transactional } from 'typeorm-transactional';
+
+import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
+import { User } from '../../../../entities/user.entity';
 import { AwsService } from '../../../adapters/aws/core/aws.service';
 import { NicknameService } from '../../../utils/nickname/core/nickname.service';
-import { UserResDto } from '../dto/response/userRes.dto';
-import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { UpdateFullUserReqDto } from '../../admin/dto/request/updateFullUserReq.dto';
-import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
-import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
-import { User } from '../../../../entities/user.entity';
 import { AuthService } from '../../auth/core/auth.service';
+import { EssayService } from '../../essay/core/essay.service';
 import { DeactivateReqDto } from '../dto/request/deacvivateReq.dto';
-import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
-import { Transactional } from 'typeorm-transactional';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
-import { Aggregate } from '../../../../entities/aggregate.entity';
+import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
+import { ProfileImageUrlResDto } from '../dto/response/profileImageUrlRes.dto';
+import { UserResDto } from '../dto/response/userRes.dto';
+import { UserSummaryResDto } from '../dto/response/userSummaryRes.dto';
 import { IUserRepository } from '../infrastructure/iuser.repository';
 
 @Injectable()

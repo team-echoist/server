@@ -1,22 +1,23 @@
+import { BullModule } from '@nestjs/bull';
 import { forwardRef, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Alert } from '../../../../entities/alert.entity';
+
 import { AlertController } from './api/alert.controller';
+import { AlertProcessor } from './core/alert.processor';
 import { AlertService } from './core/alert.service';
 import { AlertRepository } from './infrastructure/alert.repository';
-import { User } from '../../../../entities/user.entity';
-import { ToolModule } from '../../../utils/tool/tool.module';
-import { FirebaseService } from '../../../adapters/firebase/core/firebase.service';
-import { SupportModule } from '../support/support.module';
-import { AwsModule } from '../../../adapters/aws/aws.module';
-import { BullModule } from '@nestjs/bull';
-import { ConfigService } from '@nestjs/config';
-import { AlertProcessor } from './core/alert.processor';
-import { UserModule } from '../../../base/user/user.module';
-import { Essay } from '../../../../entities/essay.entity';
+import { Alert } from '../../../../entities/alert.entity';
 import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
-import { JwtModule } from '@nestjs/jwt';
+import { Essay } from '../../../../entities/essay.entity';
+import { User } from '../../../../entities/user.entity';
+import { AwsModule } from '../../../adapters/aws/aws.module';
+import { FirebaseService } from '../../../adapters/firebase/core/firebase.service';
 import { AuthModule } from '../../../base/auth/auth.module';
+import { UserModule } from '../../../base/user/user.module';
+import { ToolModule } from '../../../utils/tool/tool.module';
+import { SupportModule } from '../support/support.module';
 
 @Module({
   imports: [

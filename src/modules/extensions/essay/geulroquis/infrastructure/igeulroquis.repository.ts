@@ -1,5 +1,6 @@
-import { Geulroquis } from '../../../../../entities/geulroguis.entity';
 import { DeleteResult } from 'typeorm';
+
+import { Geulroquis } from '../../../../../entities/geulroguis.entity';
 
 export interface IGeulroquisRepository {
   saveGeulroquis(geulroquis: Geulroquis): Promise<Geulroquis>;

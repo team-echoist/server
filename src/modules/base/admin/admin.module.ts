@@ -1,7 +1,9 @@
+import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import * as strategies from '../../../common/guards/strategies';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import {
   AdminOfficeController,
   AdminAuthController,
@@ -12,40 +14,39 @@ import {
   AdminSupportController,
   AdminRootController,
 } from './api/admin.controller';
-import { UserModule } from '../user/user.module';
-import { EssayModule } from '../essay/essay.module';
-import { MailModule } from '../../utils/mail/mail.module';
-import { ToolModule } from '../../utils/tool/tool.module';
-import { AwsModule } from '../../adapters/aws/aws.module';
+import { AdminProcessor } from './core/admin.processor';
 import { AdminService } from './core/admin.service';
 import { AdminRepository } from './infrastructure/admin.repository';
-import { ReviewQueue } from '../../../entities/reviewQueue.entity';
-import { ReportQueue } from '../../../entities/reportQueue.entity';
-import { User } from '../../../entities/user.entity';
-import { Essay } from '../../../entities/essay.entity';
-import { Subscription } from '../../../entities/subscription.entity';
-import { ProcessedHistory } from '../../../entities/processedHistory.entity';
-import { Story } from '../../../entities/story.entity';
+import * as strategies from '../../../common/guards/strategies';
 import { Admin } from '../../../entities/admin.entity';
+import { AppVersions } from '../../../entities/appVersions.entity';
+import { Essay } from '../../../entities/essay.entity';
 import { Inquiry } from '../../../entities/inquiry.entity';
-import { Notice } from '../../../entities/notice.entity';
-import { SupportModule } from '../../extensions/management/support/support.module';
-import { Release } from '../../../entities/release.entity';
-import { BullModule } from '@nestjs/bull';
-import { ConfigService } from '@nestjs/config';
-import { AdminProcessor } from './core/admin.processor';
-import { AlertModule } from '../../extensions/management/alert/alert.module';
-import { CronModule } from '../../utils/cron/cron.module';
-import { GeulroquisModule } from '../../extensions/essay/geulroquis/geulroquis.module';
-import { Server } from '../../../entities/server.entity';
-import { NicknameModule } from '../../utils/nickname/nickname.module';
-import { Theme } from '../../../entities/theme.entity';
 import { Item } from '../../../entities/item.entity';
-import { UserItem } from '../../../entities/userItem.entity';
+import { Notice } from '../../../entities/notice.entity';
+import { ProcessedHistory } from '../../../entities/processedHistory.entity';
+import { Release } from '../../../entities/release.entity';
+import { ReportQueue } from '../../../entities/reportQueue.entity';
+import { ReviewQueue } from '../../../entities/reviewQueue.entity';
+import { Server } from '../../../entities/server.entity';
+import { Story } from '../../../entities/story.entity';
+import { Subscription } from '../../../entities/subscription.entity';
+import { Theme } from '../../../entities/theme.entity';
+import { User } from '../../../entities/user.entity';
 import { UserHomeItem } from '../../../entities/userHomeItem.entity';
 import { UserHomeLayout } from '../../../entities/userHomeLayout.entity';
+import { UserItem } from '../../../entities/userItem.entity';
 import { UserTheme } from '../../../entities/userTheme.entity';
-import { AppVersions } from '../../../entities/appVersions.entity';
+import { AwsModule } from '../../adapters/aws/aws.module';
+import { GeulroquisModule } from '../../extensions/essay/geulroquis/geulroquis.module';
+import { AlertModule } from '../../extensions/management/alert/alert.module';
+import { SupportModule } from '../../extensions/management/support/support.module';
+import { CronModule } from '../../utils/cron/cron.module';
+import { MailModule } from '../../utils/mail/mail.module';
+import { NicknameModule } from '../../utils/nickname/nickname.module';
+import { ToolModule } from '../../utils/tool/tool.module';
+import { EssayModule } from '../essay/essay.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [

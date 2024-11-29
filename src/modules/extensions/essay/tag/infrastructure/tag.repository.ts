@@ -1,7 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Tag } from '../../../../../entities/tag.entity';
+
 import { ITagRepository } from './itag.repository';
+import { Tag } from '../../../../../entities/tag.entity';
 
 export class TagRepository implements ITagRepository {
   constructor(

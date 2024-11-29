@@ -1,6 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class ReviewResDto {
   @ApiProperty()

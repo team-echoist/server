@@ -1,23 +1,24 @@
-import * as strategies from '../../../common/guards/strategies';
-import { forwardRef, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from '../auth/auth.module';
-import { MailModule } from '../../utils/mail/mail.module';
-import { AwsModule } from '../../adapters/aws/aws.module';
-import { EssayModule } from '../essay/essay.module';
-import { ToolModule } from '../../utils/tool/tool.module';
-import { UserQueryController } from './api/user.query.controller';
-import { UserRepository } from './infrastructure/user.repository';
-import { UserService } from './core/user.service';
-import { User } from '../../../entities/user.entity';
-import { Essay } from '../../../entities/essay.entity';
-import { NicknameModule } from '../../utils/nickname/nickname.module';
-import { DeactivationReason } from '../../../entities/deactivationReason.entity';
 import { BullModule } from '@nestjs/bull';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserProcessor } from './core/user.processor';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { UserCommandController } from './api/user.command.controller';
+import { UserQueryController } from './api/user.query.controller';
+import { UserProcessor } from './core/user.processor';
+import { UserService } from './core/user.service';
+import { UserRepository } from './infrastructure/user.repository';
+import * as strategies from '../../../common/guards/strategies';
+import { DeactivationReason } from '../../../entities/deactivationReason.entity';
+import { Essay } from '../../../entities/essay.entity';
+import { User } from '../../../entities/user.entity';
+import { AwsModule } from '../../adapters/aws/aws.module';
+import { MailModule } from '../../utils/mail/mail.module';
+import { NicknameModule } from '../../utils/nickname/nickname.module';
+import { ToolModule } from '../../utils/tool/tool.module';
+import { AuthModule } from '../auth/auth.module';
+import { EssayModule } from '../essay/essay.module';
 
 @Module({
   imports: [

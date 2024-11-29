@@ -1,13 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Geulroquis } from '../../../../entities/geulroguis.entity';
-import { GeulroquisController } from './api/geulroquis.controller';
+
 import { GeulroquisService } from './core/geulroquis.service';
 import { GeulroquisRepository } from './infrastructure/geulroquis.repository';
-import { ToolModule } from '../../../utils/tool/tool.module';
-import { JwtModule } from '@nestjs/jwt';
+import { Geulroquis } from '../../../../entities/geulroguis.entity';
 import { AuthModule } from '../../../base/auth/auth.module';
 import { UserModule } from '../../../base/user/user.module';
+import { ToolModule } from '../../../utils/tool/tool.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { UserModule } from '../../../base/user/user.module';
     forwardRef(() => AuthModule),
     forwardRef(() => UserModule),
   ],
-  controllers: [GeulroquisController],
+  controllers: [],
   providers: [
     GeulroquisService,
     { provide: 'IGeulroquisRepository', useClass: GeulroquisRepository },

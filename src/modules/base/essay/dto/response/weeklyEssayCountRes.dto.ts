@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNumber } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { IsDateString, IsNumber } from 'class-validator';
 
 export class WeeklyEssayCountResDto {
   @ApiProperty()

@@ -5,15 +5,16 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { Observable } from 'rxjs';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { Observable } from 'rxjs';
+
 import { AdminService } from '../../modules/base/admin/core/admin.service';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class AdminGuard extends AuthGuard('admin-jwt') implements CanActivate {

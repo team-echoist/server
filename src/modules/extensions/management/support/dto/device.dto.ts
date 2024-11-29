@@ -1,4 +1,5 @@
 import { IsEnum, IsString } from 'class-validator';
+
 import { DeviceOS, DeviceType } from '../../../../../common/types/enum.types';
 
 export class DeviceDto {

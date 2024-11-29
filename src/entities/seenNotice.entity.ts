@@ -1,6 +1,7 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { User } from './user.entity';
+
 import { Notice } from './notice.entity';
+import { User } from './user.entity';
 
 @Entity('seen_notice')
 export class SeenNotice {

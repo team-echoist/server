@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { Essay } from '../../../../../entities/essay.entity';
+import { User } from '../../../../../entities/user.entity';
+import { ViewRecord } from '../../../../../entities/viewRecord.entity';
 import { ViewService } from '../core/view.service';
 import { ViewRepository } from '../infrastructure/view.repository';
-import { User } from '../../../../../entities/user.entity';
-import { Essay } from '../../../../../entities/essay.entity';
-import { ViewRecord } from '../../../../../entities/viewRecord.entity';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

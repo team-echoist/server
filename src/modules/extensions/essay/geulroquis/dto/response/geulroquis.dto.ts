@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class GeulroquisDto {
   @ApiProperty()

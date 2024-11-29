@@ -6,15 +6,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ReportQueue } from './reportQueue.entity';
-import { ReviewQueue } from './reviewQueue.entity';
-import { Essay } from './essay.entity';
-import { User } from './user.entity';
+
 import { Admin } from './admin.entity';
+import { Essay } from './essay.entity';
 import { Inquiry } from './inquiry.entity';
 import { Notice } from './notice.entity';
-import { ActionType } from '../common/types/enum.types';
 import { Release } from './release.entity';
+import { ReportQueue } from './reportQueue.entity';
+import { ReviewQueue } from './reviewQueue.entity';
+import { User } from './user.entity';
+import { ActionType } from '../common/types/enum.types';
 
 @Entity('processed_history')
 export class ProcessedHistory {

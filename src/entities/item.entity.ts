@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { UserItem } from './userItem.entity';
-import { UserHomeItem } from './userHomeItem.entity';
+
 import { Theme } from './theme.entity';
+import { UserHomeItem } from './userHomeItem.entity';
+import { UserItem } from './userItem.entity';
 
 @Entity()
 export class Item {

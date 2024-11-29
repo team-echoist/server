@@ -1,14 +1,15 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Brackets, In, MoreThan, Repository } from 'typeorm';
-import { Essay } from '../../../../entities/essay.entity';
-import { SaveEssayDto } from '../dto/saveEssay.dto';
-import { UpdateEssayDto } from '../dto/updateEssay.dto';
-import { Bookmark } from '../../../../entities/bookmark.entity';
-import { ReportQueue } from '../../../../entities/reportQueue.entity';
+
+import { IEssayRepository } from './iessay.repository';
 import { EssayStatus, PageType } from '../../../../common/types/enum.types';
 import { Aggregate } from '../../../../entities/aggregate.entity';
+import { Bookmark } from '../../../../entities/bookmark.entity';
+import { Essay } from '../../../../entities/essay.entity';
+import { ReportQueue } from '../../../../entities/reportQueue.entity';
 import { SyncStatus } from '../../../../entities/sysncStatus.entity';
-import { IEssayRepository } from './iessay.repository';
+import { SaveEssayDto } from '../dto/saveEssay.dto';
+import { UpdateEssayDto } from '../dto/updateEssay.dto';
 
 export class EssayRepository implements IEssayRepository {
   constructor(

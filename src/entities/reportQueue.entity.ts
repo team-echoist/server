@@ -8,9 +8,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+
 import { Essay } from './essay.entity';
 import { ProcessedHistory } from './processedHistory.entity';
+import { User } from './user.entity';
 
 @Entity('report_queue')
 export class ReportQueue {

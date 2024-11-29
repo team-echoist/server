@@ -1,11 +1,12 @@
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { User } from '../../../../../entities/user.entity';
+import { UserService } from '../../../../base/user/core/user.service';
+import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';
+import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { FollowService } from '../core/follow.service';
 import { FollowRepository } from '../infrastructure/follow.repository';
-import { ToolService } from '../../../../utils/tool/core/tool.service';
-import { UserService } from '../../../../base/user/core/user.service';
-import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
-import { User } from '../../../../../entities/user.entity';
-import { UserSummaryResDto } from '../../../../base/user/dto/response/userSummaryRes.dto';
 
 jest.mock('typeorm-transactional', () => ({
   initializeTransactionalContext: jest.fn(),

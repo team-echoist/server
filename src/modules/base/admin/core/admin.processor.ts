@@ -1,9 +1,10 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
-import { AdminService } from './admin.service';
-import { ProcessReqDto } from '../dto/request/processReq.dto';
-import { ReportQueue } from '../../../../entities/reportQueue.entity';
 import { DataSource } from 'typeorm';
+
+import { AdminService } from './admin.service';
+import { ReportQueue } from '../../../../entities/reportQueue.entity';
+import { ProcessReqDto } from '../dto/request/processReq.dto';
 
 @Processor('admin')
 export class AdminProcessor {
