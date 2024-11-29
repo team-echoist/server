@@ -75,6 +75,7 @@ export class UserService {
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
     user.profileImage = imageUrl;
     await this.userRepository.saveUser(user);
+    await this.redis.del(`user:${userId}`);
 
     return this.utilsService.transformToDto(ProfileImageUrlResDto, { imageUrl });
   }
@@ -235,7 +236,19 @@ export class UserService {
     };
   }
 
-  async updateUserTable(aggregate: Aggregate) {
-    await this.userRepository.updateUserTable(aggregate.userId, aggregate.reputationScore);
+  async saveDeactivationReasons(deactivationReasons: DeactivationReason[]) {
+    await this.userRepository.saveDeactivationReasons(deactivationReasons);
+  }
+
+  async checkEmail(email: string) {
+    const user = await this.userRepository.findByEmail(email);
+    if (user) throw new HttpException('사용중인 이메일 입니다.', HttpStatus.CONFLICT);
+    return true;
+  }
+
+  async checkNickname(nickname: string) {
+    const user = await this.userRepository.findByNickname(nickname);
+    if (user) throw new HttpException('사용중인 닉네임 입니다.', HttpStatus.CONFLICT);
+    return true;
   }
 }

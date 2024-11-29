@@ -7,7 +7,7 @@ import { MailModule } from '../../utils/mail/mail.module';
 import { AwsModule } from '../../adapters/aws/aws.module';
 import { EssayModule } from '../essay/essay.module';
 import { ToolModule } from '../../utils/tool/tool.module';
-import { UserController } from './api/user.controller';
+import { UserQueryController } from './api/user.query.controller';
 import { UserRepository } from './infrastructure/user.repository';
 import { UserService } from './core/user.service';
 import { User } from '../../../entities/user.entity';
@@ -17,7 +17,7 @@ import { DeactivationReason } from '../../../entities/deactivationReason.entity'
 import { BullModule } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { UserProcessor } from './core/user.processor';
-import { IUserRepository } from './infrastructure/iuser.repository';
+import { UserCommandController } from './api/user.command.controller';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { IUserRepository } from './infrastructure/iuser.repository';
     forwardRef(() => AuthModule),
     forwardRef(() => EssayModule),
   ],
-  controllers: [UserController],
+  controllers: [UserQueryController, UserCommandController],
   providers: [
     UserService,
     { provide: 'IUserRepository', useClass: UserRepository },

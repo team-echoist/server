@@ -5,7 +5,6 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { ToolService } from '../../../utils/tool/core/tool.service';
 import { MailService } from '../../../utils/mail/core/mail.service';
 import { NicknameService } from '../../../utils/nickname/core/nickname.service';
-import { AuthRepository } from '../infrastructure/auth.repository';
 import { CreateUserReqDto } from '../dto/request/createUserReq.dto';
 import { OauthDto } from '../dto/oauth.dto';
 import { OAuth2Client } from 'google-auth-library';
@@ -20,20 +19,24 @@ import { UserStatus } from '../../../../common/types/enum.types';
 import { Request as ExpressRequest } from 'express';
 import { User } from '../../../../entities/user.entity';
 import { HomeService } from '../../../extensions/user/home/core/home.service';
-import { IAuthRepository } from '../infrastructure/iauth.repository';
+import { DeactivateReqDto } from '../../user/dto/request/deacvivateReq.dto';
+import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
+import { UserService } from '../../user/core/user.service';
+import { IUserRepository } from '../../user/infrastructure/iuser.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
-    @Inject('IAuthRepository') private readonly authRepository: IAuthRepository,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
+    private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly utilsService: ToolService,
     private readonly nicknameService: NicknameService,
     private readonly httpService: HttpService,
-    private configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly homeService: HomeService,
+    private configService: ConfigService,
   ) {}
 
   private readonly oauthClient = new OAuth2Client(
@@ -41,13 +44,13 @@ export class AuthService {
   );
 
   async checkEmail(email: string) {
-    const user = await this.authRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
     if (user) throw new HttpException('사용중인 이메일 입니다.', HttpStatus.CONFLICT);
     return true;
   }
 
   async checkNickname(nickname: string) {
-    const user = await this.authRepository.findByNickname(nickname);
+    const user = await this.userRepository.findByNickname(nickname);
     if (user) throw new HttpException('사용중인 닉네임 입니다.', HttpStatus.CONFLICT);
     return true;
   }
@@ -91,12 +94,12 @@ export class AuthService {
 
     const { email, userId } = JSON.parse(userEmailData);
 
-    const user = await this.authRepository.findById(userId);
+    const user = await this.userRepository.findById(userId);
 
     if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     user.email = email;
-    await this.authRepository.saveUser(user);
+    await this.userRepository.saveUser(user);
 
     return user;
   }
@@ -111,7 +114,7 @@ export class AuthService {
 
     userData.nickname = await this.nicknameService.generateUniqueNickname();
 
-    req.user = await this.authRepository.saveUser(userData);
+    req.user = await this.userRepository.saveUser(userData);
 
     await this.homeService.createDefaultTheme(req.user.id);
 
@@ -119,7 +122,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string) {
-    const user = await this.authRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new HttpException('존재하지 않는 계정입니다.', HttpStatus.BAD_REQUEST);
     }
@@ -192,7 +195,7 @@ export class AuthService {
     let user = cachedUser ? JSON.parse(cachedUser) : null;
 
     if (!user) {
-      user = await this.authRepository.findByIdWithEmail(payload);
+      user = await this.userRepository.findByIdWithEmail(payload);
       if (user) {
         await this.redis.set(cacheKey, JSON.stringify(user), 'EX', 600);
         return user;
@@ -205,7 +208,7 @@ export class AuthService {
   @Transactional()
   async incrementTokenVersion(user: User) {
     user.tokenVersion += 1;
-    await this.authRepository.saveUser(user);
+    await this.userRepository.saveUser(user);
   }
 
   // @Transactional()
@@ -242,13 +245,13 @@ export class AuthService {
 
   @Transactional()
   async passwordReset(email: string) {
-    const user = await this.authRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
     if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const temporaryPassword = this.utilsService.getUUID();
     user.password = await bcrypt.hash(temporaryPassword, 12);
 
-    await this.authRepository.saveUser(user);
+    await this.userRepository.saveUser(user);
 
     await this.mailService.sendPasswordResetEmail(email, temporaryPassword);
   }
@@ -260,11 +263,11 @@ export class AuthService {
     if (oauthUser.platformId === undefined || oauthUser.platform === null)
       throw new HttpException('플랫폼 정보가 올바르지 않습니다.', HttpStatus.BAD_REQUEST);
 
-    let user = await this.authRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
+    let user = await this.userRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
 
     if (!user) {
       if (oauthUser.email) {
-        const emailUser = await this.authRepository.findByEmail(oauthUser.email);
+        const emailUser = await this.userRepository.findByEmail(oauthUser.email);
         if (emailUser) {
           throw new HttpException(
             '귀하의 계정에 등록된 이메일은 이미 사용 중입니다.',
@@ -274,7 +277,7 @@ export class AuthService {
       }
       const nickname = await this.nicknameService.generateUniqueNickname();
 
-      user = await this.authRepository.saveUser({
+      user = await this.userRepository.saveUserDto({
         email: oauthUser.email || null,
         platform: oauthUser.platform,
         platformId: oauthUser.platformId,
@@ -395,5 +398,42 @@ export class AuthService {
   async getApplePublicKey(kid: string): Promise<string> {
     const key = await this.client.getSigningKey(kid);
     return key.getPublicKey();
+  }
+
+  @Transactional()
+  async requestDeactivation(userId: number, data: DeactivateReqDto) {
+    const user = await this.userService.fetchUserEntityById(userId);
+
+    if (user.deactivationDate)
+      throw new HttpException('이 계정은 이미 삭제 대기중입니다.', HttpStatus.BAD_REQUEST);
+
+    user.deactivationDate = new Date();
+
+    await this.userRepository.saveUser(user);
+
+    const deactivationReasons = data.reasons.map((reason) => {
+      const deactivationReason = new DeactivationReason();
+      deactivationReason.user = user;
+      deactivationReason.reason = reason;
+      return deactivationReason;
+    });
+
+    await this.userService.saveDeactivationReasons(deactivationReasons);
+  }
+
+  async cancelDeactivation(userId: number) {
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user.deactivationDate)
+      throw new HttpException('이 계정은 이미 활성상태 입니다.', HttpStatus.BAD_REQUEST);
+
+    user.deactivationDate = null;
+
+    await this.userRepository.saveUser(user);
+  }
+
+  @Transactional()
+  async deleteAccount(userId: number) {
+    await this.userService.deleteAccount(userId);
   }
 }

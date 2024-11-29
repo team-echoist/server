@@ -12,7 +12,7 @@ import { TagModule } from '../../extensions/essay/tag/tag.module';
 import { AwsModule } from '../../adapters/aws/aws.module';
 import { FollowModule } from '../../extensions/user/follow/follow.module';
 import { BadgeModule } from '../../extensions/essay/badge/badge.module';
-import { EssayController } from './api/essay.controller';
+import { EssayQueryController } from './api/essay.query.controller';
 import { EssayService } from './core/essay.service';
 import { EssayRepository } from './infrastructure/essay.repository';
 import { User } from '../../../entities/user.entity';
@@ -29,6 +29,7 @@ import { AlertModule } from '../../extensions/management/alert/alert.module';
 import { SupportModule } from '../../extensions/management/support/support.module';
 import { Aggregate } from '../../../entities/aggregate.entity';
 import { SyncStatus } from '../../../entities/sysncStatus.entity';
+import { EssayCommandController } from './api/essay.command.controller';
 
 @Module({
   imports: [
@@ -60,7 +61,7 @@ import { SyncStatus } from '../../../entities/sysncStatus.entity';
     forwardRef(() => BookmarkModule),
     forwardRef(() => UserModule),
   ],
-  controllers: [EssayController],
+  controllers: [EssayQueryController, EssayCommandController],
   providers: [
     EssayService,
     { provide: 'IEssayRepository', useClass: EssayRepository },

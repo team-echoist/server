@@ -6,6 +6,7 @@ import { DeactivationReason } from '../../../../entities/deactivationReason.enti
 import { ConfigService } from '@nestjs/config';
 import { UserStatus } from '../../../../common/types/enum.types';
 import { IUserRepository } from './iuser.repository';
+import { CreateUserReqDto } from '../../auth/dto/request/createUserReq.dto';
 
 export class UserRepository implements IUserRepository {
   constructor(
@@ -174,5 +175,32 @@ export class UserRepository implements IUserRepository {
     const [users, total] = await query.getManyAndCount();
 
     return { users, total };
+  }
+
+  async findById(id: number) {
+    return this.userRepository.findOne({ where: { id: id } });
+  }
+
+  async findByIdWithEmail(payload: any) {
+    return this.userRepository.findOne({
+      where: { id: payload.sub, email: payload.username },
+      relations: ['devices'],
+    });
+  }
+
+  async findByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findByNickname(nickname: string) {
+    return this.userRepository.findOne({ where: { nickname } });
+  }
+
+  async saveUserDto(createUserDto: CreateUserReqDto) {
+    return this.userRepository.save(createUserDto);
+  }
+
+  async findByPlatformId(platform: string, platformId: string) {
+    return this.userRepository.findOne({ where: { platform: platform, platformId: platformId } });
   }
 }

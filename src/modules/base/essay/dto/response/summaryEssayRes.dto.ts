@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsNumber, IsString } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
-import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 import { EssayStatus } from '../../../../../common/types/enum.types';
+import { UserLimitedInfoResDto } from '../../../user/dto/response/userLimitedInfoRes.dto';
 
 export class SummaryEssayResDto {
   @ApiProperty()
@@ -35,10 +35,10 @@ export class SummaryEssayResDto {
   @Expose()
   content: string;
 
-  @ApiProperty({ type: UserSummaryResDto })
-  @Type(() => UserSummaryResDto)
+  @ApiProperty({ type: UserLimitedInfoResDto })
+  @Type(() => UserLimitedInfoResDto)
   @Expose()
-  author: UserSummaryResDto;
+  author: UserLimitedInfoResDto;
 
   @ApiProperty()
   @IsString()

@@ -13,8 +13,8 @@ import { TagDto } from '../tag.dto';
 import { StoryDto } from '../../../../extensions/essay/story/dto/story.dto';
 import { ReviewQueue } from '../../../../../entities/reviewQueue.entity';
 import { ReviewResDto } from '../../../../extensions/management/review/dto/response/reviewRes.dto';
-import { UserSummaryResDto } from '../../../user/dto/response/userSummaryRes.dto';
 import { EssayStatus } from '../../../../../common/types/enum.types';
+import { UserLimitedInfoResDto } from '../../../user/dto/response/userLimitedInfoRes.dto';
 
 export class EssayResDto {
   @ApiProperty()
@@ -68,10 +68,10 @@ export class EssayResDto {
   @Expose()
   tags: TagDto[];
 
-  @ApiProperty({ type: UserSummaryResDto })
-  @Type(() => UserSummaryResDto)
+  @ApiProperty({ type: UserLimitedInfoResDto })
+  @Type(() => UserLimitedInfoResDto)
   @Expose()
-  author: UserSummaryResDto;
+  author: UserLimitedInfoResDto;
 
   @ApiProperty({ type: StoryDto })
   @Type(() => StoryDto)

@@ -92,7 +92,8 @@ export class EssayService {
 
     const savedEssay = await this.essayRepository.saveEssay(essayData);
 
-    return this.utilsService.transformToDto(EssayResDto, savedEssay);
+    const x = this.utilsService.transformToDto(EssayResDto, savedEssay);
+    console.log(x);
   }
 
   private async evaluateUserReputation(user: User) {

@@ -3,9 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ToolModule } from '../../utils/tool/tool.module';
 import { MailModule } from '../../utils/mail/mail.module';
 import { NicknameModule } from '../../utils/nickname/nickname.module';
-import { AuthController } from './api/auth.controller';
+import { AuthLocalController } from './api/auth.local.controller';
 import { AuthService } from './core/auth.service';
-import { AuthRepository } from './infrastructure/auth.repository';
 import { User } from '../../../entities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import * as strategies from '../../../common/guards/strategies';
@@ -14,10 +13,14 @@ import { AwsModule } from '../../adapters/aws/aws.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
 import { HomeModule } from '../../extensions/user/home/home.module';
+import { AuthOauthController } from './api/auth.oauth.controller';
+import { UserRepository } from '../user/infrastructure/user.repository';
+import { DeactivationReason } from '../../../entities/deactivationReason.entity';
+import { AuthManagementController } from './api/auth.management.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, DeactivationReason]),
     JwtModule.register({}),
     ConfigModule,
     HttpModule,
@@ -28,16 +31,16 @@ import { HomeModule } from '../../extensions/user/home/home.module';
     HomeModule,
     forwardRef(() => UserModule),
   ],
-  controllers: [AuthController],
+  controllers: [AuthLocalController, AuthOauthController, AuthManagementController],
   providers: [
     AuthService,
-    { provide: 'IAuthRepository', useClass: AuthRepository },
+    { provide: 'IUserRepository', useClass: UserRepository },
     strategies.LocalStrategy,
     strategies.GoogleStrategy,
     strategies.KakaoStrategy,
     strategies.NaverStrategy,
     strategies.AppleStrategy,
   ],
-  exports: [AuthService, { provide: 'IAuthRepository', useClass: AuthRepository }],
+  exports: [AuthService],
 })
 export class AuthModule {}

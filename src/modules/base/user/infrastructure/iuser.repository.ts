@@ -2,6 +2,7 @@ import { User } from '../../../../entities/user.entity';
 import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { DeleteResult } from 'typeorm';
+import { CreateUserReqDto } from '../../auth/dto/request/createUserReq.dto';
 
 export interface IUserRepository {
   findUserById(userId: number): Promise<User>;
@@ -44,4 +45,16 @@ export interface IUserRepository {
     page: number,
     limit: number,
   ): Promise<{ users: User[]; total: number }>;
+
+  findById(id: number): Promise<User>;
+
+  findByIdWithEmail(payload: any): Promise<User>;
+
+  findByEmail(email: string): Promise<User>;
+
+  findByNickname(nickname: string): Promise<User>;
+
+  saveUserDto(createUserDto: CreateUserReqDto): Promise<CreateUserReqDto & User>;
+
+  findByPlatformId(platform: string, platformId: string): Promise<User>;
 }
