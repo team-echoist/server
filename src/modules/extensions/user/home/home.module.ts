@@ -1,9 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { HomeController } from './api/home.controller';
+import { HomeCommandController } from './api/home.command.controller';
+import { HomeQueryController } from './api/home.query.controller';
+import { CommandHandlers } from './command';
 import { HomeService } from './core/home.service';
 import { HomeRepository } from './infrastructure/home.repository';
 import { RedlockProvider } from '../../../../config/redlock.provider';
@@ -20,6 +23,7 @@ import { GeulroquisModule } from '../../essay/geulroquis/geulroquis.module';
 
 @Module({
   imports: [
+    CqrsModule,
     ConfigModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature([Item, Theme, UserTheme, UserItem, UserHomeLayout, UserHomeItem]),
@@ -28,11 +32,12 @@ import { GeulroquisModule } from '../../essay/geulroquis/geulroquis.module';
     forwardRef(() => GeulroquisModule),
     forwardRef(() => AuthModule),
   ],
-  controllers: [HomeController],
+  controllers: [HomeQueryController, HomeCommandController],
   providers: [
     HomeService,
     { provide: 'IHomeRepository', useClass: HomeRepository },
     RedlockProvider,
+    ...CommandHandlers,
   ],
   exports: [HomeService],
 })

@@ -6,10 +6,14 @@ import { Admin } from '../../../entities/admin.entity';
 import { AppVersions } from '../../../entities/appVersions.entity';
 import { BasicNickname } from '../../../entities/basicNickname.entity';
 import { Server } from '../../../entities/server.entity';
+import { Theme } from '../../../entities/theme.entity';
 import { ToolModule } from '../tool/tool.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, BasicNickname, Server, AppVersions]), ToolModule],
+  imports: [
+    TypeOrmModule.forFeature([Admin, BasicNickname, Server, AppVersions, Theme]),
+    ToolModule,
+  ],
   providers: [SeederService],
   exports: [SeederService],
 })

@@ -26,4 +26,5 @@ module.exports = {
     { type: 'test', release: false },
     { type: 'chore', release: false },
   ],
+  tagFormat: 'v${version}',
 };

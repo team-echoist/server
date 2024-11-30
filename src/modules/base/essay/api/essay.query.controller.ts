@@ -37,7 +37,7 @@ export class EssayQueryController {
   **쿼리 파라미터:**
   - \`page\` (number, optional): 조회할 페이지를 지정합니다. 기본값은 1입니다.
   - \`limit\` (number, optional): 조회할 에세이 수를 지정합니다. 기본값은 10입니다.
-  - \`pageType\`: '나만의 글'에선 'private', '발행한 글'에선 'public' 를 사용합니다. 'story'인 경우 자신의 에세이인지 검증합니다.
+  - \`pageType\`: '나만의 글'에선 'private', '발행한 글'에선 'public' 를 사용합니다. 'story'인 경우 자신의 에세이만 조회할 수 있습니다.
   - \`storyId\`: (number, optional): \`pageType.STORY\`인 경우 제공.
 
   **동작 과정:**

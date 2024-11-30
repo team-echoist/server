@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -8,6 +9,7 @@ import { Admin } from '../../../../entities/admin.entity';
 import { AppVersions } from '../../../../entities/appVersions.entity';
 import { BasicNickname } from '../../../../entities/basicNickname.entity';
 import { Server } from '../../../../entities/server.entity';
+import { Theme } from '../../../../entities/theme.entity';
 import { ToolService } from '../../tool/core/tool.service';
 
 @Injectable()
@@ -21,9 +23,25 @@ export class SeederService {
     private readonly serverRepository: Repository<Server>,
     @InjectRepository(AppVersions)
     private readonly appVersionsRepository: Repository<AppVersions>,
-
+    @InjectRepository(Theme)
+    private readonly themeRepository: Repository<Theme>,
+    private readonly configService: ConfigService,
     private readonly utilsService: ToolService,
   ) {}
+
+  async initializeDefaultTheme() {
+    const theme = await this.themeRepository.findOne({ where: { id: 1 } });
+    if (!theme) {
+      const defaultTheme = this.themeRepository.create({
+        id: 1,
+        name: 'workaholic',
+        price: 0,
+        url: this.configService.get<string>('DEFAULT_THEME_URL'),
+      });
+
+      await this.themeRepository.save(defaultTheme);
+    }
+  }
 
   async initializeNicknames(): Promise<void> {
     console.log('Basic nickname created started');
