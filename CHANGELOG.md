@@ -1,3 +1,10 @@
+## [1.21.9](https://github.com/team-echoist/server/compare/v1.21.8...v1.21.9) (2024-11-30)
+
+
+### Bug Fixes
+
+* 도무지이해할수엄는순환종속성이슈를어찌저찌해결.. ([#492](https://github.com/team-echoist/server/issues/492)) ([3fe9c2a](https://github.com/team-echoist/server/commit/3fe9c2ac2eaf6ea995633c7284a9af8cd74c6993))
+
 ## [1.21.9](https://github.com/team-echoist/server/compare/v1.21.8...v1.21.9) (2024-11-29)
 
 
