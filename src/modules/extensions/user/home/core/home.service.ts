@@ -6,6 +6,7 @@ import { Transactional } from 'typeorm-transactional';
 
 import { Item } from '../../../../../entities/item.entity';
 import { Theme } from '../../../../../entities/theme.entity';
+import { User } from '../../../../../entities/user.entity';
 import { UserHomeItem } from '../../../../../entities/userHomeItem.entity';
 import { UserHomeLayout } from '../../../../../entities/userHomeLayout.entity';
 import { UserTheme } from '../../../../../entities/userTheme.entity';
@@ -27,7 +28,7 @@ export class HomeService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  private async acquireLock(lockKey: string, ttl: number) {
+  async acquireLock(lockKey: string, ttl: number) {
     try {
       return await this.redlock.acquire([lockKey], ttl);
     } catch (err) {
@@ -38,7 +39,7 @@ export class HomeService {
     }
   }
 
-  private async releaseLock(lock: Lock) {
+  async releaseLock(lock: Lock) {
     try {
       await lock.release();
     } catch (err) {
@@ -67,6 +68,7 @@ export class HomeService {
     let activeLayout: UserHomeLayout;
 
     const userThemes = await this.homeRepository.findUserThemes(userId);
+
     if (userThemes.length === 0) {
       const { userTheme, userLayout } = await this.createDefaultTheme(userId);
       userThemes.push(userTheme);
@@ -76,6 +78,7 @@ export class HomeService {
     if (!activeLayout) {
       activeLayout = await this.homeRepository.findActiveLayoutByUserId(userId);
     }
+
     const activeThemeId = activeLayout ? activeLayout.theme.id : null;
 
     const userThemeIds = new Set(userThemes.map((theme) => theme.theme.id));
@@ -110,42 +113,30 @@ export class HomeService {
     return { userTheme, userLayout };
   }
 
-  async buyTheme(userId: number, themeId: number) {
-    const lockKey = `buyThemeLock:${userId}`;
-    const ttl = 10000;
-
-    const lock = await this.acquireLock(lockKey, ttl);
-
-    try {
-      await this.executeBuyThemeTransaction(userId, themeId);
-    } catch (err) {
-      throw new HttpException('테마 구매중 오류가 발생했습니다.', HttpStatus.INTERNAL_SERVER_ERROR);
-    } finally {
-      await this.releaseLock(lock);
+  async getThemePrice(themeId: number): Promise<number> {
+    const theme = await this.homeRepository.findThemeById(themeId);
+    if (!theme) {
+      throw new HttpException('존재하지 않는 테마입니다.', HttpStatus.BAD_REQUEST);
     }
+    return theme.price;
   }
 
   @Transactional()
-  private async executeBuyThemeTransaction(userId: number, themeId: number) {
-    const user = await this.userService.fetchUserEntityById(userId);
-    const userThemes = await this.homeRepository.findUserThemes(userId);
+  async addThemeToUser(user: User, themeId: number): Promise<void> {
+    const userThemes = await this.homeRepository.findUserThemes(user.id);
 
     const alreadyOwned = userThemes.some((userTheme) => userTheme.theme.id === themeId);
-    if (alreadyOwned) throw new HttpException('이미 소유한 테마입니다.', HttpStatus.BAD_REQUEST);
-
-    const theme = await this.homeRepository.findThemeById(themeId);
-    if (!theme) throw new HttpException('존재하지 않는 테마입니다.', HttpStatus.BAD_REQUEST);
-
-    if (user.gems < theme.price) {
-      throw new HttpException('재화가 부족합니다.', HttpStatus.BAD_REQUEST);
+    if (alreadyOwned) {
+      throw new HttpException('이미 소유한 테마입니다.', HttpStatus.BAD_REQUEST);
     }
 
-    user.gems -= theme.price;
+    const theme = await this.homeRepository.findThemeById(themeId);
+    if (!theme) {
+      throw new HttpException('존재하지 않는 테마입니다.', HttpStatus.BAD_REQUEST);
+    }
 
     await this.homeRepository.saveNewUserTheme(user, theme);
     await this.homeRepository.createNewUserHomeLayout(user, theme);
-
-    await this.userService.updateUser(userId, user);
   }
 
   async getItems(userId: number, themeId: number, position: string) {

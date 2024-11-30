@@ -202,7 +202,7 @@ export class ToolService {
   }
 
   sentences(text: string, minLength: number, maxLength: number) {
-    const sentenceEndings = /([.?!]+)/;
+    const sentenceEndings = /([!.?]+)/;
     return text
       .split(sentenceEndings)
       .reduce((acc, current, index, array) => {
@@ -270,7 +270,7 @@ export class ToolService {
   }
 
   extractContentFromHtml(htmlContent: string): string {
-    const bodyContentMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const bodyContentMatch = htmlContent.match(/<body[^>]*>([\S\s]*?)<\/body>/i);
 
     if (bodyContentMatch && bodyContentMatch[1]) {
       return bodyContentMatch[1];
@@ -306,5 +306,16 @@ export class ToolService {
       newTrendScore = Math.floor(newTrendScore) + incrementAmount;
     }
     return newTrendScore;
+  }
+
+  useScopeExit(onExit: () => void): () => void {
+    let called = false;
+
+    return () => {
+      if (!called) {
+        called = true;
+        onExit();
+      }
+    };
   }
 }

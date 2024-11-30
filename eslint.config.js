@@ -54,6 +54,10 @@ module.exports = [
     plugins: {
       prettier: require('eslint-plugin-prettier'),
       import: require('eslint-plugin-import'),
+      sonarjs: require('eslint-plugin-sonarjs'),
+      security: require('eslint-plugin-security'),
+      promise: require('eslint-plugin-promise'),
+      'optimize-regex': require('eslint-plugin-optimize-regex'),
     },
     rules: {
       'prettier/prettier': 'error',
@@ -65,6 +69,17 @@ module.exports = [
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
+      'sonarjs/no-duplicate-string': 'warn',
+      'sonarjs/no-identical-functions': 'warn',
+      'sonarjs/cognitive-complexity': ['warn', 15],
+
+      'security/detect-object-injection': 'warn',
+      'security/detect-unsafe-regex': 'error',
+
+      'promise/always-return': 'error',
+      'promise/no-return-wrap': 'error',
+
+      'optimize-regex/optimize-regex': 'warn',
     },
   },
 ];
