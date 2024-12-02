@@ -46,9 +46,7 @@ import { ToolModule } from './modules/utils/tool/tool.module';
       envFilePath: '../.env',
     }),
     TypeOrmModule.forRootAsync(TypeormConfig),
-    RedisModule.forRootAsync({
-      useFactory: () => redisConfig,
-    }),
+    RedisModule,
     AdminModule,
     UserModule,
     SeederModule,

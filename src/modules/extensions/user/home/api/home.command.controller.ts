@@ -4,17 +4,18 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 
 import { JwtAuthGuard } from '../../../../../common/guards/jwtAuth.guard';
-import { BuyThemeCommand } from '../command/buyTheme.command';
-import { HomeService } from '../core/home.service';
+import {
+  BuyThemeCommand,
+  ChangeThemeCommand,
+  BuyItemCommand,
+  ActivateItemCommand,
+} from '../command';
 
 @ApiTags('Home-command')
 @Controller('home')
 @UseGuards(JwtAuthGuard)
 export class HomeCommandController {
-  constructor(
-    private readonly homeService: HomeService,
-    private readonly commandBus: CommandBus,
-  ) {}
+  constructor(private readonly commandBus: CommandBus) {}
 
   @Post('themes/buy/:themeId')
   @ApiOperation({
@@ -62,7 +63,7 @@ export class HomeCommandController {
   })
   @ApiResponse({ status: 200 })
   async changeTheme(@Req() req: ExpressRequest, @Param('themeId', ParseIntPipe) themeId: number) {
-    return this.homeService.changeTheme(req.user.id, themeId);
+    return this.commandBus.execute(new ChangeThemeCommand(req.user.id, themeId));
   }
 
   @Post('items/buy/:itemId')
@@ -86,7 +87,7 @@ export class HomeCommandController {
   })
   @ApiResponse({ status: 201 })
   async buyItem(@Req() req: ExpressRequest, @Param('itemId', ParseIntPipe) itemId: number) {
-    return this.homeService.buyItem(req.user.id, itemId);
+    return this.commandBus.execute(new BuyItemCommand(req.user.id, itemId));
   }
 
   @Post('items/activate/:itemId')
@@ -112,6 +113,6 @@ export class HomeCommandController {
     `,
   })
   async activateItem(@Req() req: ExpressRequest, @Param('itemId', ParseIntPipe) itemId: number) {
-    return this.homeService.activateItem(req.user.id, itemId);
+    return this.commandBus.execute(new ActivateItemCommand(req.user.id, itemId));
   }
 }
