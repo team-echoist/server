@@ -58,7 +58,6 @@ import { ToolModule } from './modules/utils/tool/tool.module';
     FollowModule,
     StoryModule,
     MailModule,
-    RedisModule,
     ToolModule,
     AwsModule,
     BadgeModule,

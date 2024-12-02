@@ -201,7 +201,7 @@ export class UserService {
   @Transactional()
   async deleteAccount(userId: number) {
     const userIds = [userId];
-    const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    const todayDate = new Date().toISOString().replace(/[.:-]/g, '').slice(0, 15);
     await this.userRepository.deleteAccount(userId, todayDate);
 
     const batchSize = 5;
