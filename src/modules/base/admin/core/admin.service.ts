@@ -46,36 +46,36 @@ import { ToolService } from '../../../utils/tool/core/tool.service';
 import { EssayService } from '../../essay/core/essay.service';
 import { IEssayRepository } from '../../essay/infrastructure/iessay.repository';
 import { UserService } from '../../user/core/user.service';
+import { ProfileImageUrlResDto } from '../../user/dto/response/profileImageUrlRes.dto';
+import { UserResDto } from '../../user/dto/response/userRes.dto';
+import { IUserRepository } from '../../user/infrastructure/iuser.repository';
+import { CreateAdminDto } from '../dto/createAdmin.dto';
+import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
+import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
+import { CreateItemReqDto } from '../dto/request/createItemReq.dto';
+import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
+import { CreateThemeReqDto } from '../dto/request/createThemeReq.dto';
 import { ProcessReqDto } from '../dto/request/processReq.dto';
+import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
+import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
+import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
+import { AdminResDto } from '../dto/response/adminRes.dto';
 import { DashboardResDto } from '../dto/response/dashboardRes.dto';
+import { DetailReviewResDto } from '../dto/response/detailReviewRes.dto';
+import { EssayInfoResDto } from '../dto/response/essayInfoRes.dto';
+import { FullEssayResDto } from '../dto/response/fullEssayRes.dto';
+import { FullInquiryResDto } from '../dto/response/fullInquiryRes.dto';
+import { FullUserResDto } from '../dto/response/fullUserRes.dto';
+import { HistoriesResDto } from '../dto/response/historiesRes.dto';
+import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
 import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
 import { ReportResDto } from '../dto/response/reportRes.dto';
 import { ReportsResDto } from '../dto/response/reportsRes.dto';
 import { ReviewResDto } from '../dto/response/reviewRes.dto';
-import { DetailReviewResDto } from '../dto/response/detailReviewRes.dto';
-import { HistoriesResDto } from '../dto/response/historiesRes.dto';
-import { FullUserResDto } from '../dto/response/fullUserRes.dto';
 import { SavedAdminResDto } from '../dto/response/savedAdminRes.dto';
 import { UserDetailResDto } from '../dto/response/userDetailRes.dto';
-import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
-import { CreateAdminDto } from '../dto/createAdmin.dto';
-import { EssayInfoResDto } from '../dto/response/essayInfoRes.dto';
-import { FullEssayResDto } from '../dto/response/fullEssayRes.dto';
-import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
-import { AdminResDto } from '../dto/response/adminRes.dto';
-import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
-import { ProfileImageUrlResDto } from '../../user/dto/response/profileImageUrlRes.dto';
-import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
-import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
-import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
-import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
-import { FullInquiryResDto } from '../dto/response/fullInquiryRes.dto';
-import { CreateThemeReqDto } from '../dto/request/createThemeReq.dto';
-import { CreateItemReqDto } from '../dto/request/createItemReq.dto';
-import { UserResDto } from '../../user/dto/response/userRes.dto';
 import { IAdminRepository } from '../infrastructure/iadmin.repository';
-import { IUserRepository } from '../../user/infrastructure/iuser.repository';
 
 @Injectable()
 export class AdminService {
@@ -958,7 +958,7 @@ export class AdminService {
 
   async deleteUser(adminId: number, userId: number) {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
-    const todayDate = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    const todayDate = new Date().toISOString().replace(/[.:-]/g, '').slice(0, 15);
 
     await this.userRepository.deleteAccount(userId, todayDate);
   }

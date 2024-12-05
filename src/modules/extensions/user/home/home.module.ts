@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { HomeCommandController } from './api/home.command.controller';
 import { HomeQueryController } from './api/home.query.controller';
-import { CommandHandlers } from './command';
+import { CommandHandlers } from './command/handler';
 import { HomeService } from './core/home.service';
 import { HomeRepository } from './infrastructure/home.repository';
 import { RedlockProvider } from '../../../../config/redlock.provider';
@@ -36,7 +36,6 @@ import { GeulroquisModule } from '../../essay/geulroquis/geulroquis.module';
   providers: [
     HomeService,
     { provide: 'IHomeRepository', useClass: HomeRepository },
-    RedlockProvider,
     ...CommandHandlers,
   ],
   exports: [HomeService],

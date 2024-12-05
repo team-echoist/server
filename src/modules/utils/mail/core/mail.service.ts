@@ -23,7 +23,10 @@ export class MailService {
   }
 
   private getHtmlTemplate(title: string, message: string, template: string, options?: string) {
-    const templatePath = path.resolve(process.cwd(), `src/modules/mail/template/${template}.html`);
+    const templatePath = path.resolve(
+      process.cwd(),
+      `src/modules/utils/mail/template/${template}.html`,
+    );
     let html = fs.readFileSync(templatePath, 'utf8');
     html = html.replace(/{{title}}/g, title);
     html = html.replace(/{{message}}/g, message);

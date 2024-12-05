@@ -1,7 +1,4 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
-import Redlock, { Lock } from 'redlock';
 import { Transactional } from 'typeorm-transactional';
 
 import { Item } from '../../../../../entities/item.entity';
@@ -9,7 +6,9 @@ import { Theme } from '../../../../../entities/theme.entity';
 import { User } from '../../../../../entities/user.entity';
 import { UserHomeItem } from '../../../../../entities/userHomeItem.entity';
 import { UserHomeLayout } from '../../../../../entities/userHomeLayout.entity';
+import { UserItem } from '../../../../../entities/userItem.entity';
 import { UserTheme } from '../../../../../entities/userTheme.entity';
+import { RedisService } from '../../../../adapters/redis/core/redis.service';
 import { UserService } from '../../../../base/user/core/user.service';
 import { ToolService } from '../../../../utils/tool/core/tool.service';
 import { GeulroquisService } from '../../../essay/geulroquis/core/geulroquis.service';
@@ -24,28 +23,8 @@ export class HomeService {
     private readonly geulroquisService: GeulroquisService,
     private readonly toolService: ToolService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
-    @Inject('REDLOCK') private readonly redlock: Redlock,
-    @InjectRedis() private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {}
-
-  async acquireLock(lockKey: string, ttl: number) {
-    try {
-      return await this.redlock.acquire([lockKey], ttl);
-    } catch (err) {
-      throw new HttpException(
-        '락을 획득할 수 없습니다. 잠시 후 다시 시도하세요.',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
-    }
-  }
-
-  async releaseLock(lock: Lock) {
-    try {
-      await lock.release();
-    } catch (err) {
-      console.error('락 해제 실패:', err);
-    }
-  }
 
   async todayGeulroquis() {
     const url = await this.geulroquisService.todayGeulroquis();
@@ -54,7 +33,7 @@ export class HomeService {
 
   @Transactional()
   async getThemes(userId: number) {
-    const cachedThemes = await this.redis.get('linkedout:themes');
+    const cachedThemes = await this.redisService.getCache('linkedout:themes');
 
     let allThemes: Theme[];
 
@@ -62,7 +41,7 @@ export class HomeService {
       allThemes = JSON.parse(cachedThemes);
     } else {
       allThemes = await this.homeRepository.findAllThemes();
-      await this.redis.set('linkedout:themes', JSON.stringify(allThemes));
+      await this.redisService.setCache('linkedout:themes', JSON.stringify(allThemes));
     }
 
     let activeLayout: UserHomeLayout;
@@ -143,7 +122,7 @@ export class HomeService {
     const cacheKey = `items:theme:${themeId}:${position || 'all'}`;
 
     let items: Item[] | null = null;
-    const cachedItems = await this.redis.get(cacheKey);
+    const cachedItems = await this.redisService.getCache(cacheKey);
 
     if (cachedItems) {
       items = JSON.parse(cachedItems);
@@ -152,7 +131,7 @@ export class HomeService {
     if (!items) {
       items = await this.homeRepository.findItemsByThemeAndPosition(themeId, position);
 
-      await this.redis.set(cacheKey, JSON.stringify(items));
+      await this.redisService.setCache(cacheKey, JSON.stringify(items));
     }
 
     const userItems = await this.homeRepository.findUserItemsByTheme(userId, themeId);
@@ -168,114 +147,61 @@ export class HomeService {
     return { items: itemsDto };
   }
 
-  async buyItem(userId: number, itemId: number) {
-    const lockKey = `buy-item-lock:${userId}`;
-    const ttl = 10000;
-
-    const lock = await this.acquireLock(lockKey, ttl);
-
-    try {
-      await this.executeBuyItemTransaction(userId, itemId);
-    } catch (err) {
-      throw new HttpException(
-        '아이템 구매 중 오류가 발생했습니다.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    } finally {
-      await this.releaseLock(lock);
-    }
+  async getUserItems(userId: number): Promise<UserItem[]> {
+    return this.homeRepository.findUserItems(userId);
   }
 
-  @Transactional()
-  private async executeBuyItemTransaction(userId: number, itemId: number) {
-    const user = await this.userService.fetchUserEntityById(userId);
-    const userItems = await this.homeRepository.findUserItems(userId);
+  async getItemById(itemId: number): Promise<Item | null> {
+    return this.homeRepository.findItemById(itemId);
+  }
 
-    const alreadyOwned = userItems.some((userItem) => userItem.item.id === itemId);
-    if (alreadyOwned) throw new HttpException('이미 소유한 아이템입니다.', HttpStatus.BAD_REQUEST);
-
-    const item = await this.homeRepository.findItemById(itemId);
-    if (!item) throw new HttpException('존재하지 않는 아이템입니다.', HttpStatus.BAD_REQUEST);
-
-    if (user.gems < item.price) {
-      throw new HttpException('재화가 부족합니다.', HttpStatus.BAD_REQUEST);
-    }
-
-    user.gems -= item.price;
-
+  async addItemToUser(user: User, item: Item): Promise<void> {
     await this.homeRepository.saveNewUserItem(user, item);
-    await this.userService.updateUser(userId, user);
   }
 
-  @Transactional()
-  async changeTheme(userId: number, themeId: number): Promise<void> {
-    const userThemes = await this.homeRepository.findUserThemes(userId);
-    await this.checkUserOwnsTheme(userThemes, themeId);
-
-    const currentLayout = await this.homeRepository.findUserCurrentLayout(userId);
-    if (currentLayout) {
-      currentLayout.isActive = false;
-      await this.homeRepository.saveUserHomeLayout(currentLayout);
-    }
-
-    const newLayout = await this.homeRepository.findUserActivateLayout(userId, themeId);
-    if (!newLayout) {
-      throw new HttpException(
-        '해당 테마에 대한 레이아웃이 존재하지 않습니다.',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    newLayout.isActive = true;
-    await this.homeRepository.saveUserHomeLayout(newLayout);
-    await this.redis.del(`user:${userId}`);
+  async getUserThemes(userId: number): Promise<UserTheme[]> {
+    return this.homeRepository.findUserThemes(userId);
   }
 
-  private async checkUserOwnsTheme(userThemes: UserTheme[], themeId: number): Promise<void> {
-    const ownsTheme = userThemes.some((userTheme) => userTheme.theme.id === themeId);
-    if (!ownsTheme) {
-      throw new HttpException('해당 테마를 소유하고 있지 않습니다.', HttpStatus.BAD_REQUEST);
-    }
+  async getActiveLayout(userId: number): Promise<UserHomeLayout | null> {
+    return this.homeRepository.findUserCurrentLayout(userId);
   }
 
-  @Transactional()
-  async activateItem(userId: number, itemId: number) {
-    // 현재 활성화된 레이아웃 가져오기
-    const activeLayout = await this.homeRepository.findUserCurrentHomeLayout(userId);
+  async deactivateLayout(layout: UserHomeLayout): Promise<void> {
+    layout.isActive = false;
+    await this.homeRepository.saveUserHomeLayout(layout);
+  }
 
-    if (!activeLayout) {
-      throw new HttpException('활성화된 레이아웃이 없습니다.', HttpStatus.BAD_REQUEST);
-    }
+  async getLayoutByTheme(userId: number, themeId: number): Promise<UserHomeLayout | null> {
+    return this.homeRepository.findUserActivateLayout(userId, themeId);
+  }
 
-    // 아이템 가져오기 및 검증
-    const item = await this.homeRepository.findItemById(itemId);
-    if (!item || item.theme.id !== activeLayout.theme.id) {
-      throw new HttpException(
-        '해당 아이템이 존재하지 않거나, 현재 테마에 속하지 않습니다.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  async activateLayout(layout: UserHomeLayout): Promise<void> {
+    layout.isActive = true;
+    await this.homeRepository.saveUserHomeLayout(layout);
+  }
 
-    // 사용자가 해당 아이템을 소유했는지 확인
-    const userOwnsItem = await this.homeRepository.findUserItemById(userId, itemId);
-    if (!userOwnsItem) {
-      throw new HttpException('해당 아이템을 소유하고 있지 않습니다.', HttpStatus.FORBIDDEN);
-    }
+  async clearUserCache(userId: number): Promise<void> {
+    await this.redisService.deleteCache(`user:${userId}`);
+  }
 
-    // 같은 포지션에 있는 기존 아이템 비활성화
-    const existingItem = activeLayout.homeItems.find(
-      (homeItem) => homeItem.item.position === item.position,
-    );
+  async userOwnsItem(userId: number, itemId: number): Promise<boolean> {
+    const userItem = await this.homeRepository.findUserItemById(userId, itemId);
+    return !!userItem;
+  }
+
+  async deactivateItemAtPosition(layout: UserHomeLayout, position: string): Promise<void> {
+    const existingItem = layout.homeItems.find((homeItem) => homeItem.item.position === position);
     if (existingItem) {
       await this.homeRepository.removeUserHomeItem(existingItem);
     }
+  }
 
-    // 새 아이템 활성화
+  async activateItemInLayout(layout: UserHomeLayout, item: Item): Promise<void> {
     const newUserHomeItem = new UserHomeItem();
-    newUserHomeItem.layout = activeLayout;
+    newUserHomeItem.layout = layout;
     newUserHomeItem.item = item;
 
     await this.homeRepository.saveUserHomeItem(newUserHomeItem);
-    await this.redis.del(`user:${userId}`);
   }
 }

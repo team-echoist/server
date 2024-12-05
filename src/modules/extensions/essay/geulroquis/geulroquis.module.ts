@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GeulroquisService } from './core/geulroquis.service';
 import { GeulroquisRepository } from './infrastructure/geulroquis.repository';
 import { Geulroquis } from '../../../../entities/geulroguis.entity';
+import { RedisModule } from '../../../adapters/redis/redis.module';
 import { AuthModule } from '../../../base/auth/auth.module';
 import { UserModule } from '../../../base/user/user.module';
 import { ToolModule } from '../../../utils/tool/tool.module';
@@ -13,6 +14,7 @@ import { ToolModule } from '../../../utils/tool/tool.module';
   imports: [
     JwtModule.register({}),
     TypeOrmModule.forFeature([Geulroquis]),
+    RedisModule,
     ToolModule,
     forwardRef(() => AuthModule),
     forwardRef(() => UserModule),
