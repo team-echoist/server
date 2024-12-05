@@ -8,6 +8,7 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
+  private readonly logoPath: string = 'src/modules/utils/mail/template/logo.png';
 
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
@@ -52,7 +53,7 @@ export class MailService {
       attachments: [
         {
           filename: 'logo.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          path: path.resolve(process.cwd(), this.logoPath),
           cid: 'logo',
           contentDisposition: 'inline',
         },
@@ -73,7 +74,7 @@ export class MailService {
       attachments: [
         {
           filename: 'logo.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          path: path.resolve(process.cwd(), this.logoPath),
           cid: 'logo',
           contentDisposition: 'inline',
         },
@@ -94,7 +95,7 @@ export class MailService {
       attachments: [
         {
           filename: 'logo.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          path: path.resolve(process.cwd(), this.logoPath),
           cid: 'logo',
           contentDisposition: 'inline',
         },
@@ -127,7 +128,7 @@ export class MailService {
       attachments: [
         {
           filename: 'logo.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          path: path.resolve(process.cwd(), this.logoPath),
           cid: 'logo',
           contentDisposition: 'inline',
         },
@@ -160,7 +161,7 @@ export class MailService {
       attachments: [
         {
           filename: 'logo.png',
-          path: path.resolve(process.cwd(), 'src/modules/mail/template/logo.png'),
+          path: path.resolve(process.cwd(), this.logoPath),
           cid: 'logo',
           contentDisposition: 'inline',
         },
