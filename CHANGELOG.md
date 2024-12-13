@@ -1,3 +1,10 @@
+## [1.21.12](https://github.com/team-echoist/server/compare/v1.21.11...v1.21.12) (2024-12-13)
+
+
+### Bug Fixes
+
+* 테스트 흔적 제거... ([#500](https://github.com/team-echoist/server/issues/500)) ([e2ae514](https://github.com/team-echoist/server/commit/e2ae5149d00ba6e772503784dafc36d024e9a336))
+
 ## [1.21.11](https://github.com/team-echoist/server/compare/v1.21.10...v1.21.11) (2024-12-13)
 
 
