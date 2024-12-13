@@ -127,26 +127,48 @@ export class EssayRepository implements IEssayRepository {
   }
 
   async findTargetUserEssays(userId: number, storyId: number, page: number, limit: number) {
-    const queryBuilder = this.essayRepository
+    const subQuery = this.essayRepository
       .createQueryBuilder('essay')
       .leftJoinAndSelect('essay.author', 'author')
-      .leftJoinAndSelect('essay.story', 'story')
-      .leftJoinAndSelect('essay.tags', 'tags')
-      .where('essay.author.id = :userId', { userId })
+      .where('essay.author_id = :userId', { userId })
       .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
       .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE })
-      .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL });
+      .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL })
+      .andWhere('essay.deletedDate IS NULL');
 
     if (storyId !== undefined) {
-      queryBuilder.andWhere('essay.story.id = :storyId', { storyId });
-      queryBuilder.orderBy('essay.createdDate', 'ASC');
-    } else {
-      queryBuilder.orderBy('essay.createdDate', 'DESC');
+      subQuery.andWhere('essay.story_id = :storyId', { storyId });
     }
 
-    queryBuilder.offset((page - 1) * limit).limit(limit);
+    const idsResult = await subQuery
+      .orderBy('essay.createdDate', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getRawMany();
 
-    const [essays, total] = await queryBuilder.getManyAndCount();
+    const essayIds = idsResult.map((row) => row.essay_id);
+
+    if (essayIds.length === 0) {
+      return { essays: [], total: 0 };
+    }
+
+    const total = await this.essayRepository
+      .createQueryBuilder('essay')
+      .where('essay.author_id = :userId', { userId })
+      .andWhere('essay.status != :linkedOutStatus', { linkedOutStatus: EssayStatus.LINKEDOUT })
+      .andWhere('essay.status != :privateStatus', { privateStatus: EssayStatus.PRIVATE })
+      .andWhere('essay.status != :burialStatus', { burialStatus: EssayStatus.BURIAL })
+      .andWhere('essay.deletedDate IS NULL')
+      .getCount();
+
+    const essays = await this.essayRepository
+      .createQueryBuilder('essay')
+      .leftJoinAndSelect('essay.author', 'author')
+      .leftJoinAndSelect('essay.tags', 'tags')
+      .leftJoinAndSelect('essay.story', 'story')
+      .whereInIds(essayIds)
+      .orderBy('essay.createdDate', 'DESC')
+      .getMany();
 
     return { essays, total };
   }
