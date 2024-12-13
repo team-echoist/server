@@ -1,3 +1,10 @@
+## [1.21.10](https://github.com/team-echoist/server/compare/v1.21.9...v1.21.10) (2024-12-05)
+
+
+### Bug Fixes
+
+* 메일 로고 경로 변경 ([#495](https://github.com/team-echoist/server/issues/495)) ([66f12c0](https://github.com/team-echoist/server/commit/66f12c04cfe370da6ad79848af5b7475eb47b375))
+
 ## [1.21.9](https://github.com/team-echoist/server/compare/v1.21.8...v1.21.9) (2024-12-05)
 
 
