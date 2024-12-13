@@ -89,11 +89,11 @@ export class Essay {
   device: Device;
 
   @JoinTable({ name: 'essay_tags' })
-  @ManyToMany(() => Tag, (tag) => tag.essays, { onDelete: 'CASCADE' })
+  @ManyToMany(() => Tag, (tag) => tag.essays, { onDelete: 'CASCADE', nullable: true })
   tags: Tag[];
 
   @JoinColumn({ name: 'story_id' })
-  @ManyToOne(() => Story, (story) => story.essays, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Story, (story) => story.essays, { onDelete: 'CASCADE', nullable: true })
   story: Story;
 
   @Index()
