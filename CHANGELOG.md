@@ -1,3 +1,10 @@
+## [1.21.11](https://github.com/team-echoist/server/compare/v1.21.10...v1.21.11) (2024-12-13)
+
+
+### Bug Fixes
+
+* 에세이 목록 조회 시 중복 및 페이징 문제 해결 ([#499](https://github.com/team-echoist/server/issues/499)) ([6253fcc](https://github.com/team-echoist/server/commit/6253fcc57adb11494451f2bf226c66e85caa18c4))
+
 ## [1.21.10](https://github.com/team-echoist/server/compare/v1.21.9...v1.21.10) (2024-12-05)
 
 
