@@ -55,6 +55,7 @@ export class EssayRepository implements IEssayRepository {
         title: data.title,
         content: data.content,
         linkedOutGauge: data.linkedOutGauge,
+        thumbnail: data.thumbnail,
         status: data.status,
         device: data.device,
         author: data.author,

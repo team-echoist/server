@@ -67,6 +67,7 @@ export class EssayService {
           HttpStatus.BAD_REQUEST,
         );
     }
+    console.log(data);
 
     const user = await this.userService.fetchUserEntityById(requester.id);
     const tags = (await this.tagService.getTags(data.tags)) || [];

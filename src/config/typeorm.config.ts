@@ -31,7 +31,7 @@ export const TypeormConfig: TypeOrmModuleAsyncOptions = {
       connectionTimeoutMillis: 5000,
     },
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
-    logging: true,
+    logging: false,
     logger: 'advanced-console',
   }),
   async dataSourceFactory(option) {
