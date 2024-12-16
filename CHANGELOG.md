@@ -1,3 +1,10 @@
+## [1.21.13](https://github.com/team-echoist/server/compare/v1.21.12...v1.21.13) (2024-12-16)
+
+
+### Bug Fixes
+
+* 에세이 저장시 썸네일 필드 누락 ([#501](https://github.com/team-echoist/server/issues/501)) ([bf4a7de](https://github.com/team-echoist/server/commit/bf4a7ded7d5a4fd294ffca8a6c33869a04010b49))
+
 ## [1.21.12](https://github.com/team-echoist/server/compare/v1.21.11...v1.21.12) (2024-12-13)
 
 
