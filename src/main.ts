@@ -33,6 +33,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { snapshot: true });
 
   const allowedOrigins = [
+    'app://.',
     'https://linkedoutapp.com',
     'https://linkedout-umber.vercel.app',
     'https://admin.linkedoutapp.com',
