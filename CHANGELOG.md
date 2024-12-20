@@ -1,3 +1,10 @@
+## [1.21.14](https://github.com/team-echoist/server/compare/v1.21.13...v1.21.14) (2024-12-18)
+
+
+### Bug Fixes
+
+* 일렉트론 오리진 cors 추가 ([#502](https://github.com/team-echoist/server/issues/502)) ([a2079e9](https://github.com/team-echoist/server/commit/a2079e98a7dec081f0f31f836e1820be9a31213c))
+
 ## [1.21.13](https://github.com/team-echoist/server/compare/v1.21.12...v1.21.13) (2024-12-16)
 
 
