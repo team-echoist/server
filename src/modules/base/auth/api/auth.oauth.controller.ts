@@ -60,11 +60,11 @@ export class AuthOauthController {
     req.user = await this.authService.oauthLogin(req.user);
     const jwt = await this.authService.login(req);
 
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    // let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    // redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
+    // res.redirect(redirectUrl);
 
-    redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
-
-    res.redirect(redirectUrl);
+    res.json({ accessToken: jwt.accessToken, refreshToken: jwt.refreshToken });
   }
 
   @Post('google/mobile')
