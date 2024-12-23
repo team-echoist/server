@@ -60,9 +60,8 @@ export class AuthOauthController {
     req.user = await this.authService.oauthLogin(req.user);
     const jwt = await this.authService.login(req);
 
-    // let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
-    // redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
-    const redirectUrl = `app://./home?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
     res.redirect(redirectUrl);
   }
 
