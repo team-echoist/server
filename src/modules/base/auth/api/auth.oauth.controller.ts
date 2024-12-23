@@ -62,9 +62,8 @@ export class AuthOauthController {
 
     // let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
     // redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
-    // res.redirect(redirectUrl);
-
-    res.json({ accessToken: jwt.accessToken, refreshToken: jwt.refreshToken });
+    const redirectUrl = `app://./web/login?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
+    res.redirect(redirectUrl);
   }
 
   @Post('google/mobile')
