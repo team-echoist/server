@@ -1,3 +1,10 @@
+## [1.21.15](https://github.com/team-echoist/server/compare/v1.21.14...v1.21.15) (2024-12-23)
+
+
+### Bug Fixes
+
+* 일렉트론 리디렉션 경로 ([#507](https://github.com/team-echoist/server/issues/507)) ([9527cd0](https://github.com/team-echoist/server/commit/9527cd0d989d55fc64bc499bb512acabddacc424))
+
 ## [1.21.14](https://github.com/team-echoist/server/compare/v1.21.13...v1.21.14) (2024-12-18)
 
 
