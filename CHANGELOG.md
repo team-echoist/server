@@ -1,3 +1,10 @@
+## [1.21.16](https://github.com/team-echoist/server/compare/v1.21.15...v1.21.16) (2024-12-26)
+
+
+### Bug Fixes
+
+* 일렉트론 oauth 리디렉션 ([#508](https://github.com/team-echoist/server/issues/508)) ([726b16a](https://github.com/team-echoist/server/commit/726b16a88ba8649c6f884d5da6b40dc29610567c))
+
 ## [1.21.15](https://github.com/team-echoist/server/compare/v1.21.14...v1.21.15) (2024-12-23)
 
 
