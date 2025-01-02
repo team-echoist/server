@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { Transactional } from 'typeorm-transactional';
@@ -38,10 +38,19 @@ export class GeulroquisService {
     const cachedGeulroquis = await this.redis.get(cacheKey);
 
     if (cachedGeulroquis) {
-      return JSON.parse(cachedGeulroquis);
+      try {
+        return JSON.parse(cachedGeulroquis);
+      } catch (error) {
+        console.error('Redis 캐시 파싱 실패:', error);
+        await this.redis.del(cacheKey);
+      }
     }
 
     const todayGeulroquis = await this.geulroquisRepository.findTodayGeulroquis();
+
+    if (!todayGeulroquis || !todayGeulroquis.url) {
+      throw new HttpException('오늘의 글로키를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
 
     await this.redis.set(cacheKey, JSON.stringify(todayGeulroquis.url), 'EX', 24 * 60 * 60);
 

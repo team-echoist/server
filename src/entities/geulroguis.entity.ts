@@ -5,7 +5,7 @@ export class Geulroquis {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: false })
   url: string;
 
   @Column({ default: false })
