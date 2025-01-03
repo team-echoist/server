@@ -1,3 +1,10 @@
+## [1.21.17](https://github.com/team-echoist/server/compare/v1.21.16...v1.21.17) (2025-01-02)
+
+
+### Bug Fixes
+
+* 글로키 url필드 제약조건 및 검증로직 추가 ([#509](https://github.com/team-echoist/server/issues/509)) ([1d58d77](https://github.com/team-echoist/server/commit/1d58d77a6be84bb50e7250d0dc1fc1f01274c9f8))
+
 ## [1.21.16](https://github.com/team-echoist/server/compare/v1.21.15...v1.21.16) (2024-12-26)
 
 
