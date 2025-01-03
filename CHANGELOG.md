@@ -1,3 +1,10 @@
+## [1.21.18](https://github.com/team-echoist/server/compare/v1.21.17...v1.21.18) (2025-01-03)
+
+
+### Bug Fixes
+
+* 이미지 경로 재사용 로직 일시 중단 ([#510](https://github.com/team-echoist/server/issues/510)) ([ee027da](https://github.com/team-echoist/server/commit/ee027da322dc2b98c7c3eb6ee3026100f23c99ad))
+
 ## [1.21.17](https://github.com/team-echoist/server/compare/v1.21.16...v1.21.17) (2025-01-02)
 
 
