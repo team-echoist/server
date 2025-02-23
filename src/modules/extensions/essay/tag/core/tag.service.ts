@@ -7,7 +7,7 @@ import { ITagRepository } from '../infrastructure/itag.repository';
 export class TagService {
   constructor(@Inject('ITagRepository') private readonly tagRepository: ITagRepository) {}
 
-  async getTags(tagNames: string[]) {
+  async getTags(tagNames: string[] | undefined) {
     if (!tagNames || tagNames.length === 0) return [];
     return await this.processTags(tagNames);
   }

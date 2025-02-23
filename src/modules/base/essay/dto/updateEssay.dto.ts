@@ -22,7 +22,7 @@ export class UpdateEssayDto {
 
   @Expose()
   @IsOptional()
-  story: Story;
+  story: Story | null;
 
   @Expose()
   @IsString()

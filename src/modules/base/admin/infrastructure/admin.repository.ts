@@ -199,7 +199,14 @@ export class AdminRepository implements IAdminRepository {
     return this.adminRepository.findOne({ where: { name: name } });
   }
 
-  async findAdmins(activated: boolean, page: number, limit: number) {
+  async findAdmins(
+    page: number,
+    limit: number,
+    activated: boolean | undefined,
+  ): Promise<{
+    admins: Admin[];
+    total: number;
+  }> {
     const [admins, total] = await this.adminRepository.findAndCount({
       where: activated !== undefined ? { activated } : {},
       skip: (page - 1) * limit,

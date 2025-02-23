@@ -38,7 +38,7 @@ export interface IAdminRepository {
 
   getReviews(page: number, limit: number): Promise<{ reviews: ReviewQueue[]; total: number }>;
 
-  getReview(reviewId: number): Promise<ReviewQueue>;
+  getReview(reviewId: number): Promise<ReviewQueue | null>;
 
   saveReview(review: ReviewQueue): Promise<ReviewQueue>;
 
@@ -48,23 +48,23 @@ export interface IAdminRepository {
 
   handleBannedReviews(userId: number): Promise<void>;
 
-  findByEmail(email: string): Promise<Admin>;
+  findByEmail(email: string): Promise<Admin | null>;
 
-  findByName(name: string): Promise<Admin>;
+  findByName(name: string): Promise<Admin | null>;
 
   findAdmins(
-    activated: boolean,
     page: number,
     limit: number,
+    activated: boolean | undefined,
   ): Promise<{ admins: Admin[]; total: number }>;
 
-  findAdmin(adminId: number): Promise<Admin>;
+  findAdmin(adminId: number): Promise<Admin | null>;
 
   updateAdmin(admin: Admin, data: AdminUpdateReqDto): Promise<Admin>;
 
   saveAdmin(admin: Admin | CreateAdminDto): Promise<Admin | (CreateAdminDto & Admin)>;
 
-  getCurrentServerStatus(): Promise<Server>;
+  getCurrentServerStatus(): Promise<Server | null>;
 
   saveServer(server: Server): Promise<Server>;
 
@@ -76,7 +76,7 @@ export interface IAdminRepository {
 
   findThemes(): Promise<Theme[]>;
 
-  findThemeById(themeId: number): Promise<Theme>;
+  findThemeById(themeId: number): Promise<Theme | null>;
 
   deleteTheme(themeId: number): Promise<DeleteResult>;
 
@@ -88,7 +88,7 @@ export interface IAdminRepository {
 
   findAllVersions(): Promise<AppVersions[]>;
 
-  findVersion(versionId: number): Promise<AppVersions>;
+  findVersion(versionId: number): Promise<AppVersions | null>;
 
   saveVersion(version: AppVersions): Promise<AppVersions>;
 }

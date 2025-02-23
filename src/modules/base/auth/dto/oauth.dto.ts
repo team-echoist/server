@@ -2,10 +2,10 @@ import { IsString } from 'class-validator';
 
 export class OauthDto {
   @IsString()
-  platform?: string;
+  platform: string;
 
   @IsString()
-  platformId?: string;
+  platformId: string;
 
   @IsString()
   email?: string;

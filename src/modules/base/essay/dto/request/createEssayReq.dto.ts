@@ -40,7 +40,7 @@ export class CreateEssayReqDto {
   @ApiProperty({ type: 'enum', description: 'private, public, linkedout, burial' })
   @IsEnum(EssayStatus)
   @IsOptional()
-  status?: EssayStatus;
+  status: EssayStatus;
 
   @ApiProperty({
     description: '위도 좌표',

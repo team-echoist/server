@@ -15,25 +15,12 @@ export class AwsService {
 
   constructor(private configService: ConfigService) {
     this.s3Client = new S3Client({
-      region: this.configService.get('AWS_REGION'),
+      region: this.configService.get<string>('AWS_REGION') || '',
       credentials: {
-        accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY'),
-        secretAccessKey: this.configService.get('AWS_S3_SECRET_ACCESS_KEY'),
+        accessKeyId: this.configService.get<string>('AWS_S3_ACCESS_KEY') || '',
+        secretAccessKey: this.configService.get<string>('AWS_S3_SECRET_ACCESS_KEY') || '',
       },
     });
-  }
-
-  async geulroquisUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
-    const command = new PutObjectCommand({
-      Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
-      Key: fileName,
-      Body: file.buffer,
-      ACL: 'public-read',
-      ContentType: `image/${ext}`,
-    });
-
-    await this.s3Client.send(command);
-    return `https://${this.configService.get('AWS_CLOUD_FRONT')}/${fileName}`;
   }
 
   async imageUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
@@ -81,6 +68,7 @@ export class AwsService {
     }
   }
 
+  // todo 사용하지 않는 메소드
   async getAssetLinksJson(): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.configService.get('AWS_S3_PRIVATE_BUCKET_NAME'),

@@ -73,7 +73,7 @@ export class EssayCommandController {
   })
   @ApiResponse({ status: 201, type: EssayResDto })
   async saveEssay(@Req() req: ExpressRequest, @Body() createEssayDto: CreateEssayReqDto) {
-    return this.essayService.saveEssay(req.user, req.device, createEssayDto);
+    return this.essayService.saveEssay(req.user!, req.device!, createEssayDto);
   }
 
   @Put(':essayId')
@@ -135,7 +135,7 @@ export class EssayCommandController {
     @Param('essayId', ParseIntPipe) essayId: number,
     @Body() updateEssayDto: UpdateEssayReqDto,
   ) {
-    return this.essayService.updateEssay(req.user, essayId, updateEssayDto);
+    return this.essayService.updateEssay(req.user!, essayId, updateEssayDto);
   }
 
   @Post('images')
@@ -211,6 +211,6 @@ export class EssayCommandController {
   })
   @ApiResponse({ status: 200 })
   async deleteEssay(@Req() req: ExpressRequest, @Param('essayId', ParseIntPipe) essayId: number) {
-    await this.essayService.deleteEssay(req.user.id, essayId);
+    await this.essayService.deleteEssay(req.user!.id!, essayId);
   }
 }

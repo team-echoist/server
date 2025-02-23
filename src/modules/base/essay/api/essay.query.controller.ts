@@ -59,7 +59,7 @@ export class EssayQueryController {
     @Query('pageType', PageTypeEnumPipe) pageType: PageType,
     @Query('storyId', OptionalParseIntPipe) storyId: number,
   ) {
-    return this.essayService.getMyEssays(req.user.id, pageType, page, limit, storyId);
+    return this.essayService.getMyEssays(req.user!.id!, pageType, page, limit, storyId);
   }
 
   @Get('author/:userId')
@@ -122,7 +122,7 @@ export class EssayQueryController {
     @Req() req: ExpressRequest,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.essayService.getRecommendEssays(req.user.id, limit);
+    return this.essayService.getRecommendEssays(req.user!.id!, limit);
   }
 
   @Get('followings')
@@ -154,7 +154,7 @@ export class EssayQueryController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.essayService.getFollowingsEssays(req.user.id, page, limit);
+    return this.essayService.getFollowingsEssays(req.user!.id!, page, limit);
   }
 
   @Get('sentence')
@@ -184,7 +184,7 @@ export class EssayQueryController {
     @Query('type', new DefaultValuePipe('first')) type: 'first' | 'last' = 'first',
     @Query('limit', new PagingParseIntPipe(6)) limit: number,
   ) {
-    return await this.essayService.getSentenceEssays(req.user.id, type, limit);
+    return await this.essayService.getSentenceEssays(req.user!.id!, type, limit);
   }
 
   @Get('recent')
@@ -210,7 +210,7 @@ export class EssayQueryController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.essayService.getRecentViewedEssays(req.user.id, page, limit);
+    return this.essayService.getRecentViewedEssays(req.user!.id!, page, limit);
   }
 
   @Get('search')
@@ -251,7 +251,7 @@ export class EssayQueryController {
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     if (pageType !== PageType.ANY)
-      return this.essayService.searchEssays(pageType, keyword, page, limit, req.user.id);
+      return this.essayService.searchEssays(pageType, keyword, page, limit, req.user!.id!);
     return;
   }
 
@@ -307,7 +307,7 @@ export class EssayQueryController {
   
   **쿼리 파라미터:**
   - \`pageType\` (required): 응답객체의 \`anotherEssays\` 필드의 값을 결정합니다. \`private\`, \`public\`, \`story\` 를 사용할 수 있으며 각각 저장한 글, 발행한 글, 타겟 스토리 의 \`이전 글\`. 그리고 추천 에세이의 \`다른 글\`에 사용됩니다.
-  - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`면 해당 스토리의 아이디를 쿼리로 추가해야합니다.
+  - \`storyId\` (optional): 선택적 쿼리로, 만약 \`pageType\` 이 \`story\`면 필수적으로 해당 스토리의 아이디를 쿼리로 추가해야합니다.
   
   **각 페이지 타입에 대한 동작:**
   페이지 타입에 따라 '이전 글'은 '에세이 상세조회'와 동일하게 동작합니다.

@@ -57,10 +57,10 @@ export class AuthOauthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    req.user = await this.authService.oauthLogin(req.user);
+    req.user! = await this.authService.oauthLogin(req.user!!);
     const jwt = await this.authService.login(req);
 
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT')!;
     redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
     res.redirect(redirectUrl);
   }
@@ -89,7 +89,7 @@ export class AuthOauthController {
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 200, type: JwtResDto })
   async mobileGoogleLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
-    req.user = await this.authService.validateGoogleUser(oauthData.token);
+    req.user! = await this.authService.validateGoogleUser(oauthData.token);
     return await this.authService.login(req);
   }
 
@@ -131,9 +131,9 @@ export class AuthOauthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('kakao'))
   async kakaoCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    req.user = await this.authService.oauthLogin(req.user);
+    req.user! = await this.authService.oauthLogin(req.user!);
     const jwt = await this.authService.login(req);
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT')!;
 
     redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
@@ -163,7 +163,7 @@ export class AuthOauthController {
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201, type: JwtResDto })
   async mobileKakaoLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
-    req.user = await this.authService.validateKakaoUser(oauthData.token);
+    req.user! = await this.authService.validateKakaoUser(oauthData.token);
 
     return await this.authService.login(req);
   }
@@ -206,10 +206,10 @@ export class AuthOauthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('naver'))
   async naverCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    req.user = await this.authService.oauthLogin(req.user);
+    req.user! = await this.authService.oauthLogin(req.user!);
     const jwt = await this.authService.login(req);
 
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT')!;
 
     redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
@@ -239,7 +239,7 @@ export class AuthOauthController {
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201, type: JwtResDto })
   async mobileNaverLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
-    req.user = await this.authService.validateNaverUser(oauthData.token);
+    req.user! = await this.authService.validateNaverUser(oauthData.token);
     return await this.authService.login(req);
   }
 
@@ -281,9 +281,9 @@ export class AuthOauthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('apple'))
   async appleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    req.user = await this.authService.oauthLogin(req.user);
+    req.user! = await this.authService.oauthLogin(req.user!);
     const jwt = await this.authService.login(req);
-    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT');
+    let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT')!;
 
     redirectUrl += `?accessToken=${jwt.accessToken}&refreshToken=${jwt.refreshToken}`;
 
@@ -313,7 +313,7 @@ export class AuthOauthController {
   @ApiBody({ type: OauthMobileReqDto })
   @ApiResponse({ status: 201, type: JwtResDto })
   async mobileAppleLogin(@Req() req: ExpressRequest, @Body() oauthData: OauthMobileReqDto) {
-    req.user = await this.authService.validateAppleUser(oauthData.token);
+    req.user! = await this.authService.validateAppleUser(oauthData.token);
     return await this.authService.login(req);
   }
 }

@@ -5,7 +5,7 @@ export class CreateUserReqDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsEmail({}, { message: '올바른 이메일 형식이어야 합니다.' })
-  email: string;
+  email?: string | null;
 
   @ApiProperty({
     description:
@@ -15,7 +15,7 @@ export class CreateUserReqDto {
   @IsString()
   @Length(8, 30)
   @Matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/)
-  password?: string;
+  password?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()

@@ -37,7 +37,7 @@ export class AuthManagementController {
   })
   @ApiBody({ type: DeactivateReqDto })
   async requestDeactivation(@Req() req: ExpressRequest, @Body() data: DeactivateReqDto) {
-    return this.authService.requestDeactivation(req.user.id, data);
+    return this.authService.requestDeactivation(req.user!.id!, data);
   }
 
   @Post('reactivate')
@@ -58,7 +58,7 @@ export class AuthManagementController {
   })
   @ApiResponse({ status: 200 })
   async cancelDeactivation(@Req() req: ExpressRequest) {
-    return this.authService.cancelDeactivation(req.user.id);
+    return this.authService.cancelDeactivation(req.user!.id!);
   }
 
   @Delete()
@@ -77,6 +77,6 @@ export class AuthManagementController {
   })
   @ApiResponse({ status: 200 })
   async deleteAccount(@Req() req: ExpressRequest) {
-    return this.authService.deleteAccount(req.user.id);
+    return this.authService.deleteAccount(req.user!.id!);
   }
 }

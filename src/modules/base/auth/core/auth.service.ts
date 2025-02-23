@@ -58,21 +58,21 @@ export class AuthService {
 
   @Transactional()
   async signingUp(req: ExpressRequest, data: CreateUserReqDto) {
-    await this.checkEmail(data.email);
+    await this.checkEmail(data.email!);
 
     const code = await this.utilsService.generateSixDigit();
-    data.password = await bcrypt.hash(data.password, 12);
+    data.password = await bcrypt.hash(data.password!, 12);
 
     await this.redis.set(`${req.ip}:${code}`, JSON.stringify(data), 'EX', 300);
 
-    await this.mailService.sendVerificationEmail(data.email, code);
+    await this.mailService.sendVerificationEmail(data.email!, code);
   }
 
   @Transactional()
   async verifyEmail(req: ExpressRequest, email: string) {
     await this.checkEmail(email);
 
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const code = await this.utilsService.generateSixDigit();
 
     const userEmailData = { email, userId };
@@ -117,7 +117,7 @@ export class AuthService {
 
     req.user = await this.userRepository.saveUser(userData);
 
-    await this.homeService.createDefaultTheme(req.user.id);
+    await this.homeService.createDefaultTheme(req.user!.id!);
 
     return await this.login(req);
   }
@@ -149,16 +149,16 @@ export class AuthService {
   }
 
   async login(req: ExpressRequest) {
-    const accessPayload = { username: req.user.email, sub: req.user.id };
+    const accessPayload = { username: req.user!.email, sub: req.user!.id };
     const refreshPayload = {
-      username: req.user.email,
-      sub: req.user.id,
+      username: req.user!.email,
+      sub: req.user!.id,
       device: req.device,
-      tokenVersion: req.user.tokenVersion,
+      tokenVersion: req.user!.tokenVersion,
     };
 
     const refreshToken = await this.generateRefreshToken(refreshPayload);
-    await this.redis.set(`${refreshToken}:${req.user.id}`, 'used', 'EX', 29 * 60 + 50);
+    await this.redis.set(`${refreshToken}:${req.user!.id}`, 'used', 'EX', 29 * 60 + 50);
 
     return {
       accessToken: await this.generateAccessToken(accessPayload),
@@ -412,14 +412,16 @@ export class AuthService {
 
     await this.userRepository.saveUser(user);
 
-    const deactivationReasons = data.reasons.map((reason) => {
-      const deactivationReason = new DeactivationReason();
-      deactivationReason.user = user;
-      deactivationReason.reason = reason;
-      return deactivationReason;
-    });
+    const deactivationReasons = data.reasons
+      ? data.reasons.map((reason) => {
+          const deactivationReason = new DeactivationReason();
+          deactivationReason.user = user;
+          deactivationReason.reason = reason;
+          return deactivationReason;
+        })
+      : null;
 
-    await this.userService.saveDeactivationReasons(deactivationReasons);
+    if (deactivationReasons) await this.userService.saveDeactivationReasons(deactivationReasons);
   }
 
   async cancelDeactivation(userId: number) {

@@ -99,7 +99,7 @@ export class User {
     nullable: true,
     name: 'deactivation_date',
   })
-  deactivationDate: Date;
+  deactivationDate: Date | null;
 
   @DeleteDateColumn({
     name: 'deleted_date',

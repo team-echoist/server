@@ -76,8 +76,8 @@ export class EssayRepository implements IEssayRepository {
       relations: ['tags', 'author', 'device'],
     });
 
-    if (data.tags && data.tags.length > 0) {
-      savedEssay.tags = data.tags;
+    if (savedEssay && data.tags && data.tags.length > 0) {
+      savedEssay!.tags = data.tags;
 
       await this.essayRepository.save(savedEssay);
     }

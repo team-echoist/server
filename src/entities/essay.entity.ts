@@ -66,7 +66,7 @@ export class Essay {
     name: 'deleted_date',
     type: 'timestamptz',
   })
-  deletedDate: Date;
+  deletedDate: Date | null;
 
   @Column({ name: 'thumbnail', nullable: true })
   thumbnail: string;
@@ -94,7 +94,7 @@ export class Essay {
 
   @JoinColumn({ name: 'story_id' })
   @ManyToOne(() => Story, (story) => story.essays, { onDelete: 'CASCADE', nullable: true })
-  story: Story;
+  story: Story | null;
 
   @Index()
   @JoinColumn({ name: 'author_id' })

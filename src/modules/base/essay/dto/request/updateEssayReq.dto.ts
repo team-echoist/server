@@ -46,7 +46,7 @@ export class UpdateEssayReqDto {
   @ApiProperty({ type: 'enum', description: 'private, published, public, linkedout' })
   @IsEnum(EssayStatus)
   @IsOptional()
-  status?: EssayStatus;
+  status: EssayStatus;
 
   @ApiProperty({
     description: '장소 이름',

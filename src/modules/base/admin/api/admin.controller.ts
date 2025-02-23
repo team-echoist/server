@@ -25,51 +25,50 @@ import { AdminGuard } from '../../../../common/guards/admin.guard';
 import { OptionalBoolPipe } from '../../../../common/pipes/optionalBool.pipe';
 import { OptionalParseIntPipe } from '../../../../common/pipes/optionalParseInt.pipe';
 import { PagingParseIntPipe } from '../../../../common/pipes/pagingParseInt.pipe';
+import { ServerStatus } from '../../../../common/types/enum.types';
+import { GeulroquisCountResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisCountRes.dto';
+import { GeulroquisResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisRes.dto';
+import { UpdateVersionReqDto } from '../../../extensions/management/support/dto/request/updateVersionReq.dto';
+import { InquiriesSummaryResDto } from '../../../extensions/management/support/dto/response/inquiriesSummaryRes.dto';
+import { NoticesSummaryResDto } from '../../../extensions/management/support/dto/response/noticesSummaryRes.dto';
+import { ReleasesResDto } from '../../../extensions/management/support/dto/response/releasesRes.dto';
+import { VersionsResDto } from '../../../extensions/management/support/dto/response/versionsRes.dto';
+import { ItemsResDto } from '../../../extensions/user/home/dto/response/itemsRes.dto';
+import { ThemesResDto } from '../../../extensions/user/home/dto/response/themesRes.dto';
+import { CronLogsResDto } from '../../../utils/cron/dto/response/cronLogsRes.dto';
+import { SummaryEssaysResDto } from '../../essay/dto/response/SummaryEssaysRes.dto';
 import { ProfileImageReqDto } from '../../user/dto/request/profileImageReq.dto';
 import { ProfileImageUrlResDto } from '../../user/dto/response/profileImageUrlRes.dto';
 import { AdminService } from '../core/admin.service';
-
 import { AdminLoginReqDto } from '../dto/request/adminLoginReq.dto';
+import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
 import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 import { CreateAdminReqDto } from '../dto/request/createAdminReq.dto';
+import { CreateItemReqDto } from '../dto/request/createItemReq.dto';
+import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
+import { CreateThemeReqDto } from '../dto/request/createThemeReq.dto';
+import { InquiryAnswerReqDto } from '../dto/request/inquiryAnswerReq.dto';
 import { ProcessReqDto } from '../dto/request/processReq.dto';
-import { DashboardResDto } from '../dto/response/dashboardRes.dto';
-import { ReportsResDto } from '../dto/response/reportsRes.dto';
-import { ReviewsResDto } from '../dto/response/reviewsRes.dto';
-import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
-import { HistoriesResDto } from '../dto/response/historiesRes.dto';
-import { SavedAdminResDto } from '../dto/response/savedAdminRes.dto';
-import { UserDetailResDto } from '../dto/response/userDetailRes.dto';
-import { UsersResDto } from '../dto/response/usersRes.dto';
+import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
 import { UpdateFullUserReqDto } from '../dto/request/updateFullUserReq.dto';
+import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
+import { UpdateReleaseReqDto } from '../dto/request/updateReleaseReq.dto';
+import { AdminResDto } from '../dto/response/adminRes.dto';
+import { AdminsResDto } from '../dto/response/adminsRes.dto';
+import { DashboardResDto } from '../dto/response/dashboardRes.dto';
+import { DetailReviewResDto } from '../dto/response/detailReviewRes.dto';
 import { EssaysInfoResDto } from '../dto/response/essaysInfoRes.dto';
 import { FullEssayResDto } from '../dto/response/fullEssayRes.dto';
-import { UpdateEssayStatusReqDto } from '../dto/request/updateEssayStatusReq.dto';
-import { AdminResDto } from '../dto/response/adminRes.dto';
-import { DetailReviewResDto } from '../dto/response/detailReviewRes.dto';
-import { AdminRegisterReqDto } from '../dto/request/adminRegisterReq.dto';
-import { CreateNoticeReqDto } from '../dto/request/createNoticeReq.dto';
-import { UpdateNoticeReqDto } from '../dto/request/updateNoticeReq.dto';
-import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
-import { NoticesSummaryResDto } from '../../../extensions/management/support/dto/response/noticesSummaryRes.dto';
-import { InquiryAnswerReqDto } from '../dto/request/inquiryAnswerReq.dto';
 import { FullInquiryResDto } from '../dto/response/fullInquiryRes.dto';
-import { UpdateReleaseReqDto } from '../dto/request/updateReleaseReq.dto';
-import { InquiriesSummaryResDto } from '../../../extensions/management/support/dto/response/inquiriesSummaryRes.dto';
-import { ReleasesResDto } from '../../../extensions/management/support/dto/response/releasesRes.dto';
-import { AdminsResDto } from '../dto/response/adminsRes.dto';
-import { CronLogsResDto } from '../../../utils/cron/dto/response/cronLogsRes.dto';
-import { GeulroquisResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisRes.dto';
-import { GeulroquisCountResDto } from '../../../extensions/essay/geulroquis/dto/response/geulroquisCountRes.dto';
-import { VersionsResDto } from '../../../extensions/management/support/dto/response/versionsRes.dto';
-import { UpdateVersionReqDto } from '../../../extensions/management/support/dto/request/updateVersionReq.dto';
-import { ServerStatus } from '../../../../common/types/enum.types';
+import { HistoriesResDto } from '../dto/response/historiesRes.dto';
+import { NoticeWithProcessorResDto } from '../dto/response/noticeWithProcessorRes.dto';
+import { ReportDetailResDto } from '../dto/response/reportDetailRes.dto';
+import { ReportsResDto } from '../dto/response/reportsRes.dto';
+import { ReviewsResDto } from '../dto/response/reviewsRes.dto';
+import { SavedAdminResDto } from '../dto/response/savedAdminRes.dto';
 import { ServerStatusResDto } from '../dto/response/serverStatusRes.dto';
-import { CreateThemeReqDto } from '../dto/request/createThemeReq.dto';
-import { CreateItemReqDto } from '../dto/request/createItemReq.dto';
-import { ItemsResDto } from '../../../extensions/user/home/dto/response/itemsRes.dto';
-import { ThemesResDto } from '../../../extensions/user/home/dto/response/themesRes.dto';
-import { SummaryEssaysResDto } from '../../essay/dto/response/SummaryEssaysRes.dto';
+import { UserDetailResDto } from '../dto/response/userDetailRes.dto';
+import { UsersResDto } from '../dto/response/usersRes.dto';
 
 @ApiTags('Admin-auth')
 @Controller('admin-auth')
@@ -183,7 +182,7 @@ export class AdminDashboardController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return this.adminService.countEssaysByDailyThisMonth(year, month);
+    return this.adminService.countEssaysByDailyThisMonth(year!, month!);
   }
 
   @Get('stats/essays/monthly')
@@ -251,7 +250,7 @@ export class AdminDashboardController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return this.adminService.countDailyRegistrations(year, month);
+    return this.adminService.countDailyRegistrations(year!, month!);
   }
 
   @Get('stats/users/monthly')
@@ -282,7 +281,7 @@ export class AdminDashboardController {
     },
   })
   async getMonthlyRegistrations(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countMonthlyRegistrations(year);
+    return this.adminService.countMonthlyRegistrations(year!);
   }
 
   @Get('stats/payments/daily')
@@ -318,7 +317,7 @@ export class AdminDashboardController {
     @Query('year', OptionalParseIntPipe) year?: number,
     @Query('month', OptionalParseIntPipe) month?: number,
   ) {
-    return this.adminService.countMonthlySubscriptionPayments(year, month);
+    return this.adminService.countMonthlySubscriptionPayments(year!, month!);
   }
 
   @Get('stats/payments/monthly')
@@ -349,7 +348,7 @@ export class AdminDashboardController {
     },
   })
   async getMonthlySubscriptionPayments(@Query('year', OptionalParseIntPipe) year?: number) {
-    return this.adminService.countYearlySubscriptionPayments(year);
+    return this.adminService.countYearlySubscriptionPayments(year!);
   }
 }
 
@@ -383,7 +382,7 @@ export class AdminInfoController {
   @ApiResponse({ type: AdminResDto })
   @ApiBody({ type: AdminUpdateReqDto })
   async updateAdmin(@Req() req: ExpressRequest, @Body() data: AdminUpdateReqDto) {
-    return this.adminService.updateAdmin(req.user.id, data);
+    return this.adminService.updateAdmin(req.user!.id!, data);
   }
 
   @Post('images')
@@ -407,7 +406,7 @@ export class AdminInfoController {
   @ApiBody({ type: ProfileImageReqDto })
   @UseInterceptors(FileInterceptor('image'))
   async saveProfileImage(@Req() req: ExpressRequest, @UploadedFile() file: Express.Multer.File) {
-    return this.adminService.saveProfileImage(req.user.id, file);
+    return this.adminService.saveProfileImage(req.user!.id!, file);
   }
 
   @Delete('images')
@@ -428,7 +427,7 @@ export class AdminInfoController {
   })
   @ApiResponse({ status: 200 })
   async deleteProfileImage(@Req() req: ExpressRequest) {
-    return this.adminService.deleteProfileImage(req.user.id);
+    return this.adminService.deleteProfileImage(req.user!.id!);
   }
 
   @Get()
@@ -493,7 +492,7 @@ export class AdminInfoController {
   })
   @ApiResponse({ status: 200, type: AdminResDto })
   async getMyAdmin(@Req() req: ExpressRequest) {
-    return this.adminService.getAdmin(req.user.id);
+    return this.adminService.getAdmin(req.user!.id!);
   }
 
   @Get(':adminId')
@@ -612,7 +611,7 @@ export class AdminTaskController {
     @Param('essayId', ParseIntPipe) essayId: number,
     @Body() processReqDto: ProcessReqDto,
   ) {
-    return this.adminService.processReports(req.user.id, essayId, processReqDto);
+    return this.adminService.processReports(req.user!.id!, essayId, processReqDto);
   }
 
   @Get('reviews')
@@ -696,7 +695,7 @@ export class AdminTaskController {
     @Param('reviewId', ParseIntPipe) reviewId: number,
     @Body() processReqDto: ProcessReqDto,
   ) {
-    return this.adminService.processReview(req.user.id, reviewId, processReqDto);
+    return this.adminService.processReview(req.user!.id!, reviewId, processReqDto);
   }
 }
 
@@ -724,7 +723,7 @@ export class AdminSupportController {
   @ApiResponse({ status: 201, type: NoticeWithProcessorResDto })
   @ApiBody({ type: CreateNoticeReqDto })
   async createNotice(@Req() req: ExpressRequest, @Body() data: CreateNoticeReqDto) {
-    return this.adminService.createNotice(req.user.id, data);
+    return this.adminService.createNotice(req.user!.id!, data);
   }
 
   @Put('notices/:noticeId')
@@ -752,7 +751,7 @@ export class AdminSupportController {
     @Param('noticeId', ParseIntPipe) noticeId: number,
     @Body() data: UpdateNoticeReqDto,
   ) {
-    return this.adminService.updateNotice(req.user.id, noticeId, data);
+    return this.adminService.updateNotice(req.user!.id!, noticeId, data);
   }
 
   @Delete('notices/:noticeId')
@@ -773,7 +772,7 @@ export class AdminSupportController {
     @Req() req: ExpressRequest,
     @Param('noticeId', ParseIntPipe) noticeId: number,
   ) {
-    return this.adminService.deleteNotice(req.user.id, noticeId);
+    return this.adminService.deleteNotice(req.user!.id!, noticeId);
   }
 
   @Get('notices')
@@ -894,7 +893,7 @@ export class AdminSupportController {
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
     @Body() data: InquiryAnswerReqDto,
   ) {
-    return this.adminService.createAnswer(req.user.id, inquiryId, data.answer);
+    return this.adminService.createAnswer(req.user!.id!, inquiryId, data.answer);
   }
 
   @Post('releases')
@@ -918,7 +917,7 @@ export class AdminSupportController {
   @ApiResponse({ status: 201 })
   @ApiBody({ type: UpdateReleaseReqDto })
   async createRelease(@Req() req: ExpressRequest, @Body() data: UpdateReleaseReqDto) {
-    return this.adminService.createRelease(req.user.id, data.content);
+    return this.adminService.createRelease(req.user!.id!, data.content);
   }
 
   @Put('releases/:releaseId')
@@ -949,7 +948,7 @@ export class AdminSupportController {
     @Param('releaseId', ParseIntPipe) releaseId: number,
     @Body() data: UpdateReleaseReqDto,
   ) {
-    return this.adminService.updateRelease(req.user.id, releaseId, data.content);
+    return this.adminService.updateRelease(req.user!.id!, releaseId, data.content);
   }
 
   @Delete('releases/:releaseId')
@@ -974,7 +973,7 @@ export class AdminSupportController {
     @Req() req: ExpressRequest,
     @Param('releaseId', ParseIntPipe) releaseId: number,
   ) {
-    return this.adminService.deleteRelease(req.user.id, releaseId);
+    return this.adminService.deleteRelease(req.user!.id!, releaseId);
   }
 
   @Get('releases')
@@ -1053,9 +1052,9 @@ export class AdminManagementController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'filter', enum: ['all', 'monitored', 'activeSubscription'], required: false })
   async getUsers(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
-    @Query('filter') filter?: string,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('filter') filter: string,
   ) {
     return this.adminService.getUsers(filter, page, limit);
   }
@@ -1129,7 +1128,7 @@ export class AdminManagementController {
     @Param('userId', ParseIntPipe) userId: number,
     @Body() data: UpdateFullUserReqDto,
   ) {
-    return this.adminService.updateUser(req.user.id, userId, data);
+    return this.adminService.updateUser(req.user!.id!, userId, data);
   }
 
   @Get('essays/search')
@@ -1190,8 +1189,8 @@ export class AdminManagementController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   async getEssays(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
     return this.adminService.getFullEssays(page, limit);
   }
@@ -1246,7 +1245,7 @@ export class AdminManagementController {
     @Param('essayId', ParseIntPipe) essayId: number,
     @Body() data: UpdateEssayStatusReqDto,
   ) {
-    return this.adminService.updateEssayStatus(req.user.id, essayId, data);
+    return this.adminService.updateEssayStatus(req.user!.id!, essayId, data);
   }
 }
 
@@ -1265,7 +1264,7 @@ export class AdminOfficeController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(10)) limit: number,
   ) {
-    return this.adminService.getCronLogs(req.user.id, page, limit, key);
+    return this.adminService.getCronLogs(req.user!.id!, page, limit, key);
   }
 
   @Get('histories')
@@ -1294,10 +1293,10 @@ export class AdminOfficeController {
   @ApiQuery({ name: 'target', required: false })
   @ApiQuery({ name: 'action', required: false })
   async getHistories(
-    @Query('page', new PagingParseIntPipe(1)) page?: number,
-    @Query('limit', new PagingParseIntPipe(10)) limit?: number,
-    @Query('target') target?: string,
-    @Query('action') action?: string,
+    @Query('page', new PagingParseIntPipe(1)) page: number,
+    @Query('limit', new PagingParseIntPipe(10)) limit: number,
+    @Query('target') target: string,
+    @Query('action') action: string,
   ) {
     return this.adminService.getHistories(page, limit, target, action);
   }
@@ -1595,7 +1594,7 @@ export class AdminRootController {
   @ApiBody({ type: CreateAdminReqDto })
   @ApiResponse({ status: 200, type: SavedAdminResDto })
   async createAdmin(@Req() req: ExpressRequest, @Body() data: CreateAdminReqDto) {
-    return this.adminService.createAdmin(req.user.id, data);
+    return this.adminService.createAdmin(req.user!.id!, data);
   }
 
   @Put(':adminId')
@@ -1628,7 +1627,7 @@ export class AdminRootController {
     @Param('adminId', ParseIntPipe) adminId: number,
     @Query('activated', ParseBoolPipe) activated: boolean,
   ) {
-    return this.adminService.activationSettings(req.user.id, adminId, activated);
+    return this.adminService.activationSettings(req.user!.id!, adminId, activated);
   }
 
   @Post('server/status')
@@ -1650,27 +1649,27 @@ export class AdminRootController {
     type: ServerStatus.OPEN || ServerStatus.CLOSED || ServerStatus.MAINTENANCE,
   })
   async saveServerStatus(@Req() req: ExpressRequest, @Body('status') status: string) {
-    return await this.adminService.saveServerStatus(req.user.id, status);
+    return await this.adminService.saveServerStatus(req.user!.id!, status);
   }
 
   @Delete(':adminId')
   async deleteAdmin(@Req() req: ExpressRequest, @Param('adminId', ParseIntPipe) adminId: number) {
-    return this.adminService.deleteAdmin(req.user.id, adminId);
+    return this.adminService.deleteAdmin(req.user!.id!, adminId);
   }
 
   @Delete('users/:userId')
   async deleteUser(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
-    return this.adminService.deleteUser(req.user.id, userId);
+    return this.adminService.deleteUser(req.user!.id!, userId);
   }
 
   @Post('clear/verify')
   async requestClearDatabase(@Req() req: ExpressRequest) {
-    return this.adminService.requestClearDatabase(req.user.id);
+    return this.adminService.requestClearDatabase(req.user!.id!);
   }
 
   @Post('clear/geulroquis')
   async resetGeulroquis(@Req() req: ExpressRequest) {
-    return this.adminService.resetGeulroquis(req.user.id);
+    return this.adminService.resetGeulroquis(req.user!.id!);
   }
 
   @Get('clear/init')
@@ -1693,11 +1692,11 @@ export class AdminRootController {
 
   @Delete('clear/users')
   async deleteAllUser(@Req() req: ExpressRequest) {
-    return this.adminService.deleteAllUser(req.user.id);
+    return this.adminService.deleteAllUser(req.user!.id!);
   }
 
   @Delete('clear/device')
   async deleteAllDevice(@Req() req: ExpressRequest) {
-    return this.adminService.deleteAllDevice(req.user.id);
+    return this.adminService.deleteAllDevice(req.user!.id!);
   }
 }

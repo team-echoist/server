@@ -295,6 +295,8 @@ export class AdminService {
 
   async getReportDetails(essayId: number) {
     const essayWithReports = await this.essayRepository.getReportDetails(essayId);
+    if (!essayWithReports)
+      throw new HttpException('리포트를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     return this.toolService.transformToDto(ReportDetailResDto, {
       ...essayWithReports,
@@ -369,6 +371,7 @@ export class AdminService {
 
   async processBatchReports(reports: ReportQueue[], adminId: number, data: ProcessReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     for (const report of reports) {
       await this.processReport(report);
@@ -469,6 +472,9 @@ export class AdminService {
   async processReview(adminId: number, reviewId: number, data: ProcessReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
     const review = await this.adminRepository.getReview(reviewId);
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    if (!review) throw new HttpException('리뷰를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     review.processed = true;
 
     this.handleReviewAction(review, data.actionType);
@@ -547,9 +553,8 @@ export class AdminService {
   async updateUser(adminId: number, userId: number, data: UpdateFullUserReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
     const user = await this.userRepository.findUserById(userId);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     await this.userService.updateUser(userId, data);
 
@@ -575,6 +580,8 @@ export class AdminService {
 
   async getFullEssay(essayId: number) {
     const essay = await this.essayRepository.findFullEssay(essayId);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     if (essay.author.deletedDate) {
       essay.author.nickname = 'deleted_user';
     }
@@ -585,9 +592,8 @@ export class AdminService {
   async updateEssayStatus(adminId: number, essayId: number, data: UpdateEssayStatusReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
     const essay = await this.essayRepository.findFullEssay(essayId);
-    if (!essay) {
-      throw new NotFoundException(`Essay with ID ${essayId} not found`);
-    }
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    if (!essay) throw new HttpException('에세이 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const actionType = this.determineEssayActionType(essay, data);
     const newHistory = this.createProcessedHistory(actionType, 'essay', essay, admin);
@@ -628,7 +634,7 @@ export class AdminService {
 
   async validateAdmin(email: string, password: string) {
     const admin = await this.adminRepository.findByEmail(email);
-    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
+    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated) {
       return admin;
     }
     return null;
@@ -636,7 +642,7 @@ export class AdminService {
 
   async validateSwagger(name: string, password: string) {
     const admin = await this.adminRepository.findByName(name);
-    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated === true) {
+    if (admin && (await bcrypt.compare(password, admin.password)) && admin.activated) {
       return admin;
     }
     return false;
@@ -658,8 +664,8 @@ export class AdminService {
     return !admin ? null : admin;
   }
 
-  async getAdmins(page: number, limit: number, activated?: boolean) {
-    const { admins, total } = await this.adminRepository.findAdmins(activated, page, limit);
+  async getAdmins(page: number, limit: number, activated: boolean | undefined) {
+    const { admins, total } = await this.adminRepository.findAdmins(page, limit, activated);
 
     const totalPage: number = Math.ceil(total / limit);
 
@@ -675,6 +681,8 @@ export class AdminService {
 
   async updateAdmin(adminId: number, data: AdminUpdateReqDto) {
     const admin = await this.adminRepository.findAdmin(adminId);
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 12);
     }
@@ -684,7 +692,8 @@ export class AdminService {
 
   async saveProfileImage(adminId: number, file: Express.Multer.File) {
     const admin = await this.adminRepository.findAdmin(adminId);
-    const newExt = file.originalname.split('.').pop();
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    const newExt = file.originalname.split('.').pop() ?? '';
 
     let fileName: any;
     if (admin.profileImage) {
@@ -704,7 +713,7 @@ export class AdminService {
 
   async deleteProfileImage(adminId: number) {
     const admin = await this.adminRepository.findAdmin(adminId);
-
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     if (!admin.profileImage) {
       throw new NotFoundException('No profile image to delete');
     }
@@ -713,7 +722,7 @@ export class AdminService {
     const fileName = `profile/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
-    admin.profileImage = null;
+    admin.profileImage = '';
     await this.adminRepository.saveAdmin(admin);
 
     return { message: 'Profile image deleted successfully' };
@@ -721,15 +730,16 @@ export class AdminService {
 
   async activationSettings(rootAdminId: number, adminId: number, activated: boolean) {
     const rootAdmin = await this.adminRepository.findAdmin(rootAdminId);
-    if (rootAdmin.id !== 1) {
+    if (rootAdmin!.id !== 1) {
       throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
     }
     const admin = await this.adminRepository.findAdmin(adminId);
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     admin.activated = activated;
 
     const updatedAdmin = await this.adminRepository.saveAdmin(admin);
 
-    if (activated === true) await this.mailService.sendActiveComplete(admin.email);
+    if (activated) await this.mailService.sendActiveComplete(admin.email);
 
     return this.toolService.transformToDto(AdminResDto, updatedAdmin);
   }
@@ -758,7 +768,7 @@ export class AdminService {
   }
 
   async getInactiveAdmins(page: number, limit: number) {
-    const admins = await this.adminRepository.findAdmins(false, page, limit);
+    const admins = await this.adminRepository.findAdmins(page, limit, false);
 
     const adminsDto = this.toolService.transformToDto(AdminResDto, admins);
 
@@ -975,10 +985,10 @@ export class AdminService {
 
   async saveGeulroquisImages(files: Express.Multer.File[]) {
     const uploadPromises = files.map(async (file) => {
-      const newExt = file.originalname.split('.').pop();
+      const newExt = file.originalname.split('.').pop() ?? '';
       const imageName = this.toolService.getUUID();
       const fileName = `geulroquis/${imageName}.${newExt}`;
-      return await this.awsService.geulroquisUploadToS3(fileName, file, newExt);
+      return await this.awsService.imageUploadToS3(fileName, file, newExt);
     });
 
     const imageUrls = await Promise.all(uploadPromises);
@@ -1112,10 +1122,10 @@ export class AdminService {
 
   async resetRootAdmin() {
     const root = await this.adminRepository.findAdmin(1);
-    const hashedPassword = await bcrypt.hash(this.configService.get<string>('ROOT_PASSWORD'), 12);
+    const hashedPassword = await bcrypt.hash(this.configService.get<string>('ROOT_PASSWORD')!, 12);
 
-    root.email = this.configService.get<string>('ROOT_EMAIL');
-    root.name = this.configService.get<string>('ROOT_NAME');
+    root.email = this.configService.get<string>('ROOT_EMAIL')!;
+    root.name = this.configService.get<string>('ROOT_NAME')!;
     root.password = hashedPassword;
     root.activated = true;
     await this.adminRepository.saveAdmin(root);
@@ -1152,11 +1162,11 @@ export class AdminService {
   }
 
   async login(req: ExpressRequest) {
-    const accessPayload = { username: req.user.email, sub: req.user.id };
-    const refreshPayload = { username: req.user.email, sub: req.user.id, device: req.device };
+    const accessPayload = { username: req.user!.email, sub: req.user!.id };
+    const refreshPayload = { username: req.user!.email, sub: req.user!.id, device: req.device };
 
     const refreshToken = await this.generateAdminRefreshToken(refreshPayload);
-    await this.redis.set(`${refreshToken}:${req.user.id}:admin`, 'used', 'EX', 29 * 60 + 50);
+    await this.redis.set(`${refreshToken}:${req.user!.id}:admin`, 'used', 'EX', 29 * 60 + 50);
 
     return {
       accessToken: await this.generateAdminAccessToken(accessPayload),
@@ -1170,7 +1180,7 @@ export class AdminService {
     await this.redis.set(token, '이게뭔일이람', 'EX', 600);
 
     await this.mailService.rootInitAuthenticationEmail(
-      this.configService.get<string>('ROOT_EMAIL'),
+      this.configService.get<string>('ROOT_EMAIL')!,
       token,
     );
   }

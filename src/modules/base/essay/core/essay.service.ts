@@ -69,7 +69,7 @@ export class EssayService {
     }
     console.log(data);
 
-    const user = await this.userService.fetchUserEntityById(requester.id);
+    const user = await this.userService.fetchUserEntityById(requester.id!);
     const tags = (await this.tagService.getTags(data.tags)) || [];
     let device = await this.supportService.findDevice(user, reqDevice);
 
@@ -127,9 +127,9 @@ export class EssayService {
 
     const savedMonitoredEssay = await this.essayRepository.saveEssay(adjustedData);
     if (data.status !== EssayStatus.PRIVATE) {
-      await this.reviewService.saveReviewRequest(user, savedMonitoredEssay, data);
-      await this.alertService.createReviewAlerts(savedMonitoredEssay, data.status);
-      await this.alertService.sendPushReviewAlert(savedMonitoredEssay);
+      await this.reviewService.saveReviewRequest(user, savedMonitoredEssay!, data);
+      await this.alertService.createReviewAlerts(savedMonitoredEssay!, data.status);
+      await this.alertService.sendPushReviewAlert(savedMonitoredEssay!);
     }
 
     return this.utilsService.transformToDto(EssayResDto, savedMonitoredEssay);
@@ -137,15 +137,17 @@ export class EssayService {
 
   @Transactional()
   async updateEssay(requester: Express.User, essayId: number, data: UpdateEssayReqDto) {
-    const user = await this.userService.fetchUserEntityById(requester.id);
+    const user = await this.userService.fetchUserEntityById(requester.id!);
 
     const essay = await this.essayRepository.findEssayById(essayId);
-    await this.checkEssayPermissions(essay, requester.id);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
+    await this.checkEssayPermissions(essay, requester.id!);
     await this.checkIfEssayUnderReview(essayId, data);
 
     let message = '';
     if (requester.status === UserStatus.MONITORED && data.status !== EssayStatus.PRIVATE) {
-      await this.reviewService.saveReviewRequest(user, essay, data);
+      await this.reviewService.saveReviewRequest(user, essay!, data);
       message = '정책 위반으로 인해 요청이 검토됩니다.';
     }
 
@@ -202,9 +204,10 @@ export class EssayService {
 
     const totalPage: number = Math.ceil(total / limit);
 
-    let currentStoryName: string;
-    if (storyId !== undefined)
-      currentStoryName = await this.utilsService.findStoryNameInEssays(essays);
+    let currentStoryName: string | null;
+    storyId !== undefined
+      ? (currentStoryName = await this.utilsService.findStoryNameInEssays(essays))
+      : (currentStoryName = null);
 
     essays.forEach((essay) => {
       essay.content = this.utilsService.extractPartContent(essay.content);
@@ -234,11 +237,11 @@ export class EssayService {
   async applyCommonEssayQueryLogic(req: ExpressRequest, essay: Essay) {
     if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
-    const user = await this.userService.fetchUserEntityById(req.user.id);
+    const user = await this.userService.fetchUserEntityById(req.user!.id!);
     const isBookmarked = !!(await this.bookmarkService.getBookmark(user, essay));
 
-    if (essay.author && req.user.id !== essay.author.id) {
-      await this.handleNonAuthorView(req.user.id, essay);
+    if (essay.author && req.user!.id! !== essay.author.id) {
+      await this.handleNonAuthorView(req.user!.id!, essay);
     }
 
     const newEssayData = {
@@ -253,6 +256,7 @@ export class EssayService {
   @Transactional()
   async getEssay(req: ExpressRequest, essayId: number, pageType: PageType, storyId?: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     let essayDto: EssayResDto | EssayResDto[];
     if (pageType === PageType.BURIAL) {
@@ -265,8 +269,8 @@ export class EssayService {
       pageType === PageType.BURIAL
         ? null
         : pageType === PageType.RECOMMEND
-          ? await this.getRecommendEssays(req.user.id, 6)
-          : await this.previousEssay(req.user.id, essay, pageType, storyId);
+          ? await this.getRecommendEssays(req.user!.id!, 6)
+          : await this.previousEssay(req.user!.id!, essay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
@@ -288,23 +292,32 @@ export class EssayService {
           currentEssay.id,
         );
         break;
+
       case PageType.PRIVATE:
-        if (currentEssay.author.id !== req.user.id) {
+        if (currentEssay.author.id !== req.user!.id!) {
           throw new HttpException(
             '비공개 다음 글은 본인만 조회할 수 있습니다.',
             HttpStatus.BAD_REQUEST,
           );
         }
-        nextEssay = await this.essayRepository.findNextEssayByPrivate(req.user.id, currentEssay.id);
+        nextEssay = await this.essayRepository.findNextEssayByPrivate(
+          req.user!.id!,
+          currentEssay.id,
+        );
         break;
+
       case PageType.STORY:
-        const excludePrivate = currentEssay.author.id !== req.user.id;
+        if (!storyId)
+          throw new HttpException('스토리 아이디가 필요합니다.', HttpStatus.BAD_REQUEST);
+
+        const excludePrivate = currentEssay.author.id !== req.user!.id!;
         nextEssay = await this.essayRepository.findNextEssayByStory(
           storyId,
           currentEssay.id,
           excludePrivate,
         );
         break;
+
       default:
         throw new HttpException('잘못된 페이지 타입입니다.', HttpStatus.BAD_REQUEST);
     }
@@ -315,7 +328,7 @@ export class EssayService {
 
     const essayDto = await this.applyCommonEssayQueryLogic(req, nextEssay);
 
-    const anotherEssays = await this.previousEssay(req.user.id, nextEssay, pageType, storyId);
+    const anotherEssays = await this.previousEssay(req.user!.id!, nextEssay, pageType, storyId);
 
     return { essay: essayDto, anotherEssays: anotherEssays };
   }
@@ -483,7 +496,7 @@ export class EssayService {
   @Transactional()
   async saveThumbnail(file: Express.Multer.File, essayId?: number) {
     const fileName = await this.getFileNameByThumbnail(essayId);
-    const newExt = file.originalname.split('.').pop();
+    const newExt = file.originalname.split('.').pop() ?? '';
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
 
@@ -492,7 +505,7 @@ export class EssayService {
 
   async deleteThumbnail(essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
-    if (!essay.thumbnail) {
+    if (!essay || !essay.thumbnail) {
       throw new HttpException('삭제할 썸네일이 없습니다.', HttpStatus.NOT_FOUND);
     }
 
@@ -500,7 +513,7 @@ export class EssayService {
     const fileName = `images/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
-    essay.thumbnail = null;
+    essay.thumbnail = '';
     await this.essayRepository.saveEssay(essay);
 
     return { message: 'Thumbnail deleted successfully' };
@@ -544,6 +557,8 @@ export class EssayService {
     if (recentEssayIds.length > 0) {
       const recentTagObjects = await this.essayRepository.getRecentTags(recentEssayIds);
       recentTags = recentTagObjects.map((tag) => tag.tagId);
+    } else {
+      recentTags = [];
     }
 
     return recentTags;
@@ -658,6 +673,7 @@ export class EssayService {
   @Transactional()
   async deleteEssayStory(userId: number, essayId: number) {
     const essay = await this.essayRepository.findEssayById(essayId);
+    if (!essay) throw new HttpException('에세이를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     await this.checkEssayPermissions(essay, userId);
 
@@ -701,9 +717,6 @@ export class EssayService {
     limit: number,
     userId?: number,
   ) {
-    if (typeof keyword !== 'string') {
-      throw new HttpException('잘못된 키워드 유형', HttpStatus.BAD_REQUEST);
-    }
     let cacheKey = `search:${pageType}:${keyword}:${page}:${limit}`;
 
     if (pageType !== PageType.PRIVATE && pageType !== PageType.ANY) {
@@ -719,7 +732,7 @@ export class EssayService {
     switch (pageType) {
       case PageType.PRIVATE:
         ({ essays, total } = await this.essayRepository.searchPrivateEssays(
-          userId,
+          userId!,
           searchKeyword,
           page,
           limit,

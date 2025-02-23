@@ -10,11 +10,11 @@ import { UpdateEssayDto } from '../dto/updateEssay.dto';
 export interface IEssayRepository {
   totalEssayCount(): Promise<number>;
 
-  findEssayById(essayId: number): Promise<Essay>;
+  findEssayById(essayId: number): Promise<Essay | null>;
 
-  findPublishedEssayById(essayId: number): Promise<Essay>;
+  findPublishedEssayById(essayId: number): Promise<Essay | null>;
 
-  saveEssay(data: SaveEssayDto): Promise<Essay>;
+  saveEssay(data: SaveEssayDto): Promise<Essay | null>;
 
   saveEssays(essays: Essay[]): Promise<Essay[]>;
 
@@ -59,7 +59,7 @@ export interface IEssayRepository {
     createdDate: Date,
   ): Promise<Essay[]>;
 
-  findNextEssayByPublic(authorId: number, currentEssayId: number): Promise<Essay>;
+  findNextEssayByPublic(authorId: number, currentEssayId: number): Promise<Essay | null>;
 
   findNextEssayByPrivate(userId: number, currentEssayId: number): Promise<Essay | null>;
 
@@ -79,11 +79,11 @@ export interface IEssayRepository {
 
   countEssaysByMonthlyThisYear(year: number): Promise<any[]>;
 
-  getReportDetails(essayId: number): Promise<Essay>;
+  getReportDetails(essayId: number): Promise<Essay | null>;
 
   findFullEssays(page: number, limit: number): Promise<{ essays: Essay[]; total: number }>;
 
-  findFullEssay(essayId: number): Promise<Essay>;
+  findFullEssay(essayId: number): Promise<Essay | null>;
 
   deleteAllEssay(userId: number): Promise<any>;
 
@@ -127,7 +127,7 @@ export interface IEssayRepository {
 
   handleUpdateEssayStatus(userIds: number[]): Promise<UpdateResult>;
 
-  findAggregateById(essayId: number): Promise<Aggregate>;
+  findAggregateById(essayId: number): Promise<Aggregate | null>;
 
   saveAggregate(aggregate: Aggregate): Promise<Aggregate>;
 

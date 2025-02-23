@@ -18,7 +18,7 @@ declare global {
       createdAt?: Date;
       updatedAt?: Date;
       deletedAt?: Date;
-      deactivationDate?: Date;
+      deactivationDate?: Date | null;
       isFirst?: boolean;
       tokenVersion?: number;
     }
