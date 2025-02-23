@@ -4,19 +4,19 @@
     "target": "ES2021",
     "outDir": "./dist",
     "baseUrl": "./",
-    "sourceMap": true,
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
+    "sourceMap": true, // 소스맵 파일 생성
+    "declaration": true, // 컴파일된 JS 파일에 대한 .d.ts 파일 생성
+    "removeComments": true, // 컴파일된 JS 파일에서 주석을 제거
+    "emitDecoratorMetadata": true, // 런타임에서 데코레이터에 대한 메타데이터를 추가
+    "experimentalDecorators": true, // ECMAScript 표준에 없는 데코레이터 기능을 활성화
+    "allowSyntheticDefaultImports": true, // default import 허용
+    "incremental": true, // 이전 컴파일 결과를 저장하여 재컴파일 속도를 향상
+    "skipLibCheck": true, // 라이브러리 타입 검사 생략
+    "strictNullChecks": true, // null과 undefined를 엄격하게 검사
+    "noImplicitAny": true, // 타입이 명시되지 않은 경우 암시적으로 any를 허용하지 않음
+    "strictBindCallApply": true, // .bind(), .call(), .apply() 사용 시 타입을 엄격하게 검사
+    "forceConsistentCasingInFileNames": true, // 파일 이름의 대소문자 일관성을 강제
+    "noFallthroughCasesInSwitch": true, // switch 문에서 break가 빠지면 오류를 발생시킴
   },
 	  "include": ["src/**/*.ts", "custom_typings/**/*.ts"]
 }

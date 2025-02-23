@@ -41,7 +41,7 @@ export class HomeCommandController {
   })
   @ApiResponse({ status: 201 })
   async buyTheme(@Req() req: ExpressRequest, @Param('themeId', ParseIntPipe) themeId: number) {
-    return this.commandBus.execute(new BuyThemeCommand(req.user.id, themeId));
+    return this.commandBus.execute(new BuyThemeCommand(req.user!.id!, themeId));
   }
 
   @Post('themes/activate/:themeId')
@@ -63,7 +63,7 @@ export class HomeCommandController {
   })
   @ApiResponse({ status: 200 })
   async changeTheme(@Req() req: ExpressRequest, @Param('themeId', ParseIntPipe) themeId: number) {
-    return this.commandBus.execute(new ChangeThemeCommand(req.user.id, themeId));
+    return this.commandBus.execute(new ChangeThemeCommand(req.user!.id!, themeId));
   }
 
   @Post('items/buy/:itemId')
@@ -87,7 +87,7 @@ export class HomeCommandController {
   })
   @ApiResponse({ status: 201 })
   async buyItem(@Req() req: ExpressRequest, @Param('itemId', ParseIntPipe) itemId: number) {
-    return this.commandBus.execute(new BuyItemCommand(req.user.id, itemId));
+    return this.commandBus.execute(new BuyItemCommand(req.user!.id!, itemId));
   }
 
   @Post('items/activate/:itemId')
@@ -113,6 +113,6 @@ export class HomeCommandController {
     `,
   })
   async activateItem(@Req() req: ExpressRequest, @Param('itemId', ParseIntPipe) itemId: number) {
-    return this.commandBus.execute(new ActivateItemCommand(req.user.id, itemId));
+    return this.commandBus.execute(new ActivateItemCommand(req.user!.id!, itemId));
   }
 }

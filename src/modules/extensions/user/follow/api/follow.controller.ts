@@ -50,7 +50,7 @@ export class FollowController {
     @Query('page', new PagingParseIntPipe(1)) page: number,
     @Query('limit', new PagingParseIntPipe(20)) limit: number,
   ) {
-    return this.followService.getFollowings(req.user.id, page, limit);
+    return this.followService.getFollowings(req.user!.id!, page, limit);
   }
 
   @Post(':userId')
@@ -77,7 +77,7 @@ export class FollowController {
   })
   @ApiResponse({ status: 201 })
   async follow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
-    return this.followService.follow(req.user.id, userId);
+    return this.followService.follow(req.user!.id!, userId);
   }
 
   @Delete(':userId')
@@ -102,6 +102,6 @@ export class FollowController {
   })
   @ApiResponse({ status: 204 })
   async upFollow(@Req() req: ExpressRequest, @Param('userId', ParseIntPipe) userId: number) {
-    return this.followService.unFollow(req.user.id, userId);
+    return this.followService.unFollow(req.user!.id!, userId);
   }
 }

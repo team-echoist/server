@@ -5,7 +5,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import * as cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import * as dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import * as express from 'express';
@@ -44,9 +44,9 @@ async function bootstrap() {
     'https://devtools.nestjs.com',
   ];
 
-  const corsOptions = {
+  const corsOptions: CorsOptions = {
     origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin) || !origin) {
+      if (!origin || allowedOrigins.includes(origin) || !origin) {
         callback(null, origin);
       } else {
         callback(new Error('Not allowed by CORS'));
@@ -64,7 +64,7 @@ async function bootstrap() {
     ],
     methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
     credentials: true,
-    exposeHeaders: ['x-access-token', 'x-refresh-token'],
+    exposedHeaders: ['x-access-token', 'x-refresh-token'],
   };
 
   app.use(cors(corsOptions));
@@ -188,7 +188,7 @@ async function bootstrap() {
     writeFileSync(join(process.cwd(), 'swagger.json'), JSON.stringify(document));
   }
 
-  await app.listen(process.env.SERVER_PORT);
+  await app.listen(process.env.SERVER_PORT!);
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
