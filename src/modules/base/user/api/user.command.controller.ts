@@ -54,7 +54,7 @@ export class UserCommandController {
   })
   @ApiBody({ type: DeactivateReqDto })
   async requestDeactivation(@Req() req: ExpressRequest, @Body() data: DeactivateReqDto) {
-    return this.userService.requestDeactivation(req.user.id, data);
+    return this.userService.requestDeactivation(req.user!.id!, data);
   }
 
   // todo 삭제
@@ -76,7 +76,7 @@ export class UserCommandController {
   })
   @ApiResponse({ status: 200 })
   async cancelDeactivation(@Req() req: ExpressRequest) {
-    return this.userService.cancelDeactivation(req.user.id);
+    return this.userService.cancelDeactivation(req.user!.id!);
   }
 
   // todo 삭제
@@ -96,7 +96,7 @@ export class UserCommandController {
   })
   @ApiResponse({ status: 200 })
   async deleteAccount(@Req() req: ExpressRequest) {
-    return this.userService.deleteAccount(req.user.id);
+    return this.userService.deleteAccount(req.user!.id!);
   }
 
   @Post('images')
@@ -125,7 +125,7 @@ export class UserCommandController {
   @ApiBody({ type: ProfileImageReqDto })
   @UseInterceptors(FileInterceptor('image'))
   async saveProfileImage(@Req() req: ExpressRequest, @UploadedFile() file: Express.Multer.File) {
-    return this.userService.saveProfileImage(req.user.id, file);
+    return this.userService.saveProfileImage(req.user!.id!, file);
   }
 
   @Delete('images')
@@ -147,7 +147,7 @@ export class UserCommandController {
   })
   @ApiResponse({ status: 200 })
   async deleteProfileImage(@Req() req: ExpressRequest) {
-    return this.userService.deleteProfileImage(req.user.id);
+    return this.userService.deleteProfileImage(req.user!.id!);
   }
 
   @Put()
@@ -185,6 +185,6 @@ export class UserCommandController {
   @ApiResponse({ status: 200, type: UserResDto })
   @ApiBody({ type: UpdateUserReqDto })
   async updateUser(@Req() req: ExpressRequest, @Body() data: UpdateUserReqDto) {
-    return this.userService.updateUser(req.user.id, data);
+    return this.userService.updateUser(req.user!.id!, data);
   }
 }

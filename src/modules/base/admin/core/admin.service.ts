@@ -778,6 +778,8 @@ export class AdminService {
   @Transactional()
   async createNotice(adminId: number, data: CreateNoticeReqDto) {
     const processor = await this.adminRepository.findAdmin(adminId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     const newNotice = new Notice();
     newNotice.title = data.title;
     newNotice.content = data.content;
@@ -803,6 +805,7 @@ export class AdminService {
   async updateNotice(adminId: number, announcementId: number, data: UpdateNoticeReqDto) {
     const processor = await this.adminRepository.findAdmin(adminId);
     const Notice = await this.supportRepository.findNotice(announcementId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const newNotice = {
       ...Notice,
@@ -830,6 +833,7 @@ export class AdminService {
   async deleteNotice(adminId: number, announcementId: number) {
     const processor = await this.adminRepository.findAdmin(adminId);
     const notice = await this.supportRepository.findNotice(announcementId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const newNotice = {
       ...notice,
@@ -881,6 +885,7 @@ export class AdminService {
   async createAnswer(adminId: number, inquiryId: number, answer: string) {
     const inquiry = await this.supportRepository.findInquiryById(inquiryId);
     const processor = await this.adminRepository.findAdmin(adminId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     inquiry.answer = answer;
     inquiry.processed = true;
@@ -900,6 +905,7 @@ export class AdminService {
   @Transactional()
   async createRelease(adminId: number, content: string) {
     const processor = await this.adminRepository.findAdmin(adminId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const newRelease = new Release();
     newRelease.content = content;
@@ -921,6 +927,7 @@ export class AdminService {
 
   async updateRelease(adminId: number, releaseId: number, content: string) {
     const processor = await this.adminRepository.findAdmin(adminId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const release = await this.supportRepository.findRelease(releaseId);
     release.content = content;
@@ -942,8 +949,10 @@ export class AdminService {
 
   async deleteRelease(adminId: number, releaseId: number) {
     const processor = await this.adminRepository.findAdmin(adminId);
+    if (!processor) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     const release = await this.supportRepository.findRelease(releaseId);
     const history = this.createProcessedHistory(ActionType.DELETED, 'release', release, processor);
+
     await this.adminRepository.saveHistory(history);
 
     await this.redis.del('latestRelease');
@@ -1044,6 +1053,9 @@ export class AdminService {
     let status = await this.redis.get(cacheKey);
     if (!status) {
       const currentStatus = await this.adminRepository.getCurrentServerStatus();
+      if (!currentStatus)
+        throw new HttpException('서버 상태를 확인할 수 없습니다.', HttpStatus.NOT_FOUND);
+
       await this.redis.set(cacheKey, currentStatus.status, 'EX', 3600);
       status = currentStatus.status;
     }
@@ -1094,6 +1106,7 @@ export class AdminService {
     if (adminId !== 1) throw new HttpException('접근 권한이 없습니다.', HttpStatus.FORBIDDEN);
 
     const admin = await this.adminRepository.findAdmin(adminId);
+    if (!admin) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const token = await this.toolService.generateVerifyToken();
 
@@ -1122,6 +1135,7 @@ export class AdminService {
 
   async resetRootAdmin() {
     const root = await this.adminRepository.findAdmin(1);
+    if (!root) throw new HttpException('관리자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     const hashedPassword = await bcrypt.hash(this.configService.get<string>('ROOT_PASSWORD')!, 12);
 
     root.email = this.configService.get<string>('ROOT_EMAIL')!;
@@ -1224,6 +1238,7 @@ export class AdminService {
 
   async createItem(data: CreateItemReqDto) {
     const theme = await this.adminRepository.findThemeById(data.themeId);
+    if (!theme) throw new HttpException('테마를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     const newItem = new Item();
     newItem.name = data.name;

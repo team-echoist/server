@@ -98,7 +98,7 @@ export class UserQueryController {
   })
   @ApiResponse({ type: UserSummaryWithCountResDto })
   async userSummary(@Req() req: ExpressRequest) {
-    return this.userService.getUserSummary(req.user.id);
+    return this.userService.getUserSummary(req.user!.id!);
   }
 
   @Get('info')
@@ -116,7 +116,7 @@ export class UserQueryController {
   })
   @ApiResponse({ status: 200, type: UserSummaryResDto })
   async getMyInfo(@Req() req: ExpressRequest) {
-    return this.userService.getUserInfo(req.user.id);
+    return this.userService.getUserInfo(req.user!.id!);
   }
 
   @Get('profile/my')
@@ -136,7 +136,7 @@ export class UserQueryController {
   })
   @ApiResponse({ status: 200, type: UserSummaryWithStatsResDto })
   async getMyProfile(@Req() req: ExpressRequest) {
-    return this.userService.getUserProfile(req.user.id);
+    return this.userService.getUserProfile(req.user!.id!);
   }
 
   @Get('profile/:userId')

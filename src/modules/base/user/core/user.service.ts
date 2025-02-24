@@ -59,7 +59,7 @@ export class UserService {
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
     const user = await this.userRepository.findUserById(userId);
-    const newExt = file.originalname.split('.').pop();
+    const newExt = file.originalname.split('.').pop() ?? '';
     // const defaultProfileImage = this.utilsService.isDefaultProfileImage(user.profileImage);
 
     // let fileName: any;
@@ -93,7 +93,7 @@ export class UserService {
     const fileName = `profile/${urlParts}`;
 
     await this.awsService.deleteImageFromS3(fileName);
-    user.profileImage = null;
+    user.profileImage = '';
     await this.userRepository.saveUser(user);
 
     return { message: 'Profile image deleted successfully' };
@@ -132,23 +132,15 @@ export class UserService {
     return this.utilsService.transformToDto(UserResDto, user);
   }
 
-  async getUserSummaryById(userId: number) {
-    const user = await this.fetchUserEntityById(userId);
-
-    const filteredUser = await this.userLayoutFilter(user);
-
-    return this.utilsService.transformToDto(UserSummaryResDto, filteredUser);
-  }
-
   async getUserProfile(userId: number) {
-    const user = await this.getUserSummaryById(userId);
+    const user = await this.getUserInfo(userId);
     const essayStats = await this.essayService.essayStatsByUserId(userId);
 
     return { user: user, essayStats: essayStats };
   }
 
   async getUserSummary(userId: number) {
-    const userSummary = await this.getUserSummaryById(userId);
+    const userSummary = await this.getUserInfo(userId);
     const weeklyEssayCounts = await this.essayService.getWeeklyEssayCounts(userId);
 
     return { ...userSummary, weeklyEssayCounts: weeklyEssayCounts };
@@ -179,14 +171,16 @@ export class UserService {
 
     await this.userRepository.saveUser(user);
 
-    const deactivationReasons = data.reasons.map((reason) => {
-      const deactivationReason = new DeactivationReason();
-      deactivationReason.user = user;
-      deactivationReason.reason = reason;
-      return deactivationReason;
-    });
+    if (data.reasons && data.reasons.length > 0) {
+      const deactivationReasons = data.reasons.map((reason) => {
+        const deactivationReason = new DeactivationReason();
+        deactivationReason.user = user;
+        deactivationReason.reason = reason;
+        return deactivationReason;
+      });
 
-    await this.userRepository.saveDeactivationReasons(deactivationReasons);
+      await this.userRepository.saveDeactivationReasons(deactivationReasons);
+    }
   }
 
   async cancelDeactivation(userId: number) {
