@@ -33,7 +33,7 @@ export class UserService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
-    private readonly utilsService: ToolService,
+    private readonly toolService: ToolService,
     private readonly awsService: AwsService,
     private readonly nicknameService: NicknameService,
     @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
@@ -59,19 +59,21 @@ export class UserService {
 
   async saveProfileImage(userId: number, file: Express.Multer.File) {
     const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+
     const newExt = file.originalname.split('.').pop() ?? '';
-    // const defaultProfileImage = this.utilsService.isDefaultProfileImage(user.profileImage);
+    // const defaultProfileImage = this.toolService.isDefaultProfileImage(user.profileImage);
 
     // let fileName: any;
     //
     // if (defaultProfileImage) {
-    //   const imageName = this.utilsService.getUUID();
+    //   const imageName = this.toolService.getUUID();
     //   fileName = `profile/${imageName}`;
     // } else {
     //   const urlParts = user.profileImage.split('/').pop();
     //   fileName = `profile/${urlParts}`;
     // }
-    const imageName = this.utilsService.getUUID();
+    const imageName = this.toolService.getUUID();
     const fileName = `profile/${imageName}`;
 
     const imageUrl = await this.awsService.imageUploadToS3(fileName, file, newExt);
@@ -79,14 +81,15 @@ export class UserService {
     await this.userRepository.saveUser(user);
     await this.redis.del(`user:${userId}`);
 
-    return this.utilsService.transformToDto(ProfileImageUrlResDto, { imageUrl });
+    return this.toolService.transformToDto(ProfileImageUrlResDto, { imageUrl });
   }
 
   async deleteProfileImage(userId: number) {
     const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     if (!user.profileImage) {
-      throw new NotFoundException('No profile image to delete');
+      throw new NotFoundException('프로필 이미지를 찾을 수 없습니다.');
     }
 
     const urlParts = user.profileImage.split('/').pop();
@@ -102,10 +105,11 @@ export class UserService {
   async updateUser(userId: number, data: UpdateUserReqDto | UpdateFullUserReqDto) {
     const cacheKey = `user:${userId}`;
     const user = await this.fetchUserEntityById(userId);
+    if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     if (data.nickname && data.nickname !== user.nickname) {
       await this.authService.checkNickname(data.nickname);
-      await this.nicknameService.setNicknameUsage(user.nickname, false);
+      await this.nicknameService.setNicknameUsage(user.nickname!, false);
       await this.nicknameService.setNicknameUsage(data.nickname, true);
     }
 
@@ -124,12 +128,12 @@ export class UserService {
     const updatedUser = await this.userRepository.updateUser(user, data);
     await this.redis.setex(cacheKey, 3600, JSON.stringify(updatedUser));
 
-    return this.utilsService.transformToDto(UserResDto, updatedUser);
+    return this.toolService.transformToDto(UserResDto, updatedUser);
   }
 
   async findUserById(userId: number) {
     const user = await this.fetchUserEntityById(userId);
-    return this.utilsService.transformToDto(UserResDto, user);
+    return this.toolService.transformToDto(UserResDto, user);
   }
 
   async getUserProfile(userId: number) {
@@ -220,7 +224,7 @@ export class UserService {
 
     const filteredUser = await this.userLayoutFilter(user);
 
-    return this.utilsService.transformToDto(UserSummaryResDto, filteredUser);
+    return this.toolService.transformToDto(UserSummaryResDto, filteredUser);
   }
 
   async userLayoutFilter(user: User) {

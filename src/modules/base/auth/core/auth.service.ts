@@ -260,8 +260,8 @@ export class AuthService {
   // ----------------- OAuth ---------------------
 
   @Transactional()
-  async oauthLogin(oauthUser: OauthDto) {
-    if (oauthUser.platformId === undefined || oauthUser.platform === null)
+  async oauthLogin(oauthUser: Express.User | OauthDto) {
+    if (!oauthUser.platformId || !oauthUser.platform)
       throw new HttpException('플랫폼 정보가 올바르지 않습니다.', HttpStatus.BAD_REQUEST);
 
     let user = await this.userRepository.findByPlatformId(oauthUser.platform, oauthUser.platformId);
@@ -427,6 +427,7 @@ export class AuthService {
   async cancelDeactivation(userId: number) {
     const user = await this.userRepository.findUserById(userId);
 
+    if (!user) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     if (!user.deactivationDate)
       throw new HttpException('이 계정은 이미 활성상태 입니다.', HttpStatus.BAD_REQUEST);
 

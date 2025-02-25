@@ -1,4 +1,4 @@
-import { DeleteResult } from 'typeorm';
+import { DeepPartial, DeleteResult } from 'typeorm';
 
 import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { User } from '../../../../entities/user.entity';
@@ -8,7 +8,7 @@ import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 export interface IUserRepository {
   findUserById(userId: number): Promise<User>;
 
-  findUserByEmail(email: string): Promise<User>;
+  findUserByEmail(email: string): Promise<User | null>;
 
   saveUser(user: User): Promise<User>;
 
@@ -25,7 +25,7 @@ export interface IUserRepository {
     limit: number,
   ): Promise<{ users: User[]; total: number }>;
 
-  findUserDetailById(userId: number): Promise<User>;
+  findUserDetailById(userId: number): Promise<User | null>;
 
   updateUser(user: User, data: UpdateUserReqDto): Promise<User>;
 
@@ -47,15 +47,15 @@ export interface IUserRepository {
     limit: number,
   ): Promise<{ users: User[]; total: number }>;
 
-  findById(id: number): Promise<User>;
+  findById(id: number): Promise<User | null>;
 
-  findByIdWithEmail(payload: any): Promise<User>;
+  findByIdWithEmail(payload: any): Promise<User | null>;
 
-  findByEmail(email: string): Promise<User>;
+  findByEmail(email: string): Promise<User | null>;
 
-  findByNickname(nickname: string): Promise<User>;
+  findByNickname(nickname: string): Promise<User | null>;
 
   saveUserDto(createUserDto: CreateUserReqDto): Promise<CreateUserReqDto & User>;
 
-  findByPlatformId(platform: string, platformId: string): Promise<User>;
+  findByPlatformId(platform: string, platformId: string): Promise<User | null>;
 }

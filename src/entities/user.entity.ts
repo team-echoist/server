@@ -39,17 +39,17 @@ export class User {
 
   @Index()
   @Column({ nullable: true, unique: true, default: null })
-  nickname: string;
+  nickname: string | null;
 
   @Index()
   @Column({ unique: true, nullable: true })
-  email: string;
+  email: string | null;
 
   @Column({ nullable: true })
-  password: string;
+  password: string | null;
 
   @Column({ nullable: true })
-  gender: string;
+  gender: string | null;
 
   @Column({
     name: 'profile_image',
@@ -59,13 +59,13 @@ export class User {
   profileImage: string;
 
   @Column({ name: 'birth_date', nullable: true })
-  birthDate: Date;
+  birthDate: Date | null;
 
   @Column({ nullable: true })
-  platform: string;
+  platform: string | null;
 
   @Column({ name: 'platform_id', nullable: true })
-  platformId: string;
+  platformId: string | null;
 
   @Column({
     type: 'enum',

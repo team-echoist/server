@@ -7,14 +7,14 @@ declare global {
   namespace Express {
     export interface User {
       id?: number;
-      nickname?: string;
-      email: string;
-      password?: string;
-      gender?: string;
+      nickname?: string | null;
+      email: string | null;
+      password?: string | null;
+      gender?: string | null;
       status?: UserStatus;
-      platform?: string;
-      platformId?: string;
-      birthDate?: Date;
+      platform?: string | null;
+      platformId?: string | null;
+      birthDate?: Date | null;
       createdAt?: Date;
       updatedAt?: Date;
       deletedAt?: Date;

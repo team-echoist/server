@@ -57,7 +57,7 @@ export class AuthOauthController {
   @ApiResponse({ status: 200 })
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
-    req.user! = await this.authService.oauthLogin(req.user!!);
+    req.user! = await this.authService.oauthLogin(req.user!);
     const jwt = await this.authService.login(req);
 
     let redirectUrl = this.configService.get<string>('WEB_REGISTER_REDIRECT')!;

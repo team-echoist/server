@@ -12,6 +12,7 @@ import { ReviewQueue } from '../../../../entities/reviewQueue.entity';
 import { Server } from '../../../../entities/server.entity';
 import { Subscription } from '../../../../entities/subscription.entity';
 import { Theme } from '../../../../entities/theme.entity';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { CreateAdminDto } from '../dto/createAdmin.dto';
 import { AdminUpdateReqDto } from '../dto/request/adminUpdateReq.dto';
 
@@ -33,38 +34,50 @@ export class AdminRepository implements IAdminRepository {
     @InjectRepository(AppVersions)
     private readonly appVersionsRepository: Repository<AppVersions>,
     private readonly dataSource: DataSource,
+    private readonly toolService: ToolService,
   ) {}
 
   async totalSubscriberCount(today: Date) {
-    return this.subscriptionRepository.count({
+    const subscribeCount = await this.subscriptionRepository.count({
       where: {
         endDate: Between(today, new Date('2100-01-01')),
       },
     });
+
+    this.toolService.assertExists(subscribeCount);
+    return subscribeCount;
   }
 
   async todaySubscribers(todayStart: Date, todayEnd: Date) {
-    return this.subscriptionRepository.count({
+    const subscribers = await this.subscriptionRepository.count({
       where: {
         createdDate: Between(todayStart, todayEnd),
       },
     });
+
+    this.toolService.assertExists(subscribers);
+    return subscribers;
   }
 
   async unprocessedReports() {
-    return this.reportRepository.count({
+    const reports = await this.reportRepository.count({
       where: { processed: false },
     });
+
+    this.toolService.assertExists(reports);
+    return reports;
   }
 
   async unprocessedReviews() {
-    return this.reviewRepository.count({
+    const reviews = await this.reviewRepository.count({
       where: { processed: false },
     });
+    this.toolService.assertExists(reviews);
+    return reviews;
   }
 
   async countMonthlySubscriptionPayments(firstDayOfMonth: Date, lastDayOfMonth: Date) {
-    return this.subscriptionRepository
+    const count = await this.subscriptionRepository
       .createQueryBuilder('subscription')
       .select('EXTRACT(DAY FROM subscription.createdDate)', 'day')
       .addSelect('COUNT(*)', 'count')
@@ -75,10 +88,13 @@ export class AdminRepository implements IAdminRepository {
       .groupBy('EXTRACT(DAY FROM subscription.createdDate)')
       .orderBy('EXTRACT(DAY FROM subscription.createdDate)', 'ASC')
       .getRawMany();
+
+    this.toolService.assertExists(count);
+    return count;
   }
 
   async countYearlySubscriptionPayments(year: number) {
-    return this.subscriptionRepository
+    const count = await this.subscriptionRepository
       .createQueryBuilder('subscription')
       .select('EXTRACT(MONTH FROM subscription.createdDate)', 'month')
       .addSelect('COUNT(*)', 'count')
@@ -86,6 +102,9 @@ export class AdminRepository implements IAdminRepository {
       .groupBy('EXTRACT(MONTH FROM subscription.createdDate)')
       .orderBy('EXTRACT(MONTH FROM subscription.createdDate)', 'ASC')
       .getRawMany();
+
+    this.toolService.assertExists(count);
+    return count;
   }
 
   async getReports(sort: string, page: number, limit: number) {
@@ -124,24 +143,26 @@ export class AdminRepository implements IAdminRepository {
     queryBuilder.offset((page - 1) * limit).limit(limit);
     const reports = await queryBuilder.getRawMany();
 
+    this.toolService.assertExists(reports);
     return { reports, totalReports, totalEssay };
   }
 
   async findReportByEssayId(essayId: number) {
-    return this.reportRepository.find({
+    const reports = await this.reportRepository.find({
       where: { essay: { id: essayId } },
       relations: ['reporter', 'essay'],
     });
+
+    this.toolService.assertExists(reports);
+    return reports;
   }
 
   async saveReport(report: ReportQueue) {
     await this.reportRepository.save(report);
-    return;
   }
 
   async saveHistory(history: ProcessedHistory) {
     await this.processedRepository.save(history);
-    return;
   }
 
   async getReviews(page: number, limit: number) {
@@ -152,18 +173,26 @@ export class AdminRepository implements IAdminRepository {
       relations: ['user', 'essay'],
       order: { createdDate: 'DESC' },
     });
+
+    this.toolService.assertExists(reviews);
     return { reviews, total };
   }
 
   async getReview(reviewId: number) {
-    return this.reviewRepository.findOne({
+    const review = await this.reviewRepository.findOne({
       where: { id: reviewId },
       relations: ['essay', 'user'],
     });
+
+    this.toolService.assertExists(review);
+    return review;
   }
 
   async saveReview(review: ReviewQueue) {
-    return this.reviewRepository.save(review);
+    const savedReview = await this.reviewRepository.save(review);
+
+    this.toolService.assertExists(savedReview);
+    return savedReview;
   }
 
   async getHistories(query: FindManyOptions) {

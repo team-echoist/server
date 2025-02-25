@@ -318,4 +318,33 @@ export class ToolService {
       }
     };
   }
+
+  assertExists<T>(
+    value: T,
+    options: { allowEmptyArray?: boolean; allowEmptyObject?: boolean } = {},
+  ): T {
+    const { allowEmptyArray = false, allowEmptyObject = false } = options;
+
+    // 1) null, undefined 체크
+    if (value == null) {
+      throw new HttpException('데이터를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
+
+    // 2) 배열 체크
+    if (Array.isArray(value) && value.length === 0 && !allowEmptyArray) {
+      throw new HttpException('데이터를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
+
+    // 3) 객체 체크 - keys가 0개라면 비어있는 객체
+    if (
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0 &&
+      !allowEmptyObject
+    ) {
+      throw new HttpException('데이터를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+    }
+
+    return value;
+  }
 }

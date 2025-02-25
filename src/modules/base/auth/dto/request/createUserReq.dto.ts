@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class CreateUserReqDto {
   @ApiProperty()
-  @IsNotEmpty()
   @IsEmail({}, { message: '올바른 이메일 형식이어야 합니다.' })
   email?: string | null;
 

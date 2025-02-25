@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
@@ -6,6 +7,7 @@ import { IUserRepository } from './iuser.repository';
 import { UserStatus } from '../../../../common/types/enum.types';
 import { DeactivationReason } from '../../../../entities/deactivationReason.entity';
 import { User } from '../../../../entities/user.entity';
+import { ToolService } from '../../../utils/tool/core/tool.service';
 import { CreateUserReqDto } from '../../auth/dto/request/createUserReq.dto';
 import { UpdateUserReqDto } from '../dto/request/updateUserReq.dto';
 
@@ -16,14 +18,18 @@ export class UserRepository implements IUserRepository {
     @InjectRepository(DeactivationReason)
     private readonly deactivationReasonRepository: Repository<DeactivationReason>,
 
+    private readonly toolService: ToolService,
     private readonly configService: ConfigService,
   ) {}
 
   async findUserById(userId: number) {
-    return this.userRepository.findOne({
+    const user = this.userRepository.findOne({
       where: { id: userId },
       relations: ['devices', 'homeLayouts', 'homeLayouts.homeItems', 'homeLayouts.homeItems.item'],
     });
+
+    await this.toolService.assertExists(user);
+    return user;
   }
 
   async findUserByEmail(email: string) {
@@ -129,7 +135,7 @@ export class UserRepository implements IUserRepository {
       .update(User)
       .set({
         email: () => `CONCAT('${todayDate}_', email)`,
-        nickname: null,
+        nickname: () => `CONCAT('${todayDate}_UID${userId}_', nickname)`,
         status: UserStatus.DEACTIVATED,
         profileImage: this.configService.get<string>('DEFAULT_PROFILE_IMG'),
         deletedDate: () => `NOW()`,
